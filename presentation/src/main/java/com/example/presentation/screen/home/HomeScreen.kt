@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.presentation.component.theme.SiriaTemplateTheme
+import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.organism.AppTopBar
 import com.example.presentation.component.ui.organism.BottomNavigationBar
@@ -57,9 +56,6 @@ fun HomeScreen(
                     isLeadingIconAvailable = false,
                     onLeadingIconClicked = {},
                     leadingIconResource = IconResource.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
-                    isTrailingIconAvailable = false,
-                    onTrailingIconClicked = {},
-                    trailingIconResource = IconResource.Vector(Icons.Filled.MoreVert)
                 ),
             )
         },
@@ -98,7 +94,7 @@ private fun HomeScreenContents(
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    SiriaTemplateTheme {
+    PetbulanceTheme {
         HomeScreen(
             navController = rememberNavController(),
             argument = HomeArgument(

@@ -1,4 +1,4 @@
-package com.example.siriaTemplate.common.nav
+package com.example.petbulance.common.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

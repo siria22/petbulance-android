@@ -11,18 +11,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import com.example.domain.model.type.AppTheme
+import com.example.presentation.component.theme.color.LocalPetbulanceColorScheme
+import com.example.presentation.component.theme.color.PetbulanceColorScheme
+import com.example.presentation.component.theme.color.getPetbulanceColorScheme
 
 private val DarkColorScheme = darkColorScheme()
 private val LightColorScheme = lightColorScheme()
 
-object SiriaTemplateTheme {
-    val colorScheme: SiriaTemplateColorScheme
+object PetbulanceTheme {
+    val colorScheme: PetbulanceColorScheme
         @Composable
-        get() = LocalColorScheme.current
+        get() = LocalPetbulanceColorScheme.current
 }
 
 @Composable
-fun SiriaTemplateTheme(
+fun PetbulanceTheme(
     appTheme: AppTheme = AppTheme.DEVICE,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
@@ -33,7 +36,7 @@ fun SiriaTemplateTheme(
         AppTheme.DEVICE -> isSystemInDarkTheme()
     }
 
-    val customColorScheme = getColorScheme(useDarkTheme)
+    val customColorScheme = getPetbulanceColorScheme(useDarkTheme)
 
     val materialColorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -45,10 +48,10 @@ fun SiriaTemplateTheme(
         else -> LightColorScheme
     }
 
-    CompositionLocalProvider(LocalColorScheme provides customColorScheme) {
+    CompositionLocalProvider(LocalPetbulanceColorScheme provides customColorScheme) {
         MaterialTheme(
             colorScheme = materialColorScheme,
-            typography = Typography,
+            typography = PretendardTypography,
             content = content
         )
     }

@@ -1,0 +1,63 @@
+name: Design Tokens CI
+
+on:
+  push:
+    branches:
+      - figma-tokens-update
+
+jobs:
+  build-tokens:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 트리거가 발생한 'figma-tokens-update' 브랜치의 코드를 체크아웃
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: figma-tokens-update
+          
+      # 2. Node.js 환경 설정 (Style Dictionary 실행용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+#      .. Unused
+#      # 3. Style Dictionary 설치 (package.json이 없다고 가정)
+#      - name: Install Style Dictionary
+#        run: npm install -g style-dictionary
+#
+#      # 4. Style Dictionary 실행 (토큰 변환)
+#      - name: Build Design Tokens
+#        run: style-dictionary build
+#
+#      - name: Get Current Date (KST)
+#        run: echo "TODAY=$(TZ='Asia/Seoul' date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      # 5. 변경 사항을 PR로 생성
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.BOT_PAT }}
+
+          commit-message: "Update design tokens"
+          committer: GitHub Actions <actions@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+
+          # 2. PR 브랜치 설정
+          branch: "auto/design-tokens-update"
+
+          # 3. PR 타겟 브랜치 설정
+          base: "main"
+
+          # 4. PR 내용 설정
+          title: "Design - Figma 디자인 토큰 변경 (${{ env.TODAY }})"
+          body: |
+            Figma (Tokens Studio)에서 디자인 토큰이 변경됨
+            
+            *트리거 브랜치: `figma-tokens-update`*
+            
+            (이 PR은 자동 생성되었습니다.)
+
+          # 5. PR 업데이트 설정
+          update-existing: true

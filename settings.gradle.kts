@@ -18,12 +18,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://repository.map.naver.com/archive/maven") }
-        maven { url = uri("https://devrepo.kakao.com/nexus/content/groups/public/") }
+        maven(uri("https://repository.map.naver.com/archive/maven"))
+        maven(uri("https://devrepo.kakao.com/nexus/content/groups/public/"))
     }
 }
 
-rootProject.name = "siriaTemplate"
+rootProject.name = "petbulance"
 include(":app")
 include(":presentation")
 include(":domain")

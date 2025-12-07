@@ -1,4 +1,4 @@
-package com.example.siriaTemplate
+package com.example.petbulance
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,8 +11,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.presentation.component.theme.SiriaTemplateTheme
-import com.example.siriaTemplate.common.nav.AppNavGraph
+import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.petbulance.common.nav.AppNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
-            SiriaTemplateTheme(appTheme = appTheme) {
+            PetbulanceTheme(appTheme = appTheme) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavGraph(modifier = Modifier.padding(innerPadding))
                 }

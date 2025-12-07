@@ -10,8 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.SiriaTemplateTheme
-
+import com.example.presentation.component.theme.PetbulanceTheme
 
 sealed interface IconResource {
     data class Vector(val imageVector: ImageVector) : IconResource
@@ -24,7 +23,7 @@ fun BasicIcon(
     iconResource: IconResource,
     contentDescription: String?,
     size: Dp = 24.dp,
-    tint: Color = SiriaTemplateTheme.colorScheme.iconTint
+    tint: Color = PetbulanceTheme.colorScheme.icon.gnb.default
 ) {
     when (iconResource) {
         is IconResource.Vector -> {
@@ -46,3 +45,4 @@ fun BasicIcon(
         }
     }
 }
+

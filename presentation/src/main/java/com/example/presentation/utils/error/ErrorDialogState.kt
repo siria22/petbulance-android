@@ -1,6 +1,7 @@
 package com.example.presentation.utils.error
 
 import android.util.Log
+import com.example.domain.utils.LOGGER_TAG
 
 data class ErrorDialogState(
     val userMessage: String,
@@ -9,7 +10,7 @@ data class ErrorDialogState(
 ) {
     fun logErrorEvent() {
         Log.e(
-            "SiriaTemplate",
+            LOGGER_TAG,
             "userMessage : $userMessage\nexceptionMessage : ${exceptionMessage ?: "Unknown error"}"
         )
     }

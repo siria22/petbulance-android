@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.SiriaTemplateTheme
+import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.SmallRoundedCorner
 import com.example.presentation.component.ui.Space8
 
@@ -26,20 +26,20 @@ fun BasicCheckBox(
     isChangeable: Boolean = true,
 ) {
     val borderColor = if (isChangeable) {
-        SiriaTemplateTheme.colorScheme.primary
+        PetbulanceTheme.colorScheme.icon.basic
     } else {
-        SiriaTemplateTheme.colorScheme.inactivatedIconColor
+        PetbulanceTheme.colorScheme.action.link.pressed
     }
 
     val backgroundColor = if (isChangeable) {
         if (checkState) {
-            SiriaTemplateTheme.colorScheme.primary
+            PetbulanceTheme.colorScheme.bg.icon.pressed
         } else {
             Color.Transparent
         }
     } else {
         if (checkState) {
-            SiriaTemplateTheme.colorScheme.inactivatedIconColor
+            PetbulanceTheme.colorScheme.icon.basic
         } else {
             Color.Transparent
         }
@@ -67,7 +67,7 @@ fun BasicCheckBox(
             Icon(
                 Icons.Default.Check,
                 contentDescription = "Check",
-                tint = SiriaTemplateTheme.colorScheme.onPrimaryButtonColor
+                tint = PetbulanceTheme.colorScheme.icon.gnb.selected
             )
         }
     }
@@ -76,7 +76,7 @@ fun BasicCheckBox(
 @Preview
 @Composable
 private fun AppCheckBoxPreview() {
-    SiriaTemplateTheme {
+    PetbulanceTheme {
         Column {
             BasicCheckBox(checkState = true, onCheckedChange = {})
             BasicCheckBox(checkState = false, onCheckedChange = {})

@@ -6,19 +6,20 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services") version "4.4.4"
     alias(libs.plugins.devtoolsKsp)
 }
 
 android {
-    namespace = "com.example.siriaTemplate"
+    namespace = "com.example.petbulance"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.siriaTemplate"
+        applicationId = "com.example.petbulance"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "v1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,10 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.SiriaTemplateTheme
+import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.LargeRoundedCorner
+import com.example.presentation.component.ui.spacingLarge
+import com.example.presentation.component.ui.spacingXL
+import com.example.presentation.component.ui.spacingXXL
 
 /**
  * Creates a basic dialog with a transparent background and a content area.
@@ -28,7 +34,6 @@ import com.example.presentation.component.ui.LargeRoundedCorner
  *
  * @param modifier Modifier to be applied to the root layout of the dialog.
  * @param minimumWidth The minimum width of the dialog as a fraction of the screen width.
- * @param onDismissRequest A function that will be called when the dialog is dismissed.
  * @param backHandler A function that will be called when the back button is pressed.
  * @param content The @Composable content of the dialog.
  */
@@ -36,41 +41,36 @@ import com.example.presentation.component.ui.LargeRoundedCorner
 fun BasicDialog(
     modifier: Modifier = Modifier,
     minimumWidth: Float = 0.8f,
-    onDismissRequest: () -> Unit = {},
-    backHandler: (() -> Unit)? = null,
+    backHandler: () -> Unit = {},
+    position: Alignment = Alignment.Center,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
+            .background(color = Color.Black.copy(alpha = 0.5f))
+            .padding(horizontal = 16.dp)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                enabled = true,
                 indication = null,
-                onClick = onDismissRequest
-            ),
-        contentAlignment = Alignment.Center
+                interactionSource = remember { MutableInteractionSource() }) { }
     ) {
         Column(
             modifier = modifier
-                .align(Alignment.Center)
+                .align(position)
                 .background(
-                    color = SiriaTemplateTheme.colorScheme.background,
+                    color = Color.White,
                     shape = LargeRoundedCorner
                 )
-                .padding(24.dp)
-                .fillMaxWidth(minimumWidth)
-                .clickable (
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {}
-                ),
+                .padding(horizontal = spacingXL)
+                .padding(top = spacingXXL, bottom = spacingXL)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(spacingXL)
         ) {
             content()
         }
-        BackHandler { backHandler?.invoke() ?: onDismissRequest() }
+        BackHandler { backHandler() }
     }
 }
 
@@ -79,19 +79,54 @@ fun BasicDialog(
 private fun BasicDialogPreview() {
     BasicDialog {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(spacingLarge),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Sample Text",
-                style = MaterialTheme.typography.bodyMedium,
-                color = SiriaTemplateTheme.colorScheme.descriptionText
+                text = "어떤 순서로 정렬할까요?",
+                style = MaterialTheme.typography.titleMedium.emp(),
+                color = PetbulanceTheme.colorScheme.text.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "Sample Text",
-                style = MaterialTheme.typography.headlineSmall,
-                color = SiriaTemplateTheme.colorScheme.commonText
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "리뷰 많은 순",
+                        style = MaterialTheme.typography.bodyLarge.emp(),
+                        color = PetbulanceTheme.colorScheme.text.tertiary,
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "가까운 순",
+                        style = MaterialTheme.typography.bodyLarge.emp(),
+                        color = PetbulanceTheme.colorScheme.text.tertiary,
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "평점 높은 순",
+                        style = MaterialTheme.typography.bodyLarge.emp(),
+                        color = PetbulanceTheme.colorScheme.text.tertiary,
+                    )
+                }
+            }
         }
     }
 }

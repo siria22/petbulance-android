@@ -11,14 +11,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.SiriaTemplateTheme
-import com.example.presentation.component.theme.SiriaTemplateTheme.colorScheme
+import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 
 @Composable
 fun CustomGreenLoader(
     modifier: Modifier = Modifier
 ) {
-    val progressColor = colorScheme.primary
+    val progressColor = colorScheme.action.primary.default
     val trackColor = Color(0xFFE0F2F1)
 
     CircularProgressIndicator(
@@ -43,7 +43,7 @@ fun ContentPlaceholder() {
 @Preview(apiLevel = 34)
 @Composable
 private fun CustomGreenLoaderPreview() {
-    SiriaTemplateTheme {
+    PetbulanceTheme {
         CustomGreenLoader()
     }
 }

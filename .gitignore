@@ -16,3 +16,6 @@ local.properties
 
 # Secrets and configuration files
 /app/google-services.json
+
+# Windsurf Instructions
+/_windsurf

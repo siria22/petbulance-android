@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.SiriaTemplateTheme
+import com.example.presentation.component.theme.PetbulanceTheme
 
 /**
  * A basic input text field component that provides a text input field with a placeholder and
@@ -35,7 +35,7 @@ import com.example.presentation.component.theme.SiriaTemplateTheme
  * @param onValueChange The callback to be triggered when the text field value changes.
  * @param modifier (Optional) The modifier to be applied to the text field.
  * @param textStyle (Optional) The style to be applied to the text in the text field.
- * @param placeholder (Optional) The placeholder text to be displayed when the text field is empty.
+ * @param placeholder (Optional) The placeholder text to be displayed when the text field is stub.
  * @param singleLine (Optional) Whether the text field should be a single line or not.
  * @param keyboardOptions (Optional) The options for the keyboard to be displayed for the text field.
  */
@@ -55,10 +55,10 @@ fun BasicInputTextField(
         modifier = modifier
             .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        textStyle = textStyle.copy(color = SiriaTemplateTheme.colorScheme.commonText),
+        textStyle = textStyle.copy(color = PetbulanceTheme.colorScheme.text.primary),
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
-        cursorBrush = SolidColor(SiriaTemplateTheme.colorScheme.commonText),
+        cursorBrush = SolidColor(PetbulanceTheme.colorScheme.text.primary),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth().height(24.dp),
@@ -72,7 +72,7 @@ fun BasicInputTextField(
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
-                            style = textStyle.copy(color = SiriaTemplateTheme.colorScheme.descriptionText)
+                            style = textStyle.copy(color = PetbulanceTheme.colorScheme.text.caption)
                         )
                     }
                     innerTextField()
@@ -80,7 +80,7 @@ fun BasicInputTextField(
                 Icon(
                     Icons.Default.Clear,
                     contentDescription = "Clear all",
-                    tint = SiriaTemplateTheme.colorScheme.iconTint,
+                    tint = PetbulanceTheme.colorScheme.icon.basic,
                     modifier = Modifier
                         .size(16.dp)
                         .clickable {

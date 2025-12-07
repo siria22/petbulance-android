@@ -1,3 +1,9 @@
+@file:Suppress("DEPRECATION")
+
+import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +12,18 @@ plugins {
     alias(libs.plugins.devtoolsKsp)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     namespace = "com.example.presentation"
     compileSdk = 36
 
@@ -15,6 +32,37 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField(
+            "String",
+            "WEB_CLIENT_ID",
+            "\"${localProperties["WEB_CLIENT_ID"]}\""
+        )
+        buildConfigField(
+            "String",
+            "NAVER_CLIENT_ID",
+            "\"${localProperties["NAVER_CLIENT_ID"]}\""
+        )
+        buildConfigField(
+            "String",
+            "NAVER_CLIENT_SECRET",
+            "\"${localProperties["NAVER_CLIENT_SECRET"]}\""
+        )
+        buildConfigField(
+            "String",
+            "NAVER_API_CLIENT_ID",
+            "\"${localProperties["NAVER_API_CLIENT_ID"]}\""
+        )
+        buildConfigField(
+            "String",
+            "NAVER_API_CLIENT_SECRET",
+            "\"${localProperties["NAVER_API_CLIENT_SECRET"]}\""
+        )
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            "\"${localProperties["KAKAO_NATIVE_APP_KEY"]}\""
+        )
     }
 
     buildTypes {
@@ -30,10 +78,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-        }
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
@@ -41,6 +87,8 @@ android {
         }
     }
 }
+
+val generateTokensClasspath by configurations.creating
 
 dependencies {
     implementation(project(":domain"))
@@ -82,6 +130,9 @@ dependencies {
     // Permissions
     implementation(libs.accompanist.permissions)
 
+    // Google Play Services Location
+    implementation(libs.play.services.location)
+
     // Firebase & Auth
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
@@ -93,10 +144,75 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Login
+    implementation(libs.kakao.login)
+    implementation(libs.naver.login)
+    implementation(libs.googleid)
+
+    // Naver Map
+    implementation(libs.map.sdk)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    val kotlinVersion = libs.versions.kotlin.get()
+
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion")
+    generateTokensClasspath("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:$kotlinVersion")
+
+    generateTokensClasspath(libs.kotlinx.serialization.json.v163)
+    generateTokensClasspath("com.squareup:kotlinpoet:2.2.0")
+
+}
+
+tasks.register<JavaExec>("generateDesignTokens") {
+
+    group = "petbulance"
+    description = "Generates Primitives.kt from tokens.json using kts script."
+
+    val scriptFile = project.rootProject.file("tokens/generateColors.kts")
+    val tokenFile = project.rootProject.file("tokens/tokens.json")
+    inputs.file(scriptFile)
+    inputs.file(tokenFile)
+
+    val outputDir = file("src/main/java/com/example/presentation/component/theme/color")
+    outputs.dir(outputDir)
+
+    val gradleJavaHome = System.getProperty("org.gradle.java.home")
+    if (gradleJavaHome != null && File(gradleJavaHome).exists()) {
+        executable = File(gradleJavaHome, "bin/java").absolutePath
+    }
+
+    mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
+    classpath = generateTokensClasspath
+
+    val serializationPluginJar = generateTokensClasspath.files.first {
+        it.name.startsWith("kotlin-serialization-compiler-plugin-embeddable")
+    }.absolutePath
+
+    args = listOf(
+        "-no-stdlib",
+        "-no-reflect",
+        "-Xplugin=$serializationPluginJar",
+        "-classpath",
+        generateTokensClasspath.asPath,
+        "-script",
+        scriptFile.path,
+        outputDir.absolutePath,
+        tokenFile.absolutePath
+    )
+
+    jvmArgs = listOf("-Dfile.encoding=UTF-8")
+}
+
+tasks.named("preBuild") {
+    dependsOn(tasks.named("generateDesignTokens"))
 }
