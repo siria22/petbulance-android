@@ -168,8 +168,8 @@ dependencies {
     generateTokensClasspath("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion")
     generateTokensClasspath("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:$kotlinVersion")
 
-    generateTokensClasspath(libs.kotlinx.serialization.json.v163)
-    generateTokensClasspath("com.squareup:kotlinpoet:2.2.0")
+    generateTokensClasspath(libs.kotlinx.serialization.json)
+    generateTokensClasspath(libs.kotlinpoet)
 
 }
 
@@ -188,7 +188,7 @@ tasks.register<JavaExec>("generateDesignTokens") {
 
     val gradleJavaHome = System.getProperty("org.gradle.java.home")
     if (gradleJavaHome != null && File(gradleJavaHome).exists()) {
-        executable = File(gradleJavaHome, "bin/java").absolutePath
+        setExecutable(File(gradleJavaHome, "bin/java").absolutePath)
     }
 
     mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")

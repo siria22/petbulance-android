@@ -1,0 +1,12 @@
+package com.example.data.datasource.remote.network.feature.community.post.dto.post
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CreatePostReqDto(
+    val boardId: Long,
+    val category: String,
+    val title: String,
+    val content: String,
+    val imageUrls: List<String> = emptyList()
+)

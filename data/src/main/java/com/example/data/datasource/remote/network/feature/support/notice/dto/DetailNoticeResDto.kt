@@ -1,0 +1,29 @@
+package com.example.data.datasource.remote.network.feature.support.notice.dto
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class DetailNoticeResDto(
+    val noticeId: Long,
+    val isImportant: Boolean,
+    val title: String,
+    val createdAt: String,
+    val content: String,
+    val attachments: List<AttachmentDto> = emptyList(),
+    val previousNotice: AdjacentNoticeDto? = null,
+    val nextNotice: AdjacentNoticeDto? = null
+)
+
+@Serializable
+data class AttachmentDto(
+    val fileId: Long,
+    val fileName: String,
+    val fileUrl: String,
+    val fileType: String
+)
+
+@Serializable
+data class AdjacentNoticeDto(
+    val noticeId: Long,
+    val title: String
+)

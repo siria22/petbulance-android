@@ -1,0 +1,98 @@
+package com.example.data.datasource.remote.network.feature.hospital.review
+
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
+import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import javax.inject.Inject
+
+class ReviewApi @Inject constructor(
+    private val client: HttpClient,
+    private val baseHost: String
+) {
+    private val baseUrl = "$baseHost/receipts"
+
+    suspend fun findHospital(hospitalName: String): HttpResponse {
+        return client.get("$baseUrl/$hospitalName")
+    }
+
+    suspend fun searchReview(value: String, cursorId: Long?, size: Int): HttpResponse {
+        return client.get("$baseUrl/search/$value") {
+            cursorId?.let { parameter("cursorId", it) }
+            parameter("size", size)
+        }
+    }
+
+    suspend fun filterReview(
+        region: String?,
+        animalType: String?,
+        receipt: Boolean?,
+        cursorId: Long?,
+        size: Int
+    ): HttpResponse {
+        return client.get("$baseUrl/filter") {
+            region?.let { parameter("region", it) }
+            animalType?.let { parameter("animalType", it) }
+            receipt?.let { parameter("receipt", it) }
+            cursorId?.let { parameter("cursorId", it) }
+            parameter("size", size)
+        }
+    }
+
+    suspend fun getHospitalReviews(
+        hospitalId: Long,
+        onlyImageReview: Boolean,
+        cursorId: Long?,
+        cursorRating: Double?,
+        cursorLikeCount: Long?,
+        size: Int,
+        sortBy: String,
+        sortDirection: String
+    ): HttpResponse {
+        return client.get("$baseUrl/reviews/$hospitalId") {
+            parameter("images", onlyImageReview)
+            cursorId?.let { parameter("cursorId", it) }
+            cursorRating?.let { parameter("cursorRating", it) }
+            cursorLikeCount?.let { parameter("cursorLikeCount", it) }
+            parameter("size", size)
+            parameter("sortBy", sortBy)
+            parameter("sortDirection", sortDirection)
+        }
+    }
+
+    suspend fun saveReview(body: ReviewSaveReqDto): HttpResponse {
+        return client.post("$baseUrl/save/reviews") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }
+    }
+
+    suspend fun checkReviewImageSave(body: ReviewImageCheckReqDto): HttpResponse {
+        return client.get("$baseUrl/save/success") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }
+    }
+
+    suspend fun getMyReviews(size: Int, cursorId: Long?): HttpResponse {
+        return client.get("$baseUrl/me") {
+            parameter("size", size)
+            cursorId?.let { parameter("cursorId", it) }
+        }
+    }
+
+    suspend fun deleteMyReviews(ids: List<Long>): HttpResponse {
+        return client.delete(baseUrl) {
+            ids.forEach { id ->
+                parameter("ids", id)
+            }
+        }
+    }
+}

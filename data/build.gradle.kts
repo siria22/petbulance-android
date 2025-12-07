@@ -2,15 +2,30 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.devtoolsKsp)
+
+    id("com.google.gms.google-services") version "4.4.4" apply false
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     namespace = "com.example.data"
     compileSdk = 36
 
@@ -18,6 +33,12 @@ android {
         minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField(
+            "String",
+            "SERVER_URL",
+            "\"${localProperties["SERVER_URL"]}\""
+        )
     }
 
     buildTypes {
@@ -53,6 +74,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
     implementation(libs.kotlinx.serialization.json)
 
     // Data - Room
@@ -75,6 +97,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.functions)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Test
     testImplementation(libs.junit)
