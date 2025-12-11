@@ -1,6 +1,5 @@
 @file:Suppress("DEPRECATION")
 
-import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -29,7 +28,6 @@ android {
 
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 

@@ -1,10 +1,22 @@
 package com.example.data.repository.nonfeature.app
 
+import com.example.domain.model.nonfeature.app.HealthCheckResult
 import com.example.domain.model.nonfeature.app.MetadataResponse
 import com.example.domain.model.nonfeature.app.RegionsResponse
 import com.example.domain.repository.nonfeature.app.AppInfoRepository
 
 class MockAppInfoRepository : AppInfoRepository {
+    override suspend fun checkHealth(): Result<HealthCheckResult> {
+        return Result.success(HealthCheckResult(
+            message = "Happy Energy ^O^",
+            isHealthy = true
+        ))
+    }
+
+    override suspend fun checkError(): Result<Unit> {
+        return Result.failure(Exception("Forced Error"))
+    }
+
     override suspend fun getVersion(): Result<String> {
         return Result.success("1.0.0")
     }
