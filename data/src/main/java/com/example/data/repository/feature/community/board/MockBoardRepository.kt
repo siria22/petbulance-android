@@ -2,8 +2,9 @@ package com.example.data.repository.feature.community.board
 
 import com.example.domain.model.feature.community.board.Board
 import com.example.domain.repository.feature.community.BoardRepository
+import jakarta.inject.Inject
 
-class MockBoardRepository : BoardRepository {
+class MockBoardRepository @Inject constructor() : BoardRepository {
     override suspend fun getBoardList(): Result<List<Board>> {
         return Result.success(mockBoardList)
     }

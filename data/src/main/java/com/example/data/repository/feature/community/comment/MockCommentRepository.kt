@@ -8,9 +8,10 @@ import com.example.domain.model.feature.community.comment.SearchPostCommentListR
 import com.example.domain.model.feature.community.comment.SearchPostCommentRes
 import com.example.domain.model.feature.community.comment.UpdatePostCommentReq
 import com.example.domain.repository.feature.community.CommentRepository
+import jakarta.inject.Inject
 import java.time.LocalDateTime
 
-class MockCommentRepository : CommentRepository {
+class MockCommentRepository @Inject constructor() : CommentRepository {
 
     override suspend fun updatePostComment(
         commentId: Long,

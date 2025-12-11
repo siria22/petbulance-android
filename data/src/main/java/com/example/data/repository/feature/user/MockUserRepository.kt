@@ -69,7 +69,11 @@ class MockUserRepository @Inject constructor() : UserRepository {
                 profileImageUrl = "https://petbulance.com/profile/default.png",
                 email = "contact@petbulance.com",
                 provider = "KAKAO",
-                connectedSocials = ConnectedSocials(kakao = "connected", google = null, naver = null)
+                connectedSocials = ConnectedSocials(
+                    kakao = "connected",
+                    google = null,
+                    naver = null
+                )
             )
         )
     }

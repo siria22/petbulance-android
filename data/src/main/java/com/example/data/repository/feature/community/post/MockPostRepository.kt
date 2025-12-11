@@ -23,9 +23,10 @@ import com.example.domain.model.feature.community.post.param.CreateCommentParam
 import com.example.domain.model.feature.community.post.param.CreatePostParam
 import com.example.domain.model.feature.community.post.param.UpdatePostParam
 import com.example.domain.repository.feature.community.PostRepository
+import jakarta.inject.Inject
 import java.time.LocalDateTime
 
-class MockPostRepository : PostRepository {
+class MockPostRepository @Inject constructor() : PostRepository {
     private var postIdCounter = 1L
     private var commentIdCounter = 1L
 

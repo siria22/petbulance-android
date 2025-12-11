@@ -4,13 +4,16 @@ import com.example.domain.model.nonfeature.app.HealthCheckResult
 import com.example.domain.model.nonfeature.app.MetadataResponse
 import com.example.domain.model.nonfeature.app.RegionsResponse
 import com.example.domain.repository.nonfeature.app.AppInfoRepository
+import jakarta.inject.Inject
 
-class MockAppInfoRepository : AppInfoRepository {
+class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
     override suspend fun checkHealth(): Result<HealthCheckResult> {
-        return Result.success(HealthCheckResult(
-            message = "Happy Energy ^O^",
-            isHealthy = true
-        ))
+        return Result.success(
+            HealthCheckResult(
+                message = "Happy Energy ^O^",
+                isHealthy = true
+            )
+        )
     }
 
     override suspend fun checkError(): Result<Unit> {

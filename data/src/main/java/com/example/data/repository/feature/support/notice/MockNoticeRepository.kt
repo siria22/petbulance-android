@@ -3,8 +3,9 @@ package com.example.data.repository.feature.support.notice
 import com.example.domain.model.feature.support.notice.NoticeDetail
 import com.example.domain.model.feature.support.notice.PagingNoticeList
 import com.example.domain.repository.feature.support.NoticeRepository
+import jakarta.inject.Inject
 
-class MockNoticeRepository : NoticeRepository {
+class MockNoticeRepository @Inject constructor() : NoticeRepository {
     override suspend fun getNoticeList(
         lastNoticeId: Long?,
         pageSize: Int

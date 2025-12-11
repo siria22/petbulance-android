@@ -42,7 +42,8 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         val start = page * size
         val end = (start + size).coerceAtMost(mockHospitals.size)
 
-        val content = if (start >= mockHospitals.size) emptyList() else mockHospitals.subList(start, end)
+        val content =
+            if (start >= mockHospitals.size) emptyList() else mockHospitals.subList(start, end)
 
         return Result.success(
             PagingResult(

@@ -1,10 +1,10 @@
 package com.example.data.repository.feature.support.qna
 
+import com.example.data.datasource.remote.network.common.safeApiCall
 import com.example.data.datasource.remote.network.feature.support.qna.QnaApi
 import com.example.data.datasource.remote.network.feature.support.qna.dto.CreateQnaResDto
 import com.example.data.datasource.remote.network.feature.support.qna.dto.DeleteQnaResDto
 import com.example.data.datasource.remote.network.feature.support.qna.dto.UpdateQnaResDto
-import com.example.data.datasource.remote.network.common.safeApiCall
 import com.example.data.mapper.feature.support.toCreateQnaDto
 import com.example.data.mapper.feature.support.toDomain
 import com.example.data.mapper.feature.support.toUpdateDto
