@@ -1,4 +1,4 @@
-package com.example.domain.usecase.feature.inquiry
+package com.example.domain.usecase.feature.support.inquiry
 
 import com.example.domain.model.feature.support.inquiry.InquiryRequest
 import com.example.domain.repository.feature.support.InquiryRepository

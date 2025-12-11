@@ -25,19 +25,19 @@ import com.example.presentation.R
  *
  * @param modifier The modifier to apply to this composable.
  * @param size The size of the image box. The default value is 128.dp.
- * @param galleryUri The [Uri] of the image to display. If null, a gray box will be displayed instead.
+ * @param uri The [Uri] of the image to display. If null, a gray box will be displayed instead.
  */
 @Composable
 fun BasicImageBox(
     modifier: Modifier = Modifier,
     size: Dp = 128.dp,
-    galleryUri: Uri?,
+    uri: Uri?,
     errorImageResource: Int = R.drawable.broken_image,
     placeholderImageResource: Int = R.drawable.broken_image /* TODO : placeholder 이미지 */
 ) {
-    val isUriValid = galleryUri != null && galleryUri.toString().isNotBlank()
+    val isUriValid = uri != null && uri.toString().isNotBlank()
 
-    val dataToLoad = if (isUriValid) galleryUri else null
+    val dataToLoad = if (isUriValid) uri else null
 
     Box(
         modifier = modifier.size(size),

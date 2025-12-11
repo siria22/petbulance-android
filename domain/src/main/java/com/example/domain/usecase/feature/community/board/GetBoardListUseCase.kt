@@ -1,4 +1,4 @@
-package com.example.domain.usecase.feature.board
+package com.example.domain.usecase.feature.community.board
 
 import com.example.domain.model.feature.community.board.Board
 import com.example.domain.repository.feature.community.BoardRepository

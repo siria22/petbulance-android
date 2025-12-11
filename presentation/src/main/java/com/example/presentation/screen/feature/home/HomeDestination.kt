@@ -1,4 +1,4 @@
-package com.example.presentation.screen.home
+package com.example.presentation.screen.feature.home
 
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -11,13 +11,7 @@ import com.example.presentation.utils.nav.ScreenDestinations
 
 fun NavGraphBuilder.homeDestination(navController: NavController) {
     composable(
-        route = ScreenDestinations.Home.route,
-//        arguments = listOf(
-//            navArgument(name = "") {
-//                type = NavType.LongType
-//                defaultValue = 0L
-//            }
-//        ) -> if route contains arguments
+        route = ScreenDestinations.Home.route
     ) {
         val viewModel: HomeViewModel = hiltViewModel()
 
@@ -34,10 +28,12 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         }
 
         val data: HomeData = let {
-            val someData by viewModel.someData.collectAsStateWithLifecycle()
+            val recentReviews by viewModel.recentReviews.collectAsStateWithLifecycle()
+            val hotArticle by viewModel.hotArticle.collectAsStateWithLifecycle()
 
             HomeData(
-                data = someData
+                recentReviews = recentReviews,
+                hotArticle = hotArticle
             )
         }
 

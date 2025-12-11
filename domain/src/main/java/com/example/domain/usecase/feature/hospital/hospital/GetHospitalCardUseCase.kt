@@ -1,4 +1,4 @@
-package com.example.domain.usecase.feature.hospital
+package com.example.domain.usecase.feature.hospital.hospital
 
 import com.example.domain.model.feature.hospital.hospital.HospitalCard
 import com.example.domain.repository.feature.hospital.HospitalRepository

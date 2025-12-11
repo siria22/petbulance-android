@@ -3,7 +3,48 @@ package com.example.domain.model.feature.community.post
 data class PostDetail(
     val boardInfo: BoardInfo,
     val postInfo: PostDetailInfo
-)
+) {
+    companion object {
+        val stub = PostDetail(
+            boardInfo = BoardInfo(
+                id = 1,
+                name = "소형포유류",
+                category = "일상/자랑"
+            ),
+            postInfo = PostDetailInfo(
+                id = 1,
+                title = "Post Title",
+                writer = WriterInfo(
+                    nickname = "Writer Nickname",
+                    profileUrl = "https://example.com/profile.jpg"
+                ),
+                createdAt = "1시간 전",
+                content = "Post Content",
+                images = listOf(
+                    PostImage(
+                        url = "https://example.com/image1.jpg",
+                        order = 1,
+                        isThumbnail = true
+                    ),
+                    PostImage(
+                        url = "https://example.com/image2.jpg",
+                        order = 2,
+                        isThumbnail = false
+                    )
+                ),
+                stats = PostStats(
+                    likeCount = 10,
+                    commentCount = 5,
+                    viewCount = 21
+                ),
+                userInteraction = UserInteraction(
+                    isLiked = true,
+                    isMine = false
+                )
+            )
+        )
+    }
+}
 
 data class BoardInfo(
     val id: Long,

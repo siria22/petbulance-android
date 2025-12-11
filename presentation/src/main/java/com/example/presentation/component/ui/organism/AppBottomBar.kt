@@ -23,7 +23,8 @@ import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
-import com.example.presentation.utils.nav.safePopBackStack
+import com.example.presentation.utils.nav.ScreenDestinations
+import com.example.presentation.utils.nav.safeNavigate
 
 /**
  * Bottom Navigation Bar
@@ -40,31 +41,53 @@ fun BottomNavigationBar(
 ) {
     val navItemList = listOf(
         BottomNavInfo(
-            label = "기록",
-            iconResource = IconResource.Drawable(R.drawable.history),
-            bottomNavType = CurrentBottomNav.HISTORY,
-            onClicked = {
-                // TODO : [Bottom Nav] Navigate to History Screen
-                // navController.safeNavigate(ScreenDestinations.History.route)
-            }
-        ),
-        BottomNavInfo(
             label = "홈",
             iconResource = IconResource.Drawable(R.drawable.home),
             bottomNavType = CurrentBottomNav.HOME,
             onClicked = {
-                navController.safePopBackStack()
+                navController.safeNavigate(ScreenDestinations.Home.route)
             }
         ),
         BottomNavInfo(
-            label = "프로필",
-            iconResource = IconResource.Drawable(R.drawable.account_circle),
-            bottomNavType = CurrentBottomNav.PROFILE,
+            label = "홈",
+            iconResource = IconResource.Drawable(R.drawable.ic_gnb_home),
+            bottomNavType = CurrentBottomNav.HOME,
             onClicked = {
-                // TODO : [Bottom Nav] Navigate to Profile Screen
-                // navController.safeNavigate(ScreenDestinations.Profile.route)
+                navController.safeNavigate(ScreenDestinations.Home.route)
             }
-        )
+        ),
+        BottomNavInfo(
+            label = "병원검색",
+            iconResource = IconResource.Drawable(R.drawable.ic_gnb_healthcross),
+            bottomNavType = CurrentBottomNav.SEARCH,
+            onClicked = {
+                /* TODO : Navigate to Hospital Search Page */
+            }
+        ),
+        BottomNavInfo(
+            label = "병원후기",
+            iconResource = IconResource.Drawable(R.drawable.ic_gnb_review),
+            bottomNavType = CurrentBottomNav.REVIEW,
+            onClicked = {
+                /* TODO : Navigate to Review Page */
+            }
+        ),
+        BottomNavInfo(
+            label = "커뮤니티",
+            iconResource = IconResource.Drawable(R.drawable.ic_gnb_community),
+            bottomNavType = CurrentBottomNav.COMMUNITY,
+            onClicked = {
+                /* TODO : Navigate to Community Page */
+            }
+        ),
+        BottomNavInfo(
+            label = "My",
+            iconResource = IconResource.Drawable(R.drawable.ic_gnb_other),
+            bottomNavType = CurrentBottomNav.MY,
+            onClicked = {
+                /* TODO : Navigate to MyPage */
+            }
+        ),
     )
 
     Row(
@@ -139,7 +162,7 @@ data class BottomNavInfo(
 )
 
 enum class CurrentBottomNav {
-    HISTORY, HOME, PROFILE
+    HOME, SEARCH, REVIEW, COMMUNITY, MY
 }
 
 @Preview

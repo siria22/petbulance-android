@@ -27,7 +27,7 @@ interface ReviewRepository {
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int = 10
-    ): Result<PagingReviewList<ReviewSearchItem>> // 검색 결과와 구조가 비슷하여 공유하거나 별도 모델 사용
+    ): Result<PagingReviewList<ReviewSearchItem>>
 
     // 4. 병원 상세 리뷰 조회
     suspend fun getHospitalReviews(

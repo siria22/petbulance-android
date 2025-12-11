@@ -1,4 +1,4 @@
-package com.example.domain.usecase.feature.hospital
+package com.example.domain.usecase.feature.hospital.hospital
 
 import com.example.domain.model.common.PagingResult
 import com.example.domain.model.feature.hospital.hospital.Hospital

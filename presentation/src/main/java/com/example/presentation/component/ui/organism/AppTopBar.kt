@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -42,13 +43,13 @@ fun AppTopBar(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
+            .background(color = background)
             .shadow(
-                elevation = 4.dp,
+                elevation = if (topBarInfo.isShadowed) 4.dp else 0.dp,
                 spotColor = Color.Black,
                 ambientColor = Color.Black,
                 clip = false
             )
-            .background(color = background)
     ) {
         if (topBarInfo.isLoading) {
             Box(modifier = Modifier.size(48.dp)) {
@@ -62,7 +63,7 @@ fun AppTopBar(
                     onIconClicked = topBarInfo.onLeadingIconClicked
                 )
             } else {
-                Spacer(modifier = Modifier.padding(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
             }
         }
 
@@ -71,15 +72,14 @@ fun AppTopBar(
         ) {
             Text(
                 text = topBarInfo.text,
-                color = colorScheme.text.primary,
+                color = if (topBarInfo.shouldEmphasized) colorScheme.action.primary.default
+                else colorScheme.text.primary,
                 style = MaterialTheme.typography.titleMedium.emp(),
                 textAlign = if (topBarInfo.textAlignment == TopBarAlignment.CENTER) TextAlign.Center
                 else TextAlign.Start,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 12.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         Row(
@@ -128,12 +128,14 @@ enum class TopBarAlignment {
 data class TopBarInfo(
     val text: String,
     val textAlignment: TopBarAlignment = TopBarAlignment.CENTER,
+    val shouldEmphasized: Boolean = false,
     val isLeadingIconAvailable: Boolean = false,
     val onLeadingIconClicked: () -> Unit = {},
     val isTrailingIconAvailable: Boolean = false,
     val leadingIconResource: IconResource = IconResource.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
     val trailingIcons: List<Pair<IconResource, () -> Unit>> = emptyList(),
     val isLoading: Boolean = false,
+    val isShadowed: Boolean = false,
 )
 
 @Preview(apiLevel = 34)
@@ -159,7 +161,7 @@ private fun AppTopBarPreview() {
                 AppTopBar(
                     topBarInfo = TopBarInfo(
                         text = text,
-                        textAlignment = TopBarAlignment.CENTER,
+                        textAlignment = TopBarAlignment.START,
                         isLeadingIconAvailable = false,
                         onLeadingIconClicked = { },
                         trailingIcons = emptyList()

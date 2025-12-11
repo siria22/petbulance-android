@@ -1,4 +1,4 @@
-package com.example.presentation.screen.home
+package com.example.presentation.screen.feature.home
 
 import com.example.presentation.utils.error.ErrorDisplayType
 import com.example.presentation.utils.error.ErrorEvent
