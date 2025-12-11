@@ -100,6 +100,14 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Location
+    implementation(libs.play.services.location)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,0 +1,36 @@
+package com.example.presentation.screen.feature.search
+
+import android.location.Location
+import com.example.domain.model.feature.hospital.hospital.Hospital
+import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
+import com.example.domain.model.feature.hospital.recent.ViewedHospitalList
+import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+
+data class UserLocationData(
+    val currentUserLocation: Location
+) {
+    companion object {
+        val empty = UserLocationData(
+            currentUserLocation = Location("empty").apply {
+                latitude = 37.579690
+                longitude = 126.977243
+            }
+        )
+    }
+}
+
+data class HospitalSearchData(
+    val hospitalSearchQuery: HospitalSearchQueryUiModel,
+    val hospitalList: List<Hospital>,
+    val recentSearchKeywords: List<RecentSearchKeyword>,
+    val viewedHospitals: ViewedHospitalList // 추가
+) {
+    companion object {
+        val empty = HospitalSearchData(
+            HospitalSearchQueryUiModel.empty,
+            emptyList(),
+            emptyList(),
+            ViewedHospitalList.empty
+        )
+    }
+}

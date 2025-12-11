@@ -1,0 +1,27 @@
+package com.example.presentation.screen.feature.search
+
+import android.location.Location
+import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
+import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+
+data class HospitalSearchArgument(
+    val intent: (HospitalSearchIntent) -> Unit,
+    val hospitalDataState: HospitalSearchDataState,
+)
+
+sealed class HospitalSearchDataState {
+    data object Init : HospitalSearchDataState()
+    data object OnProgress : HospitalSearchDataState()
+}
+
+sealed class HospitalSearchIntent {
+    data class OnQueryChanged(
+        val query: HospitalSearchQueryUiModel,
+        val currentUserLocation: Location
+    ) : HospitalSearchIntent()
+
+    data class AddRecentKeyword(val keyword: String) : HospitalSearchIntent()
+    data class DeleteRecentKeyword(val keyword: String) : HospitalSearchIntent()
+    data class AddViewedHospital(val hospitalId: Long, val hospitalName: String) : HospitalSearchIntent()
+    data class DeleteViewedHospital(val hospitalId: Long) : HospitalSearchIntent()
+}

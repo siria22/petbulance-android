@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.example.presentation.component.ui.iconSizeMs
 
 /**
  * A basic input text field component that provides a text input field with a placeholder and
@@ -47,7 +50,8 @@ fun BasicInputTextField(
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     placeholder: String = "placeholder",
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    onSearchButtonClicked: () -> Unit
 ) {
     BasicTextField(
         value = value,
@@ -55,13 +59,15 @@ fun BasicInputTextField(
         modifier = modifier
             .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        textStyle = textStyle.copy(color = PetbulanceTheme.colorScheme.text.primary),
+        textStyle = textStyle.copy(color = colorScheme.text.secondary),
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
-        cursorBrush = SolidColor(PetbulanceTheme.colorScheme.text.primary),
+        cursorBrush = SolidColor(colorScheme.text.primary),
         decorationBox = { innerTextField ->
             Row(
-                modifier = Modifier.fillMaxWidth().height(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -72,20 +78,34 @@ fun BasicInputTextField(
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
-                            style = textStyle.copy(color = PetbulanceTheme.colorScheme.text.caption)
+                            style = textStyle.copy(color = colorScheme.text.disabled)
                         )
                     }
                     innerTextField()
                 }
-                Icon(
-                    Icons.Default.Clear,
-                    contentDescription = "Clear all",
-                    tint = PetbulanceTheme.colorScheme.icon.basic,
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clickable {
-                            onValueChange("")
-                        }
+                if (value.isNotBlank()) {
+                    Icon(
+                        Icons.Default.Clear,
+                        contentDescription = "Clear all",
+                        tint = colorScheme.icon.basic,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clickable {
+                                onValueChange("")
+                            }
+                    )
+                }
+
+                val iconTint =
+                    if (value.isEmpty()) colorScheme.text.disabled else colorScheme.text.secondary
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Filled.Search),
+                    contentDescription = "Search icon",
+                    size = iconSizeMs,
+                    tint = iconTint,
+                    modifier = Modifier.clickable {
+                        onSearchButtonClicked()
+                    }
                 )
             }
         }
@@ -95,5 +115,10 @@ fun BasicInputTextField(
 @Preview(apiLevel = 34)
 @Composable
 private fun BasicInputTextFieldPreview() {
-    BasicInputTextField(value = "", onValueChange = {}, placeholder = "Placeholder")
+    BasicInputTextField(
+        value = "",
+        onValueChange = {},
+        placeholder = "Placeholder",
+        onSearchButtonClicked = {},
+    )
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.utils.nav.ScreenDestinations
@@ -40,14 +42,6 @@ fun BottomNavigationBar(
     navController: NavController
 ) {
     val navItemList = listOf(
-        BottomNavInfo(
-            label = "홈",
-            iconResource = IconResource.Drawable(R.drawable.home),
-            bottomNavType = CurrentBottomNav.HOME,
-            onClicked = {
-                navController.safeNavigate(ScreenDestinations.Home.route)
-            }
-        ),
         BottomNavInfo(
             label = "홈",
             iconResource = IconResource.Drawable(R.drawable.ic_gnb_home),
@@ -90,25 +84,33 @@ fun BottomNavigationBar(
         ),
     )
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(backgroundColor),
-        verticalAlignment = Alignment.Bottom
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        navItemList.forEachIndexed { _, item ->
-            BottomNavItem(
-                iconRes = item.iconResource,
-                itemLabel = item.label,
-                isSelected = (selectedItem == item.bottomNavType),
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable {
-                        item.onClicked
-                    },
-                onClicked = item.onClicked
-            )
+        HorizontalDivider(
+            color = colorScheme.border.subtle,
+            thickness = 1.dp
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(backgroundColor),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            navItemList.forEachIndexed { _, item ->
+                BottomNavItem(
+                    iconRes = item.iconResource,
+                    itemLabel = item.label,
+                    isSelected = (selectedItem == item.bottomNavType),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            item.onClicked
+                        },
+                    onClicked = item.onClicked
+                )
+            }
         }
     }
 }

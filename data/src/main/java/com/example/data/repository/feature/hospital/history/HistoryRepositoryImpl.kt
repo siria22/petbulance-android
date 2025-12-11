@@ -13,12 +13,12 @@ import com.example.domain.repository.feature.hospital.HistoryRepository
 import javax.inject.Inject
 
 class HistoryRepositoryImpl @Inject constructor(
-    private val api: HistoryApi
+    private val historyApi: HistoryApi
 ) : HistoryRepository {
 
     override suspend fun getRecentKeywords(): Result<List<RecentSearchKeyword>> {
         return safeApiCall<List<RecentHospitalResDto>>(path = "/recents/hospitals") {
-            api.getRecentKeywords()
+            historyApi.getRecentKeywords()
         }.map { list ->
             list.map { it.toDomain() }
         }
@@ -26,25 +26,25 @@ class HistoryRepositoryImpl @Inject constructor(
 
     override suspend fun saveRecentKeyword(keyword: String): Result<RecentSearchKeyword> {
         return safeApiCall<RecentHospitalSaveResDto>(path = "/recents/hospitals") {
-            api.saveRecentKeyword(keyword)
+            historyApi.saveRecentKeyword(keyword)
         }.map { it.toDomain() }
     }
 
     override suspend fun deleteRecentKeyword(keywordId: Long): Result<Unit> {
         return safeApiCall<Unit>(path = "/recents/hospitals/$keywordId") {
-            api.deleteRecentKeyword(keywordId)
+            historyApi.deleteRecentKeyword(keywordId)
         }
     }
 
     override suspend fun saveViewedHospital(hospitalId: Long): Result<Unit> {
         return safeApiCall<ViewedHospitalSaveResDto>(path = "/recents/viewed") {
-            api.saveViewedHospital(hospitalId)
+            historyApi.saveViewedHospital(hospitalId)
         }.map { }
     }
 
     override suspend fun getViewedHospitals(): Result<ViewedHospitalList> {
         return safeApiCall<ViewedHospitalResDto>(path = "/recents/viewed") {
-            api.getViewedHospitals()
+            historyApi.getViewedHospitals()
         }.map { dto ->
             ViewedHospitalList(
                 items = dto.viewedHospitals.map { it.toDomain() },
@@ -55,7 +55,7 @@ class HistoryRepositoryImpl @Inject constructor(
 
     override suspend fun deleteViewedHospital(hospitalId: Long): Result<Unit> {
         return safeApiCall<Unit>(path = "/recents/viewed/$hospitalId") {
-            api.deleteViewedHospital(hospitalId)
+            historyApi.deleteViewedHospital(hospitalId)
         }
     }
 }

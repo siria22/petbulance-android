@@ -8,6 +8,7 @@ import com.example.data.repository.feature.community.recent.MockRecentRepository
 import com.example.data.repository.feature.hospital.history.MockHistoryRepository
 import com.example.data.repository.feature.hospital.hospital.MockHospitalRepository
 import com.example.data.repository.feature.hospital.review.MockReviewRepository
+import com.example.data.repository.feature.hospital.search.SearchRepositoryImpl
 import com.example.data.repository.feature.support.inquiry.MockInquiryRepository
 import com.example.data.repository.feature.support.notice.MockNoticeRepository
 import com.example.data.repository.feature.support.qna.QnaRepositoryImpl
@@ -23,6 +24,7 @@ import com.example.domain.repository.feature.community.RecentRepository
 import com.example.domain.repository.feature.hospital.HistoryRepository
 import com.example.domain.repository.feature.hospital.HospitalRepository
 import com.example.domain.repository.feature.hospital.ReviewRepository
+import com.example.domain.repository.feature.hospital.SearchRepository
 import com.example.domain.repository.feature.support.InquiryRepository
 import com.example.domain.repository.feature.support.NoticeRepository
 import com.example.domain.repository.feature.support.QnaRepository
@@ -141,4 +143,10 @@ abstract class RepositoryModule {
         mock: MockRecentRepository
 //        impl: RecentRepositoryImpl
     ): RecentRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchRepository(
+        impl: SearchRepositoryImpl
+    ): SearchRepository
 }

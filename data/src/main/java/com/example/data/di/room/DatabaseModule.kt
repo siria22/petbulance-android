@@ -3,6 +3,8 @@ package com.example.data.di.room
 import android.content.Context
 import androidx.room.Room
 import com.example.data.datasource.local.database.dao.ExampleDao
+import com.example.data.datasource.local.database.dao.SearchDao
+import com.example.data.datasource.local.database.dao.ViewedHospitalDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,4 +32,13 @@ object DatabaseModule {
         return database.exampleDao()
     }
 
+    @Provides
+    fun provideSearchDao(database: AppDatabase): SearchDao {
+        return database.searchDao()
+    }
+
+    @Provides
+    fun provideViewedHospitalDao(database: AppDatabase): ViewedHospitalDao {
+        return database.viewedHospitalDao()
+    }
 }
