@@ -1,11 +1,11 @@
 package com.example.presentation.screen.feature.search.views.search
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.domain.model.feature.hospital.recent.ContentAsString
 import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.example.domain.model.feature.hospital.recent.ViewedHospital
 import com.example.domain.model.feature.hospital.recent.ViewedHospitalList
@@ -45,21 +46,28 @@ import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXXS
+import com.example.presentation.screen.feature.search.CommonSearchArgument
 import com.example.presentation.screen.feature.search.HospitalSearchArgument
 import com.example.presentation.screen.feature.search.HospitalSearchData
 import com.example.presentation.screen.feature.search.HospitalSearchDataState
 import com.example.presentation.screen.feature.search.HospitalSearchIntent
+import com.example.presentation.screen.feature.search.SearchIntent
+import com.example.presentation.screen.feature.search.SearchScreenState
+import com.example.presentation.screen.feature.search.UserLocationArgument
 import com.example.presentation.screen.feature.search.UserLocationData
+import com.example.presentation.screen.feature.search.UserLocationState
 import com.example.presentation.screen.feature.search.views.common.RowChipFilters
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(
     navController: NavController,
-    searchHospital: (HospitalSearchQueryUiModel) -> Unit,
+    commonSearchArgument: CommonSearchArgument,
+    userLocationArgument: UserLocationArgument,
     hospitalSearchArgument: HospitalSearchArgument,
-    hospitalSearchData: HospitalSearchData,
-    locationData: UserLocationData
+    locationData: UserLocationData,
+    hospitalSearchData: HospitalSearchData
 ) {
     var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
     var currentSelectedFilterBottomSheet by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
@@ -72,8 +80,21 @@ fun SearchView(
             SearchBar(
                 queryString = currentQuery.query ?: "",
                 onQueryStringChanged = { currentQuery = currentQuery.copy(query = it) },
-                onMoveBackIconClicked = {},
-                onSearchButtonClicked = { searchHospital(currentQuery) }
+                onMoveBackIconClicked = {
+                    commonSearchArgument.intent(
+                        SearchIntent.ChangeScreenState(
+                            SearchScreenState.Hospitals.MapView
+                        )
+                    )
+                },
+                onSearchButtonClicked = {
+                    hospitalSearchArgument.intent(
+                        HospitalSearchIntent.OnQueryChanged(
+                            query = currentQuery,
+                            currentUserLocation = locationData.currentUserLocation
+                        )
+                    )
+                }
             )
         },
         bottomBar = {
@@ -96,8 +117,8 @@ fun SearchView(
                 onChipClicked = { query ->
                     currentQuery = currentQuery.copy(query = query)
                 },
-                onDeleteRecentKeyword = {
-                    hospitalSearchArgument.intent(HospitalSearchIntent.DeleteRecentKeyword(it))
+                onDeleteRecentKeyword = { keyword ->
+                    hospitalSearchArgument.intent(HospitalSearchIntent.DeleteRecentKeyword(keyword))
                 },
                 onDeleteRecentViewedHospital = {
                     hospitalSearchArgument.intent(HospitalSearchIntent.DeleteViewedHospital(it.hospitalId))
@@ -119,6 +140,14 @@ fun SearchView(
             currentQuery = it.copy(query = originalQueryString)
         },
     )
+
+    BackHandler {
+        commonSearchArgument.intent(
+            SearchIntent.ChangeScreenState(
+                SearchScreenState.Hospitals.MapView
+            )
+        )
+    }
 }
 
 @Composable
@@ -135,91 +164,68 @@ private fun SearchViewContents(
     ) {
         RowChipFilters(onFilterButtonClicked = onFilterButtonClicked)
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = spacingXS,
-                    bottom = spacingMedium
-                )
-        ) {
-            Text(
-                text = "최근 검색어",
-                style = MaterialTheme.typography.bodyLarge.emp(),
-                color = colorScheme.text.primary,
-                modifier = Modifier.padding(vertical = spacingXS)
+        RecentHistorySection(
+            title = "최근 검색어",
+            items = recentQueryList,
+            onItemClick = { onChipClicked(it.keyword) },
+            onDeleteClick = { onDeleteRecentKeyword(it.keyword) }
+        )
+
+        RecentHistorySection(
+            title = "최근 본 병원",
+            items = recentViewedHospital.items,
+            onItemClick = { onChipClicked(it.hospitalName) },
+            onDeleteClick = { onDeleteRecentViewedHospital(it) }
+        )
+    }
+}
+
+@Composable
+private fun <T : ContentAsString> RecentHistorySection(
+    title: String,
+    items: List<T>,
+    onItemClick: (T) -> Unit,
+    onDeleteClick: (T) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacingXXXS),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                top = spacingXS,
+                bottom = spacingMedium
             )
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge.emp(),
+            color = colorScheme.text.primary,
+            modifier = Modifier.padding(vertical = spacingXS)
+        )
 
-            if (recentQueryList.isEmpty()) {
-                Text(
-                    text = "검색 시 자동으로 검색어가 저장돼요",
-                    style = MaterialTheme.typography.bodySmall.emp(),
-                    color = colorScheme.text.caption,
-                )
-            } else {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(spacingXS),
-                    verticalArrangement = Arrangement.spacedBy(spacingXS),
-                    modifier = Modifier.padding(horizontal = spacingXS)
-                ) {
-                    recentQueryList.forEach { query ->
-                        HistoryChip(
-                            content = query.keyword,
-                            onChipClicked = onChipClicked,
-                            onDeleteIconClicked = onDeleteRecentKeyword
-                        )
-                    }
-                }
-            }
-        }
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = spacingXS,
-                    bottom = spacingMedium
-                )
-        ) {
+        if (items.isEmpty()) {
             Text(
-                text = "최근 본 병원",
-                style = MaterialTheme.typography.bodyLarge.emp(),
-                color = colorScheme.text.primary,
-                modifier = Modifier.padding(vertical = spacingXS)
+                text = "검색 시 자동으로 검색어가 저장돼요",
+                style = MaterialTheme.typography.bodySmall.emp(),
+                color = colorScheme.text.caption,
             )
-
-            if (recentViewedHospital.items.isEmpty()) {
-                Text(
-                    text = "검색 시 자동으로 검색어가 저장돼요",
-                    style = MaterialTheme.typography.bodySmall.emp(),
-                    color = colorScheme.text.caption,
+        } else {
+            items.forEach { item ->
+                HistoryChip(
+                    content = item,
+                    onChipClicked = { onItemClick(item) },
+                    onDeleteIconClicked = { onDeleteClick(item) }
                 )
-            } else {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(spacingXS),
-                    verticalArrangement = Arrangement.spacedBy(spacingXS),
-                    modifier = Modifier.padding(horizontal = spacingXS)
-                ) {
-                    recentViewedHospital.items.forEach { history ->
-                        HistoryChip(
-                            content = history.hospitalName,
-                            onChipClicked = { onChipClicked(it) },
-                            onDeleteIconClicked = { /* TODO : delete recent Viewed Hospital */ }
-                        )
-                    }
-                }
             }
         }
     }
 }
 
 @Composable
-private fun HistoryChip(
-    content: String,
-    onChipClicked: (String) -> Unit,
-    onDeleteIconClicked: (String) -> Unit
+private fun <T : ContentAsString> HistoryChip(
+    content: T,
+    onChipClicked: (T) -> Unit,
+    onDeleteIconClicked: (T) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacingXXXS),
@@ -235,7 +241,7 @@ private fun HistoryChip(
             )
     ) {
         Text(
-            text = content,
+            text = content.getContentAsString(),
             style = MaterialTheme.typography.labelLarge,
             color = colorScheme.text.secondary,
             modifier = Modifier.clickable {
@@ -259,13 +265,21 @@ private fun SearchViewPreview() {
     PetbulanceTheme {
         SearchView(
             navController = rememberNavController(),
-            {},
-            hospitalSearchData = HospitalSearchData.empty,
-            locationData = UserLocationData.empty,
+            commonSearchArgument = CommonSearchArgument(
+                screenState = SearchScreenState.OnSearch.SearchView,
+                event = MutableSharedFlow(),
+                intent = { }
+            ),
+            userLocationArgument = UserLocationArgument(
+                intent = { },
+                locationState = UserLocationState.Init
+            ),
             hospitalSearchArgument = HospitalSearchArgument(
-                intent = {},
+                intent = { },
                 hospitalDataState = HospitalSearchDataState.Init
             ),
+            locationData = UserLocationData.empty,
+            hospitalSearchData = HospitalSearchData.empty
         )
     }
 }

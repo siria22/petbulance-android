@@ -24,7 +24,8 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
 
             CommonSearchArgument(
                 screenState = screenState,
-                event = commonSearchViewModel.eventFlow
+                event = commonSearchViewModel.eventFlow,
+                intent = commonSearchViewModel::onIntent
             )
         }
 

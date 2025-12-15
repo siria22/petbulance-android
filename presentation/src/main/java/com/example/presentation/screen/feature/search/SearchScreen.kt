@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.screen.feature.search.views.result.ResultView
 import com.example.presentation.screen.feature.search.views.search.SearchView
 import com.example.presentation.utils.error.collectCustomErrors
 import kotlinx.coroutines.CoroutineScope
@@ -47,22 +48,23 @@ fun SearchScreen(
         is SearchScreenState.OnSearch.SearchView -> {
             SearchView(
                 navController = navController,
-                searchHospital = {
-                    hospitalSearchArgument.intent(
-                        HospitalSearchIntent.OnQueryChanged(
-                            query = it,
-                            currentUserLocation = locationData.currentUserLocation
-                        )
-                    )
-                },
+                commonSearchArgument = commonSearchArgument,
+                userLocationArgument = userLocationArgument,
                 hospitalSearchArgument = hospitalSearchArgument,
-                hospitalSearchData = hospitalSearchData,
-                locationData = locationData
+                locationData = locationData,
+                hospitalSearchData = hospitalSearchData
             )
         }
 
         is SearchScreenState.OnSearch.ResultView -> {
-
+            ResultView(
+                navController = navController,
+                commonSearchArgument = commonSearchArgument,
+                userLocationArgument = userLocationArgument,
+                hospitalSearchArgument = hospitalSearchArgument,
+                locationData = locationData,
+                hospitalSearchData = hospitalSearchData
+            )
         }
     }
 
@@ -84,6 +86,7 @@ private fun SearchScreenPreview() {
                 hospitalDataState = HospitalSearchDataState.Init
             ),
             commonSearchArgument = CommonSearchArgument(
+                intent = {},
                 screenState = SearchScreenState.OnSearch.SearchView,
                 event = MutableSharedFlow()
             ),

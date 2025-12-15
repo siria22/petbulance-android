@@ -1,0 +1,214 @@
+package com.example.presentation.screen.feature.search.views.common
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.domain.model.feature.hospital.hospital.Hospital
+import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.example.presentation.component.theme.emp
+import com.example.presentation.component.ui.Dot
+import com.example.presentation.component.ui.atom.BasicIcon
+import com.example.presentation.component.ui.atom.IconResource
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun HospitalCard(
+    hospital: Hospital,
+    modifier: Modifier = Modifier,
+    onCardClick: () -> Unit = {},
+    onCopyPhoneClick: (String) -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = colorScheme.border.subtle,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .background(
+                color = colorScheme.bg.frame.default,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable { onCardClick() }
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = hospital.name,
+                style = typography.titleMedium.emp(),
+                color = colorScheme.text.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Rounded.Star),
+                    contentDescription = "Rating star",
+                    size = 16.dp,
+                    tint = colorScheme.icon.rating
+                )
+                Text(
+                    text = String.format(java.util.Locale.getDefault(), "%.1f", hospital.rating),
+                    style = typography.labelLarge,
+                    color = colorScheme.text.secondary
+                )
+
+                val reviewCount = hospital.reviewCount ?: 0
+                Text(
+                    text = "($reviewCount)",
+                    style = typography.labelLarge,
+                    color = colorScheme.text.caption
+                )
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            val isOpen = hospital.isOpenNow
+            Text(
+                text = if (isOpen) "진료 중" else "진료 종료",
+                style = typography.labelLarge.emp(),
+                color = if (isOpen) colorScheme.tag.blue.medium else colorScheme.text.caption
+            )
+
+            Dot()
+
+            hospital.openHours?.let { hours ->
+                Text(
+                    text = hours,
+                    style = typography.labelLarge.emp(),
+                    color = colorScheme.text.secondary
+                )
+            }
+
+            Dot()
+
+            hospital.distanceMeters?.let { distance ->
+                val distanceText = if (distance >= 1000) {
+                    String.format(java.util.Locale.getDefault(), "%.1fkm", distance / 1000)
+                } else {
+                    "${distance.toInt()}m"
+                }
+                Text(
+                    text = distanceText,
+                    style = typography.labelLarge.emp(),
+                    color = colorScheme.text.caption
+                )
+            }
+        }
+
+        if (!hospital.phone.isNullOrBlank()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.clickable { onCopyPhoneClick(hospital.phone!!) }
+            ) {
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Default.Call),
+                    contentDescription = "Phone",
+                    size = 16.dp,
+                    tint = colorScheme.tag.blue.medium
+                )
+                Text(
+                    text = hospital.phone!!,
+                    style = typography.labelLarge.emp(),
+                    color = colorScheme.tag.blue.medium
+                )
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Outlined.ContentCopy),
+                    contentDescription = "Copy Phone",
+                    size = 16.dp,
+                    tint = colorScheme.icon.light
+                )
+            }
+        }
+
+        if (hospital.types.isNotEmpty()) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                hospital.types.forEach { type ->
+                    HospitalTagChip(text = type)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HospitalTagChip(text: String) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = colorScheme.tag.yellow.subtle,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            style = typography.labelMedium.emp(),
+            color = colorScheme.text.primary
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun HospitalCardPreview() {
+    PetbulanceTheme {
+        HospitalCard(
+            hospital = Hospital(
+                hospitalId = 1,
+                name = "화타동물병원",
+                lat = 37.0,
+                lng = 127.0,
+                distanceMeters = 1200.0,
+                phone = "02-1234-5678",
+                types = listOf("파충류", "양서류", "어류"),
+                isOpenNow = true,
+                openHours = "20:00에 영업 종료",
+                thumbnailUrl = null,
+                rating = 4.8,
+                reviewCount = 25
+            )
+        )
+    }
+}

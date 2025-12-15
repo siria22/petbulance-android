@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,13 +44,14 @@ fun BasicDialog(
     minimumWidth: Float = 0.8f,
     backHandler: () -> Unit = {},
     position: Alignment = Alignment.Center,
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp),
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.Black.copy(alpha = 0.5f))
-            .padding(horizontal = 16.dp)
+            .padding(paddingValues)
             .clickable(
                 enabled = true,
                 indication = null,
@@ -77,20 +79,21 @@ fun BasicDialog(
 @Preview(apiLevel = 34)
 @Composable
 private fun BasicDialogPreview() {
-    BasicDialog {
+    BasicDialog(
+        backHandler = {},
+        paddingValues = PaddingValues(horizontal = spacingXL, vertical = spacingXXL)
+    ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingLarge),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(spacingXL),
         ) {
             Text(
                 text = "어떤 순서로 정렬할까요?",
                 style = MaterialTheme.typography.titleMedium.emp(),
                 color = PetbulanceTheme.colorScheme.text.primary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                textAlign = TextAlign.Center
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(spacingLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(

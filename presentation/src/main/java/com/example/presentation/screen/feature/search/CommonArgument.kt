@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.SharedFlow
 
 data class CommonSearchArgument(
     val screenState: SearchScreenState,
-    val event: SharedFlow<SearchEvent>
+    val event: SharedFlow<SearchEvent>,
+    val intent: (SearchIntent) -> Unit
 )
 
 sealed class SearchScreenState {
@@ -22,6 +23,10 @@ sealed class SearchScreenState {
     }
 }
 
+sealed class SearchIntent {
+    data class ChangeScreenState(val state: SearchScreenState) : SearchIntent()
+}
+
 sealed class SearchEvent {
     sealed class DataFetch : SearchEvent() {
         data class Error(
@@ -33,7 +38,7 @@ sealed class SearchEvent {
 
     sealed class Location : SearchEvent() {
         sealed class CheckPermission() : Location() {
-            data class Error (
+            data class Error(
                 override val userMessage: String = "위치 권한을 허용해주세요.",
                 override val exceptionMessage: String?,
                 override val displayType: ErrorDisplayType = ErrorDisplayType.Custom

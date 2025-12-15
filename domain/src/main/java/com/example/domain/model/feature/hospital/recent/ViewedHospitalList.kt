@@ -22,7 +22,7 @@ data class ViewedHospital(
     val hospitalId: Long,
     val hospitalName: String,
     val viewedAt: String
-) {
+) : ContentAsString {
     companion object {
         fun stub() = ViewedHospital(
             hospitalId = 0,
@@ -30,4 +30,6 @@ data class ViewedHospital(
             viewedAt = "2025-12-01"
         )
     }
+
+    override fun getContentAsString(): String = hospitalName
 }
