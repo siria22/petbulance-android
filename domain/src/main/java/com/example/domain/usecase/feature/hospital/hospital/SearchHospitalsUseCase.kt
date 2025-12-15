@@ -2,6 +2,7 @@ package com.example.domain.usecase.feature.hospital.hospital
 
 import com.example.domain.model.common.PagingResult
 import com.example.domain.model.feature.hospital.hospital.Hospital
+import com.example.domain.model.feature.hospital.hospital.MapBounds
 import com.example.domain.repository.feature.hospital.HospitalRepository
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ class SearchHospitalsUseCase @Inject constructor(
         region: String?,
         lat: Double?,
         lng: Double?,
-        bounds: String?,
+        bounds: MapBounds?,
         animal: String?,
         openNow: Boolean?,
         page: Int,

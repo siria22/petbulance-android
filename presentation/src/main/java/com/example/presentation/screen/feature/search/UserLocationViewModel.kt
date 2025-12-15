@@ -29,6 +29,8 @@ class UserLocationViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<SearchEvent>()
     val eventFlow: SharedFlow<SearchEvent> = _eventFlow
 
+    private var isInitialLocationSent = false
+
     fun onIntent(intent: UserLocationIntent) {
         when (intent) {
             is UserLocationIntent.RequestLocation -> {
@@ -56,13 +58,17 @@ class UserLocationViewModel @Inject constructor(
                 .catch { ex ->
                     _state.value = UserLocationState.PermissionRequired
                     _eventFlow.emit(
-                        SearchEvent.Location.CheckPermission.Error(
+                        SearchEvent.UserLocation.CheckPermission.Error(
                             exceptionMessage = ex.message
                         )
                     )
                 }
                 .collect { location ->
                     _state.value = UserLocationState.Success(location)
+                    if (!isInitialLocationSent) {
+                        _eventFlow.emit(SearchEvent.UserLocation.MoveCamera(location))
+                        isInitialLocationSent = true
+                    }
                 }
         }
     }

@@ -55,7 +55,7 @@ fun BottomNavigationBar(
             iconResource = IconResource.Drawable(R.drawable.ic_gnb_healthcross),
             bottomNavType = CurrentBottomNav.SEARCH,
             onClicked = {
-                /* TODO : Navigate to Hospital Search Page */
+                navController.safeNavigate(ScreenDestinations.Search.route)
             }
         ),
         BottomNavInfo(

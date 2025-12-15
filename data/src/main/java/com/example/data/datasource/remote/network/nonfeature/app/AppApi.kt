@@ -1,6 +1,7 @@
 package com.example.data.datasource.remote.network.nonfeature.app
 
 import com.example.data.datasource.remote.network.nonfeature.app.dto.MetadataRequestDto
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 
 class AppApi @Inject constructor(
-    private val client: HttpClient
+    @param:AuthHttpClient private val client: HttpClient
 ) {
     private val baseUrl = "${BASE_URL}/app"
 

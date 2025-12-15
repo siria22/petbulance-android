@@ -3,6 +3,7 @@ package com.example.presentation.screen.feature.search
 import android.location.Location
 import androidx.lifecycle.SavedStateHandle
 import com.example.domain.model.feature.hospital.hospital.Hospital
+import com.example.domain.model.feature.hospital.hospital.MapBounds
 import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.example.domain.model.feature.hospital.recent.ViewedHospitalList
 import com.example.domain.usecase.feature.hospital.hospital.SearchHospitalsUseCase
@@ -41,8 +42,8 @@ class HospitalSearchViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<SearchEvent>()
     val eventFlow: SharedFlow<SearchEvent> = _eventFlow
 
-    private val _hospitalSearchQuery = MutableStateFlow<HospitalSearchQueryUiModel?>(null)
-    val hospitalSearchQuery: StateFlow<HospitalSearchQueryUiModel?> = _hospitalSearchQuery
+    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.empty)
+    val hospitalSearchQuery: StateFlow<HospitalSearchQueryUiModel> = _hospitalSearchQuery
 
     private val _hospitalList = MutableStateFlow<List<Hospital>>(emptyList())
     val hospitalList: StateFlow<List<Hospital>> = _hospitalList
@@ -50,14 +51,19 @@ class HospitalSearchViewModel @Inject constructor(
     private val _recentSearchKeywords = MutableStateFlow<List<RecentSearchKeyword>>(emptyList())
     val recentSearchKeywords: StateFlow<List<RecentSearchKeyword>> = _recentSearchKeywords
 
-    private val _viewedHospitals = MutableStateFlow(ViewedHospitalList.stub().copy(items = emptyList(), totalCount = 0))
+    private val _viewedHospitals =
+        MutableStateFlow(ViewedHospitalList.stub().copy(items = emptyList(), totalCount = 0))
     val viewedHospitals: StateFlow<ViewedHospitalList> = _viewedHospitals
 
     fun onIntent(intent: HospitalSearchIntent) {
         when (intent) {
-            is HospitalSearchIntent.OnQueryChanged -> {
+            is HospitalSearchIntent.UpdateSearchQuery -> {
                 _hospitalSearchQuery.value = intent.query
-                launch { searchHospitals(intent.query, intent.currentUserLocation) }
+            }
+
+            is HospitalSearchIntent.SearchHospitalWithCurrentParams -> {
+                _hospitalSearchQuery.value = intent.query
+                launch { searchHospitals(null, intent.query, intent.currentUserLocation) }
             }
 
             is HospitalSearchIntent.AddRecentKeyword -> {
@@ -74,6 +80,10 @@ class HospitalSearchViewModel @Inject constructor(
 
             is HospitalSearchIntent.DeleteViewedHospital -> {
                 launch { deleteViewedHospital(intent.hospitalId) }
+            }
+
+            is HospitalSearchIntent.SearchNearByHospitals -> {
+                launch { searchHospitals(intent.bounds, intent.query, intent.currentUserLocation) }
             }
         }
     }
@@ -110,12 +120,14 @@ class HospitalSearchViewModel @Inject constructor(
                     )
                 }
                 .collect { list ->
-                    _viewedHospitals.value = ViewedHospitalList(items = list, totalCount = list.size.toLong())
+                    _viewedHospitals.value =
+                        ViewedHospitalList(items = list, totalCount = list.size.toLong())
                 }
         }
     }
 
     private suspend fun searchHospitals(
+        bounds: MapBounds? = null,
         queryModel: HospitalSearchQueryUiModel,
         currentUserLocation: Location
     ) {
@@ -126,7 +138,7 @@ class HospitalSearchViewModel @Inject constructor(
                 region = queryModel.getRegionFilter(),
                 lat = currentUserLocation.latitude,
                 lng = currentUserLocation.longitude,
-                bounds = null,
+                bounds = bounds,
                 animal = queryModel.species?.name,
                 openNow = queryModel.openNowOnly,
                 page = 1,       // TODO()

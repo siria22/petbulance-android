@@ -12,7 +12,7 @@ import javax.inject.Inject
 class MockHospitalRepository @Inject constructor() : HospitalRepository {
     private val mockHospitals = List(20) { i ->
         Hospital(
-            hospitalId = i + 1,
+            hospitalId = (i + 1L),
             name = "행복 동물병원 ${i + 1}호점 (Mock)",
             lat = 37.5665 + (i * 0.001),
             lng = 126.9780 + (i * 0.001),
@@ -56,7 +56,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
 
     override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
         delay(500) // Simulate network delay
-        val hospital = mockHospitals.find { it.hospitalId.toLong() == hospitalId }
+        val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
         return if (hospital != null) {
             Result.success(
@@ -89,7 +89,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         userLng: Double
     ): Result<HospitalCard> {
         delay(300) // Simulate network delay
-        val hospital = mockHospitals.find { it.hospitalId.toLong() == hospitalId }
+        val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
         return if (hospital != null) {
             Result.success(

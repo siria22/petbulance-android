@@ -1,5 +1,6 @@
 package com.example.data.datasource.remote.network.feature.support.notice
 
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -7,7 +8,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 
 class NoticeApi(
-    private val client: HttpClient,
+    @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "${BASE_URL}/notices"
 

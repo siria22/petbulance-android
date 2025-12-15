@@ -12,10 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,8 +31,6 @@ fun SearchBar(
     onMoveBackIconClicked: () -> Unit,
     onSearchButtonClicked: (String) -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf(queryString) }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -61,17 +55,19 @@ fun SearchBar(
             }
         )
         BasicInputTextField(
-            value = searchQuery,
+            value = queryString,
             onValueChange = { onQueryStringChanged(it) },
             placeholder = "병원 이름을 검색하세요",
             modifier = Modifier.weight(1f),
-            onSearchButtonClicked = { onSearchButtonClicked(searchQuery) }
+            onSearchButtonClicked = { onSearchButtonClicked(queryString) }
         )
         Text(
             text = "닫기",
             style = MaterialTheme.typography.labelMedium,
             color = colorScheme.text.secondary,
-            modifier = Modifier.padding(horizontal = spacingXS)
+            modifier = Modifier
+                .padding(horizontal = spacingXS)
+                .clickable { onMoveBackIconClicked() }
         )
     }
 }
@@ -80,6 +76,6 @@ fun SearchBar(
 @Composable
 private fun SearchBarPreview() {
     PetbulanceTheme {
-        SearchBar("",{}, {}, {})
+        SearchBar("", {}, {}, {})
     }
 }

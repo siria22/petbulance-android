@@ -1,5 +1,6 @@
 package com.example.presentation.screen.feature.search
 
+import android.location.Location
 import com.example.presentation.utils.error.ErrorDisplayType
 import com.example.presentation.utils.error.ErrorEvent
 import kotlinx.coroutines.flow.SharedFlow
@@ -36,13 +37,15 @@ sealed class SearchEvent {
         ) : DataFetch(), ErrorEvent
     }
 
-    sealed class Location : SearchEvent() {
-        sealed class CheckPermission() : Location() {
+    sealed class UserLocation : SearchEvent() {
+        sealed class CheckPermission() : UserLocation() {
             data class Error(
                 override val userMessage: String = "위치 권한을 허용해주세요.",
                 override val exceptionMessage: String?,
                 override val displayType: ErrorDisplayType = ErrorDisplayType.Custom
             ) : CheckPermission(), ErrorEvent
         }
+
+        data class MoveCamera(val location: Location) : UserLocation()
     }
 }

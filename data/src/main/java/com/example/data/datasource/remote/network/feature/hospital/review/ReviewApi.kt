@@ -2,6 +2,8 @@ package com.example.data.datasource.remote.network.feature.hospital.review
 
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
+import com.example.data.di.network.AuthHttpClient
+import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -14,10 +16,9 @@ import io.ktor.http.contentType
 import javax.inject.Inject
 
 class ReviewApi @Inject constructor(
-    private val client: HttpClient,
-    private val baseHost: String
+    @param:AuthHttpClient private val client: HttpClient,
 ) {
-    private val baseUrl = "$baseHost/receipts"
+    private val baseUrl = "$BASE_URL/receipts"
 
     suspend fun findHospital(hospitalName: String): HttpResponse {
         return client.get("$baseUrl/$hospitalName")

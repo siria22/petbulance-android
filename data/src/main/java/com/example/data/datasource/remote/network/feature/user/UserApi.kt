@@ -5,15 +5,22 @@ import com.example.data.datasource.remote.network.feature.user.dto.NicknameSaveR
 import com.example.data.datasource.remote.network.feature.user.dto.NotificationSettingReqDto
 import com.example.data.datasource.remote.network.feature.user.dto.ProfileImageUpdateReqDto
 import com.example.data.datasource.remote.network.feature.user.dto.SocialConnectRequestDto
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import javax.inject.Inject
 
 class UserApi @Inject constructor(
-    private val client: HttpClient,
+    @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "$BASE_URL/users"
 

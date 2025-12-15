@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.presentation.screen.feature.search.views.result
 
 import androidx.activity.compose.BackHandler
@@ -60,6 +58,7 @@ import com.example.presentation.screen.feature.search.views.common.RowResultCont
 import com.example.presentation.screen.feature.search.views.search.SearchBar
 import kotlinx.coroutines.flow.MutableSharedFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultView(
     navController: NavController,
@@ -92,7 +91,7 @@ fun ResultView(
                 },
                 onSearchButtonClicked = {
                     hospitalSearchArgument.intent(
-                        HospitalSearchIntent.OnQueryChanged(
+                        HospitalSearchIntent.SearchHospitalWithCurrentParams(
                             query = currentQuery,
                             currentUserLocation = locationData.currentUserLocation
                         )
@@ -136,12 +135,30 @@ fun ResultView(
             val originalQueryString = currentQuery.query
             currentQuery = updatedQuery.copy(query = originalQueryString)
         },
+        onResetFilterClicked = {
+            currentQuery = currentQuery.copy(
+                region = null,
+                district = null,
+                species = null
+            )
+        },
+        onSearchButtonClicked = {
+            hospitalSearchArgument.intent(
+                HospitalSearchIntent.SearchHospitalWithCurrentParams(
+                    query = currentQuery,
+                    currentUserLocation = locationData.currentUserLocation
+                )
+            )
+        },
     )
 
     if (isSelectSortTypeDialogVisible) {
         SelectSortTypeDialog(
             onDismissRequest = { isSelectSortTypeDialogVisible = false },
-            onSortTypeSelected = { selectedSortType = it }
+            onSortTypeSelected = {
+                selectedSortType = it
+                isSelectSortTypeDialogVisible = false
+            }
         )
     }
 

@@ -1,7 +1,7 @@
 package com.example.presentation.screen.feature.search
 
 import android.location.Location
-import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
+import com.example.domain.model.feature.hospital.hospital.MapBounds
 import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
 
 data class HospitalSearchArgument(
@@ -15,13 +15,23 @@ sealed class HospitalSearchDataState {
 }
 
 sealed class HospitalSearchIntent {
-    data class OnQueryChanged(
+    data class UpdateSearchQuery(val query: HospitalSearchQueryUiModel) : HospitalSearchIntent()
+
+    data class SearchHospitalWithCurrentParams(
+        val query: HospitalSearchQueryUiModel,
+        val currentUserLocation: Location
+    ) : HospitalSearchIntent()
+
+    data class SearchNearByHospitals(
+        val bounds: MapBounds,
         val query: HospitalSearchQueryUiModel,
         val currentUserLocation: Location
     ) : HospitalSearchIntent()
 
     data class AddRecentKeyword(val keyword: String) : HospitalSearchIntent()
     data class DeleteRecentKeyword(val keyword: String) : HospitalSearchIntent()
-    data class AddViewedHospital(val hospitalId: Long, val hospitalName: String) : HospitalSearchIntent()
+    data class AddViewedHospital(val hospitalId: Long, val hospitalName: String) :
+        HospitalSearchIntent()
+
     data class DeleteViewedHospital(val hospitalId: Long) : HospitalSearchIntent()
 }

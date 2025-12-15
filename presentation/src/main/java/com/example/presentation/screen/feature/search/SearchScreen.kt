@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.screen.feature.search.views.map.MapView
 import com.example.presentation.screen.feature.search.views.result.ResultView
 import com.example.presentation.screen.feature.search.views.search.SearchView
 import com.example.presentation.utils.error.collectCustomErrors
@@ -38,7 +39,14 @@ fun SearchScreen(
 
     when (screenState) {
         is SearchScreenState.Hospitals.MapView -> {
-
+            MapView(
+                navController = navController,
+                commonSearchArgument = commonSearchArgument,
+                userLocationArgument = userLocationArgument,
+                hospitalSearchArgument = hospitalSearchArgument,
+                locationData = locationData,
+                hospitalSearchData = hospitalSearchData
+            )
         }
 
         is SearchScreenState.Hospitals.ListView -> {

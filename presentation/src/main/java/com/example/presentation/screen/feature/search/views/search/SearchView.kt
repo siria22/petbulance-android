@@ -71,7 +71,7 @@ fun SearchView(
 ) {
     var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
     var currentSelectedFilterBottomSheet by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
-    var currentQuery by remember { mutableStateOf(hospitalSearchData.hospitalSearchQuery) }
+    val currentQuery = hospitalSearchData.hospitalSearchQuery
 
     val recentSearchKeywords = hospitalSearchData.recentSearchKeywords
 
@@ -79,7 +79,13 @@ fun SearchView(
         topBar = {
             SearchBar(
                 queryString = currentQuery.query ?: "",
-                onQueryStringChanged = { currentQuery = currentQuery.copy(query = it) },
+                onQueryStringChanged = {
+                    hospitalSearchArgument.intent(
+                        HospitalSearchIntent.UpdateSearchQuery(
+                            currentQuery.copy(query = it)
+                        )
+                    )
+                },
                 onMoveBackIconClicked = {
                     commonSearchArgument.intent(
                         SearchIntent.ChangeScreenState(
@@ -89,9 +95,14 @@ fun SearchView(
                 },
                 onSearchButtonClicked = {
                     hospitalSearchArgument.intent(
-                        HospitalSearchIntent.OnQueryChanged(
+                        HospitalSearchIntent.SearchHospitalWithCurrentParams(
                             query = currentQuery,
                             currentUserLocation = locationData.currentUserLocation
+                        )
+                    )
+                    commonSearchArgument.intent(
+                        SearchIntent.ChangeScreenState(
+                            SearchScreenState.OnSearch.ResultView
                         )
                     )
                 }
@@ -115,7 +126,11 @@ fun SearchView(
                 recentQueryList = recentSearchKeywords,
                 recentViewedHospital = hospitalSearchData.viewedHospitals,
                 onChipClicked = { query ->
-                    currentQuery = currentQuery.copy(query = query)
+                    hospitalSearchArgument.intent(
+                        HospitalSearchIntent.UpdateSearchQuery(
+                            currentQuery.copy(query = query)
+                        )
+                    )
                 },
                 onDeleteRecentKeyword = { keyword ->
                     hospitalSearchArgument.intent(HospitalSearchIntent.DeleteRecentKeyword(keyword))
@@ -136,8 +151,26 @@ fun SearchView(
         ),
         onDismissRequest = { isFilterBottomSheetVisible = false },
         onQuerySet = {
-            val originalQueryString = currentQuery.query
-            currentQuery = it.copy(query = originalQueryString)
+            hospitalSearchArgument.intent(HospitalSearchIntent.UpdateSearchQuery(it.copy(query = currentQuery.query)))
+        },
+        onResetFilterClicked = {
+            hospitalSearchArgument.intent(
+                HospitalSearchIntent.UpdateSearchQuery(
+                    currentQuery.copy(
+                        region = null,
+                        district = null,
+                        species = null
+                    )
+                )
+            )
+        },
+        onSearchButtonClicked = {
+            hospitalSearchArgument.intent(
+                HospitalSearchIntent.SearchHospitalWithCurrentParams(
+                    query = currentQuery,
+                    currentUserLocation = locationData.currentUserLocation
+                )
+            )
         },
     )
 

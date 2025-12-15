@@ -2,6 +2,7 @@ package com.example.data.datasource.remote.network.feature.hospital.history
 
 import com.example.data.datasource.remote.network.feature.hospital.history.dto.RecentHospitalSaveReqDto
 import com.example.data.datasource.remote.network.feature.hospital.history.dto.ViewedHospitalSaveReqDto
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -10,7 +11,7 @@ import io.ktor.http.*
 import javax.inject.Inject
 
 class HistoryApi @Inject constructor(
-    private val client: HttpClient,
+    @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "$BASE_URL/recents"
 

@@ -1,5 +1,7 @@
 package com.example.presentation.screen.feature.search.views.common
 
+import android.content.ClipData
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,11 +21,16 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -31,6 +38,7 @@ import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.Dot
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -40,6 +48,11 @@ fun HospitalCard(
     onCardClick: () -> Unit = {},
     onCopyPhoneClick: (String) -> Unit = {}
 ) {
+    val clipboardManager = LocalClipboard.current
+    val context = LocalContext.current
+
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -143,7 +156,14 @@ fun HospitalCard(
                     iconResource = IconResource.Vector(Icons.Default.Call),
                     contentDescription = "Phone",
                     size = 16.dp,
-                    tint = colorScheme.tag.blue.medium
+                    tint = colorScheme.tag.blue.medium,
+                    modifier = Modifier.clickable {
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = "tel:${hospital.phone!!}".toUri()
+                        }
+                        // 3. Activity 시작
+                        context.startActivity(intent)
+                    }
                 )
                 Text(
                     text = hospital.phone!!,
@@ -154,7 +174,14 @@ fun HospitalCard(
                     iconResource = IconResource.Vector(Icons.Outlined.ContentCopy),
                     contentDescription = "Copy Phone",
                     size = 16.dp,
-                    tint = colorScheme.icon.light
+                    tint = colorScheme.icon.light,
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            val clipData = ClipData.newPlainText("Phone", hospital.phone!!)
+                            val clipEntry = ClipEntry(clipData)
+                            clipboardManager.setClipEntry(clipEntry)
+                        }
+                    }
                 )
             }
         }

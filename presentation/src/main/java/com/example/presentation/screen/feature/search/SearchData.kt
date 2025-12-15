@@ -23,7 +23,7 @@ data class HospitalSearchData(
     val hospitalSearchQuery: HospitalSearchQueryUiModel,
     val hospitalList: List<Hospital>,
     val recentSearchKeywords: List<RecentSearchKeyword>,
-    val viewedHospitals: ViewedHospitalList // 추가
+    val viewedHospitals: ViewedHospitalList
 ) {
     companion object {
         val empty = HospitalSearchData(

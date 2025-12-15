@@ -1,6 +1,7 @@
 package com.example.data.datasource.remote.network.feature.hospital.hospital
 
 import com.example.data.datasource.remote.network.feature.hospital.hospital.dto.HospitalSearchReqDto
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -9,7 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import javax.inject.Inject
 
 class HospitalApi @Inject constructor(
-    private val client: HttpClient
+    @param:AuthHttpClient private val client: HttpClient
 ) {
     private val baseUrl = "${BASE_URL}/hospitals"
 

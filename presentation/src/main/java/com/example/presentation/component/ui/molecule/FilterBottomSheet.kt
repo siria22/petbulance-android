@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -40,11 +40,16 @@ import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.atom.BasicBottomSheet
+import com.example.presentation.component.ui.atom.BasicButton
+import com.example.presentation.component.ui.atom.BasicButtonSize
+import com.example.presentation.component.ui.atom.BasicButtonType
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
+import com.example.presentation.component.ui.iconSizeLarge
 import com.example.presentation.component.ui.iconSizeSmall
 import com.example.presentation.component.ui.spacingLarge
 import com.example.presentation.component.ui.spacingMedium
+import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXL
@@ -59,7 +64,9 @@ fun FilterBottomSheet(
     showBottomSheet: Boolean,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-    onQuerySet: (HospitalSearchQueryUiModel) -> Unit
+    onQuerySet: (HospitalSearchQueryUiModel) -> Unit,
+    onResetFilterClicked: () -> Unit,
+    onSearchButtonClicked: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(startTab) }
 
@@ -69,61 +76,99 @@ fun FilterBottomSheet(
     var selectedAnimalCategory by remember { mutableStateOf(AnimalCategory.SMALL_MAMMAL) }
 
     BasicBottomSheet(
-        modifier = Modifier.fillMaxHeight(0.8f),
         showBottomSheet = showBottomSheet,
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
     ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth(0.4f)
-                    .padding(horizontal = spacingMedium)
+        Box {
+            Column(
+                modifier = Modifier.fillMaxHeight(0.8f)
             ) {
-                FilterBottomSheetTab.entries.forEach { elem ->
-                    FilterBottomSheetTab(
-                        modifier = Modifier.weight(1f),
-                        tab = elem,
-                        isSelected = selectedTab == elem,
-                        onTabSelected = { selectedTab = it }
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .padding(horizontal = spacingMedium)
+                ) {
+                    FilterBottomSheetTab.entries.forEach { elem ->
+                        FilterBottomSheetTab(
+                            modifier = Modifier.weight(1f),
+                            tab = elem,
+                            isSelected = selectedTab == elem,
+                            onTabSelected = { selectedTab = it }
+                        )
+                    }
+                }
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = colorScheme.border.verySubtle
+                )
+
+                ResetFilterRow(onResetFilterClicked = onResetFilterClicked)
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = colorScheme.border.verySubtle
+                )
+
+                Column(modifier = Modifier.weight(1f)) {
+                    when (selectedTab) {
+                        FilterBottomSheetTab.REGION -> {
+                            RegionSelectColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                selectedRegion = selectedRegion,
+                                selectedDistrict = selectedDistrict,
+                                onRegionSelected = { selectedRegion = it },
+                                onDistrictSelected = { selectedDistrict = it },
+                                onQuerySet = {
+                                    onQuerySet(
+                                        currentQuery.copy(
+                                            region = selectedRegion,
+                                            district = selectedDistrict,
+                                            species = selectedAnimalCategory
+                                        )
+                                    )
+                                },
+                            )
+                        }
+
+                        FilterBottomSheetTab.SPECIES -> {
+                            SpeciesSelectColumn(
+                                onChipClicked = { selectedAnimalCategory = it },
+                                selectedAnimalCategory = selectedAnimalCategory,
+                            )
+                        }
+                    }
                 }
             }
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = colorScheme.border.verySubtle
-            )
 
-            ResetFilterRow(
-                onResetFilterClicked = { }/* TODO : clear filter */
-            )
-
-            when (selectedTab) {
-                FilterBottomSheetTab.REGION -> {
-                    RegionSelectColumn(
-                        selectedRegion = selectedRegion,
-                        selectedDistrict = selectedDistrict,
-                        onRegionSelected = { selectedRegion = it },
-                        onDistrictSelected = { selectedDistrict = it },
-                        onQuerySet = {
-                            onQuerySet(
-                                currentQuery.copy(
-                                    region = selectedRegion,
-                                    district = selectedDistrict,
-                                    species = selectedAnimalCategory
-                                )
-                            )
-                        },
-                    )
-                }
-
-                FilterBottomSheetTab.SPECIES -> {
-                    SpeciesSelectColumn(
-                        onChipClicked = { selectedAnimalCategory = it },
-                        selectedAnimalCategory = selectedAnimalCategory,
-                    )
-                }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(spacingSmall),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = spacingMedium, vertical = spacingXXL)
+                    .align(Alignment.BottomCenter)
+            ) {
+                BasicButton(
+                    modifier = Modifier.weight(2f),
+                    leadingIcon = IconResource.Vector(Icons.Default.LocationSearching),
+                    leadingIconSize = iconSizeLarge,
+                    text = "내 위치",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.SECONDARY,
+                    radius = 16.dp,
+                    onClicked = { /* TODO : Find my location and change into region/district */ }
+                )
+                BasicButton(
+                    modifier = Modifier.weight(3f),
+                    leadingIcon = null,
+                    text = "병원 보기",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.PRIMARY,
+                    radius = 16.dp,
+                    onClicked = onSearchButtonClicked
+                )
             }
         }
     }
@@ -202,7 +247,8 @@ private fun RegionSelectColumn(
     onQuerySet: (String) -> Unit
 ) {
     Row(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(spacingSmall),
     ) {
         LazyColumn(
             modifier = Modifier
@@ -253,9 +299,9 @@ private fun RegionCategoryItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
             .background(if (isSelected) colorScheme.bg.frame.default else colorScheme.bg.frame.subtle)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(horizontal = spacingLarge, vertical = spacingSmall),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -274,23 +320,21 @@ private fun RegionDetailItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .clickable(onClick = onClick)
-            .padding(horizontal = spacingMedium),
-        contentAlignment = Alignment.CenterStart
+            .clickable(onClick = onClick),
     ) {
         Text(
             text = districtName,
             style = MaterialTheme.typography.bodyMedium,
             color = if (!isSelected) colorScheme.text.primary else colorScheme.action.primary.default,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = spacingLarge, vertical = spacingSmall)
         )
 
         HorizontalDivider(
-            modifier = Modifier.align(Alignment.BottomCenter),
             thickness = 1.dp,
             color = colorScheme.border.verySubtle
         )
@@ -348,9 +392,11 @@ private fun FilterBottomSheetPreview() {
                 showBottomSheet = true,
                 sheetState = rememberModalBottomSheetState(),
                 onDismissRequest = {},
-                startTab = FilterBottomSheetTab.REGION,
+                startTab = FilterBottomSheetTab.SPECIES,
                 onQuerySet = {},
-                currentQuery = HospitalSearchQueryUiModel.empty
+                currentQuery = HospitalSearchQueryUiModel.empty,
+                onResetFilterClicked = {},
+                onSearchButtonClicked = {},
             )
         }
     }

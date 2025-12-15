@@ -1,6 +1,7 @@
 package com.example.data.datasource.remote.network.feature.community.comment
 
 import com.example.data.datasource.remote.network.feature.community.comment.dto.UpdatePostCommentReqDto
+import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
@@ -14,7 +15,7 @@ import io.ktor.http.contentType
 import javax.inject.Inject
 
 class CommentApi @Inject constructor(
-    private val client: HttpClient
+    @param:AuthHttpClient private val client: HttpClient
 ) {
     private val baseUrl = "${BASE_URL}/comments"
 

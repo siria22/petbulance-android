@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HospitalsResDto(
-    val hospitalId: Int,
+    val hospitalId: Long,
     val name: String,
     val lat: Double,
     val lng: Double,
