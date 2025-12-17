@@ -35,7 +35,6 @@ fun SearchScreen(
     locationData: UserLocationData,
     hospitalSearchData: HospitalSearchData
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
     val screenState = commonSearchArgument.screenState
 
     // --- Hoisted State ---

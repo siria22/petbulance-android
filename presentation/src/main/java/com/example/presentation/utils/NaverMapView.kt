@@ -1,5 +1,6 @@
 package com.example.presentation.utils
 
+import android.annotation.SuppressLint
 import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.OverlayImage
 
+@Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
 @Composable
 fun NaverMapView(
     currentLocation: Location,
@@ -73,7 +75,7 @@ fun NaverMapView(
             locationOverlay.position = LatLng(currentLocation.latitude, currentLocation.longitude)
         }
     }
-
+    
     AndroidView(
         factory = { mapView },
         modifier = modifier

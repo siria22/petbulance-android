@@ -26,7 +26,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HospitalSearchViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val searchHospitalsUseCase: SearchHospitalsUseCase,
     private val getRecentSearchKeywordUseCase: GetRecentSearchKeywordUseCase,
     private val addSearchKeywordUseCase: AddSearchKeywordUseCase,
