@@ -13,12 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,8 +27,6 @@ import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
-import com.example.presentation.component.ui.molecule.FilterBottomSheet
-import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.example.presentation.component.ui.organism.BottomNavigationBar
 import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.spacingMedium
@@ -41,62 +34,28 @@ import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.CommonSearchArgument
-import com.example.presentation.screen.feature.search.HospitalSearchArgument
-import com.example.presentation.screen.feature.search.HospitalSearchData
-import com.example.presentation.screen.feature.search.HospitalSearchDataState
-import com.example.presentation.screen.feature.search.HospitalSearchIntent
-import com.example.presentation.screen.feature.search.SearchIntent
-import com.example.presentation.screen.feature.search.SearchScreenState
-import com.example.presentation.screen.feature.search.UserLocationArgument
-import com.example.presentation.screen.feature.search.UserLocationData
-import com.example.presentation.screen.feature.search.UserLocationState
+import com.example.presentation.screen.feature.search.SearchUiEvent
+import com.example.presentation.screen.feature.search.SearchUiState
 import com.example.presentation.screen.feature.search.views.common.HospitalCard
-import com.example.presentation.screen.feature.search.views.common.HospitalSortType
 import com.example.presentation.screen.feature.search.views.common.RowChipFilters
 import com.example.presentation.screen.feature.search.views.common.RowResultControlChips
+import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
 import com.example.presentation.screen.feature.search.views.search.SearchBar
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultView(
     navController: NavController,
-    commonSearchArgument: CommonSearchArgument,
-    userLocationArgument: UserLocationArgument,
-    hospitalSearchArgument: HospitalSearchArgument,
-    locationData: UserLocationData,
-    hospitalSearchData: HospitalSearchData
+    searchUiState: SearchUiState,
+    onEvent: (SearchUiEvent) -> Unit
 ) {
-    var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
-    var currentSelectedFilterBottomSheet by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
-    var currentQuery by remember { mutableStateOf(hospitalSearchData.hospitalSearchQuery) }
-
-    var selectedSortType by remember { mutableStateOf(HospitalSortType.DISTANCE) }
-    var isOpenNowOnly by remember { mutableStateOf(false) }
-
-    var isSelectSortTypeDialogVisible by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             SearchBar(
-                queryString = currentQuery.query ?: "",
-                onQueryStringChanged = { /* nop */ },
-                onMoveBackIconClicked = {
-                    commonSearchArgument.intent(
-                        SearchIntent.ChangeScreenState(
-                            SearchScreenState.OnSearch.SearchView
-                        )
-                    )
-                },
-                onSearchButtonClicked = {
-                    hospitalSearchArgument.intent(
-                        HospitalSearchIntent.SearchHospitalWithCurrentParams(
-                            query = currentQuery,
-                            currentUserLocation = locationData.currentUserLocation
-                        )
-                    )
-                }
+                queryString = searchUiState.currentQuery.query ?: "",
+                onQueryStringChanged = { /* 결과창에서는 입력 불가 */ },
+                onMoveBackIconClicked = { onEvent(SearchUiEvent.OnNavigateToMapView) },
+                onSearchButtonClicked = { /* 동작 불필요 */ }
             )
         },
         bottomBar = {
@@ -110,90 +69,22 @@ fun ResultView(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             ResultViewContents(
-                hospitalList = hospitalSearchData.hospitalList,
-                onFilterButtonClicked = { tab ->
-                    currentSelectedFilterBottomSheet = tab
-                    isFilterBottomSheetVisible = true
-                },
-                selectedSortType = selectedSortType,
-                isOpenNowOnly = isOpenNowOnly,
-                onSortTypeClicked = { isSelectSortTypeDialogVisible = true },
-                onOpenNowOnlyClicked = { isOpenNowOnly = !isOpenNowOnly }
+                searchUiState = searchUiState,
+                onEvent = onEvent
             )
         }
     }
 
-    FilterBottomSheet(
-        currentQuery = currentQuery,
-        startTab = currentSelectedFilterBottomSheet,
-        showBottomSheet = isFilterBottomSheetVisible,
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
-        ),
-        onDismissRequest = { isFilterBottomSheetVisible = false },
-        onQuerySet = { updatedQuery ->
-            val originalQueryString = currentQuery.query
-            currentQuery = updatedQuery.copy(query = originalQueryString)
-        },
-        onResetFilterClicked = {
-            currentQuery = currentQuery.copy(
-                region = null,
-                district = null,
-                species = null
-            )
-        },
-        onSearchButtonClicked = {
-            hospitalSearchArgument.intent(
-                HospitalSearchIntent.SearchHospitalWithCurrentParams(
-                    query = currentQuery,
-                    currentUserLocation = locationData.currentUserLocation
-                )
-            )
-        },
-    )
-
-    if (isSelectSortTypeDialogVisible) {
-        SelectSortTypeDialog(
-            onDismissRequest = { isSelectSortTypeDialogVisible = false },
-            onSortTypeSelected = {
-                selectedSortType = it
-                isSelectSortTypeDialogVisible = false
-            }
-        )
-    }
-
     BackHandler {
-        commonSearchArgument.intent(
-            SearchIntent.ChangeScreenState(
-                SearchScreenState.OnSearch.SearchView
-            )
-        )
+        onEvent(SearchUiEvent.OnNavigateToMapView)
     }
 }
 
 @Composable
 private fun ResultViewContents(
-    hospitalList: List<Hospital>,
-    onFilterButtonClicked: (FilterBottomSheetTab) -> Unit,
-    selectedSortType: HospitalSortType,
-    isOpenNowOnly: Boolean,
-    onSortTypeClicked: () -> Unit,
-    onOpenNowOnlyClicked: (Boolean) -> Unit
+    searchUiState: SearchUiState,
+    onEvent: (SearchUiEvent) -> Unit
 ) {
-    val filteredHospitalList = remember(hospitalList, isOpenNowOnly, selectedSortType) {
-        hospitalList
-            .asSequence()
-            .filter { if (isOpenNowOnly) it.isOpenNow else true }
-            .sortedByDescending {
-                when (selectedSortType) {
-                    HospitalSortType.DISTANCE -> it.distanceMeters
-                    HospitalSortType.REVIEW -> it.reviewCount?.toDouble()
-                    HospitalSortType.RATING -> it.rating
-                }
-            }
-            .toList()
-    }
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(spacingXS),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -204,18 +95,24 @@ private fun ResultViewContents(
                 horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RowChipFilters(onFilterButtonClicked = onFilterButtonClicked)
+                RowChipFilters(onFilterButtonClicked = {
+                    onEvent(
+                        SearchUiEvent.OnFilterButtonClicked(
+                            it
+                        )
+                    )
+                })
                 RowResultControlChips(
-                    selectedSortType = selectedSortType,
-                    isOpenNowOnly = isOpenNowOnly,
-                    onSortTypeClicked = onSortTypeClicked,
-                    onOpenNowOnlyClicked = onOpenNowOnlyClicked
+                    selectedSortType = searchUiState.selectedSortType,
+                    isOpenNowOnly = searchUiState.isOpenNowOnly,
+                    onSortTypeClicked = { onEvent(SearchUiEvent.OnSortTypeClicked(true)) },
+                    onOpenNowOnlyClicked = { onEvent(SearchUiEvent.OnOpenNowOnlyClicked) }
                 )
             }
         }
 
-        if (filteredHospitalList.isNotEmpty()) {
-            items(hospitalList) { hospital ->
+        if (searchUiState.filteredHospitalList.isNotEmpty()) {
+            items(searchUiState.filteredHospitalList) { hospital ->
                 HospitalCard(hospital = hospital)
             }
         } else {
@@ -254,27 +151,32 @@ private fun NoResult() {
     }
 }
 
-@Preview(apiLevel = 34)
+@Preview
 @Composable
 private fun ResultViewPreview() {
     PetbulanceTheme {
         ResultView(
             navController = rememberNavController(),
-            commonSearchArgument = CommonSearchArgument(
-                screenState = SearchScreenState.OnSearch.SearchView,
-                event = MutableSharedFlow(),
-                intent = { }
+            searchUiState = SearchUiState(
+                hospitalList = listOf(
+                    Hospital(
+                        hospitalId = 1,
+                        name = "행복 동물병원",
+                        lat = 37.5,
+                        lng = 127.0,
+                        distanceMeters = 500.0,
+                        phone = "02-123-4567",
+                        types = listOf("강아지", "고양이"),
+                        isOpenNow = true,
+                        openHours = "20:00 종료",
+                        thumbnailUrl = null,
+                        rating = 4.5,
+                        reviewCount = 100
+                    )
+                ),
+                currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
             ),
-            userLocationArgument = UserLocationArgument(
-                intent = { },
-                locationState = UserLocationState.Init
-            ),
-            hospitalSearchArgument = HospitalSearchArgument(
-                intent = { },
-                hospitalDataState = HospitalSearchDataState.Init
-            ),
-            locationData = UserLocationData.empty,
-            hospitalSearchData = HospitalSearchData.empty
+            onEvent = {}
         )
     }
 }

@@ -17,12 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,73 +34,32 @@ import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.iconSizeMs
-import com.example.presentation.component.ui.molecule.FilterBottomSheet
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.example.presentation.component.ui.organism.BottomNavigationBar
 import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXXS
-import com.example.presentation.screen.feature.search.CommonSearchArgument
-import com.example.presentation.screen.feature.search.HospitalSearchArgument
-import com.example.presentation.screen.feature.search.HospitalSearchData
-import com.example.presentation.screen.feature.search.HospitalSearchDataState
-import com.example.presentation.screen.feature.search.HospitalSearchIntent
-import com.example.presentation.screen.feature.search.SearchIntent
-import com.example.presentation.screen.feature.search.SearchScreenState
-import com.example.presentation.screen.feature.search.UserLocationArgument
-import com.example.presentation.screen.feature.search.UserLocationData
-import com.example.presentation.screen.feature.search.UserLocationState
+import com.example.presentation.screen.feature.search.SearchUiEvent
+import com.example.presentation.screen.feature.search.SearchUiState
 import com.example.presentation.screen.feature.search.views.common.RowChipFilters
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(
     navController: NavController,
-    commonSearchArgument: CommonSearchArgument,
-    userLocationArgument: UserLocationArgument,
-    hospitalSearchArgument: HospitalSearchArgument,
-    locationData: UserLocationData,
-    hospitalSearchData: HospitalSearchData
+    searchUiState: SearchUiState,
+    recentSearchKeywords: List<RecentSearchKeyword>,
+    viewedHospitals: ViewedHospitalList,
+    onEvent: (SearchUiEvent) -> Unit
 ) {
-    var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
-    var currentSelectedFilterBottomSheet by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
-    val currentQuery = hospitalSearchData.hospitalSearchQuery
-
-    val recentSearchKeywords = hospitalSearchData.recentSearchKeywords
-
     Scaffold(
         topBar = {
             SearchBar(
-                queryString = currentQuery.query ?: "",
-                onQueryStringChanged = {
-                    hospitalSearchArgument.intent(
-                        HospitalSearchIntent.UpdateSearchQuery(
-                            currentQuery.copy(query = it)
-                        )
-                    )
-                },
-                onMoveBackIconClicked = {
-                    commonSearchArgument.intent(
-                        SearchIntent.ChangeScreenState(
-                            SearchScreenState.Hospitals.MapView
-                        )
-                    )
-                },
-                onSearchButtonClicked = {
-                    hospitalSearchArgument.intent(
-                        HospitalSearchIntent.SearchHospitalWithCurrentParams(
-                            query = currentQuery,
-                            currentUserLocation = locationData.currentUserLocation
-                        )
-                    )
-                    commonSearchArgument.intent(
-                        SearchIntent.ChangeScreenState(
-                            SearchScreenState.OnSearch.ResultView
-                        )
-                    )
-                }
+                queryString = searchUiState.currentQuery.query ?: "",
+                onQueryStringChanged = { onEvent(SearchUiEvent.OnQueryChanged(it)) },
+                onMoveBackIconClicked = { onEvent(SearchUiEvent.OnNavigateToMapView) },
+                onSearchButtonClicked = { onEvent(SearchUiEvent.OnSearchButtonClicked) }
             )
         },
         bottomBar = {
@@ -119,67 +73,25 @@ fun SearchView(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             SearchViewContents(
-                onFilterButtonClicked = {
-                    currentSelectedFilterBottomSheet = it
-                    isFilterBottomSheetVisible = true
-                },
                 recentQueryList = recentSearchKeywords,
-                recentViewedHospital = hospitalSearchData.viewedHospitals,
-                onChipClicked = { query ->
-                    hospitalSearchArgument.intent(
-                        HospitalSearchIntent.UpdateSearchQuery(
-                            currentQuery.copy(query = query)
+                recentViewedHospital = viewedHospitals,
+                onFilterButtonClicked = { onEvent(SearchUiEvent.OnFilterButtonClicked(it)) },
+                onChipClicked = { onEvent(SearchUiEvent.OnRecentKeywordClicked(it)) },
+                onRecentHospitalClicked = { onEvent(SearchUiEvent.OnRecentHospitalClicked(it)) },
+                onDeleteRecentKeyword = { onEvent(SearchUiEvent.OnDeleteRecentKeyword(it)) },
+                onDeleteRecentViewedHospital = {
+                    onEvent(
+                        SearchUiEvent.OnDeleteRecentViewedHospital(
+                            it.hospitalId
                         )
                     )
-                },
-                onDeleteRecentKeyword = { keyword ->
-                    hospitalSearchArgument.intent(HospitalSearchIntent.DeleteRecentKeyword(keyword))
-                },
-                onDeleteRecentViewedHospital = {
-                    hospitalSearchArgument.intent(HospitalSearchIntent.DeleteViewedHospital(it.hospitalId))
                 },
             )
         }
     }
 
-    FilterBottomSheet(
-        currentQuery = hospitalSearchData.hospitalSearchQuery,
-        startTab = currentSelectedFilterBottomSheet,
-        showBottomSheet = isFilterBottomSheetVisible,
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
-        ),
-        onDismissRequest = { isFilterBottomSheetVisible = false },
-        onQuerySet = {
-            hospitalSearchArgument.intent(HospitalSearchIntent.UpdateSearchQuery(it.copy(query = currentQuery.query)))
-        },
-        onResetFilterClicked = {
-            hospitalSearchArgument.intent(
-                HospitalSearchIntent.UpdateSearchQuery(
-                    currentQuery.copy(
-                        region = null,
-                        district = null,
-                        species = null
-                    )
-                )
-            )
-        },
-        onSearchButtonClicked = {
-            hospitalSearchArgument.intent(
-                HospitalSearchIntent.SearchHospitalWithCurrentParams(
-                    query = currentQuery,
-                    currentUserLocation = locationData.currentUserLocation
-                )
-            )
-        },
-    )
-
     BackHandler {
-        commonSearchArgument.intent(
-            SearchIntent.ChangeScreenState(
-                SearchScreenState.Hospitals.MapView
-            )
-        )
+        onEvent(SearchUiEvent.OnNavigateToMapView)
     }
 }
 
@@ -189,12 +101,11 @@ private fun SearchViewContents(
     recentViewedHospital: ViewedHospitalList,
     onFilterButtonClicked: (FilterBottomSheetTab) -> Unit,
     onChipClicked: (String) -> Unit,
+    onRecentHospitalClicked: (String) -> Unit,
     onDeleteRecentKeyword: (String) -> Unit,
     onDeleteRecentViewedHospital: (ViewedHospital) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.padding(horizontal = spacingMedium)
-    ) {
+    Column(modifier = Modifier.padding(horizontal = spacingMedium)) {
         RowChipFilters(onFilterButtonClicked = onFilterButtonClicked)
 
         RecentHistorySection(
@@ -207,7 +118,7 @@ private fun SearchViewContents(
         RecentHistorySection(
             title = "최근 본 병원",
             items = recentViewedHospital.items,
-            onItemClick = { onChipClicked(it.hospitalName) },
+            onItemClick = { onRecentHospitalClicked(it.hospitalName) },
             onDeleteClick = { onDeleteRecentViewedHospital(it) }
         )
     }
@@ -224,10 +135,7 @@ private fun <T : ContentAsString> RecentHistorySection(
         verticalArrangement = Arrangement.spacedBy(spacingXXXS),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                top = spacingXS,
-                bottom = spacingMedium
-            )
+            .padding(top = spacingXS, bottom = spacingMedium)
     ) {
         Text(
             text = title,
@@ -264,55 +172,46 @@ private fun <T : ContentAsString> HistoryChip(
         horizontalArrangement = Arrangement.spacedBy(spacingXXXS),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(
-                color = colorScheme.bg.frame.medium,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(
-                vertical = spacingXXXS,
-                horizontal = spacingXS
-            )
+            .background(color = colorScheme.bg.frame.medium, shape = RoundedCornerShape(8.dp))
+            .padding(vertical = spacingXXXS, horizontal = spacingXS)
     ) {
         Text(
             text = content.getContentAsString(),
             style = MaterialTheme.typography.labelLarge,
             color = colorScheme.text.secondary,
-            modifier = Modifier.clickable {
-                onChipClicked(content)
-            }
+            modifier = Modifier.clickable { onChipClicked(content) }
         )
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.Clear),
             contentDescription = "Delete history",
             size = iconSizeMs,
-            modifier = Modifier.clickable {
-                onDeleteIconClicked(content)
-            }
+            modifier = Modifier.clickable { onDeleteIconClicked(content) }
         )
     }
 }
 
-@Preview(apiLevel = 34)
+@Preview
 @Composable
 private fun SearchViewPreview() {
     PetbulanceTheme {
         SearchView(
             navController = rememberNavController(),
-            commonSearchArgument = CommonSearchArgument(
-                screenState = SearchScreenState.OnSearch.SearchView,
-                event = MutableSharedFlow(),
-                intent = { }
+            searchUiState = SearchUiState(
+                hospitalList = emptyList(),
+                currentQuery = HospitalSearchQueryUiModel.empty,
             ),
-            userLocationArgument = UserLocationArgument(
-                intent = { },
-                locationState = UserLocationState.Init
+            recentSearchKeywords = listOf(
+                RecentSearchKeyword(1, "강남 동물병원", "2023-10-27"),
+                RecentSearchKeyword(2, "24시", "2023-10-26")
             ),
-            hospitalSearchArgument = HospitalSearchArgument(
-                intent = { },
-                hospitalDataState = HospitalSearchDataState.Init
+            viewedHospitals = ViewedHospitalList(
+                items = listOf(
+                    ViewedHospital(1, "돌봄 동물병원", "2023-10-27"),
+                    ViewedHospital(2, "사랑 동물병원", "2023-10-26")
+                ),
+                totalCount = 2
             ),
-            locationData = UserLocationData.empty,
-            hospitalSearchData = HospitalSearchData.empty
+            onEvent = {}
         )
     }
 }
