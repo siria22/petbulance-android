@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.domain.model.type.BaseEnumType
+import com.example.domain.model.type.toKorean
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
@@ -26,9 +26,11 @@ import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
+import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
 
 @Composable
 fun RowChipFilters(
+    uiModel: HospitalSearchQueryUiModel,
     onFilterButtonClicked: (FilterBottomSheetTab) -> Unit
 ) {
     Row(
@@ -40,8 +42,27 @@ fun RowChipFilters(
         )
     ) {
         FilterBottomSheetTab.entries.forEach { elem ->
+            val label = when (elem) {
+                FilterBottomSheetTab.REGION -> {
+                    val region = uiModel.region
+                    val district = uiModel.district
+                    if (region != null) {
+                        if (district != null && district.contains("전체")) {
+                            district
+                        } else {
+                            "${region.displayName} ${district ?: "전체"}"
+                        }
+                    } else {
+                        elem.toKorean()
+                    }
+                }
+                FilterBottomSheetTab.SPECIES -> {
+                    uiModel.species?.toKorean() ?: elem.toKorean()
+                }
+            }
+
             ChipFilter(
-                filterOption = elem,
+                text = label,
                 onButtonClicked = { onFilterButtonClicked(elem) }
             )
         }
@@ -49,8 +70,8 @@ fun RowChipFilters(
 }
 
 @Composable
-private fun <T : BaseEnumType> ChipFilter(
-    filterOption: T,
+private fun ChipFilter(
+    text: String,
     onButtonClicked: () -> Unit
 ) {
     Row(
@@ -69,7 +90,7 @@ private fun <T : BaseEnumType> ChipFilter(
             .padding(vertical = spacingXXS, horizontal = spacingSmall)
     ) {
         Text(
-            text = filterOption.toKorean(),
+            text = text,
             style = MaterialTheme.typography.labelLarge,
             color = colorScheme.icon.dark,
         )

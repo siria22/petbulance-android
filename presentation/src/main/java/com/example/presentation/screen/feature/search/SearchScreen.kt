@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
@@ -22,7 +21,6 @@ import com.example.presentation.screen.feature.search.views.result.ResultView
 import com.example.presentation.screen.feature.search.views.result.SelectSortTypeDialog
 import com.example.presentation.screen.feature.search.views.search.SearchView
 import com.example.presentation.utils.error.collectCustomErrors
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +77,6 @@ fun SearchScreen(
             is SearchUiEvent.OnDismissFilterBottomSheet -> isFilterBottomSheetVisible = false
             is SearchUiEvent.OnOpenNowOnlyClicked -> isOpenNowOnly = !isOpenNowOnly
             is SearchUiEvent.OnQuerySet -> {
-                // BottomSheet에서 필터 적용 시 쿼리 업데이트
                 val originalQueryString = currentDraftQuery.query
                 currentDraftQuery = event.query.copy(query = originalQueryString)
             }
@@ -101,9 +98,8 @@ fun SearchScreen(
                         currentUserLocation = locationData.currentUserLocation
                     )
                 )
-                if (screenState is SearchScreenState.OnSearch.SearchView) {
-                    commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
-                }
+                isFilterBottomSheetVisible = false
+                commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
             }
 
             is SearchUiEvent.OnSearchNearby -> {
@@ -241,6 +237,7 @@ fun SearchScreen(
 
     if (isSelectSortTypeDialogVisible) {
         SelectSortTypeDialog(
+            selectedSortType = selectedSortType,
             onDismissRequest = { onEvent(SearchUiEvent.OnSortTypeClicked(false)) },
             onSortTypeSelected = { onEvent(SearchUiEvent.OnSortTypeSelected(it)) }
         )

@@ -75,6 +75,7 @@ fun SearchView(
             SearchViewContents(
                 recentQueryList = recentSearchKeywords,
                 recentViewedHospital = viewedHospitals,
+                uiModel = searchUiState.currentQuery,
                 onFilterButtonClicked = { onEvent(SearchUiEvent.OnFilterButtonClicked(it)) },
                 onChipClicked = { onEvent(SearchUiEvent.OnRecentKeywordClicked(it)) },
                 onRecentHospitalClicked = { onEvent(SearchUiEvent.OnRecentHospitalClicked(it)) },
@@ -99,6 +100,7 @@ fun SearchView(
 private fun SearchViewContents(
     recentQueryList: List<RecentSearchKeyword>,
     recentViewedHospital: ViewedHospitalList,
+    uiModel: HospitalSearchQueryUiModel,
     onFilterButtonClicked: (FilterBottomSheetTab) -> Unit,
     onChipClicked: (String) -> Unit,
     onRecentHospitalClicked: (String) -> Unit,
@@ -106,7 +108,10 @@ private fun SearchViewContents(
     onDeleteRecentViewedHospital: (ViewedHospital) -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = spacingMedium)) {
-        RowChipFilters(onFilterButtonClicked = onFilterButtonClicked)
+        RowChipFilters(
+            uiModel = uiModel,
+            onFilterButtonClicked = onFilterButtonClicked
+        )
 
         RecentHistorySection(
             title = "최근 검색어",

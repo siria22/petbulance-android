@@ -29,6 +29,7 @@ import com.example.presentation.screen.feature.search.views.common.HospitalSortT
 
 @Composable
 fun SelectSortTypeDialog(
+    selectedSortType: HospitalSortType,
     onDismissRequest: () -> Unit,
     onSortTypeSelected: (HospitalSortType) -> Unit
 ) {
@@ -53,7 +54,7 @@ fun SelectSortTypeDialog(
                 HospitalSortType.entries.forEach {
                     SortTypeDialogItem(
                         sortType = it,
-                        isSelected = it == HospitalSortType.DISTANCE,
+                        isSelected = it == selectedSortType,
                         onItemClicked = onSortTypeSelected
                     )
                 }
@@ -100,6 +101,7 @@ private fun SortTypeDialogItem(
 private fun SelectSortTypeDialogPreview() {
     PetbulanceTheme() {
         SelectSortTypeDialog(
+            selectedSortType = HospitalSortType.DISTANCE,
             onDismissRequest = {},
             onSortTypeSelected = {}
         )

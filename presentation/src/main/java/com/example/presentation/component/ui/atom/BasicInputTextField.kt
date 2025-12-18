@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.spacingMedium
 
 /**
  * A basic input text field component that provides a text input field with a placeholder and
@@ -84,14 +86,16 @@ fun BasicInputTextField(
                 }
                 if (value.isNotBlank()) {
                     Icon(
-                        Icons.Default.Clear,
+                        Icons.Default.AddCircle,
                         contentDescription = "Clear all",
-                        tint = colorScheme.icon.basic,
+                        tint = colorScheme.icon.light,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable {
                                 onValueChange("")
                             }
+                            .rotate(45f)
+                            .padding(end = spacingMedium)
                     )
                 }
 

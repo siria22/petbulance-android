@@ -1,22 +1,41 @@
 package com.example.presentation.screen.feature.search.views.map
 
 import android.location.Location
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.hospital.hospital.MapBounds
+import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BaseCarousel
+import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.organism.AppTopBar
 import com.example.presentation.component.ui.organism.BottomNavigationBar
@@ -24,6 +43,8 @@ import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.organism.TopBarAlignment
 import com.example.presentation.component.ui.organism.TopBarInfo
 import com.example.presentation.component.ui.spacingMedium
+import com.example.presentation.component.ui.spacingSmall
+import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
 import com.example.presentation.screen.feature.search.CommonSearchArgument
@@ -91,26 +112,30 @@ fun MapView(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            MapLayer(
-                state = searchUiState,
-                onMapReady = { naverMap = it }
-            )
-            MapUiLayer(
-                state = searchUiState,
-                onEvent = onEvent,
-                onRecenterClick = {
-                    val bounds = naverMap?.contentBounds
-                    if (bounds != null) {
-                        val domainBounds = MapBounds(
-                            minLat = bounds.southWest.latitude,
-                            minLng = bounds.southWest.longitude,
-                            maxLat = bounds.northEast.latitude,
-                            maxLng = bounds.northEast.longitude
-                        )
-                        onEvent(SearchUiEvent.OnSearchNearby(domainBounds))
+            if (searchUiState.hospitalList.isEmpty()) {
+                NoResult()
+            } else {
+                MapLayer(
+                    state = searchUiState,
+                    onMapReady = { naverMap = it }
+                )
+                MapUiLayer(
+                    state = searchUiState,
+                    onEvent = onEvent,
+                    onRecenterClick = {
+                        val bounds = naverMap?.contentBounds
+                        if (bounds != null) {
+                            val domainBounds = MapBounds(
+                                minLat = bounds.southWest.latitude,
+                                minLng = bounds.southWest.longitude,
+                                maxLat = bounds.northEast.latitude,
+                                maxLng = bounds.northEast.longitude
+                            )
+                            onEvent(SearchUiEvent.OnSearchNearby(domainBounds))
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -151,7 +176,12 @@ fun MapUiLayer(
                 horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RowChipFilters(onFilterButtonClicked = { onEvent(SearchUiEvent.OnFilterButtonClicked(it)) })
+                RowChipFilters(
+                    uiModel = state.currentQuery,
+                    onFilterButtonClicked = {
+                        onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                    }
+                )
                 RowResultControlChips(
                     selectedSortType = state.selectedSortType,
                     isOpenNowOnly = state.isOpenNowOnly,
@@ -171,10 +201,14 @@ fun MapUiLayer(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = spacingMedium)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = spacingMedium)
             ) {
                 Spacer(modifier = Modifier.width(40.dp))
-                MapViewToggleButton(isToggleToListView = true, onClicked = { onEvent(SearchUiEvent.OnListViewClicked) })
+                MapViewToggleButton(
+                    isToggleToListView = true,
+                    onClicked = { onEvent(SearchUiEvent.OnListViewClicked) })
                 CurrentLocationFab(onClicked = { onEvent(SearchUiEvent.OnCurrentLocationClicked) })
             }
             BaseCarousel(
@@ -183,6 +217,40 @@ fun MapUiLayer(
                 contentPadding = PaddingValues(spacingMedium),
                 itemSpacing = spacingXS
             ) { _, item -> HospitalCard(item) }
+        }
+    }
+}
+
+@Composable
+private fun NoResult() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = spacingXL)
+
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(spacingSmall),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            BasicIcon(
+                iconResource = IconResource.Drawable(R.drawable.img_no_result),
+                contentDescription = "No result",
+                size = 160.dp,
+                tint = Color.Unspecified
+            )
+            Text(
+                text = "주변 병원을 찾을 수 없어요.",
+                style = typography.titleSmall,
+                color = colorScheme.text.tertiary
+            )
+            Text(
+                text = "더 넓은 지역에서 검색해주세요.",
+                style = typography.bodySmall,
+                color = colorScheme.text.tertiary
+            )
         }
     }
 }

@@ -85,13 +85,12 @@ fun ListView(
                     horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RowChipFilters(onFilterButtonClicked = {
-                        onEvent(
-                            SearchUiEvent.OnFilterButtonClicked(
-                                it
-                            )
-                        )
-                    })
+                    RowChipFilters(
+                        uiModel = searchUiState.currentQuery, // 추가
+                        onFilterButtonClicked = {
+                            onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                        }
+                    )
                     RowResultControlChips(
                         selectedSortType = searchUiState.selectedSortType,
                         isOpenNowOnly = searchUiState.isOpenNowOnly,
