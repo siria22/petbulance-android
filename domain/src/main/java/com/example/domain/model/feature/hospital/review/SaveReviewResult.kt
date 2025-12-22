@@ -1,6 +1,6 @@
 package com.example.domain.model.feature.hospital.review
 
-data class ReviewSaveResult(
+data class SaveReviewResult(
     val reviewId: Long,
     val uploadUrls: List<ReviewUploadUrl>
 )

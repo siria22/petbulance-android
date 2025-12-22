@@ -4,7 +4,7 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
-import com.example.domain.model.feature.hospital.review.ReviewSaveResult
+import com.example.domain.model.feature.hospital.review.SaveReviewResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 
@@ -42,7 +42,7 @@ interface ReviewRepository {
     ): Result<PagingReviewList<HospitalReview>>
 
     // 5. 리뷰 저장
-    suspend fun saveReview(param: SaveReviewParam): Result<ReviewSaveResult>
+    suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult>
 
     // 6. 이미지 저장 확인
     suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String>

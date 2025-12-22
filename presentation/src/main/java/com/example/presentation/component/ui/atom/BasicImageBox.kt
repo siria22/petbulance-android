@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +58,7 @@ fun BasicImageBox(
 
         val state = rememberAsyncImagePainter(model = dataToLoad).state
         if (state is AsyncImagePainter.State.Loading) {
-            CircularProgressIndicator()
+            CustomGreenLoader()
         }
 
     }
@@ -93,7 +92,7 @@ fun BasicImageBox(
 
         val state = rememberAsyncImagePainter(model = imageResource).state
         if (state is AsyncImagePainter.State.Loading) {
-            CircularProgressIndicator()
+            CustomGreenLoader()
         }
     }
 }

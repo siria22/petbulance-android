@@ -102,9 +102,9 @@ object NetworkModule {
                     loadTokens {
                         val authRepository = authRepositoryProvider.get()
                         val accessToken =
-                            runBlocking { authRepository.getAccessToken() }.getOrThrow()
+                            runBlocking { authRepository.getAccessToken() }.getOrNull()
                         val refreshToken =
-                            runBlocking { authRepository.getRefreshToken() }.getOrThrow()
+                            runBlocking { authRepository.getRefreshToken() }.getOrNull()
                         if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
                             null
                         } else {
@@ -114,7 +114,7 @@ object NetworkModule {
                     refreshTokens {
                         val authRepository = authRepositoryProvider.get()
                         val oldRefreshToken =
-                            runBlocking { authRepository.getRefreshToken() }.getOrThrow()
+                            runBlocking { authRepository.getRefreshToken() }.getOrNull()
                         if (oldRefreshToken.isNullOrBlank()) {
                             return@refreshTokens null
                         }
@@ -142,14 +142,13 @@ object NetworkModule {
                     }
                     sendWithoutRequest { request ->
                         val path = request.url.encodedPath
-                        // Token 필요 없는 api들
-                        val shouldNotAuth =
+                        val isAuthRequest =
                             path.contains("/auth/login") || path.contains("/auth/refresh")
                         Log.d(
                             logger, "Request path: $path, " +
-                                    "Should not auth: $shouldNotAuth"
+                                    "Is Auth Request: $isAuthRequest (Send token: ${!isAuthRequest})"
                         )
-                        shouldNotAuth
+                        !isAuthRequest
                     }
                 }
             }

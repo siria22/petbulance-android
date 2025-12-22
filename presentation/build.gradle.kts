@@ -110,9 +110,6 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.coil.video)
 
-    // UI - Glance
-    implementation(libs.androidx.glance.appwidget)
-
     // Lifecycle & Navigation
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

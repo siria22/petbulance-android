@@ -1,6 +1,5 @@
 package com.example.presentation.utils
 
-import android.annotation.SuppressLint
 import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,7 @@ import com.naver.maps.map.overlay.OverlayImage
 fun NaverMapView(
     currentLocation: Location,
     cameraPosition: Location,
-    places: List<HospitalMarker>,
+    places: List<HospitalMarker>?,
     selectedHospitalId: Long?,
     onMapReady: (NaverMap) -> Unit,
     onMapBoundsChange: (MapBounds) -> Unit,
@@ -75,7 +74,7 @@ fun NaverMapView(
             locationOverlay.position = LatLng(currentLocation.latitude, currentLocation.longitude)
         }
     }
-    
+
     AndroidView(
         factory = { mapView },
         modifier = modifier
@@ -109,8 +108,7 @@ fun NaverMapView(
 
             markers.forEach { it.map = null }
             markers.clear()
-
-            places.forEach { place ->
+            places?.forEach { place ->
                 val isSelected = place.hospitalId == selectedHospitalId
 
                 val iconRes = if (isSelected) {

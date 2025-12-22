@@ -7,5 +7,6 @@ data class ReviewSearchItem(
     val rating: Double,
     val treatment: String,
     val isReceiptVerified: Boolean,
-    val animalType: String
+    val animalType: String,
+    val totalReviewCount: Int
 )

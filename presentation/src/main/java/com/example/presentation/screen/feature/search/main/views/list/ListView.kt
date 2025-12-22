@@ -41,6 +41,8 @@ import com.example.presentation.screen.feature.search.main.views.common.RowChipF
 import com.example.presentation.screen.feature.search.main.views.common.RowResultControlChips
 import com.example.presentation.screen.feature.search.main.views.map.MapViewToggleButton
 import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.utils.nav.ScreenDestinations
+import com.example.presentation.utils.nav.safeNavigate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,8 +119,13 @@ fun ListView(
                     items(searchUiState.filteredHospitalList) { hospital ->
                         HospitalCard(
                             hospital = hospital,
+                            borderColor = colorScheme.border.subtle,
                             onCardClick = {
-                                // TODO: 추후 상세 화면 이동 구현 필요
+                                navController.safeNavigate(
+                                    route = ScreenDestinations.Search.HospitalInfo.createRoute(
+                                        id = hospital.hospitalId
+                                    )
+                                )
                             }
                         )
                     }
@@ -163,7 +170,7 @@ private fun ListViewPreview() {
                         reviewCount = 100
                     )
                 ),
-                currentQuery = HospitalSearchQueryUiModel.Companion.empty,
+                currentQuery = HospitalSearchQueryUiModel.empty,
             ),
             onEvent = {}
         )

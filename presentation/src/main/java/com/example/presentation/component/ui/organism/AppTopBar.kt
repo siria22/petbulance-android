@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -19,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +31,7 @@ import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.CustomGreenLoader
 import com.example.presentation.component.ui.atom.IconResource
+import com.example.presentation.component.ui.dropShadow
 
 @Composable
 fun AppTopBar(
@@ -43,13 +44,13 @@ fun AppTopBar(
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
-            .background(color = background)
-            .shadow(
-                elevation = if (topBarInfo.isShadowed) 4.dp else 0.dp,
-                spotColor = Color.Black,
-                ambientColor = Color.Black,
-                clip = false
+            .dropShadow(
+                shape = RoundedCornerShape(0.dp),
+                color = colorScheme.border.subtle,
+                blur = 0.dp,
+                offsetY = 1.dp
             )
+            .background(color = background)
     ) {
         if (topBarInfo.isLoading) {
             Box(modifier = Modifier.size(48.dp)) {

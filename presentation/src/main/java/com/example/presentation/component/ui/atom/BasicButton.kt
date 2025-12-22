@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.iconSizeXS
 
 enum class BasicButtonSize {
@@ -28,7 +29,7 @@ enum class BasicButtonSize {
 }
 
 enum class BasicButtonType {
-    PRIMARY, SECONDARY
+    PRIMARY, SECONDARY, DEFAULT
 }
 
 @Composable
@@ -64,13 +65,21 @@ fun BasicButton(
     }
 
     val background = when (buttonType) {
-        BasicButtonType.PRIMARY -> PetbulanceTheme.colorScheme.action.primary.default
-        BasicButtonType.SECONDARY -> PetbulanceTheme.colorScheme.bg.frame.default
+        BasicButtonType.PRIMARY -> colorScheme.action.primary.default
+        BasicButtonType.SECONDARY -> colorScheme.bg.frame.default
+        BasicButtonType.DEFAULT -> colorScheme.bg.frame.default
     }
 
     val textColor = when (buttonType) {
-        BasicButtonType.PRIMARY -> PetbulanceTheme.colorScheme.text.inverse
-        BasicButtonType.SECONDARY -> PetbulanceTheme.colorScheme.action.primary.default
+        BasicButtonType.PRIMARY -> colorScheme.text.inverse
+        BasicButtonType.SECONDARY -> colorScheme.action.primary.default
+        BasicButtonType.DEFAULT -> colorScheme.text.tertiary
+    }
+
+    val borderColor = when (buttonType) {
+        BasicButtonType.PRIMARY -> colorScheme.action.primary.default
+        BasicButtonType.SECONDARY -> colorScheme.action.primary.default
+        BasicButtonType.DEFAULT -> colorScheme.border.subtle
     }
 
     Row(
@@ -80,7 +89,7 @@ fun BasicButton(
             .heightIn(minHeight)
             .background(background, RoundedCornerShape(radius))
             .border(
-                width = 1.dp, color = PetbulanceTheme.colorScheme.action.primary.default,
+                width = 1.dp, color = borderColor,
                 shape = RoundedCornerShape(radius)
             )
             .padding(

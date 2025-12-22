@@ -40,6 +40,7 @@ import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.theme.emp
+import com.example.presentation.component.ui.CommonDivider
 import com.example.presentation.component.ui.atom.BasicBottomSheet
 import com.example.presentation.component.ui.atom.BasicButton
 import com.example.presentation.component.ui.atom.BasicButtonSize
@@ -107,17 +108,11 @@ fun FilterBottomSheet(
                     }
                 }
 
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = colorScheme.border.verySubtle
-                )
+                CommonDivider()
 
                 ResetFilterRow(onResetFilterClicked = onResetFilterClicked)
 
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = colorScheme.border.verySubtle
-                )
+                CommonDivider()
 
                 Column(modifier = Modifier.weight(1f)) {
                     when (selectedTab) {
@@ -341,10 +336,7 @@ private fun RegionDetailItem(
                 .padding(horizontal = spacingLarge, vertical = spacingSmall)
         )
 
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = colorScheme.border.verySubtle
-        )
+        CommonDivider()
     }
 }
 

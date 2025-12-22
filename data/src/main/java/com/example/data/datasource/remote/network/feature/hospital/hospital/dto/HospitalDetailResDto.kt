@@ -19,6 +19,6 @@ data class HospitalDetailResDto(
 
 @Serializable
 data class OpenHourResDto(
-    val openHour: String,
-    val closeHour: String
+    val day: String,
+    val hours: String
 )

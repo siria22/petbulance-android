@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.Space16
 import com.example.presentation.component.ui.atom.BasicButton
 import com.example.presentation.component.ui.atom.BasicButtonSize
@@ -27,12 +28,21 @@ fun ErrorDialog(
     BasicDialog {
         Text(
             text = directErrorTitle,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall.emp(),
             color = PetbulanceTheme.colorScheme.text.primary,
             modifier = Modifier.padding(bottom = 4.dp)
         )
         Text(
             text = directErrorMessage ?: errorDialogState.userMessage,
+            style = MaterialTheme.typography.bodyLarge,
+            color = PetbulanceTheme.colorScheme.text.caption,
+            softWrap = true,
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            text = errorDialogState.exceptionMessage ?: "No exception message",
             style = MaterialTheme.typography.bodyMedium,
             color = PetbulanceTheme.colorScheme.text.caption,
             softWrap = true,
@@ -58,7 +68,7 @@ private fun ErrorDialogPreview() {
     PetbulanceTheme {
         ErrorDialog(
             errorDialogState = ErrorDialogState(
-                userMessage = "뭔가 문제생긴 것 같음 ㄷㄷㄷ",
+                userMessage = "데이터를 불러오는데 실패했습니다.",
                 exceptionMessage = "some exception eee",
                 isErrorDialogVisible = true
             ),

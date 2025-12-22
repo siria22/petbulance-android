@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +23,16 @@ fun Space8() {
 @Composable
 fun Space16() {
     Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+fun CommonDivider(
+    color: Color = colorScheme.border.verySubtle
+) {
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = color
+    )
 }
 
 // RoundedCornerShape

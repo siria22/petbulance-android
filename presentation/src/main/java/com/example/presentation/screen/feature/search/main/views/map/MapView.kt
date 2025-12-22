@@ -46,7 +46,6 @@ import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
-import com.example.presentation.component.ui.spacingXXS
 import com.example.presentation.screen.feature.search.main.CommonSearchArgument
 import com.example.presentation.screen.feature.search.main.SearchEvent
 import com.example.presentation.screen.feature.search.main.SearchScreenState
@@ -112,9 +111,9 @@ fun MapView(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-//            if (searchUiState.hospitalList.isEmpty()) {
-//                NoResult()
-//            } else { // TODO : fix me!!!!!!!!!!!!
+            if (searchUiState.hospitalList.isEmpty()) {
+                NoResult()
+            } else {
                 MapLayer(
                     state = searchUiState,
                     onMapReady = { naverMap = it }
@@ -135,7 +134,7 @@ fun MapView(
                         }
                     }
                 )
-//            }
+            }
         }
     }
 }
@@ -172,10 +171,7 @@ fun MapUiLayer(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 RowChipFilters(
                     uiModel = state.currentQuery,
                     onFilterButtonClicked = {
@@ -216,7 +212,12 @@ fun MapUiLayer(
                 items = state.filteredHospitalList,
                 contentPadding = PaddingValues(spacingMedium),
                 itemSpacing = spacingXS
-            ) { _, item -> HospitalCard(item) }
+            ) { _, item ->
+                HospitalCard(
+                    item,
+                    /* TODO : on click = if isSelected => 화면 이동, else => 지도 상에서 강조 */
+                )
+            }
         }
     }
 }
@@ -268,7 +269,7 @@ private fun MapViewPreview() {
             ),
             searchUiState = SearchUiState(
                 hospitalList = emptyList(),
-                currentQuery = HospitalSearchQueryUiModel.Companion.empty,
+                currentQuery = HospitalSearchQueryUiModel.empty,
             ),
             onEvent = {}
         )

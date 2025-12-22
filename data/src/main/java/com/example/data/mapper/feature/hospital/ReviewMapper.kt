@@ -17,7 +17,8 @@ fun UserReviewSearchDto.toDomain() = ReviewSearchItem(
     rating = overallRating,
     treatment = treatmentService,
     isReceiptVerified = receiptCheck,
-    animalType = detailAnimalType
+    animalType = detailAnimalType,
+    totalReviewCount = 0 // TODO : 이거 안쓰는 값인지 확인
 )
 
 fun FilterResDto.toDomain() = ReviewSearchItem(
@@ -27,7 +28,8 @@ fun FilterResDto.toDomain() = ReviewSearchItem(
     rating = totalRating,
     treatment = treatmentService,
     isReceiptVerified = receiptCheck,
-    animalType = detailAnimalType
+    animalType = detailAnimalType,
+    totalReviewCount = totalReviewCount
 )
 
 fun SearchResDto.toDomain() = HospitalReview(
@@ -41,7 +43,9 @@ fun SearchResDto.toDomain() = HospitalReview(
     date = reviewDate,
     likeCount = likeCount,
     isLiked = liked,
-    imageUrls = images
+    imageUrls = images,
+    author = author,
+    price = totalPrice
 )
 
 fun MyReviewGetDao.toDomain() = MyReview(

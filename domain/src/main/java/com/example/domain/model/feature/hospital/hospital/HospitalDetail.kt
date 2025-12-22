@@ -15,9 +15,17 @@ data class HospitalDetail(
     val notes: String,
     val openNow: Boolean,
     val description: String
-)
+) {
+    fun toMarker() = HospitalMarker(
+        hospitalId = hospitalId,
+        longitude = lng,
+        latitude = lat,
+        isOpened = openNow,
+        isSelected = false
+    )
+}
 
 data class OpenHour(
-    val openHour: String,
-    val closeHour: String
+    val day: String,
+    val hours: String
 )

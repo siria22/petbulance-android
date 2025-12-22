@@ -18,7 +18,7 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
-import com.example.domain.model.feature.hospital.review.ReviewSaveResult
+import com.example.domain.model.feature.hospital.review.SaveReviewResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.ReviewUploadUrl
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
@@ -101,11 +101,11 @@ class ReviewRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveReview(param: SaveReviewParam): Result<ReviewSaveResult> {
+    override suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult> {
         return safeApiCall<ReviewSaveResDto>(path = "/receipts/save/reviews") {
             api.saveReview(param.toDto())
         }.map { dto ->
-            ReviewSaveResult(
+            SaveReviewResult(
                 reviewId = dto.reviewId,
                 uploadUrls = dto.urls.map { ReviewUploadUrl(it.presignedUrl, it.saveId) }
             )

@@ -4,9 +4,9 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
-import com.example.domain.model.feature.hospital.review.ReviewSaveResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
+import com.example.domain.model.feature.hospital.review.SaveReviewResult
 import com.example.domain.repository.feature.hospital.ReviewRepository
 import javax.inject.Inject
 
@@ -27,8 +27,14 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         val reviews = listOf(
-            ReviewSearchItem(1, "행복 동물병원", "친절하고 좋아요", 4.5, "예방접종", true, "강아지"),
-            ReviewSearchItem(2, "튼튼 동물병원", "시설이 깨끗해요", 5.0, "중성화 수술", false, "고양이")
+            ReviewSearchItem(
+                1, "행복 동물병원", "친절하고 좋아요", 4.5,
+                "예방접종", true, "강아지", 25
+            ),
+            ReviewSearchItem(
+                2, "튼튼 동물병원", "시설이 깨끗해요", 5.0,
+                "중성화 수술", false, "고양이", 15
+            )
         )
         return Result.success(
             PagingReviewList(
@@ -47,8 +53,14 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         val reviews = listOf(
-            ReviewSearchItem(1, "행복 동물병원", "친절하고 좋아요", 4.5, "예방접종", true, "강아지"),
-            ReviewSearchItem(2, "튼튼 동물병원", "시설이 깨끗해요", 5.0, "중성화 수술", false, "고양이")
+            ReviewSearchItem(
+                1, "행복 동물병원", "친절하고 좋아요",
+                4.5, "예방접종", true, "강아지", 25
+            ),
+            ReviewSearchItem(
+                2, "튼튼 동물병원", "시설이 깨끗해요",
+                5.0, "중성화 수술", false, "고양이", 15
+            )
         )
         return Result.success(
             PagingReviewList(
@@ -81,7 +93,9 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 "2023-11-20",
                 10,
                 true,
-                listOf("url1", "url2")
+                listOf("url1", "url2"),
+                author = "게코매니아",
+                price = 48_000
             ),
             HospitalReview(
                 2,
@@ -94,7 +108,9 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 "2023-11-19",
                 5,
                 false,
-                emptyList()
+                emptyList(),
+                author = "앵무새조와",
+                price = 50_000
             )
         )
         return Result.success(
@@ -106,8 +122,8 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         )
     }
 
-    override suspend fun saveReview(param: SaveReviewParam): Result<ReviewSaveResult> {
-        return Result.success(ReviewSaveResult(reviewId = 1, uploadUrls = emptyList()))
+    override suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult> {
+        return Result.success(SaveReviewResult(reviewId = 1, uploadUrls = emptyList()))
     }
 
     override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {

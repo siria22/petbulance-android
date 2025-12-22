@@ -44,7 +44,8 @@ data class FilterResDto(
     val treatmentService: String,
     val detailAnimalType: String,
     val reviewContent: String,
-    val totalRating: Double
+    val totalRating: Double,
+    val totalReviewCount: Int
 )
 
 @Serializable
@@ -68,7 +69,9 @@ data class SearchResDto(
     val reviewDate: String,
     val likeCount: Int = 0,
     val liked: Boolean = false,
-    val images: List<String> = emptyList()
+    val images: List<String> = emptyList(),
+    val author: String = "알 수 없음",
+    val totalPrice: Int = 0
 )
 
 @Serializable
@@ -81,12 +84,11 @@ data class ReviewSaveReqDto(
     val totalPrice: Long,
     val animalType: String,
 
-    // [중요] 서버 필드명이 대문자로 시작하므로 매핑 필요
     @SerialName("DetailAnimalType")
     val detailAnimalType: String,
 
     val treatmentService: String,
-    val visitDate: String, // yyyy-MM-dd
+    val visitDate: String,
     val reviewComment: String,
     val images: List<ReviewImageDto> = emptyList()
 )

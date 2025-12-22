@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.example.presentation.component.ui.CommonDivider
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.utils.nav.ScreenDestinations
@@ -87,10 +88,7 @@ fun BottomNavigationBar(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        HorizontalDivider(
-            color = colorScheme.border.subtle,
-            thickness = 1.dp
-        )
+        CommonDivider(colorScheme.border.subtle)
         Row(
             modifier = Modifier
                 .fillMaxWidth()

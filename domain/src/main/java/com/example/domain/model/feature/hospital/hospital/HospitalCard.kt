@@ -13,4 +13,19 @@ data class HospitalCard(
     val thumbnailUrl: String,
     val rating: Double,
     val reviewCount: Long
-)
+) {
+    fun toHospital() = Hospital(
+        hospitalId = hospitalId,
+        name = name,
+        lat = lat,
+        lng = lng,
+        distanceMeters = distanceMeters,
+        phone = phone,
+        types = types,
+        isOpenNow = isOpenNow,
+        openHours = nextOpenHours,
+        thumbnailUrl = thumbnailUrl,
+        rating = rating,
+        reviewCount = reviewCount.toInt()
+    )
+}

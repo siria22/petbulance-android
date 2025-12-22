@@ -44,8 +44,8 @@ fun HospitalDetailResDto.toDomain(): HospitalDetail {
 
 fun OpenHourResDto.toDomain(): OpenHour {
     return OpenHour(
-        openHour = openHour,
-        closeHour = closeHour
+        day = day,
+        hours = hours
     )
 }
 
