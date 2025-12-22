@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.search
+package com.example.presentation.screen.feature.search.main.views.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

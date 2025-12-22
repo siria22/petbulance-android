@@ -1,7 +1,6 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
-import androidx.lifecycle.SavedStateHandle
 import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.domain.model.feature.hospital.hospital.MapBounds
 import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
@@ -13,7 +12,7 @@ import com.example.domain.usecase.feature.hospital.recent.DeleteRecentSearchKeyw
 import com.example.domain.usecase.feature.hospital.recent.DeleteViewedHospitalUseCase
 import com.example.domain.usecase.feature.hospital.recent.GetRecentSearchKeywordUseCase
 import com.example.domain.usecase.feature.hospital.recent.GetViewedHospitalsUseCase
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.example.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,7 +40,7 @@ class HospitalSearchViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<SearchEvent>()
     val eventFlow: SharedFlow<SearchEvent> = _eventFlow
 
-    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.empty)
+    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.Companion.empty)
     val hospitalSearchQuery: StateFlow<HospitalSearchQueryUiModel> = _hospitalSearchQuery
 
     private val _hospitalList = MutableStateFlow<List<Hospital>>(emptyList())

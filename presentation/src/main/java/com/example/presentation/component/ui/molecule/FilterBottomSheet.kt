@@ -22,6 +22,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +55,7 @@ import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXL
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +70,12 @@ fun FilterBottomSheet(
     onSearchButtonClicked: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(startTab) }
+
+    LaunchedEffect(showBottomSheet, startTab) {
+        if (showBottomSheet) {
+            selectedTab = startTab
+        }
+    }
 
     var selectedRegion by remember { mutableStateOf(currentQuery.region ?: Region.SEOUL) }
     var selectedDistrict by remember { mutableStateOf(Region.SEOUL.districts.first()) }

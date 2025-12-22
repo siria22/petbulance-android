@@ -1,11 +1,11 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
 import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.domain.model.feature.hospital.hospital.MapBounds
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
-import com.example.presentation.screen.feature.search.views.common.HospitalSortType
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.domain.model.type.HospitalSortType
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.naver.maps.map.NaverMap
 
 /**

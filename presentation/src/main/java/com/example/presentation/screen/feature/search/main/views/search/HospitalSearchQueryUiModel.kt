@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.search
+package com.example.presentation.screen.feature.search.main.views.search
 
 import com.example.domain.model.type.AnimalCategory
 import com.example.domain.model.type.Region

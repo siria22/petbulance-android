@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.map
+package com.example.presentation.screen.feature.search.main.views.map
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

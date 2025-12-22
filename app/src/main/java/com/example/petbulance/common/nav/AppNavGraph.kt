@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.screen.feature.home.homeDestination
-import com.example.presentation.screen.feature.search.searchDestination
+import com.example.presentation.screen.feature.search.main.searchDestination
 import com.example.presentation.utils.nav.ScreenDestinations
 
 @Composable

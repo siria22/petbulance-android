@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.common
+package com.example.presentation.screen.feature.search.main.views.common
 
 import android.content.ClipData
 import android.content.Intent
@@ -39,6 +39,7 @@ import com.example.presentation.component.ui.Dot
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -94,7 +95,7 @@ fun HospitalCard(
                     tint = colorScheme.icon.rating
                 )
                 Text(
-                    text = String.format(java.util.Locale.getDefault(), "%.1f", hospital.rating),
+                    text = String.format(Locale.getDefault(), "%.1f", hospital.rating),
                     style = typography.labelLarge,
                     color = colorScheme.text.secondary
                 )
@@ -134,7 +135,7 @@ fun HospitalCard(
 
             hospital.distanceMeters?.let { distance ->
                 val distanceText = if (distance >= 1000) {
-                    String.format(java.util.Locale.getDefault(), "%.1fkm", distance / 1000)
+                    String.format(Locale.getDefault(), "%.1fkm", distance / 1000)
                 } else {
                     "${distance.toInt()}m"
                 }

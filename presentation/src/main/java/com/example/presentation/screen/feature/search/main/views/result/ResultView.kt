@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.result
+package com.example.presentation.screen.feature.search.main.views.result
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -39,13 +39,13 @@ import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.SearchUiEvent
-import com.example.presentation.screen.feature.search.SearchUiState
-import com.example.presentation.screen.feature.search.views.common.HospitalCard
-import com.example.presentation.screen.feature.search.views.common.RowChipFilters
-import com.example.presentation.screen.feature.search.views.common.RowResultControlChips
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
-import com.example.presentation.screen.feature.search.views.search.SearchBar
+import com.example.presentation.screen.feature.search.main.SearchUiEvent
+import com.example.presentation.screen.feature.search.main.SearchUiState
+import com.example.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.example.presentation.screen.feature.search.main.views.common.RowChipFilters
+import com.example.presentation.screen.feature.search.main.views.common.RowResultControlChips
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -215,7 +215,7 @@ private fun ResultViewPreview() {
 //                        reviewCount = 100
 //                    )
                 ),
-                currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
+                currentQuery = HospitalSearchQueryUiModel.Companion.empty.copy(query = "동물병원"),
             ),
             onEvent = {}
         )

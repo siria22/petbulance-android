@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.search
+package com.example.presentation.screen.feature.search.main.views.search
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -40,9 +40,9 @@ import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXXS
-import com.example.presentation.screen.feature.search.SearchUiEvent
-import com.example.presentation.screen.feature.search.SearchUiState
-import com.example.presentation.screen.feature.search.views.common.RowChipFilters
+import com.example.presentation.screen.feature.search.main.SearchUiEvent
+import com.example.presentation.screen.feature.search.main.SearchUiState
+import com.example.presentation.screen.feature.search.main.views.common.RowChipFilters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

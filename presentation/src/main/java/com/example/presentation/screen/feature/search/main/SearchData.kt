@@ -1,10 +1,10 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
 import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.example.domain.model.feature.hospital.recent.ViewedHospitalList
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 data class UserLocationData(
     val currentUserLocation: Location
@@ -27,7 +27,7 @@ data class HospitalSearchData(
 ) {
     companion object {
         val empty = HospitalSearchData(
-            HospitalSearchQueryUiModel.empty,
+            HospitalSearchQueryUiModel.Companion.empty,
             emptyList(),
             emptyList(),
             ViewedHospitalList.empty

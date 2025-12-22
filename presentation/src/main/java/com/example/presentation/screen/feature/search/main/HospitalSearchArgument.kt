@@ -1,8 +1,8 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
 import com.example.domain.model.feature.hospital.hospital.MapBounds
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 data class HospitalSearchArgument(
     val intent: (HospitalSearchIntent) -> Unit,

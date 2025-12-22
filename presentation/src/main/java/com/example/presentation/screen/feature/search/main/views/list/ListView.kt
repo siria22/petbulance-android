@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.list
+package com.example.presentation.screen.feature.search.main.views.list
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.example.presentation.component.ui.Space8
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.organism.AppTopBar
 import com.example.presentation.component.ui.organism.BottomNavigationBar
@@ -31,12 +34,13 @@ import com.example.presentation.component.ui.organism.TopBarInfo
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.SearchUiEvent
-import com.example.presentation.screen.feature.search.SearchUiState
-import com.example.presentation.screen.feature.search.views.common.HospitalCard
-import com.example.presentation.screen.feature.search.views.common.RowChipFilters
-import com.example.presentation.screen.feature.search.views.common.RowResultControlChips
-import com.example.presentation.screen.feature.search.views.map.MapViewToggleButton
+import com.example.presentation.screen.feature.search.main.SearchUiEvent
+import com.example.presentation.screen.feature.search.main.SearchUiState
+import com.example.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.example.presentation.screen.feature.search.main.views.common.RowChipFilters
+import com.example.presentation.screen.feature.search.main.views.common.RowResultControlChips
+import com.example.presentation.screen.feature.search.main.views.map.MapViewToggleButton
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,14 +83,16 @@ fun ListView(
                 .padding(innerPadding)
         ) {
             Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     RowChipFilters(
-                        uiModel = searchUiState.currentQuery, // 추가
+                        uiModel = searchUiState.currentQuery,
                         onFilterButtonClicked = {
                             onEvent(SearchUiEvent.OnFilterButtonClicked(it))
                         }
@@ -128,6 +134,7 @@ fun ListView(
                     isToggleToListView = false,
                     onClicked = { onEvent(SearchUiEvent.OnNavigateToMapView) }
                 )
+                Space8()
             }
         }
     }
@@ -141,7 +148,7 @@ private fun ListViewPreview() {
             navController = rememberNavController(),
             searchUiState = SearchUiState(
                 hospitalList = listOf(
-                    com.example.domain.model.feature.hospital.hospital.Hospital(
+                    Hospital(
                         hospitalId = 1,
                         name = "행복 동물병원",
                         lat = 37.5,
@@ -156,7 +163,7 @@ private fun ListViewPreview() {
                         reviewCount = 100
                     )
                 ),
-                currentQuery = com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel.empty,
+                currentQuery = HospitalSearchQueryUiModel.Companion.empty,
             ),
             onEvent = {}
         )

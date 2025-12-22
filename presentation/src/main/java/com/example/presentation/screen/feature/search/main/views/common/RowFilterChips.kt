@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.common
+package com.example.presentation.screen.feature.search.main.views.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +26,7 @@ import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 @Composable
 fun RowChipFilters(

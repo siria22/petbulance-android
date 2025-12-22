@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.result
+package com.example.presentation.screen.feature.search.main.views.result
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +25,7 @@ import com.example.presentation.component.ui.iconSizeMedium
 import com.example.presentation.component.ui.spacingLarge
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXXL
-import com.example.presentation.screen.feature.search.views.common.HospitalSortType
+import com.example.domain.model.type.HospitalSortType
 
 @Composable
 fun SelectSortTypeDialog(

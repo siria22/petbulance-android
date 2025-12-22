@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
 import com.example.presentation.utils.error.ErrorDisplayType

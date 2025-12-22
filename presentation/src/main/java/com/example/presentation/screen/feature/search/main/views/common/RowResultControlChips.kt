@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.common
+package com.example.presentation.screen.feature.search.main.views.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.domain.model.type.HospitalSortType
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
@@ -25,12 +26,6 @@ import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
-
-enum class HospitalSortType(val korean: String) {
-    DISTANCE("가까운순"),
-    RATING("별점순"),
-    REVIEW("리뷰순")
-} /* FIXME : Move to domain */
 
 @Composable
 fun RowResultControlChips(

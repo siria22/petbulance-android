@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -14,12 +14,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.molecule.FilterBottomSheet
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
-import com.example.presentation.screen.feature.search.views.common.HospitalSortType
-import com.example.presentation.screen.feature.search.views.list.ListView
-import com.example.presentation.screen.feature.search.views.map.MapView
-import com.example.presentation.screen.feature.search.views.result.ResultView
-import com.example.presentation.screen.feature.search.views.result.SelectSortTypeDialog
-import com.example.presentation.screen.feature.search.views.search.SearchView
+import com.example.domain.model.type.HospitalSortType
+import com.example.presentation.screen.feature.search.main.views.list.ListView
+import com.example.presentation.screen.feature.search.main.views.map.MapView
+import com.example.presentation.screen.feature.search.main.views.result.ResultView
+import com.example.presentation.screen.feature.search.main.views.result.SelectSortTypeDialog
+import com.example.presentation.screen.feature.search.main.views.search.SearchView
 import com.example.presentation.utils.error.collectCustomErrors
 import kotlinx.coroutines.flow.MutableSharedFlow
 

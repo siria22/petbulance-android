@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search
+package com.example.presentation.screen.feature.search.main
 
 import android.annotation.SuppressLint
 import android.os.Looper

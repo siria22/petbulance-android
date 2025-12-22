@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.search.views.map
+package com.example.presentation.screen.feature.search.main.views.map
 
 import android.location.Location
 import androidx.compose.foundation.layout.Arrangement
@@ -47,15 +47,15 @@ import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
-import com.example.presentation.screen.feature.search.CommonSearchArgument
-import com.example.presentation.screen.feature.search.SearchEvent
-import com.example.presentation.screen.feature.search.SearchScreenState
-import com.example.presentation.screen.feature.search.SearchUiEvent
-import com.example.presentation.screen.feature.search.SearchUiState
-import com.example.presentation.screen.feature.search.views.common.HospitalCard
-import com.example.presentation.screen.feature.search.views.common.RowChipFilters
-import com.example.presentation.screen.feature.search.views.common.RowResultControlChips
-import com.example.presentation.screen.feature.search.views.search.HospitalSearchQueryUiModel
+import com.example.presentation.screen.feature.search.main.CommonSearchArgument
+import com.example.presentation.screen.feature.search.main.SearchEvent
+import com.example.presentation.screen.feature.search.main.SearchScreenState
+import com.example.presentation.screen.feature.search.main.SearchUiEvent
+import com.example.presentation.screen.feature.search.main.SearchUiState
+import com.example.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.example.presentation.screen.feature.search.main.views.common.RowChipFilters
+import com.example.presentation.screen.feature.search.main.views.common.RowResultControlChips
+import com.example.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.example.presentation.utils.NaverMapView
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
@@ -112,9 +112,9 @@ fun MapView(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (searchUiState.hospitalList.isEmpty()) {
-                NoResult()
-            } else {
+//            if (searchUiState.hospitalList.isEmpty()) {
+//                NoResult()
+//            } else { // TODO : fix me!!!!!!!!!!!!
                 MapLayer(
                     state = searchUiState,
                     onMapReady = { naverMap = it }
@@ -135,7 +135,7 @@ fun MapView(
                         }
                     }
                 )
-            }
+//            }
         }
     }
 }
@@ -268,7 +268,7 @@ private fun MapViewPreview() {
             ),
             searchUiState = SearchUiState(
                 hospitalList = emptyList(),
-                currentQuery = HospitalSearchQueryUiModel.empty,
+                currentQuery = HospitalSearchQueryUiModel.Companion.empty,
             ),
             onEvent = {}
         )
