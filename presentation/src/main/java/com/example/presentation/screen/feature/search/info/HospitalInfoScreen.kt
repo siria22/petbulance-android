@@ -8,13 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Share
@@ -23,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,13 +48,15 @@ import com.example.presentation.component.ui.atom.BasicButton
 import com.example.presentation.component.ui.atom.BasicButtonSize
 import com.example.presentation.component.ui.atom.BasicButtonType
 import com.example.presentation.component.ui.atom.IconResource
+import com.example.presentation.component.ui.molecule.ReviewCard
 import com.example.presentation.component.ui.organism.AppTopBar
 import com.example.presentation.component.ui.organism.BottomNavigationBar
 import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.organism.TopBarAlignment
 import com.example.presentation.component.ui.organism.TopBarInfo
 import com.example.presentation.screen.feature.search.info.views.DetailTab
-import com.example.presentation.screen.feature.search.info.views.ReviewTab
+import com.example.presentation.screen.feature.search.info.views.EmptyReviewView
+import com.example.presentation.screen.feature.search.info.views.ReviewHeader
 import com.example.presentation.screen.feature.search.main.views.common.HospitalCard
 import com.example.presentation.utils.error.collectCustomErrors
 import com.example.presentation.utils.nav.safePopBackStack
@@ -132,48 +134,87 @@ private fun HospitalInfoScreenContents(
     onIntent: (HospitalInfoIntent) -> Unit,
     currentLocation: Location?,
     onNavigateButtonClicked: () -> Unit,
-
-    ) {
+) {
     var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
+    val listState = rememberLazyListState()
     val context = LocalContext.current
     val commonPadding = 16.dp
 
+    // 무한 스크롤 트리거
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItems = listState.layoutInfo.totalItemsCount
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            selectedTab == TabType.REVIEWS &&
+                    totalItems > 0 &&
+                    lastVisibleItem >= totalItems - 2
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            onIntent(HospitalInfoIntent.LoadMoreReviews)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxWidth()
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp)
         ) {
-            HospitalCard(
-                hospital = hospital,
-                borderColor = null,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            InfoTabRow(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                modifier = Modifier.padding(horizontal = commonPadding)
-            )
-
-            CommonDivider()
-
-            if (selectedTab == TabType.DETAILS) {
-                DetailTab(
-                    hospitalDetail = hospitalDetail,
-                    currentLocation = currentLocation ?: Location("").apply {
-                        latitude = 37.5; longitude = 127.0
-                    },
-                    onNavigateButtonClicked = onNavigateButtonClicked
-                )
-            } else {
-                ReviewTab(
-                    reviewData = reviewUiData,
-                    onIntent = onIntent
+            item {
+                HospitalCard(
+                    hospital = hospital,
+                    borderColor = null,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(modifier = Modifier.height(100.dp))
+            item {
+                InfoTabRow(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it },
+                    modifier = Modifier.padding(horizontal = commonPadding)
+                )
+            }
+
+            item {
+                CommonDivider()
+            }
+
+            if (selectedTab == TabType.DETAILS) {
+                item {
+                    DetailTab(
+                        hospitalDetail = hospitalDetail,
+                        currentLocation = currentLocation ?: Location("").apply {
+                            latitude = 37.5; longitude = 127.0
+                        },
+                        onNavigateButtonClicked = onNavigateButtonClicked
+                    )
+                }
+            } else {
+                item {
+                    ReviewHeader(
+                        reviewData = reviewUiData,
+                        onIntent = onIntent
+                    )
+                }
+
+                if (reviewUiData.reviews.isEmpty()) {
+                    item {
+                        EmptyReviewView()
+                    }
+                } else {
+                    items(
+                        items = reviewUiData.reviews,
+                        key = { it.id }
+                    ) { review ->
+                        CommonDivider(colorScheme.border.subtle)
+                        ReviewCard(review = review)
+                    }
+                }
+            }
         }
 
         BottomActionButton(
@@ -187,7 +228,7 @@ private fun HospitalInfoScreenContents(
                         context.startActivity(intent)
                     }
                 } else {
-                    /* TODO : 병원 후기 작성하기 */
+                    // TODO: 병원 후기 작성하기 화면 이동
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter)

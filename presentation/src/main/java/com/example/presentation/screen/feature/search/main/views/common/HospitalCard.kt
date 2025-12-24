@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
@@ -49,6 +51,7 @@ fun HospitalCard(
     hospital: Hospital?,
     borderColor: Color? = colorScheme.border.subtle,
     modifier: Modifier = Modifier,
+    isShadowed: Boolean = false,
     onCardClick: () -> Unit = {},
     onCopyPhoneClick: (String) -> Unit = {}
 ) {
@@ -60,6 +63,18 @@ fun HospitalCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .let { modifier ->
+                if (isShadowed) {
+                    modifier.shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        spotColor = Color.Black.copy(alpha = 0.1f),
+                        ambientColor = Color.Black.copy(alpha = 0.1f)
+                    )
+                } else {
+                    modifier
+                }
+            }
             .background(
                 color = colorScheme.bg.frame.default,
                 shape = RoundedCornerShape(16.dp)
@@ -225,21 +240,13 @@ fun HospitalCard(
 @Composable
 private fun HospitalCardPreview() {
     PetbulanceTheme {
-        HospitalCard(
-            hospital = Hospital(
-                hospitalId = 1,
-                name = "화타동물병원",
-                lat = 37.0,
-                lng = 127.0,
-                distanceMeters = 1200.0,
-                phone = "02-1234-5678",
-                types = listOf("파충류", "양서류", "어류"),
-                isOpenNow = true,
-                openHours = "20:00에 영업 종료",
-                thumbnailUrl = null,
-                rating = 4.8,
-                reviewCount = 25
+        Box(
+            modifier = Modifier.background(Color.White).padding(32.dp)
+        ) {
+            HospitalCard(
+                hospital = Hospital.stub,
+                isShadowed = true
             )
-        )
+        }
     }
 }

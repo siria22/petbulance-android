@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +39,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.community.post.PostDetail
 import com.example.domain.model.feature.hospital.review.HospitalReview
+import com.example.domain.model.type.AnimalCategory
+import com.example.domain.model.type.toKorean
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -62,7 +63,8 @@ import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
 import com.example.presentation.utils.error.collectCustomErrors
-import kotlinx.coroutines.CoroutineScope
+import com.example.presentation.utils.nav.ScreenDestinations
+import com.example.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
@@ -71,11 +73,6 @@ fun HomeScreen(
     argument: HomeArgument,
     data: HomeData
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
-
-    val dataState = argument.dataState
-    val screenState = argument.screenState
-
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
             when (event) {
@@ -112,7 +109,13 @@ fun HomeScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             HomeScreenContents(
-
+                data = data,
+                onNavigateToSearch = { navController.safeNavigate(ScreenDestinations.Search.route) },
+                navigateToHospitalSearchPageWithAnimalType = { animalCategory ->
+                    navController.safeNavigate(ScreenDestinations.Search.createRoute(animalCategory))
+                },
+                onNavigateToReview = { /* TODO: navController.navigate(...) */ },
+                onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
             )
         }
     }
@@ -120,20 +123,29 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContents(
-
+    data: HomeData,
+    onNavigateToSearch: () -> Unit,
+    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
+    onNavigateToReview: () -> Unit,
+    onNavigateToCommunity: () -> Unit
 ) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        HospitalShortcut()
+        HospitalShortcut(
+            onClicked = onNavigateToSearch,
+            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
+        )
 
         HospitalReviewShortcut(
-            reviews = listOf(HospitalReview.stub)
+            reviews = data.recentReviews,
+            onClicked = onNavigateToReview
         )
 
         HotArticlesShortcut(
-            post = PostDetail.stub
+            post = data.hotArticle,
+            onClicked = onNavigateToCommunity
         )
     }
 }
@@ -172,21 +184,28 @@ private fun CommonHeader(
 }
 
 @Composable
-private fun HospitalShortcut() {
+private fun HospitalShortcut(
+    onClicked: () -> Unit,
+    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CommonHeader(
             headerText = "내 주변 병원 바로가기",
-            onClicked = { } // TODO : Navigate to Hospital Search Page
+            onClicked = onClicked
         )
-        HospitalShortcutAnimalRow()
+        HospitalShortcutAnimalRow(
+            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
+        )
         HospitalNoticeSlider()
     }
 }
 
 @Composable
-private fun HospitalShortcutAnimalRow() {
+private fun HospitalShortcutAnimalRow(
+    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
+) {
     val images = listOf(
         painterResource(R.drawable.img_all),
         painterResource(R.drawable.img_small_mammals),
@@ -196,14 +215,7 @@ private fun HospitalShortcutAnimalRow() {
         painterResource(R.drawable.img_fishes)
     )
 
-    val category = listOf(
-        "전체",
-        "소형포유류",
-        "조류",
-        "파충류",
-        "양서류",
-        "어류"
-    )
+    val category = AnimalCategory.entries
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -218,10 +230,13 @@ private fun HospitalShortcutAnimalRow() {
             Column(
                 verticalArrangement = Arrangement.spacedBy(spacingXXS),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable {
+                    navigateToHospitalSearchPageWithAnimalType(category[idx])
+                }
             ) {
                 AnimalCategoryCircle(resourceId = image)
                 Text(
-                    text = category[idx],
+                    text = category[idx].toKorean(),
                     color = colorScheme.text.primary,
                     style = MaterialTheme.typography.bodySmall.emp(),
                 )
@@ -276,13 +291,16 @@ private fun HospitalNoticeSlider() {
 }
 
 @Composable
-private fun HospitalReviewShortcut(reviews: List<HospitalReview>) {
+private fun HospitalReviewShortcut(
+    reviews: List<HospitalReview>,
+    onClicked: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CommonHeader(
             headerText = "최신 영수증 후기",
-            onClicked = { } // TODO : Navigate to Review Page
+            onClicked = onClicked
         )
         RecentReviewSlider(reviews)
     }
@@ -366,13 +384,16 @@ private fun RecentReviewSliderItem(item: HospitalReview) {
 }
 
 @Composable
-private fun HotArticlesShortcut(post: PostDetail?) {
+private fun HotArticlesShortcut(
+    post: PostDetail?,
+    onClicked: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CommonHeader(
-            headerText = "최신 영수증 후기",
-            onClicked = { } // TODO : Navigate to CommunityPage
+            headerText = "인기 게시글",
+            onClicked = onClicked
         )
 
         if (post != null) {

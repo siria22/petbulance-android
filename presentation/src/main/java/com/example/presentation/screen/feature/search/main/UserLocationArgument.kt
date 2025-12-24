@@ -1,10 +1,12 @@
 package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
+import kotlinx.coroutines.flow.SharedFlow
 
 data class UserLocationArgument(
     val intent: (UserLocationIntent) -> Unit,
-    val locationState: UserLocationState
+    val locationState: UserLocationState,
+    val event: SharedFlow<SearchEvent>
 )
 
 sealed class UserLocationState {

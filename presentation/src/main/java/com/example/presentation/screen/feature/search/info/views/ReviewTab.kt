@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,17 +28,15 @@ import androidx.compose.ui.unit.dp
 import com.example.domain.model.type.ReviewSortType
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.emp
-import com.example.presentation.component.ui.CommonDivider
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.molecule.ChipWithIcon
-import com.example.presentation.component.ui.molecule.ReviewCard
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.screen.feature.search.info.HospitalInfoIntent
 import com.example.presentation.screen.feature.search.info.ReviewUiData
 
 @Composable
-fun ReviewTab(
+fun ReviewHeader(
     reviewData: ReviewUiData,
     onIntent: (HospitalInfoIntent) -> Unit
 ) {
@@ -83,8 +80,6 @@ fun ReviewTab(
                     contentColor = if (reviewData.onlyImage) PetbulanceTheme.colorScheme.tag.trust.medium else PetbulanceTheme.colorScheme.tag.trust.bg,
                     borderColor = if (reviewData.onlyImage) PetbulanceTheme.colorScheme.tag.trust.medium else PetbulanceTheme.colorScheme.tag.trust.bg
                 )
-
-                /* TODO : 영수증 인증 필터 */
             }
 
             DropdownMenu(
@@ -98,7 +93,7 @@ fun ReviewTab(
                     .border(
                         width = 2.dp,
                         color = PetbulanceTheme.colorScheme.border.subtle,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
                     .fillMaxWidth(0.5f)
             ) {
@@ -113,38 +108,31 @@ fun ReviewTab(
                             )
                         },
                         onClick = {
-                            onIntent(HospitalInfoIntent.ChangeReviewSort(selectionOption)) // Intent 호출
+                            onIntent(HospitalInfoIntent.ChangeReviewSort(selectionOption))
                             isMenuOpened = false
                         },
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .background(
                                 color = if (isSelected) PetbulanceTheme.colorScheme.bg.frame.medium else Color.Transparent,
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(4.dp)
                             ),
                     )
                 }
             }
         }
     }
+}
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        if (reviewData.reviews.isEmpty()) {
-            Text(
-                text = "표시할 내용이 없어요",
-                color = PetbulanceTheme.colorScheme.text.primary,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(12.dp)
-            )
-        } else {
-            reviewData.reviews.forEach { review ->
-                CommonDivider(PetbulanceTheme.colorScheme.border.subtle)
-                ReviewCard(review = review)
-            }
-        }
-    }
+@Composable
+fun EmptyReviewView() {
+    Text(
+        text = "표시할 내용이 없어요",
+        color = PetbulanceTheme.colorScheme.text.primary,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
 }

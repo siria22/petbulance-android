@@ -11,10 +11,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.domain.model.type.HospitalSortType
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.molecule.FilterBottomSheet
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
-import com.example.domain.model.type.HospitalSortType
 import com.example.presentation.screen.feature.search.main.views.list.ListView
 import com.example.presentation.screen.feature.search.main.views.map.MapView
 import com.example.presentation.screen.feature.search.main.views.result.ResultView
@@ -58,6 +58,10 @@ fun SearchScreen(
         isSelectSortTypeDialogVisible = isSelectSortTypeDialogVisible,
         currentUserLocation = locationData.currentUserLocation
     )
+
+    LaunchedEffect(Unit) {
+        userLocationArgument.intent(UserLocationIntent.RequestLocation)
+    }
 
     // --- Event Handler ---
     val onEvent: (SearchUiEvent) -> Unit = { event ->
@@ -143,9 +147,9 @@ fun SearchScreen(
             }
 
             // Navigation Intents
-            is SearchUiEvent.OnCurrentLocationClicked -> userLocationArgument.intent(
-                UserLocationIntent.RequestLocation
-            )
+            is SearchUiEvent.OnCurrentLocationClicked -> {
+                userLocationArgument.intent(UserLocationIntent.RequestLocation)
+            }
 
             is SearchUiEvent.OnListViewClicked -> commonSearchArgument.intent(
                 SearchIntent.ChangeScreenState(
@@ -190,7 +194,7 @@ fun SearchScreen(
         is SearchScreenState.Hospitals.MapView -> {
             MapView(
                 navController = navController,
-                commonSearchArgument = commonSearchArgument,
+                userLocationArgument = userLocationArgument,
                 searchUiState = searchUiState,
                 onEvent = onEvent
             )
@@ -252,7 +256,8 @@ private fun SearchScreenPreview() {
             navController = rememberNavController(),
             userLocationArgument = UserLocationArgument(
                 intent = { },
-                locationState = UserLocationState.Init
+                locationState = UserLocationState.Init,
+                event = MutableSharedFlow(),
             ),
             hospitalSearchArgument = HospitalSearchArgument(
                 intent = { },

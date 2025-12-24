@@ -31,7 +31,7 @@ class HospitalInfoViewModel @Inject constructor(
     private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase
 ) : BaseViewModel() {
 
-    private val hospitalId: Long = savedStateHandle.get<Long>("hospitalId") ?: -1L
+    private val hospitalId: Long = savedStateHandle.get<Long>("hospitalId") ?: INVALID_ID
 
     private val _dataState = MutableStateFlow<HospitalInfoDataState>(HospitalInfoDataState.Init)
     val dataState: StateFlow<HospitalInfoDataState> = _dataState
@@ -45,38 +45,41 @@ class HospitalInfoViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<HospitalInfoEvent>()
     val eventFlow: SharedFlow<HospitalInfoEvent> = _eventFlow
 
-    // Paging 관련 상태
+    // Paging State
     private var currentCursorId: Long? = null
     private var currentCursorRating: Double? = null
     private var currentCursorLikeCount: Long? = null
     private var isLastPage: Boolean = false
     private var isLoading: Boolean = false
 
-    // Cache
+    // Cache (Key: SortType + OnlyImage)
     private var reviewLoadJob: Job? = null
     private val reviewCache =
         mutableMapOf<Pair<ReviewSortType, Boolean>, PagingReviewList<HospitalReview>>()
 
     init {
         observeErrorEvent(eventFlow)
+        if (hospitalId == INVALID_ID) {
+            viewModelScope.launch {
+                emitError(IllegalArgumentException("잘못된 병원 정보입니다."))
+            }
+        }
     }
 
     fun onIntent(intent: HospitalInfoIntent) {
+        if (hospitalId == INVALID_ID) return
+
         when (intent) {
             is HospitalInfoIntent.LoadData -> loadData(intent.lat, intent.lng)
             is HospitalInfoIntent.LoadMoreReviews -> {
-                launch {
-                    loadMoreReviews()
-                }
+                launch { loadMoreReviews() }
             }
-
             is HospitalInfoIntent.ChangeReviewSort -> {
                 if (_reviewUiData.value.sortBy != intent.sortType) {
                     _reviewUiData.update { it.copy(sortBy = intent.sortType) }
                     checkCacheAndLoad()
                 }
             }
-
             is HospitalInfoIntent.ToggleImageOnly -> {
                 _reviewUiData.update { it.copy(onlyImage = intent.isChecked) }
                 checkCacheAndLoad()
@@ -87,6 +90,8 @@ class HospitalInfoViewModel @Inject constructor(
     private fun loadData(lat: Double?, lng: Double?) {
         launch {
             _dataState.value = HospitalInfoDataState.OnProgress
+            resetPagingState()
+
             runCatching {
                 zip(
                     { fetchHospital(lat, lng) },
@@ -97,10 +102,9 @@ class HospitalInfoViewModel @Inject constructor(
                 _hospitalUiData.update {
                     it.copy(hospital = hospital, hospitalDetail = detail)
                 }
-                applyReviewData(reviewPaging)
 
-                val key = Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
-                reviewCache[key] = reviewPaging
+                applyReviewData(reviewPaging, isAppend = false)
+                updateCache(reviewPaging)
 
                 _dataState.value = HospitalInfoDataState.Init
             }.onFailure { exception ->
@@ -111,14 +115,11 @@ class HospitalInfoViewModel @Inject constructor(
     }
 
     private fun checkCacheAndLoad() {
-        val currentSort = _reviewUiData.value.sortBy
-        val currentOnlyImage = _reviewUiData.value.onlyImage
-
-        val cacheKey = Pair(currentSort, currentOnlyImage)
-        val cachedData = reviewCache[cacheKey]
+        val currentKey = getCurrentCacheKey()
+        val cachedData = reviewCache[currentKey]
 
         if (cachedData != null) {
-            applyReviewData(cachedData)
+            applyReviewData(cachedData, isAppend = false)
         } else {
             loadReviewsWithCancellation()
         }
@@ -126,6 +127,8 @@ class HospitalInfoViewModel @Inject constructor(
 
     private suspend fun reloadReviewsOnly() {
         _dataState.value = HospitalInfoDataState.OnProgress
+        resetPagingState()
+
         getHospitalReviewsUseCase(
             hospitalId = hospitalId,
             onlyImageReview = _reviewUiData.value.onlyImage,
@@ -134,12 +137,8 @@ class HospitalInfoViewModel @Inject constructor(
             cursorLikeCount = null,
             sortBy = _reviewUiData.value.sortBy
         ).onSuccess { reviewPaging ->
-            val currentSort = _reviewUiData.value.sortBy
-            val currentOnlyImage = _reviewUiData.value.onlyImage
-
-            reviewCache[Pair(currentSort, currentOnlyImage)] = reviewPaging
-
-            applyReviewData(reviewPaging)
+            updateCache(reviewPaging)
+            applyReviewData(reviewPaging, isAppend = false)
             _dataState.value = HospitalInfoDataState.Init
         }.onFailure { exception ->
             if (exception !is CancellationException) {
@@ -156,15 +155,6 @@ class HospitalInfoViewModel @Inject constructor(
         }
     }
 
-    private fun applyReviewData(reviewPaging: PagingReviewList<HospitalReview>) {
-        currentCursorId = reviewPaging.nextCursorId
-        isLastPage = !reviewPaging.hasNext
-
-        _reviewUiData.update {
-            it.copy(reviews = reviewPaging.items)
-        }
-    }
-
     private suspend fun loadMoreReviews() {
         if (isLoading || isLastPage) return
         isLoading = true
@@ -177,17 +167,43 @@ class HospitalInfoViewModel @Inject constructor(
             cursorLikeCount = currentCursorLikeCount,
             sortBy = _reviewUiData.value.sortBy
         ).onSuccess { pagingResult ->
-            currentCursorId = pagingResult.nextCursorId
-            isLastPage = !pagingResult.hasNext
-
-            _reviewUiData.update {
-                it.copy(
-                    reviews = it.reviews + pagingResult.items
-                )
-            }
+            applyReviewData(pagingResult, isAppend = true)
         }.onFailure { exception ->
             emitError(exception)
         }
+        isLoading = false
+    }
+
+    private fun applyReviewData(reviewPaging: PagingReviewList<HospitalReview>, isAppend: Boolean) {
+        // 다음 요청을 위한 커서 갱신 로직 (Critical Fix)
+        isLastPage = !reviewPaging.hasNext
+        currentCursorId = reviewPaging.nextCursorId
+
+        // 마지막 아이템을 찾아 커서 정보 갱신
+        val lastItem = reviewPaging.items.lastOrNull()
+        if (lastItem != null) {
+            currentCursorRating = lastItem.rating
+            currentCursorLikeCount = lastItem.likeCount.toLong()
+        }
+
+        _reviewUiData.update {
+            it.copy(
+                reviews = if (isAppend) it.reviews + reviewPaging.items else reviewPaging.items
+            )
+        }
+    }
+
+    private fun updateCache(data: PagingReviewList<HospitalReview>) {
+        reviewCache[getCurrentCacheKey()] = data
+    }
+
+    private fun getCurrentCacheKey() = Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
+
+    private fun resetPagingState() {
+        currentCursorId = null
+        currentCursorRating = null
+        currentCursorLikeCount = null
+        isLastPage = false
         isLoading = false
     }
 
@@ -220,4 +236,8 @@ class HospitalInfoViewModel @Inject constructor(
         cursorLikeCount = null,
         sortBy = _reviewUiData.value.sortBy
     ).getOrThrow()
+
+    companion object {
+        private const val INVALID_ID = -1L
+    }
 }

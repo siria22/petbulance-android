@@ -31,8 +31,8 @@ fun BasicImageBox(
     modifier: Modifier = Modifier,
     size: Dp = 128.dp,
     uri: Uri?,
-    errorImageResource: Int = R.drawable.broken_image,
-    placeholderImageResource: Int = R.drawable.broken_image /* TODO : placeholder 이미지 */
+    errorImageResource: Int = R.drawable.img_checker,
+    placeholderImageResource: Int = R.drawable.img_checker
 ) {
     val isUriValid = uri != null && uri.toString().isNotBlank()
 

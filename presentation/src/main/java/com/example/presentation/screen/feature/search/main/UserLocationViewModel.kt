@@ -36,7 +36,7 @@ class UserLocationViewModel @Inject constructor(
             is UserLocationIntent.RequestLocation -> {
                 // UI에서 권한 체크 후 없으면 PermissionRequired 상태로, 있으면 수집 시작
                 // 여기서는 일단 수집 시도 (권한 없으면 에러 발생 -> catch)
-                startLocationUpdates()
+                startLocationUpdates(forceMove = true)
             }
 
             is UserLocationIntent.PermissionResult -> {
@@ -50,7 +50,7 @@ class UserLocationViewModel @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun startLocationUpdates() {
+    private fun startLocationUpdates(forceMove: Boolean = false) {
         launch {
             _state.value = UserLocationState.Finding
 
@@ -65,7 +65,7 @@ class UserLocationViewModel @Inject constructor(
                 }
                 .collect { location ->
                     _state.value = UserLocationState.Success(location)
-                    if (!isInitialLocationSent) {
+                    if (forceMove || !isInitialLocationSent) {
                         _eventFlow.emit(SearchEvent.UserLocation.MoveCamera(location))
                         isInitialLocationSent = true
                     }
@@ -86,9 +86,14 @@ class UserLocationViewModel @Inject constructor(
                 }
             }
         }
-
-        fusedLocationClient.requestLocationUpdates(request, callback, Looper.getMainLooper())
-            .addOnFailureListener { e -> close(e) }
+        try {
+            fusedLocationClient.requestLocationUpdates(request, callback, Looper.getMainLooper())
+                .addOnFailureListener { e ->
+                    close(e)
+                }
+        } catch (e: SecurityException) {
+            close(e)
+        }
 
         awaitClose {
             fusedLocationClient.removeLocationUpdates(callback)

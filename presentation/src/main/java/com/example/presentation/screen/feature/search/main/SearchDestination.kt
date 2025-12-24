@@ -1,22 +1,49 @@
 package com.example.presentation.screen.feature.search.main
 
 import android.location.Location
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.domain.model.feature.hospital.hospital.Hospital
+import com.example.domain.model.type.AnimalCategory
 import com.example.presentation.utils.CommonScreenWrapper
 import com.example.presentation.utils.nav.ScreenDestinations
 
 fun NavGraphBuilder.searchDestination(navController: NavController) {
     composable(
-        route = ScreenDestinations.Search.route
-    ) {
+        route = ScreenDestinations.Search.route,
+        // [Add] 아규먼트 정의
+        arguments = listOf(
+            navArgument(ScreenDestinations.Search.ARG_ANIMAL) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { entry ->
         val commonSearchViewModel: CommonSearchViewModel = hiltViewModel()
         val hospitalSearchViewModel: HospitalSearchViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
+
+        LaunchedEffect(Unit) {
+            val animalName = entry.arguments?.getString(ScreenDestinations.Search.ARG_ANIMAL)
+            val category = AnimalCategory.entries.find { it.name == animalName }
+
+            if (category != null) {
+                val currentQuery = hospitalSearchViewModel.hospitalSearchQuery.value
+                hospitalSearchViewModel.onIntent(
+                    HospitalSearchIntent.UpdateSearchQuery(
+                        currentQuery.copy(species = category)
+                    )
+                )
+            }
+        }
 
         // CommonSearchArgument
         val screenState by commonSearchViewModel.screenState.collectAsStateWithLifecycle()
@@ -30,7 +57,8 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val locationState by userLocationViewModel.locationState.collectAsStateWithLifecycle()
         val userLocationArgument = UserLocationArgument(
             intent = userLocationViewModel::onIntent,
-            locationState = locationState
+            locationState = locationState,
+            event = userLocationViewModel.eventFlow
         )
 
         // LocationData
@@ -53,7 +81,10 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
 
         val hospitalData = HospitalSearchData(
             hospitalSearchQuery = hospitalSearchQuery,
-            hospitalList = hospitalList,
+//            hospitalList = hospitalList, // FIXME :
+            hospitalList = listOf(
+                Hospital.stub
+            ),
             recentSearchKeywords = recentSearchKeywords,
             viewedHospitals = viewedHospitals
         )

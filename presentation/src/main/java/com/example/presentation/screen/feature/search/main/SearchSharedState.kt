@@ -19,9 +19,8 @@ data class SearchUiState(
     val isFilterBottomSheetVisible: Boolean = false,
     val currentSelectedFilterBottomSheet: FilterBottomSheetTab = FilterBottomSheetTab.REGION,
     val isSelectSortTypeDialogVisible: Boolean = false,
-    val currentUserLocation: Location? = null
+    val currentUserLocation: Location = Location("Default").apply { latitude = 37.57; longitude = 126.98 }
 ) {
-    // 공통 필터링 및 정렬 로직
     val filteredHospitalList: List<Hospital>
         get() = hospitalList
             .asSequence()

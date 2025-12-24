@@ -6,15 +6,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,30 +77,28 @@ fun MapViewToggleButton(
     isToggleToListView: Boolean,
     onClicked: () -> Unit
 ) {
-    val shape = RoundedCornerShape(999.dp)
-    val borderColor = colorScheme.action.primary.default
-    val bgColor = colorScheme.bg.frame.default
-
+    val shape = RoundedCornerShape(1000.dp)
+    val icon = if (isToggleToListView) Icons.AutoMirrored.Filled.List else Icons.Outlined.Map
+    val text = if (isToggleToListView) "목록보기" else "지도보기"
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacingXXXS),
         modifier = Modifier
             .clip(shape)
-            .background(bgColor, shape)
-            .border(BorderStroke(1.dp, borderColor), shape)
+            .background(colorScheme.action.primary.default, shape)
             .clickable { onClicked() }
             .padding(horizontal = spacingSmall, vertical = spacingXS)
     ) {
         BasicIcon(
-            iconResource = IconResource.Vector(Icons.Default.List),
-            contentDescription = "Recenter and search",
+            iconResource = IconResource.Vector(icon),
+            contentDescription = "Switch Map and List View",
             size = iconSizeMs,
-            tint = colorScheme.icon.medium
+            tint = colorScheme.icon.inverse
         )
         Text(
-            text = "목록보기",
+            text = text,
             style = MaterialTheme.typography.bodySmall,
-            color = colorScheme.text.secondary
+            color = colorScheme.text.inverse
         )
     }
 }
@@ -128,8 +128,10 @@ fun CurrentLocationFab(
 @Composable
 private fun RecenterSearchButtonPreview() {
     PetbulanceTheme {
-        Box(Modifier.padding(16.dp)) {
+        Column() {
             RecenterSearchButton(onClick = {})
+            MapViewToggleButton(isToggleToListView = false, onClicked = {})
+            MapViewToggleButton(isToggleToListView = true, onClicked = {})
         }
     }
 }

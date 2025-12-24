@@ -32,15 +32,12 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
         val viewModel: HospitalInfoViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
 
-        val argument: HospitalInfoArgument = let {
-            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-
-            HospitalInfoArgument(
-                state = dataState,
-                intent = viewModel::onIntent,
-                event = viewModel.eventFlow
-            )
-        }
+        val dataState by viewModel.dataState.collectAsStateWithLifecycle()
+        val argument = HospitalInfoArgument(
+            state = dataState,
+            intent = viewModel::onIntent,
+            event = viewModel.eventFlow
+        )
 
         val userLocationState by userLocationViewModel.locationState.collectAsStateWithLifecycle()
         val currentLocation = (userLocationState as? UserLocationState.Success)?.location
@@ -66,15 +63,12 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
             }
         }
 
-        val data: HospitalInfoData = let {
-            val reviewUiData by viewModel.reviewUiData.collectAsStateWithLifecycle()
-            val hospitalUiData by viewModel.hospitalUiData.collectAsStateWithLifecycle()
-
-            HospitalInfoData(
-                reviewUiData = reviewUiData,
-                hospitalUiData = hospitalUiData
-            )
-        }
+        val reviewUiData by viewModel.reviewUiData.collectAsStateWithLifecycle()
+        val hospitalUiData by viewModel.hospitalUiData.collectAsStateWithLifecycle()
+        val data = HospitalInfoData(
+            reviewUiData = reviewUiData,
+            hospitalUiData = hospitalUiData
+        )
 
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
 

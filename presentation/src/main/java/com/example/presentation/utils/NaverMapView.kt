@@ -32,8 +32,8 @@ import com.naver.maps.map.overlay.OverlayImage
 @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
 @Composable
 fun NaverMapView(
-    currentLocation: Location,
-    cameraPosition: Location,
+    currentLocation: Location?,
+    cameraPosition: Location?,
     places: List<HospitalMarker>?,
     selectedHospitalId: Long?,
     onMapReady: (NaverMap) -> Unit,
@@ -59,19 +59,26 @@ fun NaverMapView(
     val markers = remember { mutableStateListOf<Marker>() }
 
     LaunchedEffect(naverMap, cameraPosition) {
-        naverMap?.let { map ->
-            val cameraUpdate = CameraUpdate.scrollAndZoomTo(
-                LatLng(cameraPosition.latitude, cameraPosition.longitude),
-                15.5
-            ).animate(CameraAnimation.Easing)
-            map.moveCamera(cameraUpdate)
+        if (cameraPosition != null) {
+            naverMap?.let { map ->
+                val cameraUpdate = CameraUpdate.scrollAndZoomTo(
+                    LatLng(cameraPosition.latitude, cameraPosition.longitude),
+                    15.0
+                ).animate(CameraAnimation.Easing)
+                map.moveCamera(cameraUpdate)
+            }
         }
     }
 
+    // currentLocation이 null이 아닐 때만 위치 오버레이 업데이트
     LaunchedEffect(naverMap, currentLocation) {
-        naverMap?.let { map ->
-            val locationOverlay = map.locationOverlay
-            locationOverlay.position = LatLng(currentLocation.latitude, currentLocation.longitude)
+        if (currentLocation != null) {
+            naverMap?.let { map ->
+                val locationOverlay = map.locationOverlay
+                locationOverlay.isVisible = true
+                locationOverlay.position =
+                    LatLng(currentLocation.latitude, currentLocation.longitude)
+            }
         }
     }
 
@@ -82,8 +89,13 @@ fun NaverMapView(
         it.getMapAsync { map ->
             map.mapType = NaverMap.MapType.Basic
             map.uiSettings.isZoomControlEnabled = true
-            map.locationOverlay.isVisible = true
-            /* TODO : 색상 변경 */
+
+            // 초기 설정
+            with(map.locationOverlay) {
+                isVisible = currentLocation != null // 위치 정보 없으면 숨김
+                icon = OverlayImage.fromResource(R.drawable.marker_user)
+                circleColor = android.graphics.Color.parseColor("#33FF0000")
+            }
 
             map.addOnCameraIdleListener {
                 val bounds = map.contentBounds

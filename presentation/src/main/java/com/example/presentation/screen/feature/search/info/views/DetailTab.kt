@@ -187,7 +187,7 @@ private fun OpenInfo(data: List<OpenHour>?) {
             color = colorScheme.text.primary,
             style = typography.titleSmall.emp()
         )
-        if (data == null) {
+        if (data.isNullOrEmpty()) {
             Text(
                 text = "영업 정보가 없습니다.",
                 color = colorScheme.text.caption,
