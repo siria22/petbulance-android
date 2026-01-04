@@ -8,7 +8,7 @@ class GetHotArticleUseCase @Inject constructor(
     private val repository: PostRepository
 ) {
     // TODO : Get Hot Article by some criteria
-    suspend operator fun invoke(): PostDetail {
-        return PostDetail.stub
+    suspend operator fun invoke(): List<PostDetail> {
+        return listOf(PostDetail.stub)
     }
 }

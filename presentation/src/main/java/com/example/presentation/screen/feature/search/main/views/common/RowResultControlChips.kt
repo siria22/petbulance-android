@@ -21,7 +21,7 @@ import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
-import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.iconSizeMS
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
@@ -78,7 +78,7 @@ private fun SortChip(
         BasicIcon(
             iconResource = IconResource.Vector(Icons.AutoMirrored.Filled.Sort),
             contentDescription = "Sort Icon",
-            size = iconSizeMs,
+            size = iconSizeMS,
             tint = colorScheme.icon.dark
         ) // FIXME : apply design system's icon
 

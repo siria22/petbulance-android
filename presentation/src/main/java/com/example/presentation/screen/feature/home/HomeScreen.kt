@@ -40,7 +40,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.community.post.PostDetail
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.type.AnimalCategory
-import com.example.domain.model.type.toKorean
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -73,6 +72,10 @@ fun HomeScreen(
     argument: HomeArgument,
     data: HomeData
 ) {
+    LaunchedEffect(Unit) {
+        // TODO: [약관 개정안] 필수 약관 추가 동의 여부 확인
+    }
+
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
             when (event) {
@@ -144,7 +147,7 @@ private fun HomeScreenContents(
         )
 
         HotArticlesShortcut(
-            post = data.hotArticle,
+            posts = data.hotArticles,
             onClicked = onNavigateToCommunity
         )
     }
@@ -236,7 +239,7 @@ private fun HospitalShortcutAnimalRow(
             ) {
                 AnimalCategoryCircle(resourceId = image)
                 Text(
-                    text = category[idx].toKorean(),
+                    text = AnimalCategory.toKorean(category[idx]),
                     color = colorScheme.text.primary,
                     style = MaterialTheme.typography.bodySmall.emp(),
                 )
@@ -385,7 +388,7 @@ private fun RecentReviewSliderItem(item: HospitalReview) {
 
 @Composable
 private fun HotArticlesShortcut(
-    post: PostDetail?,
+    posts: List<PostDetail>?,
     onClicked: () -> Unit
 ) {
     Column(
@@ -396,106 +399,114 @@ private fun HotArticlesShortcut(
             onClicked = onClicked
         )
 
-        if (post != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = spacingMedium, vertical = spacingXXS)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = colorScheme.bg.frame.subtle,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(
-                            horizontal = spacingMedium,
-                            vertical = spacingSmall
-                        )
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            text = post.postInfo.title,
-                            style = MaterialTheme.typography.bodySmall.emp(),
-                            color = colorScheme.text.primary,
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(spacingMedium),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = post.boardInfo.name,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = colorScheme.text.caption,
-                                )
-                                Dot()
-                                Text(
-                                    text = post.boardInfo.category,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = colorScheme.text.caption,
-                                )
-                            }
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = post.postInfo.createdAt,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = colorScheme.text.caption,
-                                )
-                                Dot()
-                                Text(
-                                    text = "조회 ${post.postInfo.stats.viewCount}",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = colorScheme.text.caption,
-                                )
-                            }
-                        }
-
-                    }
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(
-                                color = colorScheme.bg.frame.default,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .size(48.dp)
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = post.postInfo.stats.commentCount.toString(),
-                                style = MaterialTheme.typography.bodyMedium.emp(),
-                                color = colorScheme.status.success.default,
-                            )
-                            Text(
-                                text = "댓글",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.text.caption,
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
+        if (posts.isNullOrEmpty()) {
             Text(
+                modifier = Modifier.padding(vertical = spacingSmall),
                 text = "내용이 없습니다.",
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodySmall.emp()
             )
+        } else {
+            posts.forEach { post ->
+                HotArticlesItem(post = post)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HotArticlesItem(post: PostDetail) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = spacingMedium, vertical = spacingXXS)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = colorScheme.bg.frame.subtle,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(
+                    horizontal = spacingMedium,
+                    vertical = spacingSmall
+                )
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = post.postInfo.title,
+                    style = MaterialTheme.typography.bodySmall.emp(),
+                    color = colorScheme.text.primary,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacingMedium),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = post.boardInfo.name,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.text.caption,
+                        )
+                        Dot()
+                        Text(
+                            text = post.boardInfo.category,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.text.caption,
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = post.postInfo.createdAt,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.text.caption,
+                        )
+                        Dot()
+                        Text(
+                            text = "조회 ${post.postInfo.stats.viewCount}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.text.caption,
+                        )
+                    }
+                }
+
+            }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .background(
+                        color = colorScheme.bg.frame.default,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .size(48.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = post.postInfo.stats.commentCount.toString(),
+                        style = MaterialTheme.typography.bodyMedium.emp(),
+                        color = colorScheme.status.success.default,
+                    )
+                    Text(
+                        text = "댓글",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.text.caption,
+                    )
+                }
+            }
         }
     }
 }

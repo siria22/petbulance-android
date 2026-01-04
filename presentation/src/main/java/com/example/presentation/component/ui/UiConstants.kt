@@ -58,7 +58,7 @@ val spacingXXL = 32.dp
 
 val iconSizeXS = 12.dp
 val iconSizeSmall = 16.dp
-val iconSizeMs = 20.dp
+val iconSizeMS = 20.dp
 val iconSizeMedium = 24.dp
 val iconSizeLarge = 28.dp
 

@@ -33,7 +33,7 @@ import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.theme.emp
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
-import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.iconSizeMS
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.example.presentation.component.ui.organism.BottomNavigationBar
 import com.example.presentation.component.ui.organism.CurrentBottomNav
@@ -189,7 +189,7 @@ private fun <T : ContentAsString> HistoryChip(
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.Clear),
             contentDescription = "Delete history",
-            size = iconSizeMs,
+            size = iconSizeMS,
             modifier = Modifier.clickable { onDeleteIconClicked(content) }
         )
     }

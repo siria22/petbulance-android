@@ -33,8 +33,8 @@ class HomeViewModel @Inject constructor(
     private val _recentReviews = MutableStateFlow<List<HospitalReview>>(emptyList())
     val recentReviews: StateFlow<List<HospitalReview>> = _recentReviews
 
-    private val _hotArticle = MutableStateFlow<PostDetail?>(null)
-    val hotArticle: StateFlow<PostDetail?> = _hotArticle
+    private val _hotArticles = MutableStateFlow<List<PostDetail>?>(null)
+    val hotArticles: StateFlow<List<PostDetail>?> = _hotArticles
 
 
     fun onIntent(intent: HomeIntent) {
@@ -82,7 +82,7 @@ class HomeViewModel @Inject constructor(
         runCatching {
             getHotArticleUseCase()
         }.onSuccess { result ->
-            _hotArticle.value = result
+            _hotArticles.value = result
         }.onFailure { ex ->
             _eventFlow.emit(
                 HomeEvent.DataFetch.Error(

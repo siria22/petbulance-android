@@ -1,8 +1,7 @@
 package com.example.data.di.network
 
 import android.util.Log
-import com.example.domain.repository.nonfeature.auth.AuthRepository
-import com.example.domain.utils.LOGGER_TAG
+import com.example.domain.repository.feature.user.AuthRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,15 +14,15 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.accept
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import javax.inject.Provider
 import javax.inject.Qualifier
@@ -41,8 +40,10 @@ annotation class DefaultHttpClient
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    val logger = "$LOGGER_TAG - NetworkModule"
     private const val TOLERABLE_TIME = 3000L
+    private const val LOG_TAG = "siria22 - NetworkModule"
+
+    private const val isLoggingOn = true
 
     @Provides
     @Singleton
@@ -56,8 +57,14 @@ object NetworkModule {
                 })
             }
             install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
+                if (isLoggingOn) {
+                    logger = object : Logger {
+                        override fun log(message: String) {
+                            Log.d(LOG_TAG, message)
+                        }
+                    }
+                    level = LogLevel.ALL
+                }
             }
             install(HttpTimeout) {
                 requestTimeoutMillis = TOLERABLE_TIME
@@ -65,7 +72,9 @@ object NetworkModule {
                 socketTimeoutMillis = TOLERABLE_TIME
             }
             defaultRequest {
-                accept(ContentType.Application.Json)
+                header(HttpHeaders.Accept, "*/*")
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.UserAgent, "KoreaUniv-Android-Client")
             }
         }
     }
@@ -83,72 +92,78 @@ object NetworkModule {
                     isLenient = true
                 })
             }
+
             install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
+                if (isLoggingOn) {
+                    logger = object : Logger {
+                        override fun log(message: String) {
+                            Log.d(LOG_TAG, message)
+                        }
+                    }
+                    level = LogLevel.ALL
+                }
             }
+
             install(HttpTimeout) {
                 requestTimeoutMillis = TOLERABLE_TIME
                 connectTimeoutMillis = TOLERABLE_TIME
                 socketTimeoutMillis = TOLERABLE_TIME
             }
+
             defaultRequest {
-                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Accept, "*/*")
+                header(HttpHeaders.UserAgent, "KoreaUniv-Android-Client")
             }
 
-            // Auth 플러그인 추가
             install(Auth) {
                 bearer {
                     loadTokens {
                         val authRepository = authRepositoryProvider.get()
-                        val accessToken =
-                            runBlocking { authRepository.getAccessToken() }.getOrNull()
-                        val refreshToken =
-                            runBlocking { authRepository.getRefreshToken() }.getOrNull()
+                        val accessToken = authRepository.getAccessToken().getOrNull()
+                        val refreshToken = authRepository.getRefreshToken().getOrNull()
+
                         if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
                             null
                         } else {
                             BearerTokens(accessToken, refreshToken)
                         }
                     }
+
                     refreshTokens {
+                        Log.d(LOG_TAG, "Token expired. Refreshing tokens...")
                         val authRepository = authRepositoryProvider.get()
-                        val oldRefreshToken =
-                            runBlocking { authRepository.getRefreshToken() }.getOrNull()
-                        if (oldRefreshToken.isNullOrBlank()) {
+                        val refreshToken = authRepository.getRefreshToken().getOrNull()
+
+                        if (refreshToken.isNullOrBlank()) {
+                            Log.e(LOG_TAG, "No refresh token found.")
                             return@refreshTokens null
                         }
 
-                        val tokenResult =
-                            runBlocking { authRepository.refreshToken(oldRefreshToken) }
+                        val result = authRepository.refreshToken(refreshToken)
 
-                        tokenResult.fold(
-                            onSuccess = { (newAccessToken, newRefreshToken) ->
-                                if (newAccessToken != null && newRefreshToken != null) {
-                                    runBlocking {
-                                        authRepository.saveTokens(newAccessToken, newRefreshToken)
-                                    }
-                                    BearerTokens(newAccessToken, newRefreshToken)
-                                } else {
-                                    runBlocking { authRepository.clearTokens() }
-                                    null
-                                }
-                            },
-                            onFailure = {
-                                runBlocking { authRepository.clearTokens() }
-                                null
+                        var newTokens: BearerTokens? = null
+
+                        result.onSuccess { (newAccess, newRefreshToken) ->
+                            if (!newAccess.isNullOrBlank()) {
+                                val finalRefreshToken = newRefreshToken ?: refreshToken
+                                authRepository.saveTokens(newAccess, finalRefreshToken)
+                                newTokens = BearerTokens(newAccess, finalRefreshToken)
+                                Log.d(LOG_TAG, "Token refresh successful.")
                             }
-                        )
+                        }.onFailure {
+                            Log.e(LOG_TAG, "Token refresh failed: ${it.message}")
+                            authRepository.clearTokens()
+                        }
+
+                        newTokens
                     }
+
                     sendWithoutRequest { request ->
                         val path = request.url.encodedPath
-                        val isAuthRequest =
-                            path.contains("/auth/login") || path.contains("/auth/refresh")
-                        Log.d(
-                            logger, "Request path: $path, " +
-                                    "Is Auth Request: $isAuthRequest (Send token: ${!isAuthRequest})"
-                        )
-                        !isAuthRequest
+                        path.contains("auth/login")
+                                || path.contains("auth/refresh")
+                                || path.contains("auth/social/login")
                     }
                 }
             }

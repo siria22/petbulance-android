@@ -30,7 +30,7 @@ import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.iconSizeMedium
-import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.iconSizeMS
 import com.example.presentation.component.ui.iconSizeXS
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
@@ -92,7 +92,7 @@ fun MapViewToggleButton(
         BasicIcon(
             iconResource = IconResource.Vector(icon),
             contentDescription = "Switch Map and List View",
-            size = iconSizeMs,
+            size = iconSizeMS,
             tint = colorScheme.icon.inverse
         )
         Text(

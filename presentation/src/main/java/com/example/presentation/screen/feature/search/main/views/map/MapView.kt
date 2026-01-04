@@ -171,24 +171,18 @@ fun MapView(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // [UX 개선] 위치 정보를 확인 중(로딩)인 경우를 최우선으로 처리
             val isLocationLoading = userLocationArgument.locationState is UserLocationState.Init ||
                     userLocationArgument.locationState is UserLocationState.Finding
 
             if (isLocationLoading) {
-                // 로딩 중에도 지도는 배경에 깔아둠 (빈 상태)
                 MapLayer(
                     state = searchUiState,
                     selectedHospitalId = null,
                     onHospitalSelected = {},
                     onMapReady = { naverMap = it }
                 )
-                Ready() // 로딩 오버레이
-            } else if (searchUiState.hospitalList.isEmpty()) {
-                // 로딩이 끝났는데 데이터가 없는 경우
-                NoResult()
+                Ready()
             } else {
-                // 정상 케이스
                 MapLayer(
                     state = searchUiState,
                     selectedHospitalId = selectedHospitalId,
@@ -362,52 +356,24 @@ private fun MapUiLayer(
                     Spacer(modifier = Modifier.width(40.dp))
                 }
             }
-            BaseCarousel(
-                modifier = Modifier.fillMaxWidth(),
-                items = state.filteredHospitalList,
-                contentPadding = PaddingValues(spacingMedium),
-                itemSpacing = spacingXS
-            ) { _, item ->
+            if (state.filteredHospitalList.isEmpty()) {
                 HospitalCard(
-                    hospital = item,
-                    isShadowed = true,
-                    onCardClick = { onHospitalClick(item) }
+                    hospital = null
                 )
+            } else {
+                BaseCarousel(
+                    modifier = Modifier.fillMaxWidth(),
+                    items = state.filteredHospitalList,
+                    contentPadding = PaddingValues(spacingMedium),
+                    itemSpacing = spacingXS
+                ) { _, item ->
+                    HospitalCard(
+                        hospital = item,
+                        isShadowed = true,
+                        onCardClick = { onHospitalClick(item) }
+                    )
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun NoResult() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = spacingXL)
-
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(spacingSmall),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            BasicIcon(
-                iconResource = IconResource.Drawable(R.drawable.img_no_result),
-                contentDescription = "No result",
-                size = 160.dp,
-                tint = Color.Unspecified
-            )
-            Text(
-                text = "주변 병원을 찾을 수 없어요.",
-                style = typography.titleSmall,
-                color = colorScheme.text.tertiary
-            )
-            Text(
-                text = "더 넓은 지역에서 검색해주세요.",
-                style = typography.bodySmall,
-                color = colorScheme.text.tertiary
-            )
         }
     }
 }

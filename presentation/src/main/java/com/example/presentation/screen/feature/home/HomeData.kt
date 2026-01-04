@@ -5,12 +5,12 @@ import com.example.domain.model.feature.hospital.review.HospitalReview
 
 data class HomeData(
     val recentReviews: List<HospitalReview>,
-    val hotArticle: PostDetail?
+    val hotArticles: List<PostDetail>?
 ) {
     companion object {
         val stub = HomeData(
             recentReviews = listOf(HospitalReview.stub),
-            hotArticle = PostDetail.stub
+            hotArticles = listOf(PostDetail.stub)
         )
     }
 }

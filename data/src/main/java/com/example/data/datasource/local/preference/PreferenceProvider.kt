@@ -49,9 +49,22 @@ class PreferenceProvider(
         }
     }
 
+    suspend fun updateLastLoginPlatform(platform: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LAST_LOGIN_PLATFORM] = platform
+        }
+    }
+
+    fun observeLastLoginPlatform(): Flow<String> {
+        return context.dataStore.data.map { prefs ->
+            prefs[LAST_LOGIN_PLATFORM] ?: ""
+        }
+    }
+
     companion object {
         val APP_THEME = stringPreferencesKey("app_theme")
         val ACCESS_TOKEN = stringPreferencesKey("access_token")
         val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        val LAST_LOGIN_PLATFORM = stringPreferencesKey("last_login_platform")
     }
 }

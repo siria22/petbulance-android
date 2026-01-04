@@ -2,8 +2,8 @@ package com.example.data.di.room
 
 import android.content.Context
 import androidx.room.Room
-import com.example.data.datasource.local.database.dao.ExampleDao
 import com.example.data.datasource.local.database.dao.SearchDao
+import com.example.data.datasource.local.database.dao.TermConsentDao
 import com.example.data.datasource.local.database.dao.ViewedHospitalDao
 import dagger.Module
 import dagger.Provides
@@ -28,8 +28,8 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideExampleDao(database: AppDatabase): ExampleDao {
-        return database.exampleDao()
+    fun provideTermConsentDao(database: AppDatabase): TermConsentDao {
+        return database.termConsentDao()
     }
 
     @Provides

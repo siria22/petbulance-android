@@ -1,12 +1,12 @@
 package com.example.domain.repository.feature.user
 
-import com.example.domain.model.feature.user.NicknameActionResult
-import com.example.domain.model.feature.user.NicknameCheckResult
-import com.example.domain.model.feature.user.NotificationSettings
-import com.example.domain.model.feature.user.ProfileImageCheckResult
-import com.example.domain.model.feature.user.ProfileImageUploadInfo
-import com.example.domain.model.feature.user.SocialConnectResult
-import com.example.domain.model.feature.user.UserInfo
+import com.example.domain.model.feature.user.user.NicknameActionResult
+import com.example.domain.model.feature.user.user.NicknameCheckResult
+import com.example.domain.model.feature.user.user.NotificationSettings
+import com.example.domain.model.feature.user.user.ProfileImageCheckResult
+import com.example.domain.model.feature.user.user.ProfileImageUploadInfo
+import com.example.domain.model.feature.user.user.SocialConnectResult
+import com.example.domain.model.feature.user.user.UserInfo
 
 interface UserRepository {
     suspend fun checkNickname(nickname: String): Result<NicknameCheckResult>

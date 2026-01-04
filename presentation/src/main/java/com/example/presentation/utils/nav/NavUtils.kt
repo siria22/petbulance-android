@@ -1,6 +1,7 @@
 package com.example.presentation.utils.nav
 
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
 
 fun NavController.safePopBackStack() {
     if (this.previousBackStackEntry != null) {
@@ -16,5 +17,11 @@ fun NavController.safeNavigate(route: String) {
                 inclusive = false
             }
         }
+    }
+}
+
+fun NavController.safeNavigate(route: String, builder: NavOptionsBuilder.() -> Unit) {
+    if (this.currentDestination?.route != route) {
+        this.navigate(route, builder)
     }
 }

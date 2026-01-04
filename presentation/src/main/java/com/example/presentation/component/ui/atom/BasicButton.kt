@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -29,7 +30,7 @@ enum class BasicButtonSize {
 }
 
 enum class BasicButtonType {
-    PRIMARY, SECONDARY, DEFAULT
+    PRIMARY, SECONDARY, DEFAULT, DISABLED
 }
 
 @Composable
@@ -68,18 +69,21 @@ fun BasicButton(
         BasicButtonType.PRIMARY -> colorScheme.action.primary.default
         BasicButtonType.SECONDARY -> colorScheme.bg.frame.default
         BasicButtonType.DEFAULT -> colorScheme.bg.frame.default
+        BasicButtonType.DISABLED -> colorScheme.action.primary.disabled
     }
 
     val textColor = when (buttonType) {
         BasicButtonType.PRIMARY -> colorScheme.text.inverse
         BasicButtonType.SECONDARY -> colorScheme.action.primary.default
         BasicButtonType.DEFAULT -> colorScheme.text.tertiary
+        BasicButtonType.DISABLED -> colorScheme.text.disabled
     }
 
     val borderColor = when (buttonType) {
         BasicButtonType.PRIMARY -> colorScheme.action.primary.default
         BasicButtonType.SECONDARY -> colorScheme.action.primary.default
         BasicButtonType.DEFAULT -> colorScheme.border.subtle
+        else -> Color.Transparent
     }
 
     Row(

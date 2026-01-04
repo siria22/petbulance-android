@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.domain.model.type.AnimalCategory
 import com.example.domain.model.type.Region
-import com.example.domain.model.type.toKorean
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -359,7 +358,7 @@ private fun SpeciesSelectColumn(
                     .clickable(onClick = { onChipClicked(animalCategory) })
             ) {
                 Text(
-                    text = animalCategory.toKorean(),
+                    text = AnimalCategory.toKorean(animalCategory),
                     style = MaterialTheme.typography.bodyLarge.emp(),
                     color = colorScheme.text.secondary,
                 )

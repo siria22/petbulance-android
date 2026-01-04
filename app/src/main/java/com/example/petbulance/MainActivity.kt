@@ -11,16 +11,25 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.petbulance.common.nav.AppNavGraph
+import com.example.presentation.component.theme.PetbulanceTheme
+import com.example.presentation.utils.SdkInitializer
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var sdkInitializer: SdkInitializer
+
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sdkInitializer.initialize(this)
+
         enableEdgeToEdge()
         setContent {
             val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()

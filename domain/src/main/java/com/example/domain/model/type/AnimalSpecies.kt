@@ -34,16 +34,6 @@ enum class AnimalSpecies(val category: AnimalCategory) {
     ORNAMENTAL_FISH(AnimalCategory.FISH)  // 관상어
 }
 
-fun AnimalCategory.toKorean(): String {
-    return when (this) {
-        AnimalCategory.SMALL_MAMMAL -> "소형 포유류"
-        AnimalCategory.BIRD -> "조류"
-        AnimalCategory.REPTILE -> "파충류"
-        AnimalCategory.AMPHIBIAN -> "양서류"
-        AnimalCategory.FISH -> "어류"
-    }
-}
-
 fun AnimalSpecies.toKorean(): String {
     return when (this) {
         AnimalSpecies.HAMSTER -> "햄스터"

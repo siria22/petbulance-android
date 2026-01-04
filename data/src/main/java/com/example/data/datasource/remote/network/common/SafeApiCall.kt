@@ -34,10 +34,7 @@ suspend inline fun <reified T> safeApiCall(
         val responseString = response.body<String>()
         val json = Json { ignoreUnknownKeys = true }
 
-        val statusCode = response.status.value
-        Log.d("$logger (responseString)", "[$statusCode] : $responseString")
-
-        when (statusCode) {
+        when (val statusCode = response.status.value) {
             in 200..299 -> {
                 val responseBody = json.decodeFromString<BaseResponse<T>>(responseString)
                 return responseBody.data?.let { Result.success(it) }

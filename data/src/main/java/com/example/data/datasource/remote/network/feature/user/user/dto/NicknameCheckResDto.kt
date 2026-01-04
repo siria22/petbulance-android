@@ -1,0 +1,10 @@
+package com.example.data.datasource.remote.network.feature.user.user.dto
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class NicknameCheckResDto(
+    val nickname: String,
+    val available: Boolean,
+    val reason: String? = null
+)

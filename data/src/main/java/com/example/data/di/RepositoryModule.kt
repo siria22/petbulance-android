@@ -1,6 +1,5 @@
 package com.example.data.di
 
-import com.example.data.repository.ExampleRepositoryImpl
 import com.example.data.repository.feature.community.board.MockBoardRepository
 import com.example.data.repository.feature.community.comment.MockCommentRepository
 import com.example.data.repository.feature.community.post.MockPostRepository
@@ -12,12 +11,13 @@ import com.example.data.repository.feature.hospital.search.SearchRepositoryImpl
 import com.example.data.repository.feature.support.inquiry.MockInquiryRepository
 import com.example.data.repository.feature.support.notice.MockNoticeRepository
 import com.example.data.repository.feature.support.qna.QnaRepositoryImpl
-import com.example.data.repository.feature.user.MockUserRepository
+import com.example.data.repository.feature.user.auth.AuthRepositoryImpl
+import com.example.data.repository.feature.user.terms.MockTermsRepository
+import com.example.data.repository.feature.user.terms.TermsRepositoryImpl
+import com.example.data.repository.feature.user.user.MockUserRepository
 import com.example.data.repository.nonfeature.app.MockAppInfoRepository
-import com.example.data.repository.nonfeature.auth.AuthRepositoryImpl
 import com.example.data.repository.nonfeature.device.MockDeviceRepository
 import com.example.data.repository.nonfeature.preference.PreferenceRepositoryImpl
-import com.example.domain.repository.feature.ExampleRepository
 import com.example.domain.repository.feature.community.BoardRepository
 import com.example.domain.repository.feature.community.CommentRepository
 import com.example.domain.repository.feature.community.PostRepository
@@ -29,9 +29,10 @@ import com.example.domain.repository.feature.hospital.SearchRepository
 import com.example.domain.repository.feature.support.InquiryRepository
 import com.example.domain.repository.feature.support.NoticeRepository
 import com.example.domain.repository.feature.support.QnaRepository
+import com.example.domain.repository.feature.user.AuthRepository
+import com.example.domain.repository.feature.user.TermsRepository
 import com.example.domain.repository.feature.user.UserRepository
 import com.example.domain.repository.nonfeature.app.AppInfoRepository
-import com.example.domain.repository.nonfeature.auth.AuthRepository
 import com.example.domain.repository.nonfeature.device.DeviceRepository
 import com.example.domain.repository.nonfeature.preference.PreferenceRepository
 import dagger.Binds
@@ -47,12 +48,6 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindExampleRepository(
-        impl: ExampleRepositoryImpl
-    ): ExampleRepository
-
-    @Binds
-    @Singleton
     abstract fun bindPreferenceRepository(
         impl: PreferenceRepositoryImpl
     ): PreferenceRepository
@@ -65,9 +60,15 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindTermsRepository(
+        mock: MockTermsRepository
+//        impl: TermsRepositoryImpl
+    ): TermsRepository
+
+    @Binds
+    @Singleton
     abstract fun bindAppInfoRepository(
         mock: MockAppInfoRepository
-//        impl: AppInfoRepositoryImpl
     ): AppInfoRepository
 
     @Binds

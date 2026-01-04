@@ -24,6 +24,10 @@ class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
         return Result.success("1.0.0")
     }
 
+    override suspend fun getCurrentAppVersion(): Result<String> {
+        return Result.success("1.0.0")
+    }
+
     override suspend fun getMetadata(
         region: String,
         species: String,

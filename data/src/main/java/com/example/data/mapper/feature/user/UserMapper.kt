@@ -1,23 +1,23 @@
 package com.example.data.mapper.feature.user
 
-import com.example.data.datasource.remote.network.feature.user.dto.CheckProfileImageResDto
-import com.example.data.datasource.remote.network.feature.user.dto.MeResponseDto
-import com.example.data.datasource.remote.network.feature.user.dto.NicknameCheckResDto
-import com.example.data.datasource.remote.network.feature.user.dto.NicknameSaveResDto
-import com.example.data.datasource.remote.network.feature.user.dto.NicknameUpdateResDto
-import com.example.data.datasource.remote.network.feature.user.dto.NotificationSettingReqDto
-import com.example.data.datasource.remote.network.feature.user.dto.NotificationSettingResDto
-import com.example.data.datasource.remote.network.feature.user.dto.ProfileImageUpdateResDto
-import com.example.data.datasource.remote.network.feature.user.dto.SocialConnectResponseDto
-import com.example.data.datasource.remote.network.feature.user.dto.SocialDisconnectResDto
-import com.example.domain.model.feature.user.ConnectedSocials
-import com.example.domain.model.feature.user.NicknameActionResult
-import com.example.domain.model.feature.user.NicknameCheckResult
-import com.example.domain.model.feature.user.NotificationSettings
-import com.example.domain.model.feature.user.ProfileImageCheckResult
-import com.example.domain.model.feature.user.ProfileImageUploadInfo
-import com.example.domain.model.feature.user.SocialConnectResult
-import com.example.domain.model.feature.user.UserInfo
+import com.example.data.datasource.remote.network.feature.user.user.dto.CheckProfileImageResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.MeResponseDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.NicknameCheckResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.NicknameSaveResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.NicknameUpdateResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.NotificationSettingReqDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.NotificationSettingResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.ProfileImageUpdateResDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.SocialConnectResponseDto
+import com.example.data.datasource.remote.network.feature.user.user.dto.SocialDisconnectResDto
+import com.example.domain.model.feature.user.user.ConnectedSocials
+import com.example.domain.model.feature.user.user.NicknameActionResult
+import com.example.domain.model.feature.user.user.NicknameCheckResult
+import com.example.domain.model.feature.user.user.NotificationSettings
+import com.example.domain.model.feature.user.user.ProfileImageCheckResult
+import com.example.domain.model.feature.user.user.ProfileImageUploadInfo
+import com.example.domain.model.feature.user.user.SocialConnectResult
+import com.example.domain.model.feature.user.user.UserInfo
 
 fun NicknameCheckResDto.toDomain() = NicknameCheckResult(
     nickname = nickname,

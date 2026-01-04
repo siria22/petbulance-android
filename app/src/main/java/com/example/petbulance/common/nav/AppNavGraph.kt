@@ -7,6 +7,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.presentation.screen.feature.home.homeDestination
 import com.example.presentation.screen.feature.search.info.hospitalInfoDestination
 import com.example.presentation.screen.feature.search.main.searchDestination
+import com.example.presentation.screen.nonfeature.login.main.loginDestination
+import com.example.presentation.screen.nonfeature.login.terms.termsDestination
+import com.example.presentation.screen.nonfeature.splash.splashDestination
 import com.example.presentation.utils.nav.ScreenDestinations
 
 @Composable
@@ -16,13 +19,16 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = ScreenDestinations.Home.route,
+        startDestination = ScreenDestinations.Splash.route,
         modifier = modifier
     ) {
+        splashDestination(navController = navController)
+        loginDestination(navController = navController)
+        termsDestination(navController = navController)
+
         homeDestination(navController = navController)
 
         searchDestination(navController = navController)
         hospitalInfoDestination(navController = navController)
-
     }
 }

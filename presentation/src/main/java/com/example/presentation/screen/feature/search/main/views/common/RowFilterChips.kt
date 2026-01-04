@@ -15,11 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.domain.model.type.toKorean
+import com.example.domain.model.type.AnimalCategory
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
-import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.iconSizeMS
 import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.example.presentation.component.ui.spacingLarge
 import com.example.presentation.component.ui.spacingMedium
@@ -56,8 +56,9 @@ fun RowChipFilters(
                         elem.toKorean()
                     }
                 }
+
                 FilterBottomSheetTab.SPECIES -> {
-                    uiModel.species?.toKorean() ?: elem.toKorean()
+                    AnimalCategory.toKorean(uiModel.species ?: AnimalCategory.ALL)
                 }
             }
 
@@ -98,7 +99,7 @@ private fun ChipFilter(
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Filled.KeyboardArrowDown),
             contentDescription = "Icon",
-            size = iconSizeMs,
+            size = iconSizeMS,
             modifier = Modifier.clickable {
                 onButtonClicked()
             }

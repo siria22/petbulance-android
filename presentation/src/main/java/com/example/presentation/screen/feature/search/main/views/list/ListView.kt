@@ -116,18 +116,26 @@ fun ListView(
                     verticalArrangement = Arrangement.spacedBy(spacingMedium),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(searchUiState.filteredHospitalList) { hospital ->
-                        HospitalCard(
-                            hospital = hospital,
-                            borderColor = colorScheme.border.subtle,
-                            onCardClick = {
-                                navController.safeNavigate(
-                                    route = ScreenDestinations.Search.HospitalInfo.createRoute(
-                                        id = hospital.hospitalId
+                    if(searchUiState.filteredHospitalList.isEmpty()) {
+                        item{
+                            HospitalCard(
+                                hospital = null
+                            )
+                        }
+                    } else {
+                        items(searchUiState.filteredHospitalList) { hospital ->
+                            HospitalCard(
+                                hospital = hospital,
+                                borderColor = colorScheme.border.subtle,
+                                onCardClick = {
+                                    navController.safeNavigate(
+                                        route = ScreenDestinations.Search.HospitalInfo.createRoute(
+                                            id = hospital.hospitalId
+                                        )
                                     )
-                                )
-                            }
-                        )
+                                }
+                            )
+                        }
                     }
                 }
             }

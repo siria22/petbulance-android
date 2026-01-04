@@ -28,7 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
-import com.example.presentation.component.ui.iconSizeMs
+import com.example.presentation.component.ui.iconSizeMS
 import com.example.presentation.component.ui.spacingMedium
 
 /**
@@ -104,7 +104,7 @@ fun BasicInputTextField(
                 BasicIcon(
                     iconResource = IconResource.Vector(Icons.Filled.Search),
                     contentDescription = "Search icon",
-                    size = iconSizeMs,
+                    size = iconSizeMS,
                     tint = iconTint,
                     modifier = Modifier.clickable {
                         onSearchButtonClicked()
