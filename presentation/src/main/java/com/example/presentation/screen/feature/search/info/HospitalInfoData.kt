@@ -61,6 +61,6 @@ data class HospitalUiData(
 
 data class ReviewUiData(
     val reviews: List<HospitalReview> = emptyList(),
-    val sortBy: ReviewSortType = ReviewSortType.RECENT,
+    val sortBy: ReviewSortType = ReviewSortType.LATEST,
     val onlyImage: Boolean = false
 )

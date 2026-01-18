@@ -19,8 +19,8 @@ class GetHospitalReviewsUseCase @Inject constructor(
     ): Result<PagingReviewList<HospitalReview>> {
         val direction = "desc"
         val sortType = when(sortBy) {
-            ReviewSortType.RECOMMENDED -> "likeCount"
-            ReviewSortType.RECENT -> "createdAt"
+            ReviewSortType.MOST_HELPFUL -> "likeCount"
+            ReviewSortType.LATEST -> "createdAt"
             ReviewSortType.RATING -> "totalRating"
         }
 

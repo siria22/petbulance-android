@@ -78,6 +78,7 @@ fun ReviewCard(review: HospitalReview) {
                 size = iconSizeMedium,
                 contentDescription = "More",
                 tint = colorScheme.icon.light
+                //TODO : More 버튼 클릭 시
             )
         }
 

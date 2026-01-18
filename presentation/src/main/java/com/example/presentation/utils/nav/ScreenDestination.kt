@@ -25,4 +25,5 @@ sealed class ScreenDestinations(val route: String) {
         }
     }
 
+    data object Review : ScreenDestinations("review")
 }
