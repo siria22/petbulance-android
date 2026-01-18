@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.review
+package com.example.presentation.screen.feature.review.main
 
 import com.example.domain.model.type.AnimalCategory
 import com.example.domain.model.type.Region

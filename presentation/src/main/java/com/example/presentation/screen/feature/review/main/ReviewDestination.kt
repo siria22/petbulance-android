@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.review
+package com.example.presentation.screen.feature.review.main
 
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel

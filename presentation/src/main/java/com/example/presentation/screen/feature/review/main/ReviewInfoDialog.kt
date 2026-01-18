@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.review
+package com.example.presentation.screen.feature.review.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

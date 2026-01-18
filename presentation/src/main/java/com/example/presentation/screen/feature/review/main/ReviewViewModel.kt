@@ -1,4 +1,4 @@
-package com.example.presentation.screen.feature.review
+package com.example.presentation.screen.feature.review.main
 
 import androidx.lifecycle.viewModelScope
 import com.example.domain.model.feature.hospital.review.HospitalReview
@@ -53,6 +53,7 @@ class ReviewViewModel @Inject constructor(
 
     private val _isLoadingNextPage = MutableStateFlow(false)
     val isLoadingNextPage = _isLoadingNextPage.asStateFlow()
+
 
     // Pagination Info
     private var currentCursorId: Long? = null
