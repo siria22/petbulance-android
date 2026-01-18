@@ -4,23 +4,21 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
+import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.example.domain.model.feature.hospital.review.SaveReviewResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 
 interface ReviewRepository {
 
-    // 1. 병원 검색
     suspend fun findHospital(name: String): Result<List<HospitalInfo>>
 
-    // 2. 리뷰 검색 (키워드)
     suspend fun searchReview(
         query: String,
         cursorId: Long?,
         size: Int = 10
     ): Result<PagingReviewList<ReviewSearchItem>>
 
-    // 3. 리뷰 필터
     suspend fun filterReview(
         region: String?,
         animalType: String?,
@@ -29,7 +27,6 @@ interface ReviewRepository {
         size: Int = 10
     ): Result<PagingReviewList<ReviewSearchItem>>
 
-    // 4. 병원 상세 리뷰 조회
     suspend fun getHospitalReviews(
         hospitalId: Long,
         onlyImageReview: Boolean = false,
@@ -41,18 +38,18 @@ interface ReviewRepository {
         sortDirection: String = "desc"
     ): Result<PagingReviewList<HospitalReview>>
 
-    // 5. 리뷰 저장
     suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult>
 
-    // 6. 이미지 저장 확인
     suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String>
 
-    // 7. 내 리뷰 조회
     suspend fun getMyReviews(
         size: Int = 10,
         cursorId: Long? = null
     ): Result<PagingReviewList<MyReview>>
 
-    // 8. 내 리뷰 삭제
     suspend fun deleteMyReviews(ids: List<Long>): Result<String>
+
+    suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): Result<ReceiptAnalysisResult>
+
+    suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit>
 }

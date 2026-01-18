@@ -10,3 +10,9 @@ data class ReceiptAnalysisResDto(
     val price: Long,
     val items: List<ReceiptItemDto>
 )
+
+@Serializable
+data class ReceiptItemDto(
+    val name: String,
+    val price: Long
+)

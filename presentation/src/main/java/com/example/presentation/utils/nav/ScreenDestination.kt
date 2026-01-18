@@ -27,5 +27,6 @@ sealed class ScreenDestinations(val route: String) {
 
     data object Review : ScreenDestinations("review") {
         data object Search : ScreenDestinations("review/search")
+        data object Create : ScreenDestinations("review/create")
     }
 }

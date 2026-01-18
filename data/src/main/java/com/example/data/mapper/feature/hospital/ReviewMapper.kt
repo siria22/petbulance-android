@@ -13,6 +13,7 @@ import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 
+// TODO : 명세 확인
 fun UserReviewSearchDto.toDomain() = ReviewSearchItem(
     id = id,
     hospitalName = hospitalName,
@@ -78,4 +79,12 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     images = images?.map {
         ReviewImageDto(filename = it.filename, contentType = it.contentType)
     }
+)
+
+fun ReceiptAnalysisResDto.toDomain() = ReceiptAnalysisResult(
+    hospitalId = hospitalId,
+    hospitalName = hospitalName,
+    visitDate = visitDateTime,
+    totalPrice = price,
+    items = items.map { ReceiptItem(it.name, it.price) }
 )

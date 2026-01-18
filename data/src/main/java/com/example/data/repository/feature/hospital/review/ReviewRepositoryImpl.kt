@@ -7,6 +7,7 @@ import com.example.data.datasource.remote.network.feature.hospital.review.dto.Fi
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.FindHospitalResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.HospitalReviewsCursorResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetResDto
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewDeleteResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckResDto
@@ -18,6 +19,7 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
+import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.example.domain.model.feature.hospital.review.SaveReviewResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.ReviewUploadUrl
@@ -114,7 +116,7 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
         return safeApiCall<ReviewImageCheckResDto>(path = "/receipts/save/success") {
-            val reqDto = ReviewImageCheckReqDto(reviewId, keys)
+            val reqDto = ReviewImageCheckReqDto(reviewId = reviewId, keys = keys)
             api.checkReviewImageSave(reqDto)
         }.map { it.message }
     }
@@ -138,5 +140,17 @@ class ReviewRepositoryImpl @Inject constructor(
         return safeApiCall<ReviewDeleteResDto>(path = "/receipts") {
             api.deleteMyReviews(ids)
         }.map { it.message }
+    }
+
+    override suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): Result<ReceiptAnalysisResult> {
+        return safeApiCall<ReceiptAnalysisResDto>(path = "/receipts") {
+            api.analyzeReceipt(imageBytes, fileName)
+        }.map { it.toDomain() }
+    }
+
+    override suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit> {
+        return safeApiCall<Unit>(path = url) {
+            api.uploadImage(url, imageBytes)
+        }.map { }
     }
 }

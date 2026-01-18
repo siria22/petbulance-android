@@ -1,7 +1,8 @@
 package com.example.presentation.component.ui.atom
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -10,14 +11,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.round
 
 @Composable
 fun RatingBar(
@@ -26,14 +36,36 @@ fun RatingBar(
     maxRating: Int = 5,
     starSize: Dp = 24.dp,
     activeColor: Color = colorScheme.icon.rating,
-    inactiveColor: Color = colorScheme.icon.disabled
+    inactiveColor: Color = colorScheme.icon.disabled,
+    onRatingChanged: ((Double) -> Unit)? = null
 ) {
-    Row(modifier = modifier) {
+    val density = LocalDensity.current
+    val starSizePx = with(density) { starSize.toPx() }
+
+    Row(
+        modifier = modifier.then(
+            if (onRatingChanged != null) {
+                Modifier
+                    .pointerInput(Unit) {
+                        detectTapGestures { offset ->
+                            val newRating = calculateRating(offset.x, starSizePx, maxRating)
+                            onRatingChanged(newRating)
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures { change, _ ->
+                            val newRating =
+                                calculateRating(change.position.x, starSizePx, maxRating)
+                            onRatingChanged(newRating)
+                        }
+                    }
+            } else Modifier
+        )
+    ) {
         val fullStars = floor(rating).toInt()
         val partialStarFill = rating - fullStars
         val emptyStars = maxRating - ceil(rating).toInt()
 
-        // Full stars
         repeat(fullStars) {
             Icon(
                 imageVector = Icons.Filled.Star,
@@ -43,7 +75,6 @@ fun RatingBar(
             )
         }
 
-        // Partial star
         if (partialStarFill > 0) {
             PartialStar(
                 fraction = partialStarFill.toFloat(),
@@ -53,7 +84,6 @@ fun RatingBar(
             )
         }
 
-        // Empty stars
         repeat(emptyStars) {
             Icon(
                 imageVector = Icons.Filled.Star,
@@ -63,6 +93,12 @@ fun RatingBar(
             )
         }
     }
+}
+
+private fun calculateRating(x: Float, starSizePx: Float, maxRating: Int): Double {
+    val rawRating = x / starSizePx
+    val rating = (round(rawRating * 2) / 2.0)
+    return max(0.0, min(maxRating.toDouble(), rating))
 }
 
 @Composable
@@ -94,34 +130,19 @@ private fun PartialStar(
     }
 }
 
-private class FractionalClip(private val fraction: Float) : androidx.compose.ui.graphics.Shape {
+private class FractionalClip(private val fraction: Float) : Shape {
     override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
-        layoutDirection: androidx.compose.ui.unit.LayoutDirection,
-        density: androidx.compose.ui.unit.Density
-    ): androidx.compose.ui.graphics.Outline {
-        return androidx.compose.ui.graphics.Outline.Rectangle(
-            rect = androidx.compose.ui.geometry.Rect(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        return Outline.Rectangle(
+            rect = Rect(
                 left = 0f,
                 top = 0f,
                 right = size.width * fraction,
                 bottom = size.height
             )
         )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun RatingBarPreview() {
-    PetbulanceTheme {
-        Column {
-            RatingBar(rating = 4.8)
-            RatingBar(rating = 3.5)
-            RatingBar(rating = 2.2)
-            RatingBar(rating = 1.0)
-            RatingBar(rating = 0.4)
-        }
     }
 }

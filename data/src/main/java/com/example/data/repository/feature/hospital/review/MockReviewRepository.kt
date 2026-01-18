@@ -4,6 +4,7 @@ import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
 import com.example.domain.model.feature.hospital.review.PagingReviewList
+import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 import com.example.domain.model.feature.hospital.review.SaveReviewResult
@@ -149,5 +150,27 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
 
     override suspend fun deleteMyReviews(ids: List<Long>): Result<String> {
         return Result.success("Deleted")
+    }
+
+    override suspend fun analyzeReceipt(
+        imageBytes: ByteArray,
+        fileName: String
+    ): Result<ReceiptAnalysisResult> {
+        return Result.success(
+            ReceiptAnalysisResult(
+                hospitalName = "행복 동물병원",
+                visitDate = "2023-11-20",
+                items = emptyList(),
+                hospitalId = 0L,
+                totalPrice = 120_000
+            )
+        )
+    }
+
+    override suspend fun uploadImage(
+        url: String,
+        imageBytes: ByteArray
+    ): Result<Unit> {
+        return Result.success(Unit)
     }
 }

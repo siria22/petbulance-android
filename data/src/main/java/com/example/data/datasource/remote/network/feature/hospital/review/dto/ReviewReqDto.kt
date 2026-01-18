@@ -2,6 +2,7 @@ package com.example.data.datasource.remote.network.feature.hospital.review.dto
 
 import kotlinx.serialization.Serializable
 
+// TODO : 체크
 @Serializable
 data class ReviewSaveReqDto(
     val hospitalId: Long,
@@ -28,11 +29,13 @@ data class ReceiptItemDto(
 @Serializable
 data class ReviewImageDto(
     val filename: String,
-    val contentType: String
+    val contentType: String,
+    val content: String,
+    val receipt: Boolean
 )
 
 @Serializable
 data class ReviewImageCheckReqDto(
     val reviewId: Long,
-    val keys: List<String>
+    val saveIds: List<String>
 )

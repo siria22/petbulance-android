@@ -6,12 +6,17 @@ import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import javax.inject.Inject
 
@@ -94,6 +99,24 @@ class ReviewApi @Inject constructor(
             ids.forEach { id ->
                 parameter("ids", id)
             }
+        }
+    }
+
+    suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): HttpResponse {
+        return client.submitFormWithBinaryData(
+            url = baseUrl,
+            formData = formData {
+                append("image", imageBytes, Headers.build {
+                    append(HttpHeaders.ContentType, "image/*") // 또는 "image/jpeg" 등 구체적 명시
+                    append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                })
+            }
+        )
+    }
+
+    suspend fun uploadImage(url: String, imageBytes: ByteArray): HttpResponse {
+        return client.put(url) {
+            setBody(imageBytes)
         }
     }
 }

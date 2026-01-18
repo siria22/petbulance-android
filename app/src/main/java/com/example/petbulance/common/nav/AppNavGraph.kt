@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.screen.feature.home.homeDestination
+import com.example.presentation.screen.feature.review.create.reviewCreateDestination
 import com.example.presentation.screen.feature.review.main.reviewDestination
 import com.example.presentation.screen.feature.review.search.reviewSearchDestination
 import com.example.presentation.screen.feature.search.info.hospitalInfoDestination
@@ -35,5 +36,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
 
         reviewDestination(navController = navController)
         reviewSearchDestination(navController = navController)
+        reviewCreateDestination(navController = navController)
     }
 }
