@@ -116,7 +116,10 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
         return safeApiCall<ReviewImageCheckResDto>(path = "/receipts/save/success") {
-            val reqDto = ReviewImageCheckReqDto(reviewId = reviewId, keys = keys)
+            val reqDto = ReviewImageCheckReqDto(
+                reviewId = reviewId,
+                saveIds = keys
+            )
             api.checkReviewImageSave(reqDto)
         }.map { it.message }
     }

@@ -2,8 +2,10 @@ package com.example.presentation.screen.feature.review.create
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import androidx.lifecycle.viewModelScope
 import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.example.domain.model.feature.hospital.review.ReviewImageParam
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 import com.example.domain.usecase.feature.hospital.review.CreateReviewUseCase
 import com.example.presentation.utils.BaseViewModel
@@ -138,11 +140,11 @@ class ReviewCreateViewModel @Inject constructor(
             it.copy(
                 step1 = it.step1.copy(
                     isReceiptVerified = true
-                    // Note: Hospital mapping logic can be added here if needed
                 ),
                 step2 = it.step2.copy(
                     visitDate = result.visitDate,
-                    price = result.totalPrice
+                    price = result.totalPrice,
+                    receiptItems = result.items // 항목 저장
                 )
             )
         }
@@ -161,26 +163,41 @@ class ReviewCreateViewModel @Inject constructor(
         launch {
             _state.update { it.copy(isLoading = true) }
 
-            // 1. 파라미터 준비
+            // 1. 이미지 읽기 (ByteArray)
+            val imageBytesList = currentState.step3.images.mapNotNull { uriString ->
+                uriToByteArray(uriString)
+            }
+
+            // 2. 이미지 파라미터 생성 (Base64 변환)
+            val reviewImages = currentState.step3.images.mapIndexedNotNull { index, uriString ->
+                val bytes = imageBytesList.getOrNull(index) ?: return@mapIndexedNotNull null
+                // 실제 파일명/MIME 타입을 ContentResolver로 가져오는 것이 좋으나, 여기선 임의값 사용 예시
+                val base64Content = Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+                ReviewImageParam(
+                    filename = "image_$index.jpg",
+                    contentType = "image/jpeg",
+                    content = base64Content,
+                    isReceipt = false
+                )
+            }
+
+            // 3. 파라미터 준비
             val param = SaveReviewParam(
                 hospitalId = currentState.step1.hospitalInfo?.id ?: 0L,
                 rating = currentState.step1.ratings,
                 price = currentState.step2.price,
                 animalType = currentState.step2.animalType,
                 detailAnimalType = currentState.step2.detailAnimalType,
-                treatment = currentState.step2.treatment,
+                receiptItems = currentState.step2.receiptItems,
                 visitDate = currentState.step2.visitDate.ifBlank { LocalDateTime.now().toString() },
                 comment = currentState.step3.content,
-                isReceipt = currentState.step1.isReceiptVerified
+                isReceipt = currentState.step1.isReceiptVerified,
+                images = reviewImages
             )
 
-            // 2. 이미지 변환 (Uri -> ByteArray)
-            // 비동기로 변환하여 UI 스레드 차단 방지 (Dispatchers.IO 사용 권장이나 여기선 간단히 처리)
-            val imageBytesList = currentState.step3.images.mapNotNull { uriString ->
-                uriToByteArray(uriString)
-            }
-
-            // 3. UseCase 호출
+            // 4. UseCase 호출
+            // (UseCase가 여전히 List<ByteArray>를 별도로 요구한다면 imageBytesList도 전달)
             createReviewUseCase(param, imageBytesList)
                 .onSuccess {
                     emitEvent(ReviewCreateEvent.ShowToast("리뷰가 등록되었습니다."))

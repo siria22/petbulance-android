@@ -10,6 +10,8 @@ import com.example.data.datasource.remote.network.feature.hospital.review.dto.Se
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.feature.hospital.review.MyReview
+import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.example.domain.model.feature.hospital.review.ReceiptItem
 import com.example.domain.model.feature.hospital.review.ReviewSearchItem
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 
@@ -77,7 +79,12 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     reviewComment = comment,
     title = title,
     images = images?.map {
-        ReviewImageDto(filename = it.filename, contentType = it.contentType)
+        ReviewImageDto(
+            filename = it.filename,
+            contentType = it.contentType,
+            content = it.content,
+            receipt = it.isReceipt
+        )
     }
 )
 

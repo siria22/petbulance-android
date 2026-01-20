@@ -16,5 +16,7 @@ data class SaveReviewParam(
 
 data class ReviewImageParam(
     val filename: String,
-    val contentType: String
+    val contentType: String,
+    val content: String,
+    val isReceipt: Boolean
 )

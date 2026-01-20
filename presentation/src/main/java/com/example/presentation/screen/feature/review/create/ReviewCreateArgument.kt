@@ -3,6 +3,7 @@ package com.example.presentation.screen.feature.review.create
 import androidx.compose.runtime.Immutable
 import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.example.domain.model.feature.hospital.review.ReceiptItem
 import com.example.domain.model.feature.hospital.review.ReviewRating
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -39,15 +40,15 @@ data class Step2State(
     val animalType: String = "",
     val detailAnimalType: String = "",
     val treatment: String = "",
-    // OCR 분석 결과 (Hidden)
     val visitDate: String = "",
-    val price: Long = 0
+    val price: Long = 0,
+    val receiptItems: List<ReceiptItem> = emptyList()
 )
 
 @Immutable
 data class Step3State(
     val content: String = "",
-    val images: List<String> = emptyList() // Uri Strings
+    val images: List<String> = emptyList()
 )
 
 sealed interface ReviewCreateIntent {
@@ -59,7 +60,7 @@ sealed interface ReviewCreateIntent {
     // Step 1: Hospital & Rating
     data class OnHospitalSelected(val hospital: HospitalInfo) : ReviewCreateIntent
     data class OnRatingChanged(val rating: ReviewRating) : ReviewCreateIntent
-    data class OnReceiptAnalyzed(val result: ReceiptAnalysisResult) : ReviewCreateIntent // OCR 결과 적용
+    data class OnReceiptAnalyzed(val result: ReceiptAnalysisResult) : ReviewCreateIntent
 
     // Step 2: Animal & Treatment
     data class OnAnimalTypeChanged(val value: String) : ReviewCreateIntent
