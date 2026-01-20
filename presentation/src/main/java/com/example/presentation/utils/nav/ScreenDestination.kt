@@ -27,6 +27,14 @@ sealed class ScreenDestinations(val route: String) {
 
     data object Review : ScreenDestinations("review") {
         data object Search : ScreenDestinations("review/search")
-        data object Create : ScreenDestinations("review/create")
+        data object Create : ScreenDestinations("review/create?data={data}") {
+            const val ARG_DATA = "data"
+
+            fun createRoute(data: String? = null): String {
+                return if (data == null) "review/create"
+                else "review/create?data=$data"
+            }
+        }
+        data object ReceiptCamera : ScreenDestinations("review/receipt_camera")
     }
 }

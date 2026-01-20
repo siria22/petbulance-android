@@ -64,7 +64,7 @@ fun BottomNavigationBar(
             iconResource = IconResource.Drawable(R.drawable.ic_gnb_review),
             bottomNavType = CurrentBottomNav.REVIEW,
             onClicked = {
-                /* TODO : Navigate to Review Page */
+                navController.safeNavigate(ScreenDestinations.Review.route)
             }
         ),
         BottomNavInfo(

@@ -3,12 +3,15 @@ package com.example.presentation.screen.feature.review.create
 import android.content.Context
 import android.net.Uri
 import android.util.Base64
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.example.domain.model.feature.hospital.review.HospitalInfo
 import com.example.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.example.domain.model.feature.hospital.review.ReviewImageParam
 import com.example.domain.model.feature.hospital.review.SaveReviewParam
 import com.example.domain.usecase.feature.hospital.review.CreateReviewUseCase
 import com.example.presentation.utils.BaseViewModel
+import com.example.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,13 +21,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class ReviewCreateViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val createReviewUseCase: CreateReviewUseCase
+    private val createReviewUseCase: CreateReviewUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(ReviewCreateState())
@@ -75,6 +80,40 @@ class ReviewCreateViewModel @Inject constructor(
             }
 
             is ReviewCreateIntent.OnSubmitClicked -> submitReview()
+        }
+    }
+
+    init {
+        checkReceiptAnalysisResult()
+    }
+
+    private fun checkReceiptAnalysisResult() {
+        val jsonString = savedStateHandle.get<String>(ScreenDestinations.Review.Create.ARG_DATA)
+
+        if (!jsonString.isNullOrBlank()) {
+            try {
+                val analysisResult = Json.decodeFromString<ReceiptAnalysisResultUiModel>(jsonString)
+
+                _state.update {
+                    it.copy(
+                        step1 = it.step1.copy(
+                            hospitalInfo = HospitalInfo(id = 0, name = analysisResult.hospitalName),
+                            isReceiptVerified = true
+                        ),
+                        step2 = it.step2.copy(
+                            visitDate = analysisResult.visitDate,
+                            price = analysisResult.totalPrice,
+                        )
+                    )
+                }
+
+                savedStateHandle.remove<String>(ScreenDestinations.Review.Create.ARG_DATA)
+                emitEvent(ReviewCreateEvent.ShowToast("영수증 정보가 적용되었습니다."))
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitEvent(ReviewCreateEvent.ShowToast("데이터 불러오기 실패"))
+            }
         }
     }
 

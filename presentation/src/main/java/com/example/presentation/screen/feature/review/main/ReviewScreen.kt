@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.type.ReviewSortType
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.atom.BasicFabIcon
@@ -51,6 +52,8 @@ fun ReviewScreen(
     var showInfoDialog by remember { mutableStateOf(false) }
     var showSortingDialog by remember { mutableStateOf(false) }
 
+    var showReceiptDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -80,7 +83,7 @@ fun ReviewScreen(
         floatingActionButton = {
             BasicFabIcon(
                 iconResource = IconResource.Vector(Icons.Default.Edit), // TODO : 아이콘 교체
-                onClick = { /* TODO : Edit Review */ }
+                onClick = { showReceiptDialog = true }
             )
         }
     ) { innerPadding ->
@@ -143,6 +146,20 @@ fun ReviewScreen(
         )
     }
 
+    if (showReceiptDialog) {
+        ReceiptDialog(
+            onDismissRequest = { showReceiptDialog = false },
+            onConfirm = {
+                showReceiptDialog = false
+                navController.safeNavigate(ScreenDestinations.Review.Create.route)
+            },
+            onConfirmWithoutReceipt = {
+                showReceiptDialog = false
+                navController.safeNavigate(ScreenDestinations.Review.ReceiptCamera.route)
+            }
+        )
+    }
+
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
             when (event) {
@@ -166,11 +183,11 @@ private fun ReviewScreenPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewData(
-//                reviews = listOf(
-//                    HospitalReview.stub,
-//                    HospitalReview.stub.copy(id = 2)
-//                ),
-                reviews = emptyList(),
+                reviews = listOf(
+                    HospitalReview.stub,
+                    HospitalReview.stub.copy(id = 2)
+                ),
+//                reviews = emptyList(),
                 selectedRegion = null,
                 selectedDistrict = null,
                 selectedAnimalType = null,

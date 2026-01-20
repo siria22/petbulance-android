@@ -7,6 +7,8 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
 
     alias(libs.plugins.devtoolsKsp)
 }
@@ -147,6 +149,15 @@ dependencies {
 
     // Naver Map
     implementation(libs.map.sdk)
+
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // Test
     testImplementation(libs.junit)
