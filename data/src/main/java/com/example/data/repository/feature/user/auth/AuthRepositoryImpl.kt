@@ -64,7 +64,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun refreshToken(refreshToken: String): Result<Pair<String?, String?>> =
         runCatching {
             return safeApiCall<RefreshResponseDto>("auth/refresh") {
-                authApi.refresh()
+                authApi.refresh(refreshToken)
             }.map { dto ->
                 Pair(dto.accessToken, dto.refreshToken)
             }

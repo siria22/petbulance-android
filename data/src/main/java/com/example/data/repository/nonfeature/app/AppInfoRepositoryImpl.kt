@@ -5,12 +5,17 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.example.data.datasource.remote.network.common.safeApiCall
 import com.example.data.datasource.remote.network.nonfeature.app.AppApi
+import com.example.data.datasource.remote.network.nonfeature.app.dto.GetPresignReqDto
+import com.example.data.datasource.remote.network.nonfeature.app.dto.GetPresignResDto
 import com.example.data.datasource.remote.network.nonfeature.app.dto.MetadataRequestDto
 import com.example.data.datasource.remote.network.nonfeature.app.dto.MetadataResponseDto
+import com.example.data.datasource.remote.network.nonfeature.app.dto.NoticeFileReqDto
 import com.example.data.datasource.remote.network.nonfeature.app.dto.TestResponseDto
 import com.example.data.mapper.nonfeature.app.toDomain
 import com.example.domain.model.nonfeature.app.HealthCheckResult
 import com.example.domain.model.nonfeature.app.MetadataResponse
+import com.example.domain.model.nonfeature.app.PresignFileRequest
+import com.example.domain.model.nonfeature.app.PresignedUrl
 import com.example.domain.repository.nonfeature.app.AppInfoRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -68,5 +73,22 @@ class AppInfoRepositoryImpl @Inject constructor(
         return safeApiCall<MetadataResponseDto>(path = "/app/metadata") {
             api.getMetadata(requestDto)
         }.map { it.toDomain() }
+    }
+
+    override suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>> {
+        val reqDto = GetPresignReqDto(
+            files = files.map { NoticeFileReqDto(it.filename, it.contentType) }
+        )
+
+        return safeApiCall<GetPresignResDto>("app/image/presign") {
+            api.getPresignedUrl(reqDto)
+        }.map { resDto ->
+            resDto.uploadedFiles.map {
+                PresignedUrl(
+                    preSignedUrl = it.preSignedUrl,
+                    imageUrl = it.imageUrl
+                )
+            }
+        }
     }
 }

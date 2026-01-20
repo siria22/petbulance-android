@@ -2,6 +2,8 @@ package com.example.domain.repository.nonfeature.app
 
 import com.example.domain.model.nonfeature.app.HealthCheckResult
 import com.example.domain.model.nonfeature.app.MetadataResponse
+import com.example.domain.model.nonfeature.app.PresignFileRequest
+import com.example.domain.model.nonfeature.app.PresignedUrl
 
 interface AppInfoRepository {
     suspend fun checkHealth(): Result<HealthCheckResult>
@@ -13,4 +15,7 @@ interface AppInfoRepository {
         species: String,
         communityCategory: String
     ): Result<MetadataResponse>
+
+    // [ADD] Presigned URL 발급 메서드 추가
+    suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>>
 }

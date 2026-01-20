@@ -39,7 +39,10 @@ data class HospitalInfoData(
                     openHours = emptyList(), // 필요 시 채움
                     notes = "주차 가능",
                     openNow = true,
-                    description = "상세 설명"
+                    description = "상세 설명",
+                    rating = 4.3,
+                    reviewCount = 10,
+                    thumbnailUrl = ""
                 )
             ),
             reviewUiData = ReviewUiData(

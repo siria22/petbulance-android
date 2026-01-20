@@ -14,7 +14,10 @@ data class HospitalDetailResDto(
     val openHours: List<OpenHourResDto>,
     val notes: String,
     val openNow: Boolean,
-    val description: String
+    val description: String,
+    val rating: Double = 0.0,
+    val reviewCount: Int = 0,
+    val thumbnailUrl: String? = null
 )
 
 @Serializable

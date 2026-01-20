@@ -66,7 +66,7 @@ class MockPostRepository @Inject constructor() : PostRepository {
         return Result.success(
             Post(
                 postId = postId,
-                boardId = 1L, // Mock boardId
+                boardId = 1L,
                 category = param.category,
                 title = param.title,
                 content = param.content,
@@ -98,11 +98,18 @@ class MockPostRepository @Inject constructor() : PostRepository {
         val items = List(3) { i ->
             PostSummary(
                 id = (lastPostId ?: 0) + i + 1,
+                boardId = boardId ?: 1L,
+                boardName = "자유게시판",
+                category = category ?: "잡담",
                 title = "게시글 제목 ${i + 1}",
-                summary = "게시글 요약...",
+                content = "게시글 내용의 요약입니다. 이 게시글은...",
                 thumbnailUrl = null,
+                imageCount = i,
+                viewCount = (i + 1) * 50,
                 commentCount = i * 2,
-                likeCount = i * 5
+                likeCount = i * 5,
+                createdAt = "2023-10-27T15:00:00",
+                isLiked = i % 2 == 0
             )
         }
         return Result.success(PagingPostList(items = items, hasNext = true))
@@ -120,10 +127,20 @@ class MockPostRepository @Inject constructor() : PostRepository {
         val items = List(3) { i ->
             PostSearchSummary(
                 id = (lastPostId ?: 0) + i + 1,
-                title = "검색된 게시글 ${i + 1}",
-                contentSnippet = "내용 스니펫...",
+                boardId = boardId ?: 1L,
                 boardName = "자유게시판",
-                createdAt = "2023-10-27T15:00:00"
+                categories = categories ?: listOf("잡담", "정보"),
+                title = "검색된 게시글 ${i + 1}",
+                content = "검색된 게시글의 내용입니다. 키워드: $searchKeyword",
+                thumbnailUrl = null,
+                imageCount = 1,
+                viewCount = 120,
+                commentCount = 5,
+                likeCount = 10,
+                createdAt = "2023-10-27T15:00:00",
+                writerNickname = "유저${i+1}",
+                writerProfileUrl = null,
+                isLiked = false
             )
         }
         return Result.success(

@@ -2,6 +2,8 @@ package com.example.data.repository.nonfeature.app
 
 import com.example.domain.model.nonfeature.app.HealthCheckResult
 import com.example.domain.model.nonfeature.app.MetadataResponse
+import com.example.domain.model.nonfeature.app.PresignFileRequest
+import com.example.domain.model.nonfeature.app.PresignedUrl
 import com.example.domain.model.nonfeature.app.RegionsResponse
 import com.example.domain.repository.nonfeature.app.AppInfoRepository
 import jakarta.inject.Inject
@@ -34,6 +36,16 @@ class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
         communityCategory: String
     ): Result<MetadataResponse> {
         return Result.success(mockMetadataResponse)
+    }
+
+    override suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>> {
+        val mockPresignedUrlList = listOf(
+            PresignedUrl(
+                preSignedUrl = "mock presigned url",
+                imageUrl = "mock image url"
+            )
+        )
+        return Result.success(mockPresignedUrlList)
     }
 }
 

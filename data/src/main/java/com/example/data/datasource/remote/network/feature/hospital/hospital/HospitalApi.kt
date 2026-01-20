@@ -19,7 +19,7 @@ class HospitalApi @Inject constructor(
         size: Int,
         page: Int
     ): HttpResponse {
-        return client.get("$baseUrl/search") {
+        return client.get(baseUrl) {
             request.q?.let { parameter("q", it) }
             request.region?.let { parameter("region", it) }
             request.lat?.let { parameter("lat", it) }

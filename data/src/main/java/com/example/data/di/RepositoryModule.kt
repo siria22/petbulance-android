@@ -4,6 +4,7 @@ import com.example.data.repository.feature.community.board.MockBoardRepository
 import com.example.data.repository.feature.community.comment.MockCommentRepository
 import com.example.data.repository.feature.community.post.MockPostRepository
 import com.example.data.repository.feature.community.recent.MockRecentRepository
+import com.example.data.repository.feature.home.BannerRepositoryImpl
 import com.example.data.repository.feature.hospital.history.MockHistoryRepository
 import com.example.data.repository.feature.hospital.hospital.MockHospitalRepository
 import com.example.data.repository.feature.hospital.review.MockReviewRepository
@@ -11,9 +12,9 @@ import com.example.data.repository.feature.hospital.search.SearchRepositoryImpl
 import com.example.data.repository.feature.support.inquiry.MockInquiryRepository
 import com.example.data.repository.feature.support.notice.MockNoticeRepository
 import com.example.data.repository.feature.support.qna.QnaRepositoryImpl
+import com.example.data.repository.feature.support.report.ReportRepositoryImpl
 import com.example.data.repository.feature.user.auth.AuthRepositoryImpl
 import com.example.data.repository.feature.user.terms.MockTermsRepository
-import com.example.data.repository.feature.user.terms.TermsRepositoryImpl
 import com.example.data.repository.feature.user.user.MockUserRepository
 import com.example.data.repository.nonfeature.app.MockAppInfoRepository
 import com.example.data.repository.nonfeature.device.MockDeviceRepository
@@ -22,6 +23,7 @@ import com.example.domain.repository.feature.community.BoardRepository
 import com.example.domain.repository.feature.community.CommentRepository
 import com.example.domain.repository.feature.community.PostRepository
 import com.example.domain.repository.feature.community.RecentRepository
+import com.example.domain.repository.feature.home.BannerRepository
 import com.example.domain.repository.feature.hospital.HistoryRepository
 import com.example.domain.repository.feature.hospital.HospitalRepository
 import com.example.domain.repository.feature.hospital.ReviewRepository
@@ -29,6 +31,7 @@ import com.example.domain.repository.feature.hospital.SearchRepository
 import com.example.domain.repository.feature.support.InquiryRepository
 import com.example.domain.repository.feature.support.NoticeRepository
 import com.example.domain.repository.feature.support.QnaRepository
+import com.example.domain.repository.feature.support.ReportRepository
 import com.example.domain.repository.feature.user.AuthRepository
 import com.example.domain.repository.feature.user.TermsRepository
 import com.example.domain.repository.feature.user.UserRepository
@@ -159,4 +162,16 @@ abstract class RepositoryModule {
     abstract fun bindSearchRepository(
         impl: SearchRepositoryImpl
     ): SearchRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBannerRepository(
+        impl: BannerRepositoryImpl
+    ): BannerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReportRepository(
+        impl: ReportRepositoryImpl
+    ): ReportRepository
 }

@@ -11,9 +11,16 @@ data class PagingPostListResDto(
 @Serializable
 data class PostListResDto(
     val postId: Long,
+    val boardId: Long,
+    val boardName: String,
+    val category: String,
+    val createdAt: String,
+    val thumbnailUrl: String? = null,
+    val imageCount: Int,
     val title: String,
-    val summary: String?,
-    val imageUrl: String?,
+    val content: String,
+    val likeCount: Int,
     val commentCount: Int,
-    val likeCount: Int
+    val viewCount: Int,
+    val likedByUser: Boolean
 )

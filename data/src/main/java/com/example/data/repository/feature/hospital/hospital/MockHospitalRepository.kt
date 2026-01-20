@@ -38,7 +38,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         page: Int,
         size: Int
     ): Result<PagingResult<Hospital>> {
-        delay(500) // Simulate network delay
+        delay(500)
         val start = page * size
         val end = (start + size).coerceAtMost(mockHospitals.size)
 
@@ -55,7 +55,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
     }
 
     override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
-        delay(500) // Simulate network delay
+        delay(500)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
         return if (hospital != null) {
@@ -75,7 +75,10 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     ),
                     notes = "주차 가능, 예약 시 10% 할인",
                     openNow = hospital.isOpenNow,
-                    description = "이곳은 ${hospital.name}의 상세 설명입니다. 최신 장비와 최고의 의료진이 함께합니다."
+                    description = "이곳은 ${hospital.name}의 상세 설명입니다. 최신 장비와 최고의 의료진이 함께합니다.",
+                    rating = hospital.rating ?: 0.0,
+                    reviewCount = hospital.reviewCount ?: 0,
+                    thumbnailUrl = hospital.thumbnailUrl
                 )
             )
         } else {
@@ -88,7 +91,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         userLat: Double,
         userLng: Double
     ): Result<HospitalCard> {
-        delay(300) // Simulate network delay
+        delay(300)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
         return if (hospital != null) {
@@ -98,7 +101,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     name = hospital.name.replace("(Mock)", "카드 (Mock)"),
                     lat = hospital.lat,
                     lng = hospital.lng,
-                    distanceMeters = 550.0, // Fixed distance for mock
+                    distanceMeters = 550.0,
                     phone = hospital.phone ?: "02-0000-0000",
                     types = hospital.types,
                     isOpenNow = hospital.isOpenNow,

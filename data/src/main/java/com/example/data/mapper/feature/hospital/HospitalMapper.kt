@@ -38,7 +38,10 @@ fun HospitalDetailResDto.toDomain(): HospitalDetail {
         openHours = openHours.map { it.toDomain() },
         notes = notes,
         openNow = openNow,
-        description = description
+        description = description,
+        rating = rating,             // 매핑 추가
+        reviewCount = reviewCount,   // 매핑 추가
+        thumbnailUrl = thumbnailUrl  // 매핑 추가
     )
 }
 

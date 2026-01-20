@@ -8,8 +8,18 @@ data class PagingPostSearchList(
 
 data class PostSearchSummary(
     val id: Long,
-    val title: String,
-    val contentSnippet: String,
+    val boardId: Long,
     val boardName: String,
-    val createdAt: String
+    val categories: List<String>,
+    val title: String,
+    val content: String,
+    val thumbnailUrl: String?,
+    val imageCount: Int,
+    val viewCount: Int,
+    val commentCount: Int,
+    val likeCount: Int,
+    val createdAt: String,
+    val writerNickname: String,
+    val writerProfileUrl: String?,
+    val isLiked: Boolean
 )

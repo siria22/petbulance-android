@@ -2,6 +2,9 @@ package com.example.data.mapper.feature.hospital
 
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.FilterResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDao
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReceiptItemDto
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.SearchResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
@@ -66,7 +69,13 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     totalPrice = price,
     animalType = animalType,
     detailAnimalType = detailAnimalType,
-    treatmentService = treatment,
+    receiptItems = receiptItems.map {
+        ReceiptItemDto(name = it.name, price = it.price) // 매핑 수정
+    },
     visitDate = visitDate,
-    reviewComment = comment
+    reviewComment = comment,
+    title = title,
+    images = images?.map {
+        ReviewImageDto(filename = it.filename, contentType = it.contentType)
+    }
 )

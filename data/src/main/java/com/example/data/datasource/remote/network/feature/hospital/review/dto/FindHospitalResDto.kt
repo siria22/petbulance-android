@@ -75,31 +75,6 @@ data class SearchResDto(
 )
 
 @Serializable
-data class ReviewSaveReqDto(
-    val receiptChecked: Boolean,
-    val hospitalId: Long,
-    val expertiseRating: Double,
-    val kindnessRating: Double,
-    val facilityRating: Double,
-    val totalPrice: Long,
-    val animalType: String,
-
-    @SerialName("DetailAnimalType")
-    val detailAnimalType: String,
-
-    val treatmentService: String,
-    val visitDate: String,
-    val reviewComment: String,
-    val images: List<ReviewImageDto> = emptyList()
-)
-
-@Serializable
-data class ReviewImageDto(
-    val filename: String,
-    val contentType: String
-)
-
-@Serializable
 data class ReviewSaveResDto(
     val reviewId: Long,
     val urls: List<UrlAndId>
@@ -109,12 +84,6 @@ data class ReviewSaveResDto(
 data class UrlAndId(
     val presignedUrl: String,
     val saveId: String
-)
-
-@Serializable
-data class ReviewImageCheckReqDto(
-    val reviewId: Long,
-    val keys: List<String>
 )
 
 @Serializable

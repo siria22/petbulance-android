@@ -134,25 +134,42 @@ fun PagingPostListResDto.toDomain() = PagingPostList(
 
 fun PostListResDto.toDomain() = PostSummary(
     id = postId,
+    boardId = boardId,
+    boardName = boardName,
+    category = category,
     title = title,
-    summary = summary ?: "",
-    thumbnailUrl = imageUrl,
+    content = content,
+    thumbnailUrl = thumbnailUrl,
+    imageCount = imageCount,
+    viewCount = viewCount,
     commentCount = commentCount,
-    likeCount = likeCount
+    likeCount = likeCount,
+    createdAt = createdAt,
+    isLiked = likedByUser
+)
+
+fun PostSearchListResDto.toDomain() = PostSearchSummary(
+    id = postId,
+    boardId = boardId,
+    boardName = boardName,
+    categories = category,
+    title = title,
+    content = content,
+    thumbnailUrl = thumbnailUrl,
+    imageCount = imageCount,
+    viewCount = viewCount,
+    commentCount = commentCount,
+    likeCount = likeCount,
+    createdAt = createdAt,
+    writerNickname = writerNickname,
+    writerProfileUrl = writerProfileUrl,
+    isLiked = likedByUser
 )
 
 fun PagingPostSearchListResDto.toDomain() = PagingPostSearchList(
     items = content.map { it.toDomain() },
     hasNext = hasNext,
     totalPostCount = totalPostCount
-)
-
-fun PostSearchListResDto.toDomain() = PostSearchSummary(
-    id = postId,
-    title = title,
-    contentSnippet = contentSnippet ?: "",
-    boardName = boardName,
-    createdAt = createdAt
 )
 
 fun PagingMyPostListResDto.toDomain() = PagingMyPostList(

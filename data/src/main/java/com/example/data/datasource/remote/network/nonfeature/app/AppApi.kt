@@ -1,10 +1,13 @@
 package com.example.data.datasource.remote.network.nonfeature.app
 
+import com.example.data.datasource.remote.network.nonfeature.app.dto.GetPresignReqDto
 import com.example.data.datasource.remote.network.nonfeature.app.dto.MetadataRequestDto
 import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -31,10 +34,16 @@ class AppApi @Inject constructor(
 
     suspend fun getMetadata(request: MetadataRequestDto): HttpResponse {
         return client.get("$baseUrl/metadata") {
+            parameter("region", request.region)
+            parameter("species", request.species)
+            parameter("communityCategory", request.communityCategory)
+        }
+    }
+
+    suspend fun getPresignedUrl(request: GetPresignReqDto): HttpResponse {
+        return client.post("$baseUrl/image/presign") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
     }
-
-
 }

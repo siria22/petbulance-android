@@ -14,7 +14,10 @@ data class HospitalDetail(
     val openHours: List<OpenHour>,
     val notes: String,
     val openNow: Boolean,
-    val description: String
+    val description: String,
+    val rating: Double,
+    val reviewCount: Int,
+    val thumbnailUrl: String?
 ) {
     fun toMarker() = HospitalMarker(
         hospitalId = hospitalId,

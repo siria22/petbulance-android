@@ -1,5 +1,6 @@
 package com.example.data.datasource.remote.network.feature.user.auth
 
+import com.example.data.datasource.remote.network.feature.user.auth.dto.RefreshRequestDto
 import com.example.data.datasource.remote.network.feature.user.auth.dto.SocialLoginRequestDto
 import com.example.data.di.network.AuthHttpClient
 import com.example.data.di.network.BASE_URL
@@ -28,7 +29,10 @@ class AuthApi @Inject constructor(
         return client.get("$baseUrl/logout")
     }
 
-    suspend fun refresh(): HttpResponse {
-        return client.get("$baseUrl/refresh")
+    suspend fun refresh(refreshToken: String): HttpResponse {
+        return client.post("$baseUrl/refresh") {
+            contentType(ContentType.Application.Json)
+            setBody(RefreshRequestDto(refreshToken))
+        }
     }
 }
