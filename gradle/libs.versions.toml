@@ -65,6 +65,7 @@ firebaseBom = "34.7.0"
 credentialManager = "1.5.0"
 googleid = "1.1.1"
 jetbrainsKotlinJvm = "2.2.21"
+firebaseCrashlyticsPlugin = "3.0.2"
 
 # Login
 kakaoSdk = "2.23.0"
@@ -174,10 +175,11 @@ androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", versi
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
-firebase-functions = { module= "com.google.firebase:firebase-functions"}
+firebase-functions = { module = "com.google.firebase:firebase-functions" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging"}
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 # Credential Manager
 credential-manager = { group = "androidx.credentials", name = "credentials", version.ref = "credentialManager" }
@@ -211,4 +213,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }

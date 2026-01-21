@@ -9,6 +9,7 @@ plugins {
 
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services") version "4.4.4" apply false
+    alias(libs.plugins.firebase.crashlytics)
 
     alias(libs.plugins.devtoolsKsp)
 }
@@ -84,6 +85,9 @@ dependencies {
     implementation(libs.androidx.navigation.runtime)
     implementation(libs.androidx.navigation.compose)
 
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     // Test
     testImplementation(libs.junit)
