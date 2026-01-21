@@ -2,10 +2,11 @@ package com.example.presentation.screen.feature.search.main.views.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -22,7 +23,7 @@ import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.BasicInputTextField
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.dropShadow
-import com.example.presentation.component.ui.spacingXS
+import com.example.presentation.component.ui.iconSizeMedium
 
 @Composable
 fun SearchBar(
@@ -35,7 +36,7 @@ fun SearchBar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(48.dp)
             .dropShadow(
                 shape = RoundedCornerShape(0.dp),
                 color = colorScheme.border.subtle,
@@ -46,14 +47,20 @@ fun SearchBar(
                 color = colorScheme.bg.frame.default
             )
     ) {
-        BasicIcon(
-            iconResource = IconResource.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
-            contentDescription = "Move back",
-            size = 48.dp,
-            modifier = Modifier.clickable {
-                onMoveBackIconClicked()
-            }
-        )
+        Box(
+            modifier = Modifier.size(48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            BasicIcon(
+                iconResource = IconResource.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
+                contentDescription = "Move back",
+                size = iconSizeMedium,
+                modifier = Modifier.clickable {
+                    onMoveBackIconClicked()
+                },
+                tint = colorScheme.icon.dark
+            )
+        }
         BasicInputTextField(
             value = queryString,
             onValueChange = { onQueryStringChanged(it) },
@@ -61,14 +68,17 @@ fun SearchBar(
             modifier = Modifier.weight(1f),
             onSearchButtonClicked = { onSearchButtonClicked(queryString) }
         )
-        Text(
-            text = "닫기",
-            style = MaterialTheme.typography.labelMedium,
-            color = colorScheme.text.secondary,
-            modifier = Modifier
-                .padding(horizontal = spacingXS)
-                .clickable { onMoveBackIconClicked() }
-        )
+        Box(
+            modifier = Modifier.size(48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "닫기",
+                style = MaterialTheme.typography.labelMedium,
+                color = colorScheme.text.secondary,
+                modifier = Modifier.clickable { onMoveBackIconClicked() }
+            )
+        }
     }
 }
 

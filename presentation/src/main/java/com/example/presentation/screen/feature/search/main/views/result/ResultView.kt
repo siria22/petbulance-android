@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.domain.model.feature.hospital.hospital.Hospital
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -91,14 +94,14 @@ private fun ResultViewContents(
     onEvent: (SearchUiEvent) -> Unit
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(spacingXS),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(horizontal = spacingMedium)
     ) {
         item {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(spacingXXS, Alignment.Start),
+                modifier = Modifier.fillMaxWidth().padding(vertical = spacingMedium)
             ) {
                 RowChipFilters(
                     uiModel = searchUiState.currentQuery,
@@ -118,6 +121,7 @@ private fun ResultViewContents(
         if (searchUiState.filteredHospitalList.isNotEmpty()) {
             items(searchUiState.filteredHospitalList) { hospital ->
                 HospitalCard(hospital = hospital)
+                Spacer(modifier = Modifier.height(spacingMedium))
             }
         } else {
             item {
@@ -200,22 +204,36 @@ private fun ResultViewPreview() {
             navController = rememberNavController(),
             searchUiState = SearchUiState(
                 hospitalList = listOf(
-//                    Hospital(
-//                        hospitalId = 1,
-//                        name = "행복 동물병원",
-//                        lat = 37.5,
-//                        lng = 127.0,
-//                        distanceMeters = 500.0,
-//                        phone = "02-123-4567",
-//                        types = listOf("강아지", "고양이"),
-//                        isOpenNow = true,
-//                        openHours = "20:00 종료",
-//                        thumbnailUrl = null,
-//                        rating = 4.5,
-//                        reviewCount = 100
-//                    )
+                    Hospital(
+                        hospitalId = 1,
+                        name = "행복 동물병원",
+                        lat = 37.5,
+                        lng = 127.0,
+                        distanceMeters = 500.0,
+                        phone = "02-123-4567",
+                        types = listOf("댕댕이", "킹갓냥이"),
+                        isOpenNow = true,
+                        openHours = "20:00 종료",
+                        thumbnailUrl = null,
+                        rating = 4.5,
+                        reviewCount = 100
+                    ),
+                    Hospital(
+                        hospitalId = 1,
+                        name = "행복 ^o^ 동물병원",
+                        lat = 37.5,
+                        lng = 127.0,
+                        distanceMeters = 500.0,
+                        phone = "02-123-4567",
+                        types = listOf("멍멍", "야옹야옹"),
+                        isOpenNow = true,
+                        openHours = "20:00 종료",
+                        thumbnailUrl = null,
+                        rating = 4.5,
+                        reviewCount = 100
+                    )
                 ),
-                currentQuery = HospitalSearchQueryUiModel.Companion.empty.copy(query = "동물병원"),
+                currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
             ),
             onEvent = {}
         )

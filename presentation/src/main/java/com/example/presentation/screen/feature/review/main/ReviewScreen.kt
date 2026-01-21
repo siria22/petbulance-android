@@ -3,7 +3,6 @@ package com.example.presentation.screen.feature.review.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +20,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.model.type.ReviewSortType
+import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.ui.atom.BasicFabIcon
 import com.example.presentation.component.ui.atom.IconResource
@@ -82,7 +82,7 @@ fun ReviewScreen(
         },
         floatingActionButton = {
             BasicFabIcon(
-                iconResource = IconResource.Vector(Icons.Default.Edit), // TODO : 아이콘 교체
+                iconResource = IconResource.Drawable(R.drawable.ic_write),
                 onClick = { showReceiptDialog = true }
             )
         }

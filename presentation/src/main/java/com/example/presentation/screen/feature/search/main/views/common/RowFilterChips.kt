@@ -34,12 +34,8 @@ fun RowChipFilters(
     onFilterButtonClicked: (FilterBottomSheetTab) -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(spacingXS),
+        horizontalArrangement = Arrangement.spacedBy(spacingXXS),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(
-            top = spacingMedium,
-            bottom = spacingLarge,
-        )
     ) {
         FilterBottomSheetTab.entries.forEach { elem ->
             val label = when (elem) {
@@ -58,7 +54,7 @@ fun RowChipFilters(
                 }
 
                 FilterBottomSheetTab.SPECIES -> {
-                    AnimalCategory.toKorean(uiModel.species ?: AnimalCategory.ALL)
+                    uiModel.species?.korean ?: AnimalCategory.ALL.korean
                 }
             }
 

@@ -135,7 +135,7 @@ private fun HospitalInfoScreenContents(
     currentLocation: Location?,
     onNavigateButtonClicked: () -> Unit,
 ) {
-    var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
+    var selectedTab by remember { mutableStateOf(TabType.REVIEWS) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val commonPadding = 16.dp

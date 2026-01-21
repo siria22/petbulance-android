@@ -33,6 +33,7 @@ import com.example.presentation.component.ui.organism.TopBarAlignment
 import com.example.presentation.component.ui.organism.TopBarInfo
 import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingXL
+import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
 import com.example.presentation.screen.feature.search.main.SearchUiEvent
 import com.example.presentation.screen.feature.search.main.SearchUiState
@@ -89,9 +90,9 @@ fun ListView(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(spacingMedium)
                 ) {
                     RowChipFilters(
                         uiModel = searchUiState.currentQuery,

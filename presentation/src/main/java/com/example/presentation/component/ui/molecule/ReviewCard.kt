@@ -22,11 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulancePrimitives
+import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.Dot
 import com.example.presentation.component.ui.atom.BasicChip
@@ -43,7 +45,7 @@ import java.util.Locale
 @Composable
 fun ReviewCard(review: HospitalReview) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(spacingMedium),
+        verticalArrangement = Arrangement.spacedBy(spacingXS),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = spacingLarge, horizontal = spacingMedium)
@@ -84,7 +86,6 @@ fun ReviewCard(review: HospitalReview) {
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacingXS),
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(contentAlignment = Alignment.TopStart) {
@@ -114,10 +115,16 @@ fun ReviewCard(review: HospitalReview) {
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(spacingXS)) {
+                Text(
+                    text = review.id.toString(), // tODO : hospital name
+                    color = colorScheme.text.secondary,
+                    style = typography.titleSmall
+                )
+
                 StarRating(rating = review.rating)
 
                 Text(
-                    text = review.detailAnimalType,
+                    text = "${review.animalType} > ${review.detailAnimalType}",
                     color = colorScheme.text.secondary,
                     style = typography.bodySmall
                 )
@@ -209,5 +216,13 @@ fun ReviewCard(review: HospitalReview) {
                 )
             }
         }
+    }
+}
+
+@Preview(apiLevel = 34)
+@Composable
+private fun ReviewCardPreview() {
+    PetbulanceTheme {
+        ReviewCard(HospitalReview.stub)
     }
 }

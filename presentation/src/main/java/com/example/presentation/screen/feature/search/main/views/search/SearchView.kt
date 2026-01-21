@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,7 @@ import com.example.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.example.presentation.component.ui.organism.BottomNavigationBar
 import com.example.presentation.component.ui.organism.CurrentBottomNav
 import com.example.presentation.component.ui.spacingMedium
+import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXXS
 import com.example.presentation.screen.feature.search.main.SearchUiEvent
@@ -107,7 +109,7 @@ private fun SearchViewContents(
     onDeleteRecentKeyword: (String) -> Unit,
     onDeleteRecentViewedHospital: (ViewedHospital) -> Unit,
 ) {
-    Column(modifier = Modifier.padding(horizontal = spacingMedium)) {
+    Column(modifier = Modifier.padding(spacingMedium)) {
         RowChipFilters(
             uiModel = uiModel,
             onFilterButtonClicked = onFilterButtonClicked
@@ -156,12 +158,17 @@ private fun <T : ContentAsString> RecentHistorySection(
                 color = colorScheme.text.caption,
             )
         } else {
-            items.forEach { item ->
-                HistoryChip(
-                    content = item,
-                    onChipClicked = { onItemClick(item) },
-                    onDeleteIconClicked = { onDeleteClick(item) }
-                )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacingXS),
+                verticalArrangement = Arrangement.spacedBy(spacingSmall),
+            ){
+                items.forEach { item ->
+                    HistoryChip(
+                        content = item,
+                        onChipClicked = { onItemClick(item) },
+                        onDeleteIconClicked = { onDeleteClick(item) }
+                    )
+                }
             }
         }
     }
@@ -206,13 +213,17 @@ private fun SearchViewPreview() {
                 currentQuery = HospitalSearchQueryUiModel.empty,
             ),
             recentSearchKeywords = listOf(
-                RecentSearchKeyword(1, "강남 동물병원", "2023-10-27"),
-                RecentSearchKeyword(2, "24시", "2023-10-26")
+                RecentSearchKeyword(1, "도마뱀", "2023-10-27"),
+                RecentSearchKeyword(2, "햄스터", "2023-10-26"),
+                RecentSearchKeyword(1, "합정", "2023-10-27"),
+                RecentSearchKeyword(1, "친칠라", "2023-10-27"),
             ),
             viewedHospitals = ViewedHospitalList(
                 items = listOf(
-                    ViewedHospital(1, "돌봄 동물병원", "2023-10-27"),
-                    ViewedHospital(2, "사랑 동물병원", "2023-10-26")
+                    ViewedHospital(1, "연세동물병원", "2023-10-27"),
+                    ViewedHospital(2, "에코동물병원", "2023-10-26"),
+                    ViewedHospital(2, "서울응급동물병원", "2023-10-26"),
+                    ViewedHospital(2, "행복동물병원", "2023-10-26"),
                 ),
                 totalCount = 2
             ),

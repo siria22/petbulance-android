@@ -1,6 +1,7 @@
 package com.example.presentation.screen.feature.search.main.views.map
 
 import android.Manifest
+import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +55,7 @@ import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
 import com.example.presentation.component.ui.spacingXL
 import com.example.presentation.component.ui.spacingXS
+import com.example.presentation.component.ui.spacingXXS
 import com.example.presentation.screen.feature.search.main.SearchEvent
 import com.example.presentation.screen.feature.search.main.SearchUiEvent
 import com.example.presentation.screen.feature.search.main.SearchUiState
@@ -308,7 +311,12 @@ private fun MapUiLayer(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(spacingXS, Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = spacingMedium)
+            ) {
                 RowChipFilters(
                     uiModel = state.currentQuery,
                     onFilterButtonClicked = {
@@ -323,18 +331,26 @@ private fun MapUiLayer(
                 )
             }
             RecenterSearchButton(onClick = onRecenterClick)
+
             if (locationPermissionState == LocationPermissionState.COARSE) {
-                Text(
-                    text = "더 정확한 병원 안내를 위해 '정확한 위치' 권한을 허용해 주세요.",
-                    style = typography.labelLarge.emp(),
-                    color = colorScheme.text.secondary,
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .background(colorScheme.text.secondary.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                        .padding(vertical = spacingXXS, horizontal = spacingXS),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "더 정확한 병원 안내를 위해 '정확한 위치' 권한을 허용해 주세요.",
+                        style = typography.labelLarge.emp(),
+                        color = colorScheme.text.inverse
+                    )
+                }
             }
         }
 
         // BOTTOM Controls
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
@@ -386,7 +402,12 @@ private fun MapViewPreview() {
             navController = rememberNavController(),
             userLocationArgument = UserLocationArgument(
                 intent = {},
-                locationState = UserLocationState.Init,
+                locationState = UserLocationState.Success(
+                    Location("").apply {
+                        latitude = 37.5665
+                        longitude = 126.9780
+                    }
+                ),
                 event = MutableSharedFlow()
             ),
             searchUiState = SearchUiState(

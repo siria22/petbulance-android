@@ -2,18 +2,19 @@ package com.example.domain.model.feature.hospital.review
 
 data class HospitalReview(
     val id: Long,
+    val hospitalName: String,
     val isReceiptVerified: Boolean,
     val treatment: String,
     val animalType: String,
     val detailAnimalType: String,
     val content: String,
     val rating: Double,
-    val date: String,
-    val likeCount: Int,
+    val date: String?,      
+    val likeCount: Int?,    
     val isLiked: Boolean,
-    val imageUrls: List<String>,
-    val author: String,
-    val price: Int
+    val imageUrls: List<String>?,
+    val author: String?,    
+    val price: Int?         
 ) {
     companion object {
         val stub = HospitalReview(
@@ -30,7 +31,8 @@ data class HospitalReview(
             isLiked = true,
             imageUrls = listOf("https://example.com/image1.jpg", "https://example.com/image2.jpg"),
             author = "작성자",
-            price = 50000
+            price = 50000,
+            hospitalName = "행복동물병원"
         )
     }
 }

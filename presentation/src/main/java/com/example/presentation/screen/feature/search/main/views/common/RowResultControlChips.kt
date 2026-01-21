@@ -5,26 +5,26 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.domain.model.type.HospitalSortType
+import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.iconSizeMS
-import com.example.presentation.component.ui.spacingMedium
 import com.example.presentation.component.ui.spacingSmall
-import com.example.presentation.component.ui.spacingXS
 import com.example.presentation.component.ui.spacingXXS
 
 @Composable
@@ -35,12 +35,8 @@ fun RowResultControlChips(
     onOpenNowOnlyClicked: (Boolean) -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(spacingXS),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(
-            horizontal = spacingMedium,
-            vertical = spacingXS
-        )
+        horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         SortChip(
             sortType = selectedSortType,
@@ -49,7 +45,7 @@ fun RowResultControlChips(
 
         OpenNowChip(
             isOpenNowOnly = isOpenNowOnly,
-            onButtonClicked = { onOpenNowOnlyClicked(!isOpenNowOnly) }
+            onButtonClicked = { onOpenNowOnlyClicked(!isOpenNowOnly) },
         )
     }
 }
@@ -76,12 +72,11 @@ private fun SortChip(
             .clickable { onButtonClicked() }
     ) {
         BasicIcon(
-            iconResource = IconResource.Vector(Icons.AutoMirrored.Filled.Sort),
+            iconResource = IconResource.Drawable(R.drawable.ic_sort_desc),
             contentDescription = "Sort Icon",
             size = iconSizeMS,
             tint = colorScheme.icon.dark
-        ) // FIXME : apply design system's icon
-
+        )
         Text(
             text = sortType.korean,
             style = MaterialTheme.typography.labelLarge,
@@ -119,6 +114,10 @@ private fun OpenNowChip(
             text = "진료중",
             style = MaterialTheme.typography.labelLarge,
             color = textColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .height(iconSizeMS)
+                .wrapContentHeight(Alignment.CenterVertically)
         )
     }
 }

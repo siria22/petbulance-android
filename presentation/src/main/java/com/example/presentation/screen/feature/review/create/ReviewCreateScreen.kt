@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -107,7 +108,7 @@ fun ReviewCreateScreen(
                     onLeadingIconClicked = { argument.intent(ReviewCreateIntent.OnBackClicked) },
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
-                        Pair(IconResource.Vector(Icons.Default.Close)) {
+                        Pair(IconResource.Vector(Icons.Outlined.Info)) {
                             argument.intent(ReviewCreateIntent.OnCloseClicked)
                         }
                     )
@@ -253,7 +254,7 @@ private fun Step1HospitalContent(
         modifier = Modifier.padding(vertical = spacingXL, horizontal = spacingMedium)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS)
+            verticalArrangement = Arrangement.spacedBy(spacingXXS)
         ) {
             Text(
                 text = "병원명",
@@ -357,7 +358,7 @@ private fun Step2AnimalContent(
         modifier = Modifier.padding(vertical = spacingXL, horizontal = spacingMedium)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS),
+            verticalArrangement = Arrangement.spacedBy(spacingXXS),
         ) {
             Text(
                 text = "동물종",
@@ -367,7 +368,7 @@ private fun Step2AnimalContent(
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.6f)
                     .background(
                         color = colorScheme.bg.frame.default,
                         shape = RoundedCornerShape(6.dp)
@@ -382,7 +383,7 @@ private fun Step2AnimalContent(
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.6f)
+                        .fillMaxWidth()
                         .height(24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -432,7 +433,7 @@ private fun Step2AnimalContent(
 
         // 세부 동물명 입력
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS),
+            verticalArrangement = Arrangement.spacedBy(spacingXXS),
         ) {
             Text(
                 text = "세부 동물명",
@@ -448,7 +449,7 @@ private fun Step2AnimalContent(
 
         // 진료명 입력
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS),
+            verticalArrangement = Arrangement.spacedBy(spacingXXS),
         ) {
             Text(
                 text = "진료명",
@@ -539,7 +540,7 @@ private fun Step3ReviewContent(
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXXS)
+            verticalArrangement = Arrangement.spacedBy(spacingXXS)
         ) {
             Text(
                 text = "후기 내용",

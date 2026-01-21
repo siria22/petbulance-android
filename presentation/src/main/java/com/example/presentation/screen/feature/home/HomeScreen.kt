@@ -239,7 +239,7 @@ private fun HospitalShortcutAnimalRow(
             ) {
                 AnimalCategoryCircle(resourceId = image)
                 Text(
-                    text = AnimalCategory.toKorean(category[idx]),
+                    text = category[idx].korean,
                     color = colorScheme.text.primary,
                     style = MaterialTheme.typography.bodySmall.emp(),
                 )

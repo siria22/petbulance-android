@@ -32,6 +32,7 @@ import com.example.presentation.component.ui.atom.BasicIcon
 import com.example.presentation.component.ui.atom.CustomGreenLoader
 import com.example.presentation.component.ui.atom.IconResource
 import com.example.presentation.component.ui.dropShadow
+import com.example.presentation.component.ui.iconSizeMedium
 
 @Composable
 fun AppTopBar(
@@ -115,8 +116,8 @@ private fun TopBarIcon(
         BasicIcon(
             iconResource = iconResource,
             contentDescription = contentDescription,
-            size = 24.dp,
-            tint = colorScheme.icon.basic,
+            size = iconSizeMedium,
+            tint = colorScheme.icon.dark,
             modifier = modifier.clickable { onIconClicked() }
         )
     }
