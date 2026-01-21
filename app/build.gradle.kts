@@ -89,6 +89,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
 
+    // login
+    implementation(libs.kakao.login)
+    implementation(libs.naver.login)
+    implementation(libs.googleid)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
