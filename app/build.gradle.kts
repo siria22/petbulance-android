@@ -33,7 +33,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties["KAKAO_NATIVE_APP_KEY"] as String? ?: ""
+        manifestPlaceholders["kakao_native_app_key"] = localProperties["KAKAO_NATIVE_APP_KEY"] as String? ?: ""
     }
 
     buildTypes {
