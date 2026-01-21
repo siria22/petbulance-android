@@ -64,13 +64,13 @@ fun ReviewCard(review: HospitalReview) {
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = review.author,
+                    text = "review.author",
                     color = colorScheme.text.caption,
                     style = typography.labelMedium
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = review.date,
+                    text = "review.date",
                     color = colorScheme.text.caption,
                     style = typography.bodySmall
                 )
@@ -116,7 +116,7 @@ fun ReviewCard(review: HospitalReview) {
 
             Column(verticalArrangement = Arrangement.spacedBy(spacingXS)) {
                 Text(
-                    text = review.id.toString(), // tODO : hospital name
+                    text = review.hospitalName,
                     color = colorScheme.text.secondary,
                     style = typography.titleSmall
                 )
@@ -128,13 +128,11 @@ fun ReviewCard(review: HospitalReview) {
                     color = colorScheme.text.secondary,
                     style = typography.bodySmall
                 )
-                if (review.price > 0) {
-                    Text(
-                        text = "결제금액 ${String.format(Locale.KOREA, "%,d", review.price)}원",
-                        color = colorScheme.text.secondary,
-                        style = typography.bodySmall
-                    )
-                }
+                Text(
+                    text = "결제금액 ${String.format(Locale.KOREA, "%,d", review.price)}원",
+                    color = colorScheme.text.secondary,
+                    style = typography.bodySmall
+                )
                 Text(
                     text = review.treatment,
                     color = colorScheme.text.secondary,

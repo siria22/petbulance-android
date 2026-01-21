@@ -84,34 +84,36 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
     ): Result<PagingReviewList<HospitalReview>> {
         val reviews = listOf(
             HospitalReview(
-                1,
-                true,
-                "예방접종",
-                "강아지",
-                "푸들",
-                "친절해요",
-                4.5,
-                "2023-11-20",
-                10,
-                true,
-                listOf("url1", "url2"),
-                author = "게코매니아",
-                price = 48_000
+                id = 1,
+                hospitalName = "행복동물병원",
+                isReceiptVerified = true,
+                treatment = "예방접종",
+                animalType = "어류",
+                detailAnimalType = "금붕어",
+                content = "휴! 행복해지네요 ㅎㅎ",
+                rating = 4.2,
+                date = "2024-11-20",
+                likeCount = 11,
+                isLiked = false,
+                imageUrls = listOf(),
+                author = "내가 썼어요",
+                price = 100_000
             ),
             HospitalReview(
-                2,
-                false,
-                "중성화",
-                "고양이",
-                "코리안숏헤어",
-                "꼼꼼해요",
-                5.0,
-                "2023-11-19",
-                5,
-                false,
-                emptyList(),
-                author = "앵무새조와",
-                price = 50_000
+                id = 2,
+                hospitalName = "행복동물병원",
+                isReceiptVerified = true,
+                treatment = "예방접종",
+                animalType = "어류",
+                detailAnimalType = "금붕어",
+                content = "휴! 행복해지네요 ㅎㅎ",
+                rating = 4.2,
+                date = "2024-11-20",
+                likeCount = 11,
+                isLiked = false,
+                imageUrls = listOf(),
+                author = "내가 썼어요",
+                price = 100_000
             )
         )
         return Result.success(

@@ -160,7 +160,8 @@ class ReviewViewModel @Inject constructor(
             isLiked = false,
             imageUrls = emptyList(),
             author = "익명 사용자",
-            price = 0
+            price = 0,
+            hospitalName = "행복병원"
         )
     }
 }

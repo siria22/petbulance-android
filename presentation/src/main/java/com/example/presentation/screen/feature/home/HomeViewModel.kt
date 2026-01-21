@@ -2,6 +2,7 @@ package com.example.presentation.screen.feature.home
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.domain.model.feature.community.post.PostDetail
+import com.example.domain.model.feature.home.HomeScreenReview
 import com.example.domain.model.feature.hospital.review.HospitalReview
 import com.example.domain.usecase.feature.community.GetHotArticleUseCase
 import com.example.domain.usecase.feature.hospital.review.GetRecentReviewsUseCase
@@ -30,8 +31,8 @@ class HomeViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<HomeEvent>()
     val eventFlow: SharedFlow<HomeEvent> = _eventFlow
 
-    private val _recentReviews = MutableStateFlow<List<HospitalReview>>(emptyList())
-    val recentReviews: StateFlow<List<HospitalReview>> = _recentReviews
+    private val _recentReviews = MutableStateFlow<List<HomeScreenReview>>(emptyList())
+    val recentReviews: StateFlow<List<HomeScreenReview>> = _recentReviews
 
     private val _hotArticles = MutableStateFlow<List<PostDetail>?>(null)
     val hotArticles: StateFlow<List<PostDetail>?> = _hotArticles

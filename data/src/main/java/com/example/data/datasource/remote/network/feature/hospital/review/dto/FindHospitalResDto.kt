@@ -1,6 +1,5 @@
 package com.example.data.datasource.remote.network.feature.hospital.review.dto
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -60,18 +59,19 @@ data class HospitalReviewsCursorResDto(
 @Serializable
 data class SearchResDto(
     val id: Long,
-    val receiptCheck: Boolean = false,
-    val treatmentService: String,
+    val hospitalName: String,
+    val isReceiptVerified: Boolean,
+    val treatment: String,
     val animalType: String,
     val detailAnimalType: String,
-    val reviewContent: String,
-    val totalRating: Double,
-    val reviewDate: String,
-    val likeCount: Int = 0,
-    val liked: Boolean = false,
-    val images: List<String> = emptyList(),
-    val author: String = "알 수 없음",
-    val totalPrice: Int = 0
+    val content: String,
+    val rating: Double,
+    val date: String,
+    val likeCount: Int,
+    val isLiked: Boolean,
+    val imageUrls: List<String>,
+    val author: String,
+    val price: Int
 )
 
 @Serializable
@@ -93,19 +93,20 @@ data class ReviewImageCheckResDto(
 
 @Serializable
 data class MyReviewGetResDto(
-    val list: List<MyReviewGetDao>,
+    val list: List<MyReviewGetDto>,
     val nextCursorId: Long?,
     val hasNext: Boolean
 )
 
 @Serializable
-data class MyReviewGetDao(
+data class MyReviewGetDto(
     val id: Long,
     val hospitalName: String,
-    val content: String,
-    val createdAt: String,
-    val rating: Double,
-    val images: List<String> = emptyList()
+    val hospitalImageUrl: String? = null,
+    val reviewDate: String,
+    val receiptChecked: Boolean,
+    val likeCount: Int,
+    val comment: String
 )
 
 @Serializable

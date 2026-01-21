@@ -25,6 +25,7 @@ fun ReviewSearchItem.toHospitalReview(): HospitalReview {
         isLiked = false,
         imageUrls = emptyList(), // 검색 결과 API에서 이미지 미제공 (필요 시 API 수정 요청)
         author = "", // 검색 결과 API에서 작성자 미제공
-        price = 0
+        price = 0,
+        hospitalName = this.hospitalName
     )
 }

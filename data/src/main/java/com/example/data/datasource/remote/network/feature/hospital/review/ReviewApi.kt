@@ -81,7 +81,7 @@ class ReviewApi @Inject constructor(
     }
 
     suspend fun checkReviewImageSave(body: ReviewImageCheckReqDto): HttpResponse {
-        return client.get("$baseUrl/save/success") {
+        return client.post("$baseUrl/save/success") {
             contentType(ContentType.Application.Json)
             setBody(body)
         }

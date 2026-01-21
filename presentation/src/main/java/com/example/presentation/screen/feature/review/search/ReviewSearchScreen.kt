@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.example.domain.model.feature.hospital.review.HospitalReview
+import com.example.domain.model.type.ReviewSortType
 import com.example.presentation.component.theme.PetbulanceTheme
 import com.example.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.example.presentation.component.theme.emp
@@ -304,7 +305,8 @@ private fun ReviewSearchResultPreview() {
                         isLiked = true,
                         imageUrls = emptyList(),
                         author = "멍멍이맘",
-                        price = 1500000
+                        price = 1500000,
+                        hospitalName = "행복동물병원"
                     ),
                     HospitalReview(
                         id = 2,
@@ -319,7 +321,8 @@ private fun ReviewSearchResultPreview() {
                         isLiked = false,
                         imageUrls = emptyList(),
                         author = "냥냥펀치",
-                        price = 50000
+                        price = 50000,
+                        hospitalName = "므와므와"
                     )
                 ),
                 isSearchResultMode = true,
@@ -327,7 +330,7 @@ private fun ReviewSearchResultPreview() {
                 selectedRegion = null,
                 selectedDistrict = null,
                 selectedAnimalType = null,
-                selectedSort = com.example.domain.model.type.ReviewSortType.LATEST,
+                selectedSort = ReviewSortType.LATEST,
                 isReceiptVerified = false,
                 isPhotoReview = false
             )

@@ -38,7 +38,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.feature.community.post.PostDetail
-import com.example.domain.model.feature.hospital.review.HospitalReview
+import com.example.domain.model.feature.home.HomeScreenReview
 import com.example.domain.model.type.AnimalCategory
 import com.example.presentation.R
 import com.example.presentation.component.theme.PetbulanceTheme
@@ -295,7 +295,7 @@ private fun HospitalNoticeSlider() {
 
 @Composable
 private fun HospitalReviewShortcut(
-    reviews: List<HospitalReview>,
+    reviews: List<HomeScreenReview>,
     onClicked: () -> Unit
 ) {
     Column(
@@ -310,7 +310,7 @@ private fun HospitalReviewShortcut(
 }
 
 @Composable
-private fun RecentReviewSlider(reviews: List<HospitalReview>) {
+private fun RecentReviewSlider(reviews: List<HomeScreenReview>) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -334,7 +334,7 @@ private fun RecentReviewSlider(reviews: List<HospitalReview>) {
 }
 
 @Composable
-private fun RecentReviewSliderItem(item: HospitalReview) {
+private fun RecentReviewSliderItem(item: HomeScreenReview) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacingSmall),
         modifier = Modifier
@@ -344,17 +344,19 @@ private fun RecentReviewSliderItem(item: HospitalReview) {
             )
             .padding(vertical = spacingMedium, horizontal = spacingSmall)
     ) {
-        BasicImageBox(
-            uri = item.imageUrls.firstOrNull()?.toUri(),
-            size = 100.dp,
-            modifier = Modifier.clip(RoundedCornerShape(4.dp))
-        )
+        if (item.image != null) {
+            BasicImageBox(
+                uri = item.image?.toUri(),
+                size = 100.dp,
+                modifier = Modifier.clip(RoundedCornerShape(4.dp))
+            )
+        }
 
         Column(
             verticalArrangement = Arrangement.spacedBy(spacingXXS),
         ) {
             Text(
-                text = "item.hospitalName", // TODO : Missing field - 병원 이름
+                text = item.hospitalName,
                 style = MaterialTheme.typography.bodyMedium.emp(),
                 color = colorScheme.text.primary,
             )
@@ -370,7 +372,7 @@ private fun RecentReviewSliderItem(item: HospitalReview) {
                     color = colorScheme.text.tertiary,
                 )
                 Text(
-                    text = "후기 124", // TODO : Missing field - 후기 개수
+                    text = "${item.reviewCount}",
                     style = MaterialTheme.typography.labelMedium,
                     color = colorScheme.text.tertiary,
                 )

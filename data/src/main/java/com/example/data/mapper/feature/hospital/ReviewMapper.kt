@@ -1,7 +1,7 @@
 package com.example.data.mapper.feature.hospital
 
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.FilterResDto
-import com.example.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDao
+import com.example.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReceiptItemDto
 import com.example.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageDto
@@ -40,27 +40,28 @@ fun FilterResDto.toDomain() = ReviewSearchItem(
 
 fun SearchResDto.toDomain() = HospitalReview(
     id = id,
-    isReceiptVerified = receiptCheck,
-    treatment = treatmentService,
+    hospitalName = hospitalName,
+    isReceiptVerified = isReceiptVerified,
+    treatment = treatment,
     animalType = animalType,
     detailAnimalType = detailAnimalType,
-    content = reviewContent,
-    rating = totalRating,
-    date = reviewDate,
+    content = content,
+    rating = rating,
+    date = date,
     likeCount = likeCount,
-    isLiked = liked,
-    imageUrls = images,
+    isLiked = isLiked,
+    imageUrls = imageUrls,
     author = author,
-    price = totalPrice
+    price = price,
 )
 
-fun MyReviewGetDao.toDomain() = MyReview(
+fun MyReviewGetDto.toDomain() = MyReview(
     id = id,
     hospitalName = hospitalName,
-    content = content,
-    date = createdAt,
-    rating = rating,
-    representativeImage = images.firstOrNull()
+    content = comment,
+    date = reviewDate,
+    rating = 0.0,
+    representativeImage = hospitalImageUrl
 )
 
 fun SaveReviewParam.toDto() = ReviewSaveReqDto(
@@ -73,11 +74,10 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     animalType = animalType,
     detailAnimalType = detailAnimalType,
     receiptItems = receiptItems.map {
-        ReceiptItemDto(name = it.name, price = it.price) // 매핑 수정
+        ReceiptItemDto(name = it.name, price = it.price)
     },
     visitDate = visitDate,
     reviewComment = comment,
-    title = title,
     images = images?.map {
         ReviewImageDto(
             filename = it.filename,
