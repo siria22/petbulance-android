@@ -1,0 +1,11 @@
+package com.petbulance.domain.model.feature.hospital.review
+
+data class SaveReviewResult(
+    val reviewId: Long,
+    val uploadUrls: List<ReviewUploadUrl>
+)
+
+data class ReviewUploadUrl(
+    val url: String,
+    val saveId: String
+)

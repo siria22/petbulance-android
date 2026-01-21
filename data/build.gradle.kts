@@ -26,7 +26,7 @@ android {
         buildConfig = true
     }
 
-    namespace = "com.example.data"
+    namespace = "com.petbulance.data"
     compileSdk = 36
 
     defaultConfig {

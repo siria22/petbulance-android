@@ -21,7 +21,7 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.petbulance"
+    namespace = "com.petbulance.petbulance"
     compileSdk = 36
 
     defaultConfig {

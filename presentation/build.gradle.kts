@@ -25,7 +25,7 @@ android {
         buildConfig = true
     }
 
-    namespace = "com.example.presentation"
+    namespace = "com.petbulance.presentation"
     compileSdk = 36
 
     defaultConfig {

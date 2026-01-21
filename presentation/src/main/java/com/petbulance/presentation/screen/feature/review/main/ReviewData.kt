@@ -1,0 +1,17 @@
+package com.petbulance.presentation.screen.feature.review.main
+
+import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.Region
+import com.petbulance.domain.model.type.ReviewSortType
+
+data class ReviewData(
+    val reviews: List<HospitalReview>,
+    val selectedRegion: Region?,
+    val selectedDistrict: String?,
+    val selectedAnimalType: AnimalCategory?,
+    val selectedSort: ReviewSortType,
+    val isReceiptVerified: Boolean,
+    val isPhotoReview: Boolean,
+    val isLoadingNextPage: Boolean
+)
