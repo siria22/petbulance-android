@@ -56,9 +56,8 @@ fun ReviewSearchScreen(
     argument: ReviewSearchArgument,
     data: ReviewSearchData
 ) {
-
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var startTab by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
     var showSortingDialog by remember { mutableStateOf(false) }
 

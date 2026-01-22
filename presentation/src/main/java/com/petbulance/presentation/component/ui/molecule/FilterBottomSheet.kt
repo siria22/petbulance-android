@@ -358,7 +358,7 @@ private fun SpeciesSelectColumn(
                     .clickable(onClick = { onChipClicked(animalCategory) })
             ) {
                 Text(
-                    text = AnimalCategory.toKorean(animalCategory),
+                    text = animalCategory.korean,
                     style = MaterialTheme.typography.bodyLarge.emp(),
                     color = colorScheme.text.secondary,
                 )

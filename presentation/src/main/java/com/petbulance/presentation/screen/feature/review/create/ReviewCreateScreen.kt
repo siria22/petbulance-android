@@ -189,7 +189,7 @@ private fun ExitDialog(
         backHandler = onDismissRequest
     ) {
         Text(
-            text = "후기 작성을 줃단하고 나가시겠어요?",
+            text = "후기 작성을 중단하고 나가시겠어요?",
             style = typography.titleSmall,
             color = colorScheme.text.primary
         )
@@ -211,25 +211,6 @@ private fun ExitDialog(
                 radius = 28.dp,
                 onClicked = onDismissRequest
             )
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .heightIn(52.dp)
-                    .background(colorScheme.status.error.default, RoundedCornerShape(28.dp))
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 4.dp
-                    )
-                    .clickable { onExitButtonClicked() }
-            ) {
-                Text(
-                    text = "나가기",
-                    color = colorScheme.text.inverse,
-                    style = typography.titleMedium
-                )
-            }
 
             BasicButton(
                 modifier = Modifier.weight(1f),

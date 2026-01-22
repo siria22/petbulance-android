@@ -46,7 +46,7 @@ fun ReviewScreen(
     data: ReviewData
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var startTab by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
 
     var showInfoDialog by remember { mutableStateOf(false) }

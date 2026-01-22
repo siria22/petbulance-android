@@ -52,15 +52,24 @@ fun BasicDialog(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.Black.copy(alpha = 0.5f))
-            .padding(paddingValues)
             .clickable(
                 enabled = true,
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() }) { }
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                backHandler()
+            }
+            .padding(paddingValues)
     ) {
         Column(
             modifier = modifier
                 .align(position)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    // Do nothing to prevent triggering the parent's clickable (backHandler)
+                }
                 .background(
                     color = Color.White,
                     shape = LargeRoundedCorner
