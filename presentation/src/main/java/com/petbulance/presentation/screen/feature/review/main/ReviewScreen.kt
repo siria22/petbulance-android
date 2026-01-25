@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.feature.review.main
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -37,8 +39,11 @@ import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ReviewScreen(
     navController: NavController,
@@ -53,6 +58,11 @@ fun ReviewScreen(
     var showSortingDialog by remember { mutableStateOf(false) }
 
     var showReceiptDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    // 1. 카메라 권한 상태 관리
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
     Scaffold(
         topBar = {
@@ -150,12 +160,19 @@ fun ReviewScreen(
         CreateReceiptDialog(
             onDismissRequest = { showReceiptDialog = false },
             onConfirm = {
+                // "영수증 없이 쓰기" -> 바로 Create 화면 이동
                 showReceiptDialog = false
                 navController.safeNavigate(ScreenDestinations.Review.Create.route)
             },
             onConfirmWithoutReceipt = {
-                showReceiptDialog = false
-                navController.safeNavigate(ScreenDestinations.Review.ReceiptCamera.route)
+                // "영수증 인증하고 쓰기" (이름이 반대같지만 로직상 여기) -> 권한 체크 후 이동
+                if (cameraPermissionState.status.isGranted) {
+                    showReceiptDialog = false
+                    navController.safeNavigate(ScreenDestinations.Review.ReceiptCamera.route)
+                } else {
+                    cameraPermissionState.launchPermissionRequest()
+                    Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }
