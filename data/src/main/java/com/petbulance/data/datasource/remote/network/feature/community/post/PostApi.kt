@@ -15,8 +15,10 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import javax.inject.Inject
 
-class PostApi(
+
+class PostApi @Inject constructor(
     @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "${BASE_URL}/posts"

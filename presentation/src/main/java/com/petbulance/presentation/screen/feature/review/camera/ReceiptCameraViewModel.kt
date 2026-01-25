@@ -4,11 +4,13 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.camera.core.ImageProxy
+import androidx.core.graphics.scale
 import androidx.lifecycle.viewModelScope
-import com.petbulance.domain.repository.feature.hospital.ReviewRepository
+import com.petbulance.domain.usecase.feature.hospital.review.AnalyzeReceiptUseCase
 import com.petbulance.presentation.screen.feature.review.create.ReceiptAnalysisResultUiModel
 import com.petbulance.presentation.screen.feature.review.create.ReceiptItemUiModel
 import com.petbulance.presentation.utils.BaseViewModel
+import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReceiptCameraViewModel @Inject constructor(
-    private val reviewRepository: ReviewRepository
+    private val analyzeReceiptUseCase: AnalyzeReceiptUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(ReceiptCameraState())
@@ -31,6 +33,16 @@ class ReceiptCameraViewModel @Inject constructor(
 
     private val _event = MutableSharedFlow<ReceiptCameraEvent>()
     val event: SharedFlow<ReceiptCameraEvent> = _event
+
+    fun onIntent(intent: ReceiptCameraIntent) {
+        when (intent) {
+            is ReceiptCameraIntent.PhotoCaptured -> onPhotoCaptured(intent.imageProxy)
+            is ReceiptCameraIntent.GalleryImageSelected -> onGalleryImageSelected(
+                intent.uri,
+                intent.contentResolver
+            )
+        }
+    }
 
     fun onPhotoCaptured(imageProxy: ImageProxy) {
         if (_state.value.isAnalyzing) {
@@ -86,7 +98,8 @@ class ReceiptCameraViewModel @Inject constructor(
     }
 
     private suspend fun analyzeReceipt(imageBytes: ByteArray) {
-        reviewRepository.analyzeReceipt(imageBytes, "receipt.jpg")
+        // UseCase 호출로 변경
+        analyzeReceiptUseCase(imageBytes)
             .onSuccess { result ->
                 val uiModel = ReceiptAnalysisResultUiModel(
                     hospitalName = result.hospitalName,
@@ -95,9 +108,14 @@ class ReceiptCameraViewModel @Inject constructor(
                     items = result.items.map { ReceiptItemUiModel(it.name, it.price) }
                 )
                 _event.emit(ReceiptCameraEvent.AnalysisSuccess(uiModel))
-            }
-            .onFailure {
-                _event.emit(ReceiptCameraEvent.AnalysisFailed)
+            }.onFailure { ex ->
+                _event.emit(
+                    ReceiptCameraEvent.AnalysisFailed(
+                        userMessage = "영수증 인식에 실패했어요",
+                        exceptionMessage = ex.message,
+                        displayType = ErrorDisplayType.Common
+                    )
+                )
             }
     }
 
@@ -107,6 +125,6 @@ class ReceiptCameraViewModel @Inject constructor(
         val aspectRatio = bitmap.height.toDouble() / bitmap.width.toDouble()
         val targetHeight = (targetWidth * aspectRatio).toInt()
 
-        return Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true)
+        return bitmap.scale(targetWidth, targetHeight)
     }
 }

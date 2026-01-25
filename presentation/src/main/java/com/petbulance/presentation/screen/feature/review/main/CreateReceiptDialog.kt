@@ -23,7 +23,7 @@ import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingXS
 
 @Composable
-fun ReceiptDialog(
+fun CreateReceiptDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     onConfirmWithoutReceipt: () -> Unit,
@@ -81,8 +81,8 @@ fun ReceiptDialog(
 
 @Preview(apiLevel = 34)
 @Composable
-private fun ReceiptDialogPreview() {
+private fun CreateReceiptDialogPreview() {
     PetbulanceTheme() {
-        ReceiptDialog({}, {}, {})
+        CreateReceiptDialog({}, {}, {})
     }
 }

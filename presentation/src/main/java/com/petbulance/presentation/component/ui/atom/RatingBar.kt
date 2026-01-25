@@ -35,6 +35,7 @@ fun RatingBar(
     rating: Double,
     maxRating: Int = 5,
     starSize: Dp = 24.dp,
+    stepSize: Double = 0.1,
     activeColor: Color = colorScheme.icon.rating,
     inactiveColor: Color = colorScheme.icon.disabled,
     onRatingChanged: ((Double) -> Unit)? = null
@@ -48,14 +49,15 @@ fun RatingBar(
                 Modifier
                     .pointerInput(Unit) {
                         detectTapGestures { offset ->
-                            val newRating = calculateRating(offset.x, starSizePx, maxRating)
+                            val newRating =
+                                calculateRating(offset.x, starSizePx, maxRating, stepSize)
                             onRatingChanged(newRating)
                         }
                     }
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures { change, _ ->
                             val newRating =
-                                calculateRating(change.position.x, starSizePx, maxRating)
+                                calculateRating(change.position.x, starSizePx, maxRating, stepSize)
                             onRatingChanged(newRating)
                         }
                     }
@@ -95,10 +97,12 @@ fun RatingBar(
     }
 }
 
-private fun calculateRating(x: Float, starSizePx: Float, maxRating: Int): Double {
+private fun calculateRating(x: Float, starSizePx: Float, maxRating: Int, stepSize: Double): Double {
     val rawRating = x / starSizePx
-    val rating = (round(rawRating * 2) / 2.0)
-    return max(0.0, min(maxRating.toDouble(), rating))
+    val rating = round(rawRating / stepSize) * stepSize
+    val roundedRating = round(rating * 10) / 10.0
+
+    return max(0.0, min(maxRating.toDouble(), roundedRating))
 }
 
 @Composable

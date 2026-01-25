@@ -147,7 +147,7 @@ fun ReviewScreen(
     }
 
     if (showReceiptDialog) {
-        ReceiptDialog(
+        CreateReceiptDialog(
             onDismissRequest = { showReceiptDialog = false },
             onConfirm = {
                 showReceiptDialog = false

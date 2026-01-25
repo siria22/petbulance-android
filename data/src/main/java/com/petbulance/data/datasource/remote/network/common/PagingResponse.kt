@@ -1,5 +1,8 @@
 package com.petbulance.data.datasource.remote.network.common
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PagingResponse<T>(
     val content: List<T>,
     val last: Boolean,

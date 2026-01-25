@@ -40,7 +40,7 @@ annotation class DefaultHttpClient
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val TOLERABLE_TIME = 3000L
+    private const val TOLERABLE_TIME = 10_000L
     private const val LOG_TAG = "siria22 - NetworkModule"
 
     private const val isLoggingOn = true

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -162,6 +161,7 @@ fun ReviewCreateScreen(
             ) {
                 if (argument.state.currentStep == ReviewCreateStep.REVIEW_CONTENT) {
                     argument.intent(ReviewCreateIntent.OnSubmitClicked)
+                    // TODO : Navigate to Review Detail page
                 } else {
                     argument.intent(ReviewCreateIntent.OnNextClicked)
                 }
@@ -483,6 +483,7 @@ private fun Step3ReviewContent(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         } else {
+
                             // TODO: Show toast "최대 10장까지만 첨부 가능합니다."
                         }
                     },

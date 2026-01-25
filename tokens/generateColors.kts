@@ -122,7 +122,7 @@ try {
     // 헬퍼 함수 호출 (List<TypeSpec> 반환)
     val categoryObjects = generateCategoryObjects(colorPrimitives, colorClass)
 
-    val fileSpec = FileSpec.builder("com.example.presentation.component.theme", "Primitives")
+    val fileSpec = FileSpec.builder("com.example.presentation.component.theme.color", "Primitives")
         .addType(
             TypeSpec.objectBuilder("PetbulancePrimitives")
                 .addTypes(categoryObjects)

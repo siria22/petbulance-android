@@ -19,13 +19,14 @@ data class ReviewCreateState(
     val step1: Step1State = Step1State(),
     val step2: Step2State = Step2State(),
     val step3: Step3State = Step3State(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showValidationError: Boolean = false
 )
 
 enum class ReviewCreateStep {
-    HOSPITAL_AND_RATING,  // 1단계: 병원 선택 및 평점
-    ANIMAL_AND_TREATMENT, // 2단계: 동물 및 진료 정보
-    REVIEW_CONTENT        // 3단계: 후기 내용 및 사진
+    HOSPITAL_AND_RATING,
+    ANIMAL_AND_TREATMENT,
+    REVIEW_CONTENT
 }
 
 @Immutable

@@ -24,6 +24,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.time.LocalDateTime
 import javax.inject.Inject
+import androidx.core.net.toUri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class ReviewCreateViewModel @Inject constructor(
@@ -108,6 +111,7 @@ class ReviewCreateViewModel @Inject constructor(
                 }
 
                 savedStateHandle.remove<String>(ScreenDestinations.Review.Create.ARG_DATA)
+                // TODO: 다이어로그 띄우고 다음 스텝으로 이동
                 emitEvent(ReviewCreateEvent.ShowToast("영수증 정보가 적용되었습니다."))
 
             } catch (e: Exception) {
@@ -119,14 +123,16 @@ class ReviewCreateViewModel @Inject constructor(
 
     private fun handleBack() {
         val currentState = _state.value
+        val cleanState = currentState.copy(showValidationError = false)
+
         when (currentState.currentStep) {
             ReviewCreateStep.HOSPITAL_AND_RATING -> emitEvent(ReviewCreateEvent.ShowExitDialog)
             ReviewCreateStep.ANIMAL_AND_TREATMENT -> {
-                _state.update { it.copy(currentStep = ReviewCreateStep.HOSPITAL_AND_RATING) }
+                _state.update { cleanState.copy(currentStep = ReviewCreateStep.HOSPITAL_AND_RATING) }
             }
 
             ReviewCreateStep.REVIEW_CONTENT -> {
-                _state.update { it.copy(currentStep = ReviewCreateStep.ANIMAL_AND_TREATMENT) }
+                _state.update { cleanState.copy(currentStep = ReviewCreateStep.ANIMAL_AND_TREATMENT) }
             }
         }
     }
@@ -140,22 +146,34 @@ class ReviewCreateViewModel @Inject constructor(
         when (currentState.currentStep) {
             ReviewCreateStep.HOSPITAL_AND_RATING -> {
                 if (validateStep1(currentState.step1)) {
-                    _state.update { it.copy(currentStep = ReviewCreateStep.ANIMAL_AND_TREATMENT) }
+                    _state.update {
+                        it.copy(
+                            currentStep = ReviewCreateStep.ANIMAL_AND_TREATMENT,
+                            showValidationError = false
+                        )
+                    }
                 } else {
+                    _state.update { it.copy(showValidationError = true) }
                     emitEvent(ReviewCreateEvent.ShowToast("병원과 별점을 모두 입력해주세요."))
                 }
             }
 
             ReviewCreateStep.ANIMAL_AND_TREATMENT -> {
                 if (validateStep2(currentState.step2)) {
-                    _state.update { it.copy(currentStep = ReviewCreateStep.REVIEW_CONTENT) }
+                    _state.update {
+                        it.copy(
+                            currentStep = ReviewCreateStep.REVIEW_CONTENT,
+                            showValidationError = false
+                        )
+                    }
                 } else {
+                    _state.update { it.copy(showValidationError = true) }
                     emitEvent(ReviewCreateEvent.ShowToast("동물 정보와 진료명을 입력해주세요."))
                 }
             }
 
             ReviewCreateStep.REVIEW_CONTENT -> {
-                // Submit is handled by OnSubmitClicked
+                // no-op: Submit is handled by OnSubmitClicked
             }
         }
     }
@@ -169,7 +187,6 @@ class ReviewCreateViewModel @Inject constructor(
 
     private fun validateStep2(step2: Step2State): Boolean {
         return step2.animalType.isNotBlank() &&
-                // detailAnimalType is optional or required based on policy? assuming required for now
                 step2.detailAnimalType.isNotBlank() &&
                 step2.treatment.isNotBlank()
     }
@@ -183,10 +200,11 @@ class ReviewCreateViewModel @Inject constructor(
                 step2 = it.step2.copy(
                     visitDate = result.visitDate,
                     price = result.totalPrice,
-                    receiptItems = result.items // 항목 저장
+                    receiptItems = result.items
                 )
             )
         }
+        // TODO: 다이어로그 띄우고 다음 스텝으로 이동
         emitEvent(ReviewCreateEvent.ShowToast("영수증이 인식되었습니다."))
     }
 
@@ -194,65 +212,66 @@ class ReviewCreateViewModel @Inject constructor(
         val currentState = _state.value
         if (currentState.isLoading) return
 
+        // 1. 최종 검증 (내용 확인)
         if (currentState.step3.content.isBlank()) {
+            _state.update { it.copy(showValidationError = true) }
             emitEvent(ReviewCreateEvent.ShowToast("후기 내용을 입력해주세요."))
             return
         }
 
-        launch {
-            _state.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, showValidationError = false) }
 
-            // 1. 이미지 읽기 (ByteArray)
-            val imageBytesList = currentState.step3.images.mapNotNull { uriString ->
-                uriToByteArray(uriString)
-            }
+            try {
+                // 2. [비동기] 이미지 URI를 ByteArray로 변환 (Dispatchers.IO 사용 필수)
+                // ContentResolver를 통해 실제 파일 데이터를 읽어옴
+                val imageBytesList = withContext(Dispatchers.IO) {
+                    currentState.step3.images.mapNotNull { uriString ->
+                        try {
+                            context.contentResolver.openInputStream(Uri.parse(uriString))?.use {
+                                it.readBytes()
+                            }
+                        } catch (e: Exception) {
+                            null // 개별 이미지 로드 실패 시 무시하거나 에러 처리 정책에 따름
+                        }
+                    }
+                }
 
-            // 2. 이미지 파라미터 생성 (Base64 변환)
-            val reviewImages = currentState.step3.images.mapIndexedNotNull { index, uriString ->
-                val bytes = imageBytesList.getOrNull(index) ?: return@mapIndexedNotNull null
-                // 실제 파일명/MIME 타입을 ContentResolver로 가져오는 것이 좋으나, 여기선 임의값 사용 예시
-                val base64Content = Base64.encodeToString(bytes, Base64.NO_WRAP)
-
-                ReviewImageParam(
-                    filename = "image_$index.jpg",
-                    contentType = "image/jpeg",
-                    content = base64Content,
-                    isReceipt = false
+                // 3. 파라미터 구성 (SaveReviewParam에서 images 제거됨)
+                val param = SaveReviewParam(
+                    hospitalId = currentState.step1.hospitalInfo?.id ?: 0L,
+                    rating = currentState.step1.ratings,
+                    price = currentState.step2.price,
+                    animalType = currentState.step2.animalType,
+                    detailAnimalType = currentState.step2.detailAnimalType,
+                    receiptItems = currentState.step2.receiptItems,
+                    visitDate = currentState.step2.visitDate,
+                    comment = currentState.step3.content,
+                    isReceipt = currentState.step1.isReceiptVerified
                 )
+
+                // 4. UseCase 호출
+                createReviewUseCase(param, imageBytesList)
+                    .onSuccess {
+                        emitEvent(ReviewCreateEvent.ShowToast("리뷰가 성공적으로 등록되었습니다."))
+                        emitEvent(ReviewCreateEvent.NavigateToHome)
+                    }
+                    .onFailure { e ->
+                        emitEvent(ReviewCreateEvent.ShowToast("리뷰 등록 실패: ${e.message}"))
+                    }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitEvent(ReviewCreateEvent.ShowToast("처리 중 오류가 발생했습니다."))
+            } finally {
+                _state.update { it.copy(isLoading = false) }
             }
-
-            // 3. 파라미터 준비
-            val param = SaveReviewParam(
-                hospitalId = currentState.step1.hospitalInfo?.id ?: 0L,
-                rating = currentState.step1.ratings,
-                price = currentState.step2.price,
-                animalType = currentState.step2.animalType,
-                detailAnimalType = currentState.step2.detailAnimalType,
-                receiptItems = currentState.step2.receiptItems,
-                visitDate = currentState.step2.visitDate.ifBlank { LocalDateTime.now().toString() },
-                comment = currentState.step3.content,
-                isReceipt = currentState.step1.isReceiptVerified,
-                images = reviewImages
-            )
-
-            // 4. UseCase 호출
-            // (UseCase가 여전히 List<ByteArray>를 별도로 요구한다면 imageBytesList도 전달)
-            createReviewUseCase(param, imageBytesList)
-                .onSuccess {
-                    emitEvent(ReviewCreateEvent.ShowToast("리뷰가 등록되었습니다."))
-                    emitEvent(ReviewCreateEvent.NavigateToHome)
-                }
-                .onFailure { e ->
-                    emitEvent(ReviewCreateEvent.ShowToast("리뷰 등록 실패: ${e.message}"))
-                }
-
-            _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun uriToByteArray(uriString: String): ByteArray? {
         return try {
-            val uri = Uri.parse(uriString)
+            val uri = uriString.toUri()
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 inputStream.readBytes()
             }
