@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
  */
 suspend inline fun <reified T> safeApiCall(
     path: String,
+    useBaseResponse: Boolean = true,
     crossinline apiCall: suspend () -> HttpResponse
 ): Result<T> {
     val logger = "$LOGGER_TAG - SafeApiCalls"
@@ -36,9 +37,14 @@ suspend inline fun <reified T> safeApiCall(
 
         when (val statusCode = response.status.value) {
             in 200..299 -> {
-                val responseBody = json.decodeFromString<BaseResponse<T>>(responseString)
-                return responseBody.data?.let { Result.success(it) }
-                    ?: Result.failure(EmptyDataException("Response data is null"))
+                if (useBaseResponse) {
+                    val responseBody = json.decodeFromString<BaseResponse<T>>(responseString)
+                    return responseBody.data?.let { Result.success(it) }
+                        ?: Result.failure(EmptyDataException("Response data is null"))
+                } else {
+                    val responseBody = json.decodeFromString<T>(responseString)
+                    return Result.success(responseBody)
+                }
             }
 
             in 400..599 -> {
@@ -60,6 +66,7 @@ suspend inline fun <reified T> safeApiCall(
         return Result.failure(Exception(errorMessage, e))
     }
 }
+
 
 fun mapToDomainException(code: Int, requestPath: String, className: String, message: String): Exception {
     val errorMessage = "Request failed for path: $requestPath\n" +

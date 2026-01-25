@@ -1,3 +1,4 @@
+@file:Suppress("UNUSED_IMPORT")
 package com.petbulance.data.di
 
 import com.petbulance.data.repository.feature.community.board.BoardRepositoryImpl

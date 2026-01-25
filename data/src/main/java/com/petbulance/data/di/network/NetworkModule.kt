@@ -74,7 +74,7 @@ object NetworkModule {
             defaultRequest {
                 header(HttpHeaders.Accept, "*/*")
                 contentType(ContentType.Application.Json)
-                header(HttpHeaders.UserAgent, "KoreaUniv-Android-Client")
+//                header(HttpHeaders.UserAgent, "Petbulance-Android-Client")
             }
         }
     }
@@ -113,7 +113,7 @@ object NetworkModule {
             defaultRequest {
                 contentType(ContentType.Application.Json)
                 header(HttpHeaders.Accept, "*/*")
-                header(HttpHeaders.UserAgent, "KoreaUniv-Android-Client")
+//                header(HttpHeaders.UserAgent, "Petbulance-Android-Client")
             }
 
             install(Auth) {

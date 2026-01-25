@@ -1,6 +1,6 @@
 package com.petbulance.data.repository.feature.hospital.hospital
 
-import com.petbulance.data.datasource.remote.network.common.PagingResponse
+import com.petbulance.data.datasource.remote.network.common.CursorPagingResponse
 import com.petbulance.data.datasource.remote.network.feature.hospital.hospital.HospitalApi
 import com.petbulance.data.datasource.remote.network.feature.hospital.hospital.dto.HospitalCardResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.hospital.dto.HospitalDetailResDto
@@ -30,7 +30,9 @@ class HospitalRepositoryImpl @Inject constructor(
         page: Int,
         size: Int
     ): Result<PagingResult<Hospital>> {
-        return safeApiCall<PagingResponse<HospitalsResDto>>(path = "/hospitals") {
+        return safeApiCall<CursorPagingResponse<HospitalsResDto>>(
+            path = "/hospitals"
+        ) {
             api.searchHospitals(
                 HospitalSearchReqDto(
                     q = q,
@@ -46,9 +48,9 @@ class HospitalRepositoryImpl @Inject constructor(
             )
         }.map { pagingResponse ->
             PagingResult(
-                content = pagingResponse.content.map { it.toDomain() },
-                isLast = pagingResponse.last,
-                pageNumber = pagingResponse.number
+                content = pagingResponse.list.map { it.toDomain() },
+                isLast = !pagingResponse.hasNext,
+                pageNumber = page
             )
         }
     }

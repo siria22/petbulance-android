@@ -1,5 +1,7 @@
 package com.petbulance.presentation.screen.nonfeature.login.main
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,6 +43,7 @@ import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXXL
+import com.petbulance.presentation.utils.hooks.HandleMultiplePermissions
 import com.petbulance.presentation.utils.hooks.login.rememberGoogleLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberKakaoLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberNaverLoginManager
@@ -54,6 +57,28 @@ fun LoginScreen(
     argument: LoginArgument,
 ) {
     val dataState = argument.dataState
+
+    val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        listOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.READ_MEDIA_IMAGES
+        )
+    } else {
+        listOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+    }
+
+    HandleMultiplePermissions(
+        permissions = permissionsToRequest,
+        onAllGranted = { /* 모든 권한 허용됨 - 필요 시 로깅 */ },
+        onDenied = { /* 일부 권한 거부됨 - 로그인은 계속 진행 */ }
+    )
 
     LaunchedEffect(argument.event) {
         argument.event.collect { event ->
