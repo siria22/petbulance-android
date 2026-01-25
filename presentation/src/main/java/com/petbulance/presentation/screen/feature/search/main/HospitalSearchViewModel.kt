@@ -5,6 +5,8 @@ import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
 import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospitalList
+import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.HospitalSortType
 import com.petbulance.domain.usecase.feature.hospital.hospital.SearchHospitalsUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.AddSearchKeywordUseCase
@@ -41,7 +43,7 @@ class HospitalSearchViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<SearchEvent>()
     val eventFlow: SharedFlow<SearchEvent> = _eventFlow
 
-    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.Companion.empty)
+    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.empty)
     val hospitalSearchQuery: StateFlow<HospitalSearchQueryUiModel> = _hospitalSearchQuery
 
     private val _hospitalList = MutableStateFlow<List<Hospital>>(emptyList())
@@ -150,47 +152,64 @@ class HospitalSearchViewModel @Inject constructor(
 
         if (isNewSearch) {
             resetCursors()
-            _hospitalList.value = emptyList() // Clear list for new search
+            _hospitalList.value = emptyList()
         }
 
-        // Cache params for next page load
+        // Cache params
         lastQueryModel = queryModel
         lastUserLocation = currentUserLocation
         lastSortType = sortType
         lastBounds = bounds
 
+        val regionParam = if (queryModel.region == null) {
+            null
+        } else {
+            val district = queryModel.district
+            if (district.isNullOrBlank() || district.contains("전체")) {
+                queryModel.region.displayName.replace(" ", "")
+            } else {
+                "${queryModel.region.displayName}${district}".replace(" ", "")
+            }
+        }
+
+        // 2. Animal 파라미터 처리 (단순화됨!)
+        val animalParam = queryModel.species?.let { category ->
+            if (category == AnimalCategory.ALL) null
+            else getBackendAnimalTypes(category)
+        }
+
+        // 3. 검색어(q) 처리 (빈값 null)
+        val qParam = queryModel.query?.trim()?.takeIf { it.isNotEmpty() }
+
         runCatching {
             searchHospitalsUseCase(
-                q = queryModel.query,
-                region = queryModel.getRegionFilter(),
+                q = qParam,
+                region = regionParam,
                 lat = currentUserLocation.latitude,
                 lng = currentUserLocation.longitude,
                 bounds = bounds,
-                animal = queryModel.species?.name,
+                animal = animalParam,
                 openNow = queryModel.openNowOnly,
                 sortBy = sortType.name,
-                size = 20, // Page size
+                size = 20,
                 cursorId = currentCursorId,
                 cursorDistance = currentCursorDistance,
                 cursorRating = currentCursorRating,
                 cursorReviewCount = currentCursorReviewCount
             )
         }.onSuccess { result ->
-            // Append or Set
             val newItems = result.content
             if (isNewSearch) {
                 _hospitalList.value = newItems
             } else {
-                _hospitalList.value = _hospitalList.value + newItems
+                _hospitalList.value += newItems
             }
 
-            // Update Cursors
             hasNextPage = result.hasNext
             currentCursorId = result.cursorId
             currentCursorDistance = result.cursorDistance
             currentCursorRating = result.cursorRating
             currentCursorReviewCount = result.cursorReviewCount
-
         }.onFailure { ex ->
             _eventFlow.emit(
                 SearchEvent.DataFetch.Error(
@@ -202,6 +221,12 @@ class HospitalSearchViewModel @Inject constructor(
 
         _dataState.value = HospitalSearchDataState.Init
         isRequesting = false
+    }
+
+    private fun getBackendAnimalTypes(category: AnimalCategory): String {
+        return AnimalSpecies.entries
+            .filter { it.category == category }
+            .joinToString(",") { it.name }
     }
 
     private fun resetCursors() {
@@ -231,7 +256,8 @@ class HospitalSearchViewModel @Inject constructor(
                 _eventFlow.emit(SearchEvent.DataFetch.Error("최근 본 병원 조회 실패", ex.message))
             }
             .collect {
-                _viewedHospitals.value = ViewedHospitalList(items = it, totalCount = it.size.toLong())
+                _viewedHospitals.value =
+                    ViewedHospitalList(items = it, totalCount = it.size.toLong())
             }
     }
 

@@ -101,7 +101,9 @@ private fun ResultViewContents(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(spacingXXS, Alignment.Start),
-                modifier = Modifier.fillMaxWidth().padding(vertical = spacingMedium)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = spacingMedium)
             ) {
                 RowChipFilters(
                     uiModel = searchUiState.currentQuery,
@@ -146,8 +148,11 @@ private fun NoResult(keywordName: String?) {
             size = 160.dp,
             tint = Color.Unspecified
         )
+        val text = if (keywordName == null) "해당 조건의 병원을 찾을 수 없어요."
+        else "$keywordName(을)를 찾을 수 없어요."
+
         Text(
-            text = "$keywordName(을)를 찾을 수 없어요.",
+            text = text,
             style = typography.titleSmall,
             color = colorScheme.text.tertiary
         )

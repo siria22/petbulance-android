@@ -52,6 +52,7 @@ class UserLocationViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates(forceMove: Boolean = false) {
         launch {
+            var shouldMoveCamera = forceMove
             _state.value = UserLocationState.Finding
 
             getLocationFlow()
@@ -65,9 +66,11 @@ class UserLocationViewModel @Inject constructor(
                 }
                 .collect { location ->
                     _state.value = UserLocationState.Success(location)
-                    if (forceMove || !isInitialLocationSent) {
+                    // shouldMoveCamera 플래그 확인
+                    if (shouldMoveCamera || !isInitialLocationSent) {
                         _eventFlow.emit(SearchEvent.UserLocation.MoveCamera(location))
                         isInitialLocationSent = true
+                        shouldMoveCamera = false // 한 번 이동 후에는 자동 이동 비활성화
                     }
                 }
         }

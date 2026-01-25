@@ -53,6 +53,7 @@ sealed interface SearchUiEvent {
     data object OnSearchButtonClicked : SearchUiEvent
     data class OnSearchNearby(val bounds: MapBounds) : SearchUiEvent
     data class OnQueryChanged(val query: String) : SearchUiEvent
+    data object OnLoadMore : SearchUiEvent
 
     // --- Navigation ---
     data object OnCurrentLocationClicked : SearchUiEvent

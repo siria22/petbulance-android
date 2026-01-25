@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -240,7 +241,19 @@ fun HospitalCard(
             if (hospital.types.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    maxLines = 1, // TODO : Deprecated FlowRowOverflow
+                    overflow = FlowRowOverflow.expandOrCollapseIndicator(
+                        expandIndicator = {
+                            Text(
+                                text = "...",
+                                color = colorScheme.text.caption,
+                                style = typography.labelLarge,
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                        },
+                        collapseIndicator = { }
+                    )
                 ) {
                     hospital.types.forEach { type ->
                         BasicChip(text = type)

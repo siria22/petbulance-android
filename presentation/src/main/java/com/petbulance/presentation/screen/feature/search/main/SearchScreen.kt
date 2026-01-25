@@ -100,7 +100,7 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType // 추가됨
+                        sortType = selectedSortType
                     )
                 )
                 isFilterBottomSheetVisible = false
@@ -113,7 +113,7 @@ fun SearchScreen(
                         bounds = event.bounds,
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType // 추가됨
+                        sortType = selectedSortType
                     )
                 )
             }
@@ -124,7 +124,19 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.keyword),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType // 추가됨
+                        sortType = selectedSortType
+                    )
+                )
+                commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
+            }
+
+            is SearchUiEvent.OnRecentHospitalClicked -> {
+                currentDraftQuery = currentDraftQuery.copy(query = event.hospitalName)
+                hospitalSearchArgument.intent(
+                    HospitalSearchIntent.SearchHospitalWithCurrentParams(
+                        query = currentDraftQuery.copy(query = event.hospitalName),
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -181,6 +193,10 @@ fun SearchScreen(
 
             // Map Specific
             is SearchUiEvent.OnMapReady -> { /* Handled in MapView */
+            }
+
+            is SearchUiEvent.OnLoadMore -> {
+                hospitalSearchArgument.intent(HospitalSearchIntent.LoadNextPage)
             }
         }
     }

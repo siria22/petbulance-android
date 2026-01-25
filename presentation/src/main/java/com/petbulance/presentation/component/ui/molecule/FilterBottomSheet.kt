@@ -136,7 +136,12 @@ fun FilterBottomSheet(
 
                         FilterBottomSheetTab.SPECIES -> {
                             SpeciesSelectColumn(
-                                onChipClicked = { selectedAnimalCategory = it },
+                                onChipClicked = { newCategory ->
+                                    selectedAnimalCategory = newCategory
+                                    onQuerySet(
+                                        currentQuery.copy(species = newCategory)
+                                    )
+                                },
                                 selectedAnimalCategory = selectedAnimalCategory,
                             )
                         }
