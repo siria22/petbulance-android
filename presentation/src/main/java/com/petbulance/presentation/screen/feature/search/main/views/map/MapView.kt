@@ -332,7 +332,10 @@ private fun MapUiLayer(
                 Box(
                     modifier = Modifier
                         .padding(top = 16.dp)
-                        .background(colorScheme.text.secondary.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                        .background(
+                            colorScheme.text.secondary.copy(alpha = 0.7f),
+                            RoundedCornerShape(4.dp)
+                        )
                         .padding(vertical = spacingXXS, horizontal = spacingXS),
                     contentAlignment = Alignment.Center
                 ) {
@@ -369,9 +372,13 @@ private fun MapUiLayer(
                 }
             }
             if (state.filteredHospitalList.isEmpty()) {
-                HospitalCard(
-                    hospital = null
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(spacingMedium)
+                ) {
+                    HospitalCard(
+                        hospital = null
+                    )
+                }
             } else {
                 BaseCarousel(
                     modifier = Modifier.fillMaxWidth(),
@@ -410,6 +417,7 @@ private fun MapViewPreview() {
                 hospitalList = listOf(
                     Hospital.stub
                 ),
+//                hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
             ),
             onEvent = {}

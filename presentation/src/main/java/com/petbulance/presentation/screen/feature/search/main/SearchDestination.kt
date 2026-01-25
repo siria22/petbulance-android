@@ -10,7 +10,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -81,10 +80,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
 
         val hospitalData = HospitalSearchData(
             hospitalSearchQuery = hospitalSearchQuery,
-//            hospitalList = hospitalList, // FIXME :
-            hospitalList = listOf(
-                Hospital.stub
-            ),
+            hospitalList = hospitalList,
             recentSearchKeywords = recentSearchKeywords,
             viewedHospitals = viewedHospitals
         )

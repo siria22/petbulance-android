@@ -6,5 +6,8 @@ import kotlinx.serialization.Serializable
 data class CursorPagingResponse<T>(
     val list: List<T>,
     val cursorId: Long?,
+    val cursorDistance: Double? = null,
+    val cursorRating: Double? = null,
+    val cursorReviewCount: Long? = null,
     val hasNext: Boolean
 )

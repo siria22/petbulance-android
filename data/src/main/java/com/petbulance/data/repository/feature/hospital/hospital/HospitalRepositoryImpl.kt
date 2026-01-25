@@ -27,8 +27,12 @@ class HospitalRepositoryImpl @Inject constructor(
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
-        page: Int,
-        size: Int
+        sortBy: String?,
+        size: Int,
+        cursorId: Long?,
+        cursorDistance: Double?,
+        cursorRating: Double?,
+        cursorReviewCount: Long?
     ): Result<PagingResult<Hospital>> {
         return safeApiCall<CursorPagingResponse<HospitalsResDto>>(
             path = "/hospitals"
@@ -41,16 +45,23 @@ class HospitalRepositoryImpl @Inject constructor(
                     lng = lng,
                     bounds = bounds,
                     animal = animal,
-                    openNow = openNow
-                ),
-                size = size,
-                page = page
+                    openNow = openNow,
+                    sortBy = sortBy,
+                    size = size,
+                    cursorId = cursorId,
+                    cursorDistance = cursorDistance,
+                    cursorRating = cursorRating,
+                    cursorReviewCount = cursorReviewCount
+                )
             )
         }.map { pagingResponse ->
             PagingResult(
                 content = pagingResponse.list.map { it.toDomain() },
-                isLast = !pagingResponse.hasNext,
-                pageNumber = page
+                hasNext = pagingResponse.hasNext,
+                cursorId = pagingResponse.cursorId,
+                cursorDistance = pagingResponse.cursorDistance,
+                cursorRating = pagingResponse.cursorRating,
+                cursorReviewCount = pagingResponse.cursorReviewCount
             )
         }
     }

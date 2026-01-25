@@ -35,21 +35,22 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
-        page: Int,
-        size: Int
+        sortBy: String?,
+        size: Int,
+        cursorId: Long?,
+        cursorDistance: Double?,
+        cursorRating: Double?,
+        cursorReviewCount: Long?
     ): Result<PagingResult<Hospital>> {
         delay(500)
-        val start = page * size
-        val end = (start + size).coerceAtMost(mockHospitals.size)
-
-        val content =
-            if (start >= mockHospitals.size) emptyList() else mockHospitals.subList(start, end)
-
         return Result.success(
             PagingResult(
-                content = content,
-                isLast = end >= mockHospitals.size,
-                pageNumber = page
+                content = mockHospitals.take(size),
+                hasNext = mockHospitals.size > size,
+                cursorId = mockHospitals.getOrNull(size - 1)?.hospitalId,
+                cursorDistance = null,
+                cursorRating = null,
+                cursorReviewCount = null
             )
         )
     }

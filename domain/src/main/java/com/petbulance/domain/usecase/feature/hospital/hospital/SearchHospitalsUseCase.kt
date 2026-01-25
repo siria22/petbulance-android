@@ -17,19 +17,27 @@ class SearchHospitalsUseCase @Inject constructor(
         bounds: MapBounds?,
         animal: String?,
         openNow: Boolean?,
-        page: Int,
-        size: Int
+        sortBy: String?,
+        size: Int,
+        cursorId: Long?,
+        cursorDistance: Double?,
+        cursorRating: Double?,
+        cursorReviewCount: Long?
     ): PagingResult<Hospital> {
         return repository.searchHospitals(
-            q = null,
-            region = null,
-            lat = null,
-            lng = null,
-            bounds = null,
-            animal = null,
-            openNow = null,
-            page = page,
-            size = 10 // Project REQ
+            q = q,
+            region = region,
+            lat = lat,
+            lng = lng,
+            bounds = bounds?.let { "${it.minLat},${it.minLng},${it.maxLat},${it.maxLng}" },
+            animal = animal,
+            openNow = openNow,
+            sortBy = sortBy,
+            size = size,
+            cursorId = cursorId,
+            cursorDistance = cursorDistance,
+            cursorRating = cursorRating,
+            cursorReviewCount = cursorReviewCount
         ).getOrThrow()
     }
 }

@@ -2,6 +2,9 @@ package com.petbulance.domain.model.common
 
 data class PagingResult<T>(
     val content: List<T>,
-    val isLast: Boolean,
-    val pageNumber: Int
+    val hasNext: Boolean,
+    val cursorId: Long?,
+    val cursorDistance: Double? = null,
+    val cursorRating: Double? = null,
+    val cursorReviewCount: Long? = null
 )

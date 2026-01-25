@@ -2,6 +2,7 @@ package com.petbulance.presentation.screen.feature.search.main
 
 import android.location.Location
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
+import com.petbulance.domain.model.type.HospitalSortType
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 
 data class HospitalSearchArgument(
@@ -19,14 +20,18 @@ sealed class HospitalSearchIntent {
 
     data class SearchHospitalWithCurrentParams(
         val query: HospitalSearchQueryUiModel,
-        val currentUserLocation: Location
+        val currentUserLocation: Location,
+        val sortType: HospitalSortType
     ) : HospitalSearchIntent()
 
     data class SearchNearByHospitals(
         val bounds: MapBounds,
         val query: HospitalSearchQueryUiModel,
-        val currentUserLocation: Location
+        val currentUserLocation: Location,
+        val sortType: HospitalSortType
     ) : HospitalSearchIntent()
+
+    data object LoadNextPage : HospitalSearchIntent()
 
     data class AddRecentKeyword(val keyword: String) : HospitalSearchIntent()
     data class DeleteRecentKeyword(val keyword: String) : HospitalSearchIntent()

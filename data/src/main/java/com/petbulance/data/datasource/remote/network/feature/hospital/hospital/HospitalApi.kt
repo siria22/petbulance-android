@@ -15,9 +15,7 @@ class HospitalApi @Inject constructor(
     private val baseUrl = "${BASE_URL}/hospitals"
 
     suspend fun searchHospitals(
-        request: HospitalSearchReqDto,
-        size: Int,
-        page: Int
+        request: HospitalSearchReqDto
     ): HttpResponse {
         return client.get(baseUrl) {
             request.q?.let { parameter("q", it) }
@@ -27,9 +25,12 @@ class HospitalApi @Inject constructor(
             request.bounds?.let { parameter("bounds", it) }
             request.animal?.let { parameter("animal", it) }
             request.openNow?.let { parameter("openNow", it) }
-
-            parameter("page", page)
-            parameter("size", size)
+            request.sortBy?.let { parameter("sortBy", it) }
+            request.size?.let { parameter("size", it) }
+            request.cursorId?.let { parameter("cursorId", it) }
+            request.cursorDistance?.let { parameter("cursorDistance", it) }
+            request.cursorRating?.let { parameter("cursorRating", it) }
+            request.cursorReviewCount?.let { parameter("cursorReviewCount", it) }
         }
     }
 

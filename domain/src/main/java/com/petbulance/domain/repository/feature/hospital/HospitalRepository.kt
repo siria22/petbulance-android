@@ -14,8 +14,12 @@ interface HospitalRepository {
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
-        page: Int,
-        size: Int
+        sortBy: String?,
+        size: Int,
+        cursorId: Long?,
+        cursorDistance: Double?,
+        cursorRating: Double?,
+        cursorReviewCount: Long?
     ): Result<PagingResult<Hospital>>
 
     suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail>

@@ -5,6 +5,7 @@ import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
 import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospitalList
+import com.petbulance.domain.model.type.HospitalSortType
 import com.petbulance.domain.usecase.feature.hospital.hospital.SearchHospitalsUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.AddSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.AddViewedHospitalUseCase
@@ -53,6 +54,20 @@ class HospitalSearchViewModel @Inject constructor(
         MutableStateFlow(ViewedHospitalList.stub().copy(items = emptyList(), totalCount = 0))
     val viewedHospitals: StateFlow<ViewedHospitalList> = _viewedHospitals
 
+    // --- Cursor Pagination State ---
+    private var currentCursorId: Long? = null
+    private var currentCursorDistance: Double? = null
+    private var currentCursorRating: Double? = null
+    private var currentCursorReviewCount: Long? = null
+    private var hasNextPage: Boolean = false
+    private var isRequesting: Boolean = false
+
+    // Keep track of last successful search params for "Load More"
+    private var lastQueryModel: HospitalSearchQueryUiModel = HospitalSearchQueryUiModel.empty
+    private var lastBounds: MapBounds? = null
+    private var lastUserLocation: Location = Location("Default")
+    private var lastSortType: HospitalSortType = HospitalSortType.DISTANCE
+
     fun onIntent(intent: HospitalSearchIntent) {
         when (intent) {
             is HospitalSearchIntent.UpdateSearchQuery -> {
@@ -61,7 +76,41 @@ class HospitalSearchViewModel @Inject constructor(
 
             is HospitalSearchIntent.SearchHospitalWithCurrentParams -> {
                 _hospitalSearchQuery.value = intent.query
-                launch { searchHospitals(null, intent.query, intent.currentUserLocation) }
+                launch {
+                    searchHospitals(
+                        isNewSearch = true,
+                        queryModel = intent.query,
+                        currentUserLocation = intent.currentUserLocation,
+                        sortType = intent.sortType,
+                        bounds = null
+                    )
+                }
+            }
+
+            is HospitalSearchIntent.SearchNearByHospitals -> {
+                launch {
+                    searchHospitals(
+                        isNewSearch = true,
+                        queryModel = intent.query,
+                        currentUserLocation = intent.currentUserLocation,
+                        sortType = intent.sortType,
+                        bounds = intent.bounds
+                    )
+                }
+            }
+
+            is HospitalSearchIntent.LoadNextPage -> {
+                if (hasNextPage && !isRequesting) {
+                    launch {
+                        searchHospitals(
+                            isNewSearch = false,
+                            queryModel = lastQueryModel,
+                            currentUserLocation = lastUserLocation,
+                            sortType = lastSortType,
+                            bounds = lastBounds
+                        )
+                    }
+                }
             }
 
             is HospitalSearchIntent.AddRecentKeyword -> {
@@ -79,57 +128,37 @@ class HospitalSearchViewModel @Inject constructor(
             is HospitalSearchIntent.DeleteViewedHospital -> {
                 launch { deleteViewedHospital(intent.hospitalId) }
             }
-
-            is HospitalSearchIntent.SearchNearByHospitals -> {
-                launch { searchHospitals(intent.bounds, intent.query, intent.currentUserLocation) }
-            }
         }
     }
 
     init {
         observeErrorEvent(eventFlow)
-
-        launch {
-            getRecentSearchKeywordUseCase()
-                .onStart { _dataState.value = HospitalSearchDataState.OnProgress }
-                .catch { ex ->
-                    _eventFlow.emit(
-                        SearchEvent.DataFetch.Error(
-                            userMessage = "최근 검색기록을 가져오는데 실패했어요",
-                            exceptionMessage = ex.message
-                        )
-                    )
-                    _dataState.value = HospitalSearchDataState.Init
-                }
-                .collect { keywords ->
-                    _recentSearchKeywords.value = keywords
-                    _dataState.value = HospitalSearchDataState.Init
-                }
-        }
-
-        launch {
-            getViewedHospitalsUseCase()
-                .catch { ex ->
-                    _eventFlow.emit(
-                        SearchEvent.DataFetch.Error(
-                            userMessage = "최근 본 병원 목록을 가져오는데 실패했어요",
-                            exceptionMessage = ex.message
-                        )
-                    )
-                }
-                .collect { list ->
-                    _viewedHospitals.value =
-                        ViewedHospitalList(items = list, totalCount = list.size.toLong())
-                }
-        }
+        fetchRecentKeywords()
+        fetchViewedHospitals()
     }
 
     private suspend fun searchHospitals(
-        bounds: MapBounds? = null,
+        isNewSearch: Boolean,
         queryModel: HospitalSearchQueryUiModel,
-        currentUserLocation: Location
+        currentUserLocation: Location,
+        sortType: HospitalSortType,
+        bounds: MapBounds? = null
     ) {
+        if (isRequesting) return
+        isRequesting = true
         _dataState.value = HospitalSearchDataState.OnProgress
+
+        if (isNewSearch) {
+            resetCursors()
+            _hospitalList.value = emptyList() // Clear list for new search
+        }
+
+        // Cache params for next page load
+        lastQueryModel = queryModel
+        lastUserLocation = currentUserLocation
+        lastSortType = sortType
+        lastBounds = bounds
+
         runCatching {
             searchHospitalsUseCase(
                 q = queryModel.query,
@@ -139,11 +168,29 @@ class HospitalSearchViewModel @Inject constructor(
                 bounds = bounds,
                 animal = queryModel.species?.name,
                 openNow = queryModel.openNowOnly,
-                page = 1,       // TODO()
-                size = 10       // TODO : 페이징 어케 관리하지
+                sortBy = sortType.name,
+                size = 20, // Page size
+                cursorId = currentCursorId,
+                cursorDistance = currentCursorDistance,
+                cursorRating = currentCursorRating,
+                cursorReviewCount = currentCursorReviewCount
             )
         }.onSuccess { result ->
-            _hospitalList.value = result.content
+            // Append or Set
+            val newItems = result.content
+            if (isNewSearch) {
+                _hospitalList.value = newItems
+            } else {
+                _hospitalList.value = _hospitalList.value + newItems
+            }
+
+            // Update Cursors
+            hasNextPage = result.hasNext
+            currentCursorId = result.cursorId
+            currentCursorDistance = result.cursorDistance
+            currentCursorRating = result.cursorRating
+            currentCursorReviewCount = result.cursorReviewCount
+
         }.onFailure { ex ->
             _eventFlow.emit(
                 SearchEvent.DataFetch.Error(
@@ -152,58 +199,59 @@ class HospitalSearchViewModel @Inject constructor(
                 )
             )
         }
+
         _dataState.value = HospitalSearchDataState.Init
+        isRequesting = false
+    }
+
+    private fun resetCursors() {
+        currentCursorId = null
+        currentCursorDistance = null
+        currentCursorRating = null
+        currentCursorReviewCount = null
+        hasNextPage = false
+    }
+
+    private fun fetchRecentKeywords() = launch {
+        getRecentSearchKeywordUseCase()
+            .onStart { _dataState.value = HospitalSearchDataState.OnProgress }
+            .catch { ex ->
+                _eventFlow.emit(SearchEvent.DataFetch.Error("최근 검색기록 조회 실패", ex.message))
+                _dataState.value = HospitalSearchDataState.Init
+            }
+            .collect {
+                _recentSearchKeywords.value = it
+                _dataState.value = HospitalSearchDataState.Init
+            }
+    }
+
+    private fun fetchViewedHospitals() = launch {
+        getViewedHospitalsUseCase()
+            .catch { ex ->
+                _eventFlow.emit(SearchEvent.DataFetch.Error("최근 본 병원 조회 실패", ex.message))
+            }
+            .collect {
+                _viewedHospitals.value = ViewedHospitalList(items = it, totalCount = it.size.toLong())
+            }
     }
 
     private suspend fun addRecentSearchKeyword(keyword: String) {
-        runCatching {
-            addSearchKeywordUseCase(keyword)
-        }.onFailure { ex ->
-            _eventFlow.emit(
-                SearchEvent.DataFetch.Error(
-                    userMessage = "최근 검색어 추가에 실패했어요",
-                    exceptionMessage = ex.message
-                )
-            )
-        }
+        runCatching { addSearchKeywordUseCase(keyword) }
+            .onFailure { _eventFlow.emit(SearchEvent.DataFetch.Error("키워드 추가 실패", it.message)) }
     }
 
     private suspend fun deleteRecentSearchKeyword(keyword: String) {
-        runCatching {
-            deleteRecentSearchKeywordUseCase(keyword)
-        }.onFailure { ex ->
-            _eventFlow.emit(
-                SearchEvent.DataFetch.Error(
-                    userMessage = "최근 검색어 삭제에 실패했어요",
-                    exceptionMessage = ex.message
-                )
-            )
-        }
+        runCatching { deleteRecentSearchKeywordUseCase(keyword) }
+            .onFailure { _eventFlow.emit(SearchEvent.DataFetch.Error("키워드 삭제 실패", it.message)) }
     }
 
     private suspend fun addViewedHospital(hospitalId: Long, hospitalName: String) {
-        runCatching {
-            addViewedHospitalUseCase(hospitalId, hospitalName)
-        }.onFailure { ex ->
-            _eventFlow.emit(
-                SearchEvent.DataFetch.Error(
-                    userMessage = "최근 본 병원 추가에 실패했어요",
-                    exceptionMessage = ex.message
-                )
-            )
-        }
+        runCatching { addViewedHospitalUseCase(hospitalId, hospitalName) }
+            .onFailure { _eventFlow.emit(SearchEvent.DataFetch.Error("본 병원 추가 실패", it.message)) }
     }
 
     private suspend fun deleteViewedHospital(hospitalId: Long) {
-        runCatching {
-            deleteViewedHospitalUseCase(hospitalId)
-        }.onFailure { ex ->
-            _eventFlow.emit(
-                SearchEvent.DataFetch.Error(
-                    userMessage = "최근 본 병원 삭제에 실패했어요",
-                    exceptionMessage = ex.message
-                )
-            )
-        }
+        runCatching { deleteViewedHospitalUseCase(hospitalId) }
+            .onFailure { _eventFlow.emit(SearchEvent.DataFetch.Error("본 병원 삭제 실패", it.message)) }
     }
 }

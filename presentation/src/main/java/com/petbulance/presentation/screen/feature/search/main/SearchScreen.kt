@@ -99,7 +99,8 @@ fun SearchScreen(
                 hospitalSearchArgument.intent(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery,
-                        currentUserLocation = locationData.currentUserLocation
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType // 추가됨
                     )
                 )
                 isFilterBottomSheetVisible = false
@@ -111,7 +112,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchNearByHospitals(
                         bounds = event.bounds,
                         query = currentDraftQuery,
-                        currentUserLocation = locationData.currentUserLocation
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType // 추가됨
                     )
                 )
             }
@@ -121,7 +123,8 @@ fun SearchScreen(
                 hospitalSearchArgument.intent(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.keyword),
-                        currentUserLocation = locationData.currentUserLocation
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType // 추가됨
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -132,7 +135,8 @@ fun SearchScreen(
                 hospitalSearchArgument.intent(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.hospitalName),
-                        currentUserLocation = locationData.currentUserLocation
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType // 추가됨
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))

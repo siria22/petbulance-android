@@ -105,7 +105,8 @@ fun HospitalCard(
                 color = colorScheme.text.primary,
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp),
+                    .padding(top = 16.dp)
+                    .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center
             )
             Text(

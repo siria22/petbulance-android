@@ -10,5 +10,11 @@ data class HospitalSearchReqDto(
     val lng: Double? = null,
     val bounds: String? = null,
     val animal: String? = null,
-    val openNow: Boolean? = null
+    val openNow: Boolean? = null,
+    val sortBy: String? = null,
+    val size: Int? = null,
+    val cursorId: Long? = null,
+    val cursorDistance: Double? = null,
+    val cursorRating: Double? = null,
+    val cursorReviewCount: Long? = null
 )
