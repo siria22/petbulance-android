@@ -61,7 +61,7 @@ android {
         buildConfigField(
             "String",
             "KAKAO_NATIVE_APP_KEY",
-            "\"${localProperties["KAKAO_NATIVE_APP_KEY"]}\""
+            "\"${(localProperties["KAKAO_NATIVE_APP_KEY"] as String? ?: "").lowercase()}\""
         )
     }
 
