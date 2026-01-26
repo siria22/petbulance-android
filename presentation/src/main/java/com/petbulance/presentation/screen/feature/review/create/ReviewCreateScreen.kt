@@ -42,9 +42,12 @@ import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
+import com.petbulance.presentation.component.ui.spacingXL
+import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXL
 import com.petbulance.presentation.screen.feature.review.create.views.ExitDialog
 import com.petbulance.presentation.screen.feature.review.create.views.ReceiptVerifiedCard
+import com.petbulance.presentation.screen.feature.review.create.views.ReviewProgressBar
 import com.petbulance.presentation.screen.feature.review.create.views.Step1HospitalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step2AnimalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step3ReviewContent
@@ -131,15 +134,20 @@ fun ReviewCreateScreen(
             Column(
                 modifier = Modifier.padding(innerPadding)
             ) {
+                ReviewProgressBar(
+                    modifier = Modifier.padding(horizontal = spacingXL, vertical = spacingXS),
+                    currentStep = argument.state.currentStep
+                )
+
                 when (argument.state.currentStep) {
-                    ReviewCreateStep.HOSPITAL_AND_RATING -> {
+                    ReviewCreateStep.HOSPITAL_AND_COST -> {
                         Step1HospitalContent(
                             state = argument.state.step1,
                             intent = argument.intent
                         )
                     }
 
-                    ReviewCreateStep.ANIMAL_AND_TREATMENT -> {
+                    ReviewCreateStep.ANIMAL_AND_RATING -> {
                         Step2AnimalContent(
                             state = argument.state.step2,
                             intent = argument.intent
@@ -225,11 +233,64 @@ private fun ReviewCreateScreenStep1Preview() {
             navController = rememberNavController(),
             argument = ReviewCreateArgument(
                 state = ReviewCreateState(
-                    currentStep = ReviewCreateStep.HOSPITAL_AND_RATING,
+                    currentStep = ReviewCreateStep.HOSPITAL_AND_COST,
                     step1 = Step1State(
                         hospitalInfo = HospitalInfo(1, "행복 동물병원"),
-                        ratings = ReviewRating(4.5, 5.0, 4.0)
+                        totalPrice = "50000",
+                        treatments = listOf("중성화 수술")
                     )
+                ),
+                intent = {},
+                event = MutableSharedFlow()
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewCreateScreenStep2Preview() {
+    PetbulanceTheme {
+        ReviewCreateScreen(
+            navController = rememberNavController(),
+            argument = ReviewCreateArgument(
+                state = ReviewCreateState(
+                    currentStep = ReviewCreateStep.ANIMAL_AND_RATING,
+                    step1 = Step1State(
+                        hospitalInfo = HospitalInfo(1, "행복 동물병원"),
+                        totalPrice = "50000",
+                        treatments = listOf("중성화 수술")
+                    ),
+                    step2 = Step2State(
+                        animalType = "강아지",
+                        detailAnimalType = "말티즈",
+                        ratings = ReviewRating(4.0, 5.0, 3.0)
+                    ),
+                ),
+                intent = {},
+                event = MutableSharedFlow()
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReviewCreateScreenStep3Preview() {
+    PetbulanceTheme {
+        ReviewCreateScreen(
+            navController = rememberNavController(),
+            argument = ReviewCreateArgument(
+                state = ReviewCreateState(
+                    currentStep = ReviewCreateStep.REVIEW_CONTENT,
+                    step1 = Step1State(
+                        hospitalInfo = HospitalInfo(1, "행복 동물병원"),
+                        totalPrice = "50000",
+                        treatments = listOf("중성화 수술")
+                    ),
+                    step3 = Step3State(
+                        content = "선생님이 정말 친절하시고 설명도 잘 해주셨어요. 수술 경과도 좋아서 만족합니다."
+                    ),
                 ),
                 intent = {},
                 event = MutableSharedFlow()

@@ -15,7 +15,7 @@ data class ReviewCreateArgument(
 
 @Immutable
 data class ReviewCreateState(
-    val currentStep: ReviewCreateStep = ReviewCreateStep.HOSPITAL_AND_RATING,
+    val currentStep: ReviewCreateStep = ReviewCreateStep.HOSPITAL_AND_COST,
     val step1: Step1State = Step1State(),
     val step2: Step2State = Step2State(),
     val step3: Step3State = Step3State(),
@@ -24,15 +24,16 @@ data class ReviewCreateState(
 )
 
 enum class ReviewCreateStep {
-    HOSPITAL_AND_RATING,
-    ANIMAL_AND_TREATMENT,
+    HOSPITAL_AND_COST,
+    ANIMAL_AND_RATING,
     REVIEW_CONTENT
 }
 
 @Immutable
 data class Step1State(
     val hospitalInfo: HospitalInfo? = null,
-    val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0),
+    val totalPrice: String = "",
+    val treatments: List<String> = listOf(""),
     val isReceiptVerified: Boolean = false
 )
 
@@ -40,9 +41,8 @@ data class Step1State(
 data class Step2State(
     val animalType: String = "",
     val detailAnimalType: String = "",
-    val treatment: String = "",
+    val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0), // Step1에서 이동
     val visitDate: String = "",
-    val price: Long = 0,
     val receiptItems: List<ReceiptItem> = emptyList()
 )
 
@@ -58,15 +58,18 @@ sealed interface ReviewCreateIntent {
     data object OnNextClicked : ReviewCreateIntent
     data object OnCloseClicked : ReviewCreateIntent
 
-    // Step 1: Hospital & Rating
-    data class OnHospitalSelected(val hospital: HospitalInfo) : ReviewCreateIntent
-    data class OnRatingChanged(val rating: ReviewRating) : ReviewCreateIntent
+    // Step 1: Hospital, Cost & Treatment
+    data class OnHospitalSelected(val hospitalName: String) : ReviewCreateIntent
+    data class OnPriceChanged(val value: String) : ReviewCreateIntent
+    data class OnTreatmentChanged(val index: Int, val value: String) : ReviewCreateIntent
+    data object OnTreatmentAdded : ReviewCreateIntent
+    data class OnTreatmentRemoved(val index: Int) : ReviewCreateIntent
     data class OnReceiptAnalyzed(val result: ReceiptAnalysisResult) : ReviewCreateIntent
 
-    // Step 2: Animal & Treatment
+    // Step 2: Animal & Rating
     data class OnAnimalTypeChanged(val value: String) : ReviewCreateIntent
     data class OnDetailAnimalTypeChanged(val value: String) : ReviewCreateIntent
-    data class OnTreatmentChanged(val value: String) : ReviewCreateIntent
+    data class OnRatingChanged(val rating: ReviewRating) : ReviewCreateIntent
 
     // Step 3: Content & Image
     data class OnContentChanged(val value: String) : ReviewCreateIntent

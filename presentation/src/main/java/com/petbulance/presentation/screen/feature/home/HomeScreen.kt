@@ -93,7 +93,7 @@ fun HomeScreen(
     termsEvent: SharedFlow<TermsEvent>
 ) {
     var showTermsSheet by rememberSaveable { mutableStateOf(checkTermsInitialState) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     LaunchedEffect(termsEvent) {
         termsEvent.collect { event ->
@@ -171,7 +171,7 @@ fun HomeScreen(
                 data = termsData,
                 onIntent = termsIntent,
                 onCancel = onDismissRequest,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.main
+package com.petbulance.presentation.screen.feature.review.main.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.petbulance.presentation.component.ui.molecule.ReviewCard
+import com.petbulance.presentation.screen.feature.review.main.ReviewData
 
 @Composable
 fun ReviewListContent(

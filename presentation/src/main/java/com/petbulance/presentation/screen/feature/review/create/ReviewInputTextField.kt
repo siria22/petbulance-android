@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +23,10 @@ fun ReviewInputTextField(
     queryString: String,
     placeholder: String,
     onQueryStringChanged: (String) -> Unit,
-    singleLine: Boolean = true
-) {
+    singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+
+    ) {
     BasicTextField(
         value = queryString,
         onValueChange = onQueryStringChanged,
@@ -42,6 +45,7 @@ fun ReviewInputTextField(
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = colorScheme.text.secondary),
         singleLine = singleLine,
         cursorBrush = SolidColor(colorScheme.text.primary),
+        keyboardOptions = keyboardOptions,
         decorationBox = { innerTextField ->
             Box(
                 contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart

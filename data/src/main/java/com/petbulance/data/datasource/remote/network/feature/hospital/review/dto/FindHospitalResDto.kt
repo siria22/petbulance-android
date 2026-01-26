@@ -22,31 +22,43 @@ data class HospitalDto(
 
 @Serializable
 data class UserReviewSearchDto(
+    val userNickname: String,
     val receiptCheck: Boolean,
     val id: Long,
     val hospitalImage: String? = null,
     val hospitalId: Long,
     val hospitalName: String,
     val treatmentService: String,
+    val animalType: String,
     val detailAnimalType: String,
     val reviewContent: String,
-    val overallRating: Double
+    val totalRating: Double,
+    val createDate: String,
+    val totalPrice: Int,
+    val likeCount: Int,
+    val liked: Boolean,
+    val images: List<String>
 )
 
 @Serializable
 data class FilterResDto(
+    val userNickname: String,
     val receiptCheck: Boolean,
     val id: Long,
     val hospitalImage: String? = null,
     val hospitalId: Long,
     val hospitalName: String,
     val treatmentService: String,
+    val animalType: String,
     val detailAnimalType: String,
     val reviewContent: String,
     val totalRating: Double,
-    val totalReviewCount: Int
+    val createDate: String,
+    val totalPrice: Int,
+    val likeCount: Int,
+    val liked: Boolean,
+    val images: List<String>
 )
-
 @Serializable
 data class HospitalReviewsCursorResDto(
     val list: List<SearchResDto>,

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DropdownMenu
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.petbulance.domain.model.feature.hospital.review.ReviewRating
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -45,10 +48,14 @@ fun Step2AnimalContent(
     intent: (ReviewCreateIntent) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXL),
-        modifier = Modifier.padding(vertical = spacingXL, horizontal = spacingMedium)
+        modifier = Modifier
+            .padding(vertical = spacingXL, horizontal = spacingMedium)
+            .verticalScroll(scrollState)
+            .padding(bottom = 80.dp)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(spacingXXS),
@@ -140,19 +147,36 @@ fun Step2AnimalContent(
             )
         }
 
-        // 진료명 입력
+        // 별점 입력
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXS),
+            verticalArrangement = Arrangement.spacedBy(spacingXL),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "진료명",
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary
+            ReviewRatingItem(
+                title = "전문성",
+                desc = "진료와 치료가 전문적이었나요?",
+                currentRating = state.ratings.expertise,
+                onRatingChanged = {
+                    intent(ReviewCreateIntent.OnRatingChanged(state.ratings.copy(expertise = it)))
+                }
             )
-            ReviewInputTextField(
-                queryString = state.treatment,
-                placeholder = "예: 골절, 발톱정리, 종양수술",
-                onQueryStringChanged = { intent(ReviewCreateIntent.OnTreatmentChanged(it)) },
+
+            ReviewRatingItem(
+                title = "친절함",
+                desc = "의료진과 직원이 친절하게 응대했나요?",
+                currentRating = state.ratings.kindness,
+                onRatingChanged = {
+                    intent(ReviewCreateIntent.OnRatingChanged(state.ratings.copy(kindness = it)))
+                }
+            )
+
+            ReviewRatingItem(
+                title = "시설 만족도",
+                desc = "병원 시설이 청결하고 쾌적했나요?",
+                currentRating = state.ratings.facility,
+                onRatingChanged = {
+                    intent(ReviewCreateIntent.OnRatingChanged(state.ratings.copy(facility = it)))
+                }
             )
         }
     }
@@ -166,7 +190,7 @@ private fun ReviewCreateScreenStep2Preview() {
             state = Step2State(
                 animalType = "강아지",
                 detailAnimalType = "말티즈",
-                treatment = "슬개골 탈구 수술"
+                ratings = ReviewRating(4.0, 5.0, 3.0)
             ),
             intent = {}
         )

@@ -21,7 +21,7 @@ interface ReviewRepository {
 
     suspend fun filterReview(
         region: String?,
-        animalType: String?,
+        animalTypes: List<String>?,
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int = 10

@@ -115,7 +115,7 @@ fun Step3ReviewContent(
                 queryString = state.content,
                 placeholder = "자세한 진료 및 치료 과정을 작성해주세요.",
                 onQueryStringChanged = { intent(ReviewCreateIntent.OnContentChanged(it)) },
-                singleLine = false
+                singleLine = false,
             )
         }
     }

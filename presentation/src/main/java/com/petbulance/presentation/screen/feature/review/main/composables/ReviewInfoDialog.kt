@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.main
+package com.petbulance.presentation.screen.feature.review.main.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -20,10 +20,10 @@ import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
-import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewUploadUrl
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
+import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
 import javax.inject.Inject
 
@@ -57,13 +57,13 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun filterReview(
         region: String?,
-        animalType: String?,
+        animalTypes: List<String>?, // 변경
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         return safeApiCall<CursorPagingResDto<FilterResDto>>(path = "/receipts/filter") {
-            api.filterReview(region, animalType, isReceipt, cursorId, size)
+            api.filterReview(region, animalTypes, isReceipt, cursorId, size)
         }.map { dto ->
             PagingReviewList(
                 items = dto.list.map { it.toDomain() },
@@ -105,14 +105,14 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult> {
         return safeApiCall<ReviewSaveResDto>(path = "/receipts/save/reviews") {
-            api.saveReview(param.toDto())
+            api.saveReview(param.copy(animalType = "PARROT").toDto())
         }.map { dto ->
             SaveReviewResult(
                 reviewId = dto.reviewId,
                 uploadUrls = dto.urls.map { ReviewUploadUrl(it.presignedUrl, it.saveId) }
             )
         }
-    }
+    } // FIXME: animalType이 없어서 일단 PARROT으로 고정
 
     override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
         return safeApiCall<ReviewImageCheckResDto>(path = "/receipts/save/success") {
@@ -145,7 +145,10 @@ class ReviewRepositoryImpl @Inject constructor(
         }.map { it.message }
     }
 
-    override suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): Result<ReceiptAnalysisResult> {
+    override suspend fun analyzeReceipt(
+        imageBytes: ByteArray,
+        fileName: String
+    ): Result<ReceiptAnalysisResult> {
         return safeApiCall<ReceiptAnalysisResDto>(path = "/receipts") {
             api.analyzeReceipt(imageBytes, fileName)
         }.map { it.toDomain() }

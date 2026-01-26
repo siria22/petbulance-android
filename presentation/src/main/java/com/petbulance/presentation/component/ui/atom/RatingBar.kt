@@ -35,38 +35,52 @@ fun RatingBar(
     rating: Double,
     maxRating: Int = 5,
     starSize: Dp = 24.dp,
-    stepSize: Double = 0.1,
     activeColor: Color = colorScheme.icon.rating,
     inactiveColor: Color = colorScheme.icon.disabled,
+    isEditable: Boolean = false,
     onRatingChanged: ((Double) -> Unit)? = null
 ) {
     val density = LocalDensity.current
     val starSizePx = with(density) { starSize.toPx() }
 
+    val isInteractive = isEditable && onRatingChanged != null
+
     Row(
         modifier = modifier.then(
-            if (onRatingChanged != null) {
+            if (isInteractive) {
                 Modifier
                     .pointerInput(Unit) {
                         detectTapGestures { offset ->
                             val newRating =
-                                calculateRating(offset.x, starSizePx, maxRating, stepSize)
-                            onRatingChanged(newRating)
+                                calculateRating(
+                                    offset.x,
+                                    starSizePx,
+                                    maxRating,
+                                    1.0
+                                )
+                            onRatingChanged.invoke(newRating)
                         }
                     }
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures { change, _ ->
                             val newRating =
-                                calculateRating(change.position.x, starSizePx, maxRating, stepSize)
-                            onRatingChanged(newRating)
+                                calculateRating(
+                                    change.position.x,
+                                    starSizePx,
+                                    maxRating,
+                                    1.0
+                                )
+                            onRatingChanged.invoke(newRating)
                         }
                     }
             } else Modifier
         )
     ) {
-        val fullStars = floor(rating).toInt()
-        val partialStarFill = rating - fullStars
-        val emptyStars = maxRating - ceil(rating).toInt()
+        val displayRating = if (isEditable) round(rating) else rating
+
+        val fullStars = floor(displayRating).toInt()
+        val partialStarFill = displayRating - fullStars
+        val emptyStars = maxRating - ceil(displayRating).toInt()
 
         repeat(fullStars) {
             Icon(

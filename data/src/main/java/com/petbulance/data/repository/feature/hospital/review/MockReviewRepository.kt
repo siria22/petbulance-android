@@ -8,6 +8,8 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
+import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
 import javax.inject.Inject
 
@@ -28,14 +30,8 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         val reviews = listOf(
-            ReviewSearchItem(
-                1, "행복 동물병원", "친절하고 좋아요", 4.5,
-                "예방접종", true, "강아지", 25
-            ),
-            ReviewSearchItem(
-                2, "튼튼 동물병원", "시설이 깨끗해요", 5.0,
-                "중성화 수술", false, "고양이", 15
-            )
+            ReviewSearchItem.stub(),
+            ReviewSearchItem.stub().copy(id = 2)
         )
         return Result.success(
             PagingReviewList(
@@ -48,20 +44,14 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
 
     override suspend fun filterReview(
         region: String?,
-        animalType: String?,
+        animalTypes: List<String>?,
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         val reviews = listOf(
-            ReviewSearchItem(
-                1, "행복 동물병원", "친절하고 좋아요",
-                4.5, "예방접종", true, "강아지", 25
-            ),
-            ReviewSearchItem(
-                2, "튼튼 동물병원", "시설이 깨끗해요",
-                5.0, "중성화 수술", false, "고양이", 15
-            )
+            ReviewSearchItem.stub(),
+            ReviewSearchItem.stub().copy(id = 2)
         )
         return Result.success(
             PagingReviewList(
@@ -88,8 +78,8 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 hospitalName = "행복동물병원",
                 isReceiptVerified = true,
                 treatment = "예방접종",
-                animalType = "어류",
-                detailAnimalType = "금붕어",
+                animalType = AnimalCategory.fromString("BIRD"),
+                detailAnimalType = AnimalSpecies.fromString("PARROT"),
                 content = "휴! 행복해지네요 ㅎㅎ",
                 rating = 4.2,
                 date = "2024-11-20",
@@ -104,8 +94,8 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 hospitalName = "행복동물병원",
                 isReceiptVerified = true,
                 treatment = "예방접종",
-                animalType = "어류",
-                detailAnimalType = "금붕어",
+                animalType = AnimalCategory.fromString("FISH"),
+                detailAnimalType = AnimalSpecies.fromString("ORNAMENTAL_FISH"),
                 content = "휴! 행복해지네요 ㅎㅎ",
                 rating = 4.2,
                 date = "2024-11-20",

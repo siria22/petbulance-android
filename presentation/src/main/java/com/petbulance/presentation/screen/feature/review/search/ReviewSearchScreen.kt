@@ -29,6 +29,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -42,9 +44,9 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXXS
 import com.petbulance.presentation.screen.feature.review.main.ReviewData
-import com.petbulance.presentation.screen.feature.review.main.ReviewEmptyView
-import com.petbulance.presentation.screen.feature.review.main.ReviewListContent
-import com.petbulance.presentation.screen.feature.review.main.ReviewSortTypeDialog
+import com.petbulance.presentation.screen.feature.review.main.composables.ReviewEmptyView
+import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
+import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchBar
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -81,7 +83,7 @@ fun ReviewSearchScreen(
                         selectedDistrict = null,
                         selectedAnimalType = null,
                         isLoadingNextPage = data.isLoadingNextPage,
-                        selectedSort = com.petbulance.domain.model.type.ReviewSortType.LATEST,
+                        selectedSort = ReviewSortType.LATEST,
                         isReceiptVerified = false,
                         isPhotoReview = false
                     ),
@@ -295,8 +297,8 @@ private fun ReviewSearchResultPreview() {
                         id = 1,
                         isReceiptVerified = true,
                         treatment = "슬개골 탈구 수술",
-                        animalType = "강아지",
-                        detailAnimalType = "말티즈",
+                        animalType = AnimalCategory.fromString("BIRD"),
+                        detailAnimalType = AnimalSpecies.fromString("PARROT"),
                         content = "친절하고 꼼꼼하게 봐주셔서 좋았습니다. 수술 경과도 매우 좋아요!",
                         rating = 4.5,
                         date = "2024.01.15",
@@ -311,8 +313,8 @@ private fun ReviewSearchResultPreview() {
                         id = 2,
                         isReceiptVerified = false,
                         treatment = "종합 백신 접종",
-                        animalType = "고양이",
-                        detailAnimalType = "코숏",
+                        animalType = AnimalCategory.fromString("BIRD"),
+                        detailAnimalType = AnimalSpecies.fromString("PARROT"),
                         content = "대기 시간이 좀 길었지만 선생님은 친절하셨어요.",
                         rating = 3.5,
                         date = "2024.01.10",

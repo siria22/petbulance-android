@@ -30,6 +30,7 @@ import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulancePrimitives
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.atom.BasicChip
 import com.petbulance.presentation.component.ui.atom.BasicIcon
@@ -60,7 +61,7 @@ fun ReviewCard(review: HospitalReview) {
                 horizontalArrangement = Arrangement.spacedBy(spacingXXS)
             ) {
                 BasicChip(
-                    text = review.detailAnimalType.split(">").lastOrNull()?.trim() ?: "기타",
+                    text = review.detailAnimalType.korean,
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
@@ -118,13 +119,13 @@ fun ReviewCard(review: HospitalReview) {
                 Text(
                     text = review.hospitalName,
                     color = colorScheme.text.secondary,
-                    style = typography.titleSmall
+                    style = typography.titleSmall.emp()
                 )
 
                 StarRating(rating = review.rating)
 
                 Text(
-                    text = "${review.animalType} > ${review.detailAnimalType}",
+                    text = "${review.animalType.korean} > ${review.detailAnimalType.korean}",
                     color = colorScheme.text.secondary,
                     style = typography.bodySmall
                 )

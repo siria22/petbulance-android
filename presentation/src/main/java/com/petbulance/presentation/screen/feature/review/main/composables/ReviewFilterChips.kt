@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.main
+package com.petbulance.presentation.screen.feature.review.main.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +32,7 @@ import com.petbulance.presentation.component.ui.iconSizeMS
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
+import com.petbulance.presentation.screen.feature.review.main.ReviewData
 
 @Composable
 fun ReviewFilterChips(

@@ -3,25 +3,70 @@ package com.petbulance.presentation.screen.feature.review.create.views
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicDialog
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.atom.RatingBar
 import com.petbulance.presentation.component.ui.spacingLarge
+import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
+import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.feature.review.create.ReviewCreateStep
+
+@Composable
+fun ReviewRatingItem(
+    title: String,
+    desc: String,
+    currentRating: Double,
+    onRatingChanged: (Double) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacingMedium),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(spacingXXS),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = typography.titleSmall.emp(),
+                color = colorScheme.text.secondary,
+            )
+            Text(
+                text = desc,
+                style = typography.bodySmall,
+                color = colorScheme.text.caption
+            )
+        }
+
+        RatingBar(
+            rating = currentRating,
+            onRatingChanged = onRatingChanged,
+            isEditable = true
+        )
+    }
+}
 
 @Composable
 fun ReceiptVerifiedCard() {
@@ -94,4 +139,10 @@ fun ExitDialog(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun ReviewProgressBarPreview() {
+    ReviewProgressBar(currentStep = ReviewCreateStep.HOSPITAL_AND_COST)
 }

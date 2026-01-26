@@ -18,6 +18,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 class ReviewApi @Inject constructor(
@@ -26,7 +28,10 @@ class ReviewApi @Inject constructor(
     private val baseUrl = "$BASE_URL/receipts"
 
     suspend fun findHospital(hospitalName: String): HttpResponse {
-        return client.get("$baseUrl/$hospitalName")
+        val encodedName = URLEncoder.encode(hospitalName, StandardCharsets.UTF_8.toString())
+            .replace("+", "%20")
+
+        return client.get("$baseUrl/$encodedName")
     }
 
     suspend fun searchReview(value: String, cursorId: Long?, size: Int): HttpResponse {
@@ -38,14 +43,14 @@ class ReviewApi @Inject constructor(
 
     suspend fun filterReview(
         region: String?,
-        animalType: String?,
+        animalTypes: List<String>?,
         receipt: Boolean?,
         cursorId: Long?,
         size: Int
     ): HttpResponse {
         return client.get("$baseUrl/filter") {
             region?.let { parameter("region", it) }
-            animalType?.let { parameter("animalType", it) }
+            animalTypes?.forEach { parameter("animalType", it) }
             receipt?.let { parameter("receipt", it) }
             cursorId?.let { parameter("cursorId", it) }
             parameter("size", size)

@@ -4,9 +4,11 @@ import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
+import com.petbulance.domain.usecase.feature.hospital.review.FilterReviewUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
-    private val reviewRepository: ReviewRepository
+    private val filterReviewUseCase: FilterReviewUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<ReviewState>(ReviewState.Init)
@@ -105,7 +107,7 @@ class ReviewViewModel @Inject constructor(
     }
 
     private fun loadReviews(isRefresh: Boolean) {
-        viewModelScope.launch {
+        launch {
             if (isRefresh) {
                 _state.value = ReviewState.Loading
                 currentCursorId = null
@@ -115,14 +117,21 @@ class ReviewViewModel @Inject constructor(
                 _isLoadingNextPage.value = true
             }
 
-            // API Call
-            val result = reviewRepository.filterReview(
+            val selectedCategory = _selectedAnimalType.value
+            val animalTypesParam = if (selectedCategory == null || selectedCategory == AnimalCategory.ALL) {
+                null
+            } else {
+                AnimalSpecies.entries
+                    .filter { it.category == selectedCategory }
+                    .map { it.name }
+            }
+
+            val result = filterReviewUseCase(
                 region = if (_selectedRegion.value != null) "${_selectedRegion.value!!.name} ${_selectedDistrict.value ?: ""}" else null,
-                animalType = _selectedAnimalType.value?.name,
+                animalTypes = animalTypesParam, // 수정된 파라미터 전달
                 isReceipt = if (_isReceiptVerified.value) true else null,
                 cursorId = currentCursorId,
                 size = pageSize
-                // Note: sort and photo filter are not supported by the current API endpoint
             )
 
             result.onSuccess { pagingData ->
@@ -149,19 +158,19 @@ class ReviewViewModel @Inject constructor(
     private fun ReviewSearchItem.toHospitalReviewDummy(): HospitalReview {
         return HospitalReview(
             id = this.id,
-            isReceiptVerified = this.isReceiptVerified,
-            treatment = this.treatment,
+            isReceiptVerified = this.receiptCheck,
+            treatment = this.treatmentService,
             animalType = this.animalType,
-            detailAnimalType = this.animalType,
-            content = this.content,
-            rating = this.rating,
-            date = "2024.01.01",
-            likeCount = 0,
-            isLiked = false,
-            imageUrls = emptyList(),
-            author = "익명 사용자",
-            price = 0,
-            hospitalName = "행복병원"
+            detailAnimalType = this.detailAnimalType,
+            content = this.reviewContent,
+            rating = this.totalRating,
+            date = this.createDate,
+            likeCount = this.likeCount,
+            isLiked = this.liked,
+            imageUrls = this.images,
+            author = this.userNickname,
+            price = this.totalPrice,
+            hospitalName = this.hospitalName
         )
     }
 }

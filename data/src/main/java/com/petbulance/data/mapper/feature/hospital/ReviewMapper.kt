@@ -4,7 +4,6 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptItemDto
-import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.SearchResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
@@ -14,28 +13,45 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
+import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
 
-// TODO : 명세 확인
 fun UserReviewSearchDto.toDomain() = ReviewSearchItem(
+    userNickname = userNickname,
+    receiptCheck = receiptCheck,
     id = id,
+    hospitalImage = hospitalImage,
+    hospitalId = hospitalId,
     hospitalName = hospitalName,
-    content = reviewContent,
-    rating = overallRating,
-    treatment = treatmentService,
-    isReceiptVerified = receiptCheck,
-    animalType = detailAnimalType,
-    totalReviewCount = 0 // TODO : 이거 안쓰는 값인지 확인
+    treatmentService = treatmentService,
+    animalType = AnimalCategory.fromString(animalType),
+    detailAnimalType = AnimalSpecies.fromString(detailAnimalType),
+    reviewContent = reviewContent,
+    totalRating = totalRating,
+    createDate = createDate,
+    totalPrice = totalPrice,
+    likeCount = likeCount,
+    liked = liked,
+    images = images
 )
 
 fun FilterResDto.toDomain() = ReviewSearchItem(
+    userNickname = userNickname,
+    receiptCheck = receiptCheck,
     id = id,
+    hospitalImage = hospitalImage,
+    hospitalId = hospitalId,
     hospitalName = hospitalName,
-    content = reviewContent,
-    rating = totalRating,
-    treatment = treatmentService,
-    isReceiptVerified = receiptCheck,
-    animalType = detailAnimalType,
-    totalReviewCount = totalReviewCount
+    treatmentService = treatmentService,
+    animalType = AnimalCategory.fromString(animalType),
+    detailAnimalType = AnimalSpecies.fromString(detailAnimalType),
+    reviewContent = reviewContent,
+    totalRating = totalRating,
+    createDate = createDate,
+    totalPrice = totalPrice,
+    likeCount = likeCount,
+    liked = liked,
+    images = images
 )
 
 fun SearchResDto.toDomain() = HospitalReview(
@@ -43,8 +59,8 @@ fun SearchResDto.toDomain() = HospitalReview(
     hospitalName = hospitalName,
     isReceiptVerified = isReceiptVerified,
     treatment = treatment,
-    animalType = animalType,
-    detailAnimalType = detailAnimalType,
+    animalType = AnimalCategory.fromString(animalType),
+    detailAnimalType = AnimalSpecies.fromString(detailAnimalType),
     content = content,
     rating = rating,
     date = date,
