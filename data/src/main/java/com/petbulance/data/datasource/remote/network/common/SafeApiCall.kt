@@ -48,10 +48,33 @@ suspend inline fun <reified T> safeApiCall(
             }
 
             in 400..599 -> {
-                val errorBody = json.decodeFromString<BaseResponse<ErrorResponse>>(responseString)
-                return Result.failure(
-                    mapToDomainException(errorBody.status, path, errorBody.data!!.className, errorBody.data.message)
-                )
+                try {
+                    val errorBody = json.decodeFromString<BaseResponse<ErrorResponse>>(responseString)
+                    return Result.failure(
+                        mapToDomainException(
+                            errorBody.status,
+                            path,
+                            errorBody.data?.className ?: "UnknownError",
+                            errorBody.data?.message ?: "No message provided"
+                        )
+                    )
+                } catch (e: Exception) {
+                    try {
+                        val springError = json.decodeFromString<SpringErrorResponse>(responseString)
+                        return Result.failure(
+                            mapToDomainException(
+                                springError.status,
+                                path,
+                                "ServerError",
+                                springError.error ?: "Unknown server error\n${e.stackTrace}"
+                            )
+                        )
+                    } catch (unknown: Exception) {
+                        return Result.failure(
+                            mapToDomainException(statusCode, path, "ParsingError", "Response: $responseString")
+                        )
+                    }
+                }
             }
 
             else -> {

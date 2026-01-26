@@ -94,10 +94,10 @@ private fun TermsScreenContents(
                 agreedTermIds = data.agreedTermIds,
                 isAllRequiredAgreed = data.isAllRequiredAgreed, // 필수 약관 동의 여부 전달
                 onDetailVisible = { term ->
-                    onIntent(TermsIntent.OnDetailClick(term.id))
+                    onIntent(TermsIntent.OnDetailClick(term))
                 },
-                onToggle = { termId ->
-                    onIntent(TermsIntent.OnToggleTerm(termId))
+                onToggle = { term ->
+                    onIntent(TermsIntent.OnToggleTerm(term))
                 },
                 onAgree = { // 동의 버튼 클릭 이벤트 전달
                     onIntent(TermsIntent.OnAgreeClick)
@@ -125,10 +125,10 @@ private fun TermsScreenContents(
 private fun TermsColumn(
     termsList: List<Term>,
     agreedTermIds: Set<Long>,
-    isAllRequiredAgreed: Boolean, // 추가
+    isAllRequiredAgreed: Boolean,
     onDetailVisible: (Term) -> Unit,
-    onToggle: (Long) -> Unit,
-    onAgree: () -> Unit // 추가
+    onToggle: (Term) -> Unit,
+    onAgree: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -147,7 +147,7 @@ private fun TermsColumn(
                 title = term.title,
                 isRequired = term.required,
                 isAgreed = agreedTermIds.contains(term.id),
-                onToggle = { onToggle(term.id) },
+                onToggle = { onToggle(term) },
                 onDetailVisible = { onDetailVisible(term) }
             )
         }

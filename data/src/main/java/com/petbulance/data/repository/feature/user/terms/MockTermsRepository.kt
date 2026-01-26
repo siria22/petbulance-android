@@ -2,6 +2,7 @@ package com.petbulance.data.repository.feature.user.terms
 
 import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.domain.model.feature.user.terms.TermsStatus
+import com.petbulance.domain.model.type.TermsType
 import com.petbulance.domain.repository.feature.user.TermsRepository
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -36,7 +37,8 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
                         <p>제2조 (용어의 정의)<br>1. "서비스"라 함은 회사가 제공하는 모든 모바일 서비스를 의미합니다.</p>
                         <p>2. "이용자"라 함은 본 약관에 따라 회사가 제공하는 서비스를 받는 회원 및 비회원을 말합니다.</p>
                     """.trimIndent(),
-                    version = "1.0"
+                    version = "1.0",
+                    termsType = TermsType.SERVICE
                 ),
                 Term(
                     id = 2,
@@ -51,7 +53,8 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
                         <p>- 필수항목: 이름, 전화번호, 이메일, 반려동물 정보</p>
                         <p>- 선택항목: 주소, 생년월일</p>
                     """.trimIndent(),
-                    version = "1.0"
+                    version = "1.0",
+                    termsType = TermsType.PRIVACY
                 ),
                 Term(
                     id = 3,
@@ -63,7 +66,8 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
                         <p>본 약관은 회사가 제공하는 위치기반 서비스와 관련하여 회사와 개인위치정보주체와의 권리, 의무 및 책임사항을 규정합니다.</p>
                         <p>회사는 사용자의 현재 위치를 기반으로 가장 가까운 병원 정보를 제공하기 위해 위치 정보를 사용합니다.</p>
                     """.trimIndent(),
-                    version = "1.0"
+                    version = "1.0",
+                    termsType = TermsType.LOCATION
                 ),
                 Term(
                     id = 4,
@@ -79,7 +83,8 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
                             <li>이벤트 및 프로모션 정보 제공</li>
                         </ul>
                     """.trimIndent(),
-                    version = "1.0"
+                    version = "1.0",
+                    termsType = TermsType.MARKETING
                 )
             )
         )
@@ -101,7 +106,8 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
                     <hr>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
                 """.trimIndent(),
-                version = "1.0"
+                version = "1.0",
+                termsType = TermsType.LOCATION
             )
         )
     }

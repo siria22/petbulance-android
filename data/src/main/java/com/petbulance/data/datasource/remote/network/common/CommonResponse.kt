@@ -28,3 +28,14 @@ data class ErrorResponse(
     val className: String,
     val message: String
 )
+
+/**
+ * Common Spring Error response
+ */
+@Serializable
+data class SpringErrorResponse(
+    val timestamp: String? = null,
+    val status: Int,
+    val error: String? = null,
+    val path: String? = null
+)

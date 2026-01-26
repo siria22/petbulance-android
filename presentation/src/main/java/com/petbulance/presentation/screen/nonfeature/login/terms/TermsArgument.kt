@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.nonfeature.login.terms
 
+import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.error.ErrorEvent
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,10 +23,10 @@ sealed class TermsScreenState {
 
 sealed class TermsIntent {
     data object OnAgreeClick : TermsIntent()
-    data class OnToggleTerm(val termId: Long) : TermsIntent()
+    data class OnToggleTerm(val term: Term) : TermsIntent()
     data object OnToggleAll : TermsIntent()
 
-    data class OnDetailClick(val termId: Long) : TermsIntent()
+    data class OnDetailClick(val term: Term) : TermsIntent()
     data object OnCloseDetail : TermsIntent()
 }
 

@@ -136,18 +136,6 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.hospitalName),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType
-                    )
-                )
-                commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
-            }
-
-            is SearchUiEvent.OnRecentHospitalClicked -> {
-                currentDraftQuery = currentDraftQuery.copy(query = event.hospitalName)
-                hospitalSearchArgument.intent(
-                    HospitalSearchIntent.SearchHospitalWithCurrentParams(
-                        query = currentDraftQuery.copy(query = event.hospitalName),
-                        currentUserLocation = locationData.currentUserLocation,
                         sortType = selectedSortType // 추가됨
                     )
                 )

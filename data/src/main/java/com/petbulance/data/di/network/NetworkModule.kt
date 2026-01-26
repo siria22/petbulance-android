@@ -161,9 +161,9 @@ object NetworkModule {
 
                     sendWithoutRequest { request ->
                         val path = request.url.encodedPath
-                        path.contains("auth/login")
+                        !(path.contains("auth/login")
                                 || path.contains("auth/refresh")
-                                || path.contains("auth/social/login")
+                                || path.contains("auth/social/login"))
                     }
                 }
             }

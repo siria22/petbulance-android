@@ -32,12 +32,14 @@ fun NavGraphBuilder.termsDestination(navController: NavController) {
             val agreedTermIds by viewModel.agreedTermIds.collectAsStateWithLifecycle()
             val isAllRequiredAgreed by viewModel.isAllRequiredAgreed.collectAsStateWithLifecycle()
             val currentTerm by viewModel.currentTerm.collectAsStateWithLifecycle()
+            val userTempName by viewModel.userTempName.collectAsStateWithLifecycle()
 
             TermsData(
                 termsList = termsList,
                 agreedTermIds = agreedTermIds,
                 isAllRequiredAgreed = isAllRequiredAgreed,
-                currentTerm = currentTerm // 추가
+                currentTerm = currentTerm,
+                userTempName = userTempName
             )
         }
 

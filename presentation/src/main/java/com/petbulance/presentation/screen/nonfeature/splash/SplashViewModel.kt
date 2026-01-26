@@ -1,9 +1,11 @@
 package com.petbulance.presentation.screen.nonfeature.splash
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermsStatusUseCase
 import com.petbulance.domain.usecase.nonfeature.app.CheckAppVersionUseCase
+import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +37,7 @@ class SplashViewModel @Inject constructor(
                     if (isUpdateNeeded) {
                         // TODO: 업데이트 필요 시 처리 (강제 업데이트 다이얼로그 등)
                     }
+                    Log.d(LOGGER_TAG, "App version check success: $isUpdateNeeded")
                     checkLoginAndMove()
                 }
                 .onFailure { e ->
@@ -53,24 +56,32 @@ class SplashViewModel @Inject constructor(
         val isLoggedIn = checkLoginStatusUseCase().getOrElse { false }
 
         if (!isLoggedIn) {
+            Log.d(LOGGER_TAG, "User is not logged in")
             _event.emit(SplashEvent.NavigateToLogin)
             return
         }
 
+        Log.d(LOGGER_TAG, "User is logged in")
+
         getTermsStatusUseCase()
             .onSuccess { status ->
                 val isAllRequiredAgreed = status.service && status.privacy && status.location
+                Log.d(LOGGER_TAG, "Is All Required terms Agreed: $isAllRequiredAgreed")
                 if (isAllRequiredAgreed) {
+                    Log.d(LOGGER_TAG, "Navigate to home")
                     _event.emit(SplashEvent.NavigateToHome)
                 } else {
+                    Log.d(LOGGER_TAG, "Navigate to Home with Terms check")
                     _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
                 }
             }
-            .onFailure {
+            .onFailure { ex ->
+                Log.d(LOGGER_TAG, "Failed to get Terms status: ${ex.stackTrace}")
                 _event.emit(
                     SplashEvent.DataFetch.Error(
-                        userMessage = "사용자 정보를 불러오는데 실패했습니다.",
-                        exceptionMessage = it.message
+                        userMessage = "서버와의 통신이 원활하지 않습니다.",
+                        exceptionMessage = ex.message,
+                        displayType = ErrorDisplayType.Custom
                     )
                 )
             }
