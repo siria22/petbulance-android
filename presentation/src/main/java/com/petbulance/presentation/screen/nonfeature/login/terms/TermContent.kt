@@ -3,7 +3,12 @@ package com.petbulance.presentation.screen.nonfeature.login.terms
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.typography
@@ -17,12 +22,21 @@ import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulancePrimitives
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
-import com.petbulance.presentation.component.ui.atom.*
-import com.petbulance.presentation.component.ui.*
+import com.petbulance.presentation.component.ui.atom.BasicButton
+import com.petbulance.presentation.component.ui.atom.BasicButtonSize
+import com.petbulance.presentation.component.ui.atom.BasicButtonType
+import com.petbulance.presentation.component.ui.atom.BasicIcon
+import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.iconSizeMS
+import com.petbulance.presentation.component.ui.spacingMedium
+import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXS
+import com.petbulance.presentation.component.ui.spacingXXL
 import com.petbulance.presentation.utils.HtmlText
 
 @Composable
 fun TermsContent(
+    modifier: Modifier,
     data: TermsData,
     onIntent: (TermsIntent) -> Unit,
     onCancel: () -> Unit
@@ -31,7 +45,7 @@ fun TermsContent(
         onIntent(TermsIntent.OnCloseDetail)
     }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = modifier.fillMaxWidth()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

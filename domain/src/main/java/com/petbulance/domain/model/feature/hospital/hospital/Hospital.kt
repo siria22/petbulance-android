@@ -25,7 +25,7 @@ data class Hospital(
             lng = 127.0,
             distanceMeters = 1200.0,
             phone = "02-1234-5678",
-            types = listOf("파충류", "양서류", "어류"),
+            types = listOf("REPTILE", "dd"),
             isOpenNow = true,
             openHours = "20:00에 영업 종료",
             thumbnailUrl = null,

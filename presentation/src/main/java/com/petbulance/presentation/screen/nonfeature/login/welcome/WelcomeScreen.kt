@@ -38,7 +38,6 @@ fun WelcomeScreen(
     var showSheet by rememberSaveable { mutableStateOf(true) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-    // 약관 동의 완료(NavigateToNext) 시 바텀시트 닫기
     LaunchedEffect(event) {
         event.collect { evt ->
             if (evt is TermsEvent.NavigateToNext) {
@@ -66,38 +65,11 @@ fun WelcomeScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(horizontal = spacingMedium),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(spacingMedium, Alignment.CenterVertically)
+        Box(
+            modifier = Modifier.padding(innerPadding)
         ) {
-            // TODO: 디자인에 맞는 폭죽 이미지 리소스로 교체 필요 (R.drawable.img_welcome 등)
-            Text(text = "🎉", fontSize = 80.sp)
-
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = colorScheme.action.primary.default)) {
-                        append(data.userTempName)
-                    }
-                    append("님, 환영해요!")
-                },
-                style = typography.titleLarge.emp(),
-                color = colorScheme.text.primary,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = colorScheme.action.primary.default)) {
-                        append("펫뷸런스")
-                    }
-                    append("에서 지금 필요한\n병원 정보를 검색하세요")
-                },
-                style = typography.bodyLarge,
-                color = colorScheme.text.secondary,
-                textAlign = TextAlign.Center
+            WelcomeScreenContent(
+                tempUserName = data.userTempName
             )
         }
     }
@@ -116,9 +88,47 @@ fun WelcomeScreen(
             TermsContent(
                 data = data,
                 onIntent = intent,
-                onCancel = { showSheet = false }
+                onCancel = { showSheet = false },
+                modifier = Modifier.fillMaxSize()
             )
         }
+    }
+}
+
+@Composable
+private fun WelcomeScreenContent(tempUserName: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = spacingMedium),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacingMedium, Alignment.CenterVertically)
+    ) {
+        // TODO: 디자인에 맞는 폭죽 이미지 리소스로 교체 필요 (R.drawable.img_welcome 등)
+        Text(text = "🎉", fontSize = 80.sp)
+
+        Text(
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(color = colorScheme.action.primary.default)) {
+                    append(tempUserName)
+                }
+                append("님, 환영해요!")
+            },
+            style = typography.titleLarge.emp(),
+            color = colorScheme.text.primary,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(color = colorScheme.action.primary.default)) {
+                    append("펫뷸런스")
+                }
+                append("에서 지금 필요한\n병원 정보를 검색하세요")
+            },
+            style = typography.bodyLarge,
+            color = colorScheme.text.secondary,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
