@@ -13,8 +13,8 @@ class AgreeTermsUseCase @Inject constructor(
             repository.saveTermsConsentLocal(terms).getOrThrow()
 
             // 2. 서버로 동의 내역 전송
-            val ids = terms.map { it.id }
-            repository.saveTermsConsent(ids).getOrThrow()
+            val termsType = terms.map { (it.termsType?.ordinal?.toLong()?.plus(1L)) ?: 0L }
+            repository.saveTermsConsent(termsType).getOrThrow()
         }
     }
 }

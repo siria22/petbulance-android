@@ -43,7 +43,7 @@ class TermsRepositoryImpl @Inject constructor(
                         TermsType.valueOf(
                             dto.termsType ?: ""
                         )
-                    }.getOrNull(), // String -> Enum 변환
+                    }.getOrNull(),
                     required = dto.required,
                     summary = dto.summary,
                     content = dto.content ?: "",
@@ -69,9 +69,9 @@ class TermsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveTermsConsent(termsIdList: List<Long>): Result<Unit> {
+    override suspend fun saveTermsConsent(termsTypeList: List<Long>): Result<Unit> {
         return safeApiCall<Unit>("terms/consents") {
-            api.saveTermsConsent(TermsConsentRequestDto(termsIdList))
+            api.saveTermsConsent(TermsConsentRequestDto(termsTypeList))
         }
     }
 

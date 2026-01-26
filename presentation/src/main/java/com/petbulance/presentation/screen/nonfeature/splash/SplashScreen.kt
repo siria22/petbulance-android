@@ -55,8 +55,7 @@ fun SplashScreen(
                 }
 
                 is SplashEvent.NavigateToHomeWithTermsCheck -> {
-                    // TODO: 약관 체크 필요함을 Home에 전달하는 방식 고려 (Navigation Argument 등)
-                    navController.navigate(ScreenDestinations.Home.route) {
+                    navController.navigate(ScreenDestinations.Home.createRoute(checkTerms = true)) {
                         popUpTo(ScreenDestinations.Splash.route) { inclusive = true }
                     }
                 }

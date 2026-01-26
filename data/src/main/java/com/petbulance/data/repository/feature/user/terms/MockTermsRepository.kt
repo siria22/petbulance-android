@@ -112,7 +112,7 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
         )
     }
 
-    override suspend fun saveTermsConsent(termsIdList: List<Long>): Result<Unit> {
+    override suspend fun saveTermsConsent(termsTypeList: List<Long>): Result<Unit> {
         delay(800)
         return Result.success(Unit)
     }

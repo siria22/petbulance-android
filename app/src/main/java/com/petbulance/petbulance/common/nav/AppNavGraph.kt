@@ -12,7 +12,7 @@ import com.petbulance.presentation.screen.feature.review.search.reviewSearchDest
 import com.petbulance.presentation.screen.feature.search.info.hospitalInfoDestination
 import com.petbulance.presentation.screen.feature.search.main.searchDestination
 import com.petbulance.presentation.screen.nonfeature.login.main.loginDestination
-import com.petbulance.presentation.screen.nonfeature.login.terms.termsDestination
+import com.petbulance.presentation.screen.nonfeature.login.welcome.welcomeDestination
 import com.petbulance.presentation.screen.nonfeature.splash.splashDestination
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
@@ -28,7 +28,7 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     ) {
         splashDestination(navController = navController)
         loginDestination(navController = navController)
-        termsDestination(navController = navController)
+        welcomeDestination(navController = navController)
 
         homeDestination(navController = navController)
 

@@ -7,9 +7,15 @@ sealed class ScreenDestinations(val route: String) {
     data object Splash : ScreenDestinations("splash")
 
     data object Login : ScreenDestinations("login")
-    data object Terms : ScreenDestinations("terms")
+    data object Welcome : ScreenDestinations("welcome")
 
-    data object Home : ScreenDestinations("home")
+    data object Home : ScreenDestinations("home?checkTerms={checkTerms}") {
+        const val ARG_CHECK_TERMS = "checkTerms"
+
+        fun createRoute(checkTerms: Boolean = false): String {
+            return "home?$ARG_CHECK_TERMS=$checkTerms"
+        }
+    }
 
     data object Search : ScreenDestinations("search?animal={animal}") {
         const val ARG_ANIMAL = "animal"

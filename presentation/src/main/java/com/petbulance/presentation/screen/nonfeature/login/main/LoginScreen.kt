@@ -90,7 +90,7 @@ fun LoginScreen(
                 }
 
                 is LoginEvent.NavigateToTerms -> {
-                    navController.safeNavigate(ScreenDestinations.Terms.route)
+                    navController.safeNavigate(ScreenDestinations.Welcome.route)
                 }
 
                 else -> {}

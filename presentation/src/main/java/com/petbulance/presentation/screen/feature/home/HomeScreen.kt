@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.feature.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,11 +21,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +47,7 @@ import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.community.post.PostDetail
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -47,6 +55,7 @@ import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.Space16
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
+import com.petbulance.presentation.component.ui.atom.BasicBottomSheet
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
@@ -61,19 +70,41 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsData
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     argument: HomeArgument,
-    data: HomeData
+    data: HomeData,
+    checkTermsInitialState: Boolean,
+    termsData: TermsData,
+    termsIntent: (TermsIntent) -> Unit,
+    termsEvent: SharedFlow<TermsEvent>
 ) {
-    LaunchedEffect(Unit) {
-        // TODO: [약관 개정안] 필수 약관 추가 동의 여부 확인
+    var showTermsSheet by rememberSaveable { mutableStateOf(checkTermsInitialState) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    LaunchedEffect(termsEvent) {
+        termsEvent.collect { event ->
+            when (event) {
+                is TermsEvent.NavigateToNext -> {
+                    showTermsSheet = false
+                }
+                is TermsEvent.DataFetch.Error -> {
+
+                }
+            }
+        }
     }
 
     LaunchedEffect(argument.event) {
@@ -119,6 +150,26 @@ fun HomeScreen(
                 },
                 onNavigateToReview = { /* TODO: navController.navigate(...) */ },
                 onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
+            )
+        }
+    }
+
+    val onDismissRequest = {
+        // TODO: 정책 확정 시 추가 처리
+        Log.d("$LOGGER_TAG - HomeScreen", "Terms sheet dismissed without full agreement")
+        showTermsSheet = false
+    }
+
+    if (showTermsSheet) {
+        BasicBottomSheet(
+            showBottomSheet = true,
+            sheetState = sheetState,
+            onDismissRequest = onDismissRequest
+        ) {
+            TermsContent(
+                data = termsData,
+                onIntent = termsIntent,
+                onCancel = onDismissRequest
             )
         }
     }
@@ -525,7 +576,11 @@ private fun HomeScreenPreview() {
                 screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()
             ),
-            data = HomeData.stub
+            data = HomeData.stub,
+            checkTermsInitialState = false,
+            termsData = TermsData.stub(),
+            termsIntent = {  },
+            termsEvent = MutableSharedFlow()
         )
     }
 }
