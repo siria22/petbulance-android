@@ -9,6 +9,7 @@ import com.petbulance.data.datasource.remote.network.feature.user.terms.dto.Term
 import com.petbulance.data.datasource.remote.network.feature.user.terms.dto.TermsStatusResponseDto
 import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.domain.model.feature.user.terms.TermsStatus
+import com.petbulance.domain.model.type.TermsType
 import com.petbulance.domain.repository.feature.user.TermsRepository
 import javax.inject.Inject
 
@@ -38,6 +39,11 @@ class TermsRepositoryImpl @Inject constructor(
                 Term(
                     id = dto.id,
                     title = dto.title,
+                    termsType = runCatching {
+                        TermsType.valueOf(
+                            dto.termsType ?: ""
+                        )
+                    }.getOrNull(), // String -> Enum 변환
                     required = dto.required,
                     summary = dto.summary,
                     content = dto.content ?: "",
@@ -54,6 +60,7 @@ class TermsRepositoryImpl @Inject constructor(
             Term(
                 id = dto.id,
                 title = dto.title,
+                termsType = runCatching { TermsType.valueOf(dto.termsType ?: "") }.getOrNull(),
                 required = dto.required,
                 summary = dto.summary,
                 content = dto.content ?: "",

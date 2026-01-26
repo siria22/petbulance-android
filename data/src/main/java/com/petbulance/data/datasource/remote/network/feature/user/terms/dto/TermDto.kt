@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class TermDto(
     val id: Long,
     val title: String,
+    val termsType: String? = null,
     val required: Boolean,
     val summary: String,
     val content: String? = null,
