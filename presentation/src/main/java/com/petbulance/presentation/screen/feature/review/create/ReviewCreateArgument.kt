@@ -57,6 +57,7 @@ sealed interface ReviewCreateIntent {
     data object OnBackClicked : ReviewCreateIntent
     data object OnNextClicked : ReviewCreateIntent
     data object OnCloseClicked : ReviewCreateIntent
+    data object OnPreviousStep : ReviewCreateIntent
 
     // Step 1: Hospital, Cost & Treatment
     data class OnHospitalSelected(val hospitalName: String) : ReviewCreateIntent

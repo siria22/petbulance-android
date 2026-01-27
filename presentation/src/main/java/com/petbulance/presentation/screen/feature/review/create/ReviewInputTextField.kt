@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.feature.review.create
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,8 +26,8 @@ fun ReviewInputTextField(
     onQueryStringChanged: (String) -> Unit,
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-
-    ) {
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
     BasicTextField(
         value = queryString,
         onValueChange = onQueryStringChanged,
@@ -47,16 +48,23 @@ fun ReviewInputTextField(
         cursorBrush = SolidColor(colorScheme.text.primary),
         keyboardOptions = keyboardOptions,
         decorationBox = { innerTextField ->
-            Box(
-                contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (queryString.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodyLarge.copy(color = colorScheme.text.disabled)
-                    )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
+                ) {
+                    if (queryString.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyLarge.copy(color = colorScheme.text.disabled)
+                        )
+                    }
+                    innerTextField()
                 }
-                innerTextField()
+                trailingIcon?.invoke()
             }
         }
     )

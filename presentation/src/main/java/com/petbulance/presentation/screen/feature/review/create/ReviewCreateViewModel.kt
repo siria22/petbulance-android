@@ -48,6 +48,7 @@ class ReviewCreateViewModel @Inject constructor(
             is ReviewCreateIntent.OnBackClicked -> handleBack()
             is ReviewCreateIntent.OnCloseClicked -> handleClose()
             is ReviewCreateIntent.OnNextClicked -> handleNext()
+            is ReviewCreateIntent.OnPreviousStep -> moveToPreviousStep()
 
             // Step 1: Hospital, Cost & Treatment
             is ReviewCreateIntent.OnHospitalSelected -> {
@@ -112,6 +113,26 @@ class ReviewCreateViewModel @Inject constructor(
 
     init {
         checkReceiptAnalysisResult()
+    }
+
+    private fun moveToPreviousStep() {
+        when (_state.value.currentStep) {
+            ReviewCreateStep.HOSPITAL_AND_COST -> {
+                /* nop */
+            }
+
+            ReviewCreateStep.ANIMAL_AND_RATING -> {
+                _state.update {
+                    it.copy(currentStep = ReviewCreateStep.HOSPITAL_AND_COST)
+                }
+            }
+
+            ReviewCreateStep.REVIEW_CONTENT -> {
+                _state.update {
+                    it.copy(currentStep = ReviewCreateStep.ANIMAL_AND_RATING)
+                }
+            }
+        }
     }
 
     private fun updateTreatment(index: Int, value: String) {

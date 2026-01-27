@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.feature.review.create
 import android.Manifest
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -66,6 +67,20 @@ fun ReviewCreateScreen(
     val context = LocalContext.current
     val isVerified = argument.state.step1.isReceiptVerified
     var isVerifiedCardVisible by remember { mutableStateOf(argument.state.step1.isReceiptVerified) }
+
+    BackHandler {
+        when (argument.state.currentStep) {
+            ReviewCreateStep.HOSPITAL_AND_COST -> {
+                argument.intent(ReviewCreateIntent.OnCloseClicked)
+            }
+            ReviewCreateStep.ANIMAL_AND_RATING -> {
+                argument.intent(ReviewCreateIntent.OnPreviousStep)
+            }
+            ReviewCreateStep.REVIEW_CONTENT -> {
+                argument.intent(ReviewCreateIntent.OnPreviousStep)
+            }
+        }
+    }
 
     LaunchedEffect(isVerified) {
         if (isVerified) {

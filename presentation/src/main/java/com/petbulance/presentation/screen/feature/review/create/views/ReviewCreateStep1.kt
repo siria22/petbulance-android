@@ -1,31 +1,39 @@
 package com.petbulance.presentation.screen.feature.review.create.views
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
-import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
@@ -96,58 +104,107 @@ fun Step1HospitalContent(
                 verticalArrangement = Arrangement.spacedBy(spacingXXS),
             ) {
                 state.treatments.forEachIndexed { index, treatment ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            ReviewInputTextField(
-                                queryString = treatment,
-                                placeholder = "예: 중성화 수술, 슬개골 탈구, 예방접종",
-                                onQueryStringChanged = {
-                                    intent(ReviewCreateIntent.OnTreatmentChanged(index, it))
-                                }
-                            )
-                        }
-
-                        if (state.treatments.size > 1) {
-                            BasicIcon(
-                                iconResource = IconResource.Vector(Icons.Default.Close),
-                                contentDescription = "Delete treatment",
-                                size = 24.dp,
-                                tint = colorScheme.icon.medium,
-                                modifier = Modifier.clickable {
-                                    intent(ReviewCreateIntent.OnTreatmentRemoved(index))
-                                }
-                            )
-                        } // FIXME : X 안으로 들어가게
-                    }
-                }
-
-                // FIXME : 항목 추가 버튼
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { intent(ReviewCreateIntent.OnTreatmentAdded) }
-                        .padding(vertical = spacingXS),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BasicIcon(
-                        iconResource = IconResource.Vector(Icons.Default.Add),
-                        contentDescription = "Add treatment",
-                        size = 20.dp,
-                        tint = colorScheme.action.primary.default
-                    )
-                    Text(
-                        text = "진료 항목 추가",
-                        style = typography.bodyMedium.emp(),
-                        color = colorScheme.action.primary.default,
-                        modifier = Modifier.padding(start = 4.dp)
+                    TreatmentInputItem(
+                        treatment = treatment,
+                        placeholder = "예: 중성화 수술, 슬개골 탈구, 예방접종",
+                        onValueChange = {
+                            intent(ReviewCreateIntent.OnTreatmentChanged(index, it))
+                        },
+                        onDelete = {
+                            intent(ReviewCreateIntent.OnTreatmentRemoved(index))
+                        },
+                        showDeleteButton = state.treatments.size > 1
                     )
                 }
+
+                AddTreatmentButton(
+                    onAdd = { intent(ReviewCreateIntent.OnTreatmentAdded) }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun AddTreatmentButton(
+    onAdd: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val borderColor = colorScheme.border.subtle
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = colorScheme.bg.frame.subtle,
+                shape = RoundedCornerShape(6.dp)
+            )
+            .clickable { onAdd() }
+            .padding(1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .drawBehind {
+                    val stroke = Stroke(
+                        width = 5.0f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f), 0f)
+                    )
+                    drawRoundRect(
+                        color = borderColor,
+                        style = stroke,
+                        cornerRadius = CornerRadius(5.dp.toPx())
+                    )
+                }
+                .padding(horizontal = 16.dp, vertical = spacingXS),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BasicIcon(
+                iconResource = IconResource.Vector(Icons.Default.AddCircle),
+                contentDescription = "Add treatment",
+                size = iconSizeMedium,
+                tint = colorScheme.icon.light
+            )
+        }
+    }
+}
+
+@Composable
+private fun TreatmentInputItem(
+    treatment: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    onDelete: () -> Unit,
+    showDeleteButton: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ReviewInputTextField(
+            queryString = treatment,
+            placeholder = placeholder,
+            onQueryStringChanged = onValueChange,
+            trailingIcon = if (showDeleteButton) {
+                {
+                    BasicIcon(
+                        iconResource = IconResource.Vector(Icons.Default.Close),
+                        contentDescription = "Delete treatment",
+                        size = 20.dp,
+                        tint = colorScheme.icon.medium,
+                        modifier = Modifier.clickable { onDelete() }
+                    )
+                }
+            } else null,
+            modifier = Modifier
+                .weight(1f)
+                .border(
+                    width = 1.dp,
+                    color = colorScheme.border.subtle,
+                    shape = RoundedCornerShape(6.dp)
+                )
+        )
     }
 }
 
