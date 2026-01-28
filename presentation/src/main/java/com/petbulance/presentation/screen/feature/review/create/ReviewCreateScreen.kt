@@ -31,7 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
@@ -67,6 +67,7 @@ fun ReviewCreateScreen(
 ) {
     val context = LocalContext.current
     val isVerified = argument.state.step1.isReceiptVerified
+    val maxImages = 5
 
     var isVerifiedCardVisible by remember { mutableStateOf(argument.state.step1.isReceiptVerified) }
     var showExitDialog by remember { mutableStateOf(false) }
@@ -98,12 +99,25 @@ fun ReviewCreateScreen(
 
     // Photo Picker Launcher 설정
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(10)
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxImages)
     ) { uris ->
         if (uris.isNotEmpty()) {
             val currentImages = argument.state.step3.images
-            val newImages = uris.map { it.toString() }
-            val combinedImages = (currentImages + newImages).take(10)
+            val remaining = (maxImages - currentImages.size).coerceAtLeast(0)
+            if (remaining == 0) return@rememberLauncherForActivityResult
+
+            val selected = uris.map { it.toString() }
+            val accepted = selected.take(remaining)
+            val combinedImages = currentImages + accepted
+
+            if (selected.size > remaining) {
+                Toast.makeText(
+                    context,
+                    "이미지는 최대 ${maxImages}장까지 첨부 가능해요. ${remaining}장만 추가됩니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
             argument.intent(ReviewCreateIntent.OnImagesChanged(combinedImages))
         }
     }
@@ -180,10 +194,10 @@ fun ReviewCreateScreen(
                             state = argument.state.step3,
                             intent = argument.intent,
                             onImageAddClicked = {
-                                if (argument.state.step3.images.size >= 10) {
+                                if (argument.state.step3.images.size >= maxImages) {
                                     Toast.makeText(
                                         context,
-                                        "최대 10장까지만 첨부 가능합니다.",
+                                        "최대 ${maxImages}장까지만 첨부 가능합니다.",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
@@ -264,9 +278,8 @@ private fun ReviewCreateScreenStep1Preview() {
                 state = ReviewCreateState(
                     currentStep = ReviewCreateStep.HOSPITAL_AND_COST,
                     step1 = Step1State(
-                        hospitalInfo = HospitalInfo(1, "행복 동물병원"),
+                        hospitalInfoForReview = HospitalInfoForReview(1, "행복 동물병원"),
                         totalPrice = "50000",
-                        treatments = listOf("중성화 수술")
                     )
                 ),
                 intent = {},
@@ -286,13 +299,10 @@ private fun ReviewCreateScreenStep2Preview() {
                 state = ReviewCreateState(
                     currentStep = ReviewCreateStep.ANIMAL_AND_RATING,
                     step1 = Step1State(
-                        hospitalInfo = HospitalInfo(1, "행복 동물병원"),
+                        hospitalInfoForReview = HospitalInfoForReview(1, "행복 동물병원"),
                         totalPrice = "50000",
-                        treatments = listOf("중성화 수술")
                     ),
                     step2 = Step2State(
-                        animalType = AnimalCategory.BIRD,
-                        detailAnimalType = "앵무새",
                         ratings = ReviewRating(4.0, 5.0, 3.0)
                     ),
                 ),
@@ -313,9 +323,8 @@ private fun ReviewCreateScreenStep3Preview() {
                 state = ReviewCreateState(
                     currentStep = ReviewCreateStep.REVIEW_CONTENT,
                     step1 = Step1State(
-                        hospitalInfo = HospitalInfo(1, "행복 동물병원"),
+                        hospitalInfoForReview = HospitalInfoForReview(1, "행복 동물병원"),
                         totalPrice = "50000",
-                        treatments = listOf("중성화 수술")
                     ),
                     step3 = Step3State(
                         content = "선생님이 정말 친절하시고 설명도 잘 해주셨어요. 수술 경과도 좋아서 만족합니다."

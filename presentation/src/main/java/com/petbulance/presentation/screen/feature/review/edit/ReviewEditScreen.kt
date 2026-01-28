@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
@@ -163,8 +164,16 @@ private fun ReviewEditScreenContents(
         ) {
             // 1. 병원명
             ReviewHospitalNameInput(
-                name = state.hospitalName,
-                onNameChanged = { intent(ReviewEditIntent.OnHospitalNameChanged(it)) }
+                query = "펫뷸",
+                selectedHospitalName = "펫뷸런",
+                candidates = listOf(
+                    HospitalInfoForReview(1L, "펫뷸런"),
+                    HospitalInfoForReview(2L, "펫뷸런2"),
+                    HospitalInfoForReview(3L, "펫뷸런3")
+                ),
+                onQueryChanged = {},
+                onClearQuery = {},
+                onCandidateClicked = {},
             )
 
             // 2. 총 비용

@@ -4,6 +4,7 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptItemDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewDetailResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewModifyReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
@@ -14,6 +15,7 @@ import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
+import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.type.AnimalCategory
@@ -144,4 +146,29 @@ fun ModifyReviewParam.toDto() = ReviewModifyReqDto(
             contentType = it.contentType,
         )
     }
+)
+
+fun ReviewDetailResDto.toDomain() = ReviewDetail(
+    userNickname = userNickname ?: "알 수 없음",
+    receiptCheck = receiptCheck,
+    id = id,
+    hospitalImage = hospitalImage,
+    hospitalId = hospitalId,
+    hospitalName = hospitalName,
+    treatmentService = treatmentService,
+    animalType = AnimalCategory.fromString(animalType),
+    detailAnimalType = AnimalSpecies.fromString(
+        detailAnimalType ?: "PARROT"
+        // TODO: (01.28) 서버에서 null 내려오는 detailAnimalType을 일괄 정책으로 정리 필요
+    ),
+    reviewContent = reviewContent,
+    facilityRating = facilityRating,
+    expertiseRating = expertiseRating,
+    kindnessRating = kindnessRating,
+    createDate = createDate,
+    totalPrice = totalPrice,
+    likeCount = likeCount,
+    liked = liked,
+    visitDate = visitDate,
+    images = images
 )

@@ -83,13 +83,13 @@ class ReviewEditViewModel @Inject constructor(
                             animalType = review.animalType,
                             detailAnimalType = review.detailAnimalType.korean,
                             ratings = ReviewRating(
-                                expertise = review.totalRating,
-                                kindness = review.totalRating,
-                                facility = review.totalRating
+                                expertise = review.expertiseRating,
+                                kindness = review.kindnessRating,
+                                facility = review.facilityRating
                             ),
                             existingImages = review.images,
                             content = review.reviewContent,
-                            visitDate = review.createDate, // TODO: 명세 수정될 예정
+                            visitDate = review.visitDate,
                             isReceiptVerified = review.receiptCheck,
                             isLoading = false
                         )

@@ -1,11 +1,12 @@
 package com.petbulance.data.repository.feature.hospital.review
 
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
@@ -16,11 +17,11 @@ import javax.inject.Inject
 
 class MockReviewRepository @Inject constructor() : ReviewRepository {
 
-    override suspend fun findHospital(name: String): Result<List<HospitalInfo>> {
+    override suspend fun findHospital(name: String): Result<List<HospitalInfoForReview>> {
         return Result.success(
             listOf(
-                HospitalInfo(1, "행복 동물병원"),
-                HospitalInfo(2, "튼튼 동물병원")
+                HospitalInfoForReview(1, "행복 동물병원"),
+                HospitalInfoForReview(2, "튼튼 동물병원")
             )
         )
     }
@@ -176,7 +177,7 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         return Result.success(Unit)
     }
 
-    override suspend fun getReviewDetail(reviewId: Long): Result<ReviewSearchItem> {
-        return Result.success(ReviewSearchItem.stub())
+    override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
+        return Result.success(ReviewDetail.stub())
     }
 }

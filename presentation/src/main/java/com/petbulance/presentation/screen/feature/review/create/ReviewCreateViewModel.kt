@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.usecase.feature.hospital.review.CreateReviewUseCase
@@ -51,34 +51,46 @@ class ReviewCreateViewModel @Inject constructor(
             is ReviewCreateIntent.OnPreviousStep -> moveToPreviousStep()
 
             // Step 1: Hospital, Cost & Treatment
-            is ReviewCreateIntent.OnHospitalSelected -> {
+            is ReviewCreateIntent.OnHospitalQueryChanged -> {
+                val q = intent.query
                 _state.update {
                     it.copy(
                         step1 = it.step1.copy(
-                            hospitalInfo = HospitalInfo(
-                                id = 0,
-                                name = intent.hospitalName
-                            )
+                            hospitalQuery = q,
+                            hospitalInfoForReview = null,
+                            hospitalCandidates = emptyList()
                         )
                     )
                 }
-                fetchHospitalId(intent.hospitalName)
+                fetchHospitalCandidates(q)
+            }
+
+            is ReviewCreateIntent.OnHospitalCandidateSelected -> {
+                _state.update {
+                    it.copy(
+                        step1 = it.step1.copy(
+                            hospitalInfoForReview = intent.hospital,
+                            hospitalQuery = intent.hospital.name,
+                            hospitalCandidates = emptyList()
+                        )
+                    )
+                }
+            }
+
+            is ReviewCreateIntent.OnHospitalClearClicked -> {
+                _state.update {
+                    it.copy(
+                        step1 = it.step1.copy(
+                            hospitalQuery = "",
+                            hospitalInfoForReview = null,
+                            hospitalCandidates = emptyList()
+                        )
+                    )
+                }
             }
 
             is ReviewCreateIntent.OnPriceChanged -> {
                 _state.update { it.copy(step1 = it.step1.copy(totalPrice = intent.value)) }
-            }
-
-            is ReviewCreateIntent.OnTreatmentChanged -> {
-                updateTreatment(intent.index, intent.value)
-            }
-
-            is ReviewCreateIntent.OnTreatmentAdded -> {
-                addTreatment()
-            }
-
-            is ReviewCreateIntent.OnTreatmentRemoved -> {
-                removeTreatment(intent.index)
             }
 
             is ReviewCreateIntent.OnReceiptAnalyzed -> {
@@ -87,11 +99,11 @@ class ReviewCreateViewModel @Inject constructor(
 
             // Step 2: Animal & Rating
             is ReviewCreateIntent.OnAnimalTypeChanged -> {
-                _state.update { it.copy(step2 = it.step2.copy(animalType = intent.value)) }
+                _state.update { it.copy(step1 = it.step1.copy(animalType = intent.value)) }
             }
 
             is ReviewCreateIntent.OnDetailAnimalTypeChanged -> {
-                _state.update { it.copy(step2 = it.step2.copy(detailAnimalType = intent.value)) }
+                _state.update { it.copy(step1 = it.step1.copy(detailAnimalType = intent.value)) }
             }
 
             is ReviewCreateIntent.OnRatingChanged -> {
@@ -135,33 +147,6 @@ class ReviewCreateViewModel @Inject constructor(
         }
     }
 
-    private fun updateTreatment(index: Int, value: String) {
-        _state.update { state ->
-            val newTreatments = state.step1.treatments.toMutableList()
-            if (index in newTreatments.indices) {
-                newTreatments[index] = value
-            }
-            state.copy(step1 = state.step1.copy(treatments = newTreatments))
-        }
-    }
-
-    private fun addTreatment() {
-        _state.update { state ->
-            val newTreatments = state.step1.treatments + ""
-            state.copy(step1 = state.step1.copy(treatments = newTreatments))
-        }
-    }
-
-    private fun removeTreatment(index: Int) {
-        _state.update { state ->
-            val newTreatments = state.step1.treatments.toMutableList()
-            if (index in newTreatments.indices && newTreatments.size > 1) {
-                newTreatments.removeAt(index)
-            }
-            state.copy(step1 = state.step1.copy(treatments = newTreatments))
-        }
-    }
-
     private fun checkReceiptAnalysisResult() {
         val jsonString = savedStateHandle.get<String>(ScreenDestinations.Review.Create.ARG_DATA)
 
@@ -172,9 +157,10 @@ class ReviewCreateViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         step1 = it.step1.copy(
-                            hospitalInfo = HospitalInfo(id = 0, name = analysisResult.hospitalName),
-                            totalPrice = analysisResult.totalPrice.toString(),
-                            isReceiptVerified = true
+                            hospitalQuery = analysisResult.hospitalName,
+                            hospitalInfoForReview = null,
+                            isReceiptVerified = true,
+                            totalPrice = analysisResult.totalPrice.toString()
                         ),
                         step2 = it.step2.copy(
                             visitDate = analysisResult.visitDate,
@@ -225,7 +211,7 @@ class ReviewCreateViewModel @Inject constructor(
                     }
                 } else {
                     _state.update { it.copy(showValidationError = true) }
-                    emitEvent(ReviewCreateEvent.ShowToast("병원 정보와 비용, 진료명을 입력해주세요."))
+                    emitEvent(ReviewCreateEvent.ShowToast("병원 정보와 비용, 동물종을 입력해주세요."))
                 }
             }
 
@@ -250,13 +236,15 @@ class ReviewCreateViewModel @Inject constructor(
     }
 
     private fun validateStep1(step1: Step1State): Boolean {
-        return step1.hospitalInfo != null &&
+        return step1.hospitalInfoForReview != null &&
                 step1.totalPrice.isNotBlank() &&
-                step1.treatments.any { it.isNotBlank() }
+                step1.detailAnimalType.isNotBlank()
     }
 
     private fun validateStep2(step2: Step2State): Boolean {
-        return step2.detailAnimalType.isNotBlank() && step2.ratings.expertise > 0 && step2.ratings.kindness > 0 && step2.ratings.facility > 0
+        return step2.ratings.expertise > 0 &&
+                step2.ratings.kindness > 0 &&
+                step2.ratings.facility > 0
     }
 
     private fun applyReceiptResult(result: ReceiptAnalysisResult) {
@@ -264,7 +252,10 @@ class ReviewCreateViewModel @Inject constructor(
             it.copy(
                 step1 = it.step1.copy(
                     isReceiptVerified = true,
-                    hospitalInfo = HospitalInfo(id = 0, name = result.hospitalName),
+                    hospitalInfoForReview = HospitalInfoForReview(
+                        id = result.hospitalId,
+                        name = result.hospitalName
+                    ),
                     totalPrice = result.totalPrice.toString()
                 ),
                 step2 = it.step2.copy(
@@ -300,11 +291,11 @@ class ReviewCreateViewModel @Inject constructor(
                     currentState.step1.totalPrice.filter { it.isDigit() }.toLongOrNull() ?: 0L
 
                 val param = SaveReviewParam(
-                    hospitalId = currentState.step1.hospitalInfo?.id ?: 0L,
+                    hospitalId = currentState.step1.hospitalInfoForReview?.id ?: 0L,
                     rating = currentState.step2.ratings,
                     price = priceLong,
-                    animalType = currentState.step2.animalType,
-                    detailAnimalType = currentState.step2.detailAnimalType,
+                    animalType = currentState.step1.animalType,
+                    detailAnimalType = currentState.step1.detailAnimalType,
                     receiptItems = currentState.step2.receiptItems,
                     visitDate = currentState.step2.visitDate,
                     comment = currentState.step3.content,
@@ -342,33 +333,27 @@ class ReviewCreateViewModel @Inject constructor(
         }
     }
 
-    private fun fetchHospitalId(name: String) {
-        if (name.length < 2) return
+    private fun fetchHospitalCandidates(query: String) {
+        if (query.length < 2) return
 
-        // 1. 이전 검색 작업이 있다면 취소
         searchJob?.cancel()
-
-        // 2. 새로운 검색 작업 시작
         searchJob = viewModelScope.launch {
-            // 3. 1초 대기 (디바운싱)
-            delay(1000L)
+            delay(300L)
 
-            findHospitalIdByNameUseCase(name)
+            findHospitalIdByNameUseCase(query)
                 .onSuccess { hospitals ->
-                    // 가장 첫 번째 결과의 ID를 사용
-                    val firstMatch = hospitals.firstOrNull()
-                    if (firstMatch != null) {
-                        _state.update { state ->
-                            state.copy(
-                                step1 = state.step1.copy(
-                                    hospitalInfo = firstMatch
-                                )
+                    _state.update { state ->
+                        state.copy(
+                            step1 = state.step1.copy(
+                                hospitalCandidates = hospitals
                             )
-                        }
+                        )
                     }
                 }
                 .onFailure {
-                    // 검색 실패 시 처리 (현재는 별도 처리 없음, ID 0 유지)
+                    _state.update { state ->
+                        state.copy(step1 = state.step1.copy(hospitalCandidates = emptyList()))
+                    }
                 }
         }
     }

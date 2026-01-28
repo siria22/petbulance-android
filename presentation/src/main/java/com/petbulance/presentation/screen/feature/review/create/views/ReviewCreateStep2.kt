@@ -34,18 +34,6 @@ fun Step2AnimalContent(
             .verticalScroll(scrollState)
             .padding(bottom = 80.dp)
     ) {
-        // 동물종 선택
-        ReviewAnimalTypeInput(
-            selectedAnimalType = state.animalType,
-            onAnimalTypeSelected = { intent(ReviewCreateIntent.OnAnimalTypeChanged(it)) }
-        )
-
-        // 세부 동물명 입력
-        ReviewDetailAnimalTypeInput(
-            detailAnimalType = state.detailAnimalType,
-            onDetailAnimalTypeChanged = { intent(ReviewCreateIntent.OnDetailAnimalTypeChanged(it)) }
-        )
-
         // 별점 입력
         ReviewRatingsSection(
             ratings = state.ratings,
@@ -60,8 +48,6 @@ private fun ReviewCreateScreenStep2Preview() {
     PetbulanceTheme {
         Step2AnimalContent(
             state = Step2State(
-                animalType = AnimalCategory.BIRD,
-                detailAnimalType = "앵무새",
                 ratings = ReviewRating(4.0, 5.0, 3.0)
             ),
             intent = {}

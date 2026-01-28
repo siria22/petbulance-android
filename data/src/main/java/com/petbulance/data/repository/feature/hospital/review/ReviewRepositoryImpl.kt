@@ -9,18 +9,20 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewDeleteResDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewDetailResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
 import com.petbulance.data.mapper.feature.hospital.toDomain
 import com.petbulance.data.mapper.feature.hospital.toDto
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewUploadUrl
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
@@ -32,11 +34,11 @@ class ReviewRepositoryImpl @Inject constructor(
     private val api: ReviewApi
 ) : ReviewRepository {
 
-    override suspend fun findHospital(name: String): Result<List<HospitalInfo>> {
+    override suspend fun findHospital(name: String): Result<List<HospitalInfoForReview>> {
         return safeApiCall<FindHospitalResDto>(path = "/receipts/$name") {
             api.findHospital(name)
         }.map { dto ->
-            dto.hospitals.map { HospitalInfo(it.hospitalId, it.hospitalName) }
+            dto.hospitals.map { HospitalInfoForReview(it.hospitalId, it.hospitalName) }
         }
     }
 
@@ -172,8 +174,8 @@ class ReviewRepositoryImpl @Inject constructor(
         }.map { }
     }
 
-    override suspend fun getReviewDetail(reviewId: Long): Result<ReviewSearchItem> {
-        return safeApiCall<FilterResDto>(path = "/receipts/detail/$reviewId") {
+    override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
+        return safeApiCall<ReviewDetailResDto>(path = "/receipts/detail/$reviewId") {
             api.getReviewDetail(reviewId)
         }.map { dto ->
             dto.toDomain()

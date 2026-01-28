@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -54,8 +59,12 @@ import com.petbulance.presentation.component.ui.spacingXXS
 
 @Composable
 fun ReviewHospitalNameInput(
-    name: String,
-    onNameChanged: (String) -> Unit,
+    query: String,
+    selectedHospitalName: String?,
+    candidates: List<HospitalInfoForReview>,
+    onQueryChanged: (String) -> Unit,
+    onClearQuery: () -> Unit,
+    onCandidateClicked: (HospitalInfoForReview) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -67,11 +76,64 @@ fun ReviewHospitalNameInput(
             style = typography.titleSmall,
             color = colorScheme.text.secondary,
         )
+
         ReviewInputTextField(
-            queryString = name,
+            queryString = query,
             placeholder = "병원명을 입력해주세요.",
-            onQueryStringChanged = onNameChanged
+            onQueryStringChanged = onQueryChanged,
+            trailingIcon = if (query.isNotBlank()) {
+                {
+                    BasicIcon(
+                        iconResource = IconResource.Vector(Icons.Default.Close),
+                        contentDescription = "Clear",
+                        size = 20.dp,
+                        tint = colorScheme.icon.medium,
+                        modifier = Modifier.clickable { onClearQuery() }
+                    )
+                }
+            } else null
         )
+
+        if (candidates.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colorScheme.bg.frame.default, RoundedCornerShape(12.dp))
+                    .border(
+                        width = 1.dp,
+                        color = colorScheme.border.verySubtle,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(vertical = 6.dp)
+            ) {
+                LazyColumn {
+                    items(candidates) { item ->
+                        val isSelected = selectedHospitalName == item.name
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 220.dp)
+                                .background(
+                                    if (isSelected) colorScheme.bg.frame.subtle else Color.Transparent,
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable { onCandidateClicked(item) }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = item.name,
+                                style = typography.bodyLarge,
+                                color = colorScheme.text.secondary
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -131,7 +193,7 @@ fun ReviewAnimalTypeInput(
                     shape = RoundedCornerShape(6.dp)
                 )
                 .clickable { expanded = true }
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
             Row(
                 modifier = Modifier
@@ -259,32 +321,34 @@ fun ReviewImageSection(
         verticalAlignment = Alignment.Top,
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .size(72.dp)
-                .background(colorScheme.bg.frame.default, RoundedCornerShape(8.dp))
-                .border(
-                    width = 1.dp,
-                    shape = RoundedCornerShape(8.dp),
-                    color = colorScheme.border.verySubtle
+        if(images.size < 5) {
+            Column(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(colorScheme.bg.frame.default, RoundedCornerShape(8.dp))
+                    .border(
+                        width = 1.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        color = colorScheme.border.verySubtle
+                    )
+                    .clickable {
+                        onImageAddClicked()
+                    },
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Default.CameraAlt),
+                    contentDescription = "Add image",
+                    size = iconSizeLarge,
+                    tint = colorScheme.icon.light
                 )
-                .clickable {
-                    onImageAddClicked()
-                },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            BasicIcon(
-                iconResource = IconResource.Vector(Icons.Default.CameraAlt),
-                contentDescription = "Add image",
-                size = iconSizeLarge,
-                tint = colorScheme.icon.light
-            )
-            Text(
-                text = "${images.size}/10",
-                color = colorScheme.icon.light,
-                style = typography.labelMedium
-            )
+                Text(
+                    text = "${images.size}/5",
+                    color = colorScheme.icon.light,
+                    style = typography.labelMedium
+                )
+            }
         }
 
         LazyRow(

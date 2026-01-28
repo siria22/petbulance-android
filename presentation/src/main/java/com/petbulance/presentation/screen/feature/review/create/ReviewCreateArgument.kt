@@ -1,7 +1,7 @@
 package com.petbulance.presentation.screen.feature.review.create
 
 import androidx.compose.runtime.Immutable
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
@@ -32,16 +32,17 @@ enum class ReviewCreateStep {
 
 @Immutable
 data class Step1State(
-    val hospitalInfo: HospitalInfo? = null,
+    val hospitalQuery: String = "",
+    val hospitalCandidates: List<HospitalInfoForReview> = emptyList(),
+    val hospitalInfoForReview: HospitalInfoForReview? = null,
     val totalPrice: String = "",
-    val treatments: List<String> = listOf(""),
+    val animalType: AnimalCategory = AnimalCategory.BIRD,
+    val detailAnimalType: String = "",
     val isReceiptVerified: Boolean = false
 )
 
 @Immutable
 data class Step2State(
-    val animalType: AnimalCategory = AnimalCategory.BIRD,
-    val detailAnimalType: String = "",
     val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0),
     val visitDate: String = "",
     val receiptItems: List<ReceiptItem> = emptyList()
@@ -61,12 +62,11 @@ sealed interface ReviewCreateIntent {
     data object OnPreviousStep : ReviewCreateIntent
 
     // Step 1: Hospital, Cost & Treatment
-    data class OnHospitalSelected(val hospitalName: String) : ReviewCreateIntent
     data class OnPriceChanged(val value: String) : ReviewCreateIntent
-    data class OnTreatmentChanged(val index: Int, val value: String) : ReviewCreateIntent
-    data object OnTreatmentAdded : ReviewCreateIntent
-    data class OnTreatmentRemoved(val index: Int) : ReviewCreateIntent
     data class OnReceiptAnalyzed(val result: ReceiptAnalysisResult) : ReviewCreateIntent
+    data class OnHospitalQueryChanged(val query: String) : ReviewCreateIntent
+    data class OnHospitalCandidateSelected(val hospital: HospitalInfoForReview) : ReviewCreateIntent
+    data object OnHospitalClearClicked : ReviewCreateIntent
 
     // Step 2: Animal & Rating
     data class OnAnimalTypeChanged(val value: AnimalCategory) : ReviewCreateIntent

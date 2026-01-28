@@ -1,18 +1,19 @@
 package com.petbulance.domain.repository.feature.hospital
 
-import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
+import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
+import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 
 interface ReviewRepository {
 
-    suspend fun findHospital(name: String): Result<List<HospitalInfo>>
+    suspend fun findHospital(name: String): Result<List<HospitalInfoForReview>>
 
     suspend fun searchReview(
         query: String,
@@ -56,5 +57,5 @@ interface ReviewRepository {
 
     suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit>
 
-    suspend fun getReviewDetail(reviewId: Long): Result<ReviewSearchItem>
+    suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail>
 }

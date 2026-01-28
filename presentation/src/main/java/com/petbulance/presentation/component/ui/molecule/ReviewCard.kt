@@ -135,11 +135,6 @@ fun ReviewCard(review: HospitalReview) {
                     color = colorScheme.text.secondary,
                     style = typography.bodySmall
                 )
-                Text(
-                    text = review.treatment,
-                    color = colorScheme.text.secondary,
-                    style = typography.bodySmall
-                )
             }
         }
 
