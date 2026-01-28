@@ -159,4 +159,12 @@ class ReviewRepositoryImpl @Inject constructor(
             api.uploadImage(url, imageBytes)
         }.map { }
     }
+
+    override suspend fun getReviewDetail(reviewId: Long): Result<ReviewSearchItem> {
+        return safeApiCall<FilterResDto>(path = "/receipts/detail/$reviewId") {
+            api.getReviewDetail(reviewId)
+        }.map { dto ->
+            dto.toDomain()
+        }
+    }
 }

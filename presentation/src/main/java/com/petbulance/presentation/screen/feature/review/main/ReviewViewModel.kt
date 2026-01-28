@@ -155,6 +155,7 @@ class ReviewViewModel @Inject constructor(
         }
     }
 
+    // FIXME : 이거 꼭 이렇게 해야하는지?
     private fun ReviewSearchItem.toHospitalReviewDummy(): HospitalReview {
         return HospitalReview(
             id = this.id,

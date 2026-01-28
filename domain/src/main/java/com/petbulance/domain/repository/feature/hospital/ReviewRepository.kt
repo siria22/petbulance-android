@@ -52,4 +52,6 @@ interface ReviewRepository {
     suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): Result<ReceiptAnalysisResult>
 
     suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit>
+
+    suspend fun getReviewDetail(reviewId: Long): Result<ReviewSearchItem>
 }

@@ -119,6 +119,10 @@ class ReviewApi @Inject constructor(
         )
     }
 
+    suspend fun getReviewDetail(reviewId: Long): HttpResponse {
+        return client.get("$baseUrl/detail/$reviewId")
+    }
+
     suspend fun uploadImage(url: String, imageBytes: ByteArray): HttpResponse {
         return client.put(url) {
             setBody(imageBytes)

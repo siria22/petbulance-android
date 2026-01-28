@@ -103,3 +103,20 @@ fun ReceiptAnalysisResDto.toDomain() = ReceiptAnalysisResult(
     totalPrice = price,
     items = items.map { ReceiptItem(it.name, it.price) }
 )
+
+fun ReviewSearchItem.toHospitalReview() = HospitalReview(
+    id = this.id,
+    isReceiptVerified = this.receiptCheck,
+    treatment = this.treatmentService,
+    animalType = this.animalType,
+    detailAnimalType = this.detailAnimalType,
+    content = this.reviewContent,
+    rating = this.totalRating,
+    date = this.createDate,
+    likeCount = this.likeCount,
+    isLiked = this.liked,
+    imageUrls = this.images,
+    author = this.userNickname,
+    price = this.totalPrice,
+    hospitalName = this.hospitalName
+)
