@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -30,11 +29,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,8 +60,10 @@ import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.screen.feature.review.camera.composables.ReceiptAnalysisFailDialog
 import com.petbulance.presentation.utils.hooks.PermissionHandler
 import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
@@ -150,17 +149,9 @@ fun ReceiptCameraScreen(
         onCaptureError = { Toast.makeText(context, "사진 촬영 실패", Toast.LENGTH_SHORT).show() },
         onDismissFailDialog = { showFailDialog = false },
         onRetryAnalysis = { showFailDialog = false },
-        onGalleryClicked = {
+        onWithoutReceiptButtonClicked = {
             showFailDialog = false
-            photoPickerLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        },
-        onManualInputClicked = {
-            showFailDialog = false
-            navController.navigate(ScreenDestinations.Review.Create.createRoute(null)) {
-                popUpTo(ScreenDestinations.Review.ReceiptCamera.route) { inclusive = true }
-            }
+            navController.safeNavigate(ScreenDestinations.Review.Create.route)
         }
     )
 }
@@ -176,8 +167,7 @@ private fun ReceiptCameraScreenContents(
     onCaptureError: () -> Unit,
     onDismissFailDialog: () -> Unit,
     onRetryAnalysis: () -> Unit,
-    onGalleryClicked: () -> Unit,
-    onManualInputClicked: () -> Unit
+    onWithoutReceiptButtonClicked: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -233,7 +223,9 @@ private fun ReceiptCameraScreenContents(
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 Box(
                     modifier = Modifier.size(48.dp),
@@ -250,7 +242,7 @@ private fun ReceiptCameraScreenContents(
             }
 
             // 2. Overlay UI (Green Frame & Guide)
-            Column (
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = spacingMedium, vertical = spacingLarge),
@@ -344,8 +336,7 @@ private fun ReceiptCameraScreenContents(
             ReceiptAnalysisFailDialog(
                 onDismissRequest = onDismissFailDialog,
                 onRetry = onRetryAnalysis,
-                onGalleryClick = onGalleryClicked,
-                onManualInputClick = onManualInputClicked
+                onWithoutReceiptButtonClicked = onWithoutReceiptButtonClicked
             )
         }
     }
@@ -365,8 +356,7 @@ private fun ReceiptCameraScreenPreview() {
             onCaptureError = {},
             onDismissFailDialog = {},
             onRetryAnalysis = {},
-            onGalleryClicked = {},
-            onManualInputClicked = {}
+            onWithoutReceiptButtonClicked = {}
         )
     }
 }

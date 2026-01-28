@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.create.views
+package com.petbulance.presentation.screen.feature.review.create.composables
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background

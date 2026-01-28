@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,7 +59,7 @@ import com.petbulance.presentation.component.ui.atom.BasicBottomSheet
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
-import com.petbulance.presentation.component.ui.atom.RatingBar
+import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
@@ -418,7 +417,7 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                RatingBar(rating = item.rating)
+                StarRatingView(rating = item.rating)
                 Text(
                     text = "(${item.rating})",
                     style = MaterialTheme.typography.labelMedium,

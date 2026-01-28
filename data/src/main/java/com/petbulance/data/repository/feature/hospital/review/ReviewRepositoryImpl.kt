@@ -17,6 +17,7 @@ import com.petbulance.data.mapper.feature.hospital.toDomain
 import com.petbulance.data.mapper.feature.hospital.toDto
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
@@ -105,14 +106,14 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult> {
         return safeApiCall<ReviewSaveResDto>(path = "/receipts/save/reviews") {
-            api.saveReview(param.copy(animalType = "PARROT").toDto())
+            api.saveReview(param.toDto())
         }.map { dto ->
             SaveReviewResult(
                 reviewId = dto.reviewId,
                 uploadUrls = dto.urls.map { ReviewUploadUrl(it.presignedUrl, it.saveId) }
             )
         }
-    } // FIXME: animalType이 없어서 일단 PARROT으로 고정
+    }
 
     override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
         return safeApiCall<ReviewImageCheckResDto>(path = "/receipts/save/success") {
@@ -135,6 +136,17 @@ class ReviewRepositoryImpl @Inject constructor(
                 items = dto.list.map { it.toDomain() },
                 nextCursorId = dto.nextCursorId,
                 hasNext = dto.hasNext
+            )
+        }
+    }
+
+    override suspend fun modifyReview(param: ModifyReviewParam): Result<SaveReviewResult> {
+        return safeApiCall<ReviewSaveResDto>(path = "/receipts/modify") {
+            api.modifyReview(param.toDto())
+        }.map { dto ->
+            SaveReviewResult(
+                reviewId = dto.reviewId,
+                uploadUrls = dto.urls.map { ReviewUploadUrl(it.presignedUrl, it.saveId) }
             )
         }
     }

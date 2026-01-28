@@ -5,6 +5,7 @@ import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
+import com.petbulance.domain.model.type.AnimalCategory
 import kotlinx.coroutines.flow.SharedFlow
 
 data class ReviewCreateArgument(
@@ -39,9 +40,9 @@ data class Step1State(
 
 @Immutable
 data class Step2State(
-    val animalType: String = "",
+    val animalType: AnimalCategory = AnimalCategory.BIRD,
     val detailAnimalType: String = "",
-    val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0), // Step1에서 이동
+    val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0),
     val visitDate: String = "",
     val receiptItems: List<ReceiptItem> = emptyList()
 )
@@ -68,7 +69,7 @@ sealed interface ReviewCreateIntent {
     data class OnReceiptAnalyzed(val result: ReceiptAnalysisResult) : ReviewCreateIntent
 
     // Step 2: Animal & Rating
-    data class OnAnimalTypeChanged(val value: String) : ReviewCreateIntent
+    data class OnAnimalTypeChanged(val value: AnimalCategory) : ReviewCreateIntent
     data class OnDetailAnimalTypeChanged(val value: String) : ReviewCreateIntent
     data class OnRatingChanged(val rating: ReviewRating) : ReviewCreateIntent
 

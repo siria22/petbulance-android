@@ -28,9 +28,7 @@ data class ReceiptItemDto(
 @Serializable
 data class ReviewImageDto(
     val filename: String,
-    val contentType: String,
-    val content: String,
-    val receipt: Boolean
+    val contentType: String
 )
 
 @Serializable

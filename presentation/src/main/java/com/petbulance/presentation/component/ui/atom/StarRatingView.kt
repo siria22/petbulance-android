@@ -1,4 +1,4 @@
-package com.petbulance.presentation.component.ui.molecule
+package com.petbulance.presentation.component.ui.atom
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -6,13 +6,11 @@ import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.petbulance.presentation.component.ui.atom.BasicIcon
-import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 
 @Composable
-fun StarRating(rating: Double, maxRating: Int = 5) {
+fun StarRatingView(rating: Double, maxRating: Int = 5) {
     Row {
         for (i in 1..maxRating) {
             val starIcon = when {
@@ -24,7 +22,7 @@ fun StarRating(rating: Double, maxRating: Int = 5) {
                 iconResource = IconResource.Vector(starIcon),
                 contentDescription = "Star",
                 size = 20.dp,
-                tint = Color(0xFFFFBF0F)
+                tint = colorScheme.icon.rating
             )
         }
     }

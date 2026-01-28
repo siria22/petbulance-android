@@ -18,7 +18,7 @@ data class Hospital(
     val reviewCount: Int?
 ) {
     companion object {
-        val stub = Hospital(
+        fun stub() = Hospital(
             hospitalId = 1,
             name = "화타동물병원",
             lat = 37.0,

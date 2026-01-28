@@ -2,7 +2,7 @@ package com.petbulance.presentation.screen.feature.review.search
 
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
-import com.petbulance.domain.model.feature.hospital.review.toHospitalReview
+import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
@@ -157,4 +157,22 @@ class ReviewSearchViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun ReviewSearchItem.toHospitalReview() = HospitalReview(
+        id = this.id,
+        hospitalName = this.hospitalName,
+        isReceiptVerified = this.receiptCheck,
+        treatment = this.treatmentService,
+        animalType = this.animalType,
+        detailAnimalType = this.detailAnimalType,
+        content = this.reviewContent,
+        rating = this.totalRating,
+        date = this.createDate,
+        likeCount = this.likeCount,
+        isLiked = this.liked,
+        imageUrls = this.images,
+        author = this.userNickname,
+        price = this.totalPrice
+    )
+
 }

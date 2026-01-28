@@ -42,5 +42,10 @@ sealed class ScreenDestinations(val route: String) {
             }
         }
         data object ReceiptCamera : ScreenDestinations("review/receipt_camera")
+
+        data object Edit : ScreenDestinations("review/edit/{id}") {
+            const val ARG_ID = "id"
+            fun createRoute(id: Long): String = "review/edit/$id"
+        }
     }
 }

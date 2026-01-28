@@ -33,6 +33,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
+import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
@@ -46,9 +47,10 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.screen.feature.review.create.views.ExitDialog
-import com.petbulance.presentation.screen.feature.review.create.views.ReceiptVerifiedCard
-import com.petbulance.presentation.screen.feature.review.create.views.ReviewProgressBar
+import com.petbulance.presentation.screen.feature.review.common.ExitDialog
+import com.petbulance.presentation.screen.feature.review.create.composables.ReceiptVerifiedCard
+import com.petbulance.presentation.screen.feature.review.create.composables.ReviewProgressBar
+import com.petbulance.presentation.screen.feature.review.create.composables.ReviewSubmitCompleteDialog
 import com.petbulance.presentation.screen.feature.review.create.views.Step1HospitalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step2AnimalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step3ReviewContent
@@ -63,19 +65,23 @@ fun ReviewCreateScreen(
     navController: NavController,
     argument: ReviewCreateArgument
 ) {
-    var showExitDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isVerified = argument.state.step1.isReceiptVerified
+
     var isVerifiedCardVisible by remember { mutableStateOf(argument.state.step1.isReceiptVerified) }
+    var showExitDialog by remember { mutableStateOf(false) }
+    var showSubmitCompleteDialog by remember { mutableStateOf(false) }
 
     BackHandler {
         when (argument.state.currentStep) {
             ReviewCreateStep.HOSPITAL_AND_COST -> {
                 argument.intent(ReviewCreateIntent.OnCloseClicked)
             }
+
             ReviewCreateStep.ANIMAL_AND_RATING -> {
                 argument.intent(ReviewCreateIntent.OnPreviousStep)
             }
+
             ReviewCreateStep.REVIEW_CONTENT -> {
                 argument.intent(ReviewCreateIntent.OnPreviousStep)
             }
@@ -218,6 +224,7 @@ fun ReviewCreateScreen(
             ) {
                 if (argument.state.currentStep == ReviewCreateStep.REVIEW_CONTENT) {
                     argument.intent(ReviewCreateIntent.OnSubmitClicked)
+
                 } else {
                     argument.intent(ReviewCreateIntent.OnNextClicked)
                 }
@@ -232,6 +239,13 @@ fun ReviewCreateScreen(
                 showExitDialog = false
                 navController.safePopBackStack()
             }
+        )
+    }
+
+    if (showSubmitCompleteDialog) {
+        ReviewSubmitCompleteDialog(
+            onDismissRequest = { navController.safePopBackStack() },
+            onNavigateToReview = { /* TODO : 작성한 리뷰로 바로 이동. Response Body의 reviewId 이용. */ }
         )
     }
 
@@ -277,8 +291,8 @@ private fun ReviewCreateScreenStep2Preview() {
                         treatments = listOf("중성화 수술")
                     ),
                     step2 = Step2State(
-                        animalType = "강아지",
-                        detailAnimalType = "말티즈",
+                        animalType = AnimalCategory.BIRD,
+                        detailAnimalType = "앵무새",
                         ratings = ReviewRating(4.0, 5.0, 3.0)
                     ),
                 ),

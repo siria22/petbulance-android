@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.create
+package com.petbulance.presentation.screen.feature.review.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,7 +50,7 @@ fun ReviewInputTextField(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Box(
                     modifier = Modifier.weight(1f),

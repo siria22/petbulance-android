@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.petbulance.presentation.screen.feature.home.homeDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
 import com.petbulance.presentation.screen.feature.review.create.reviewCreateDestination
+import com.petbulance.presentation.screen.feature.review.edit.reviewEditDestination
 import com.petbulance.presentation.screen.feature.review.main.reviewDestination
 import com.petbulance.presentation.screen.feature.review.search.reviewSearchDestination
 import com.petbulance.presentation.screen.feature.search.info.hospitalInfoDestination
@@ -39,5 +40,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         reviewSearchDestination(navController = navController)
         reviewCreateDestination(navController = navController)
         receiptCameraDestination(navController = navController)
+        reviewEditDestination(navController = navController)
     }
 }

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -25,7 +24,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
@@ -38,8 +36,10 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.feature.review.common.ReviewHospitalNameInput
+import com.petbulance.presentation.screen.feature.review.common.ReviewTotalCostInput
 import com.petbulance.presentation.screen.feature.review.create.ReviewCreateIntent
-import com.petbulance.presentation.screen.feature.review.create.ReviewInputTextField
+import com.petbulance.presentation.screen.feature.review.common.ReviewInputTextField
 import com.petbulance.presentation.screen.feature.review.create.Step1State
 
 @Composable
@@ -57,39 +57,16 @@ fun Step1HospitalContent(
             .padding(bottom = 80.dp)
     ) {
         // 병원명 입력
-        Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXS)
-        ) {
-            Text(
-                text = "병원명",
-                style = typography.titleSmall,
-                color = colorScheme.text.secondary,
-            )
-            ReviewInputTextField(
-                queryString = state.hospitalInfo?.name ?: "",
-                placeholder = "병원명을 입력해주세요.",
-                onQueryStringChanged = { name ->
-                    intent(ReviewCreateIntent.OnHospitalSelected(name))
-                }
-            )
-        }
+        ReviewHospitalNameInput(
+            name = state.hospitalInfo?.name ?: "",
+            onNameChanged = { intent(ReviewCreateIntent.OnHospitalSelected(it)) }
+        )
 
         // 총 진료비 입력
-        Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXS)
-        ) {
-            Text(
-                text = "총 진료비",
-                style = typography.titleSmall,
-                color = colorScheme.text.secondary,
-            )
-            ReviewInputTextField(
-                queryString = state.totalPrice,
-                placeholder = "진료비를 입력해주세요. (원)",
-                onQueryStringChanged = { intent(ReviewCreateIntent.OnPriceChanged(it)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
+        ReviewTotalCostInput(
+            cost = state.totalPrice,
+            onCostChanged = { intent(ReviewCreateIntent.OnPriceChanged(it)) }
+        )
 
         // 진료 항목 입력
         Column(

@@ -1,6 +1,7 @@
 package com.petbulance.data.datasource.remote.network.feature.hospital.review
 
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewModifyReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
 import com.petbulance.data.di.network.AuthHttpClient
 import com.petbulance.data.di.network.BASE_URL
@@ -121,6 +122,13 @@ class ReviewApi @Inject constructor(
 
     suspend fun getReviewDetail(reviewId: Long): HttpResponse {
         return client.get("$baseUrl/detail/$reviewId")
+    }
+
+    suspend fun modifyReview(body: ReviewModifyReqDto): HttpResponse {
+        return client.post("$baseUrl/modify") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }
     }
 
     suspend fun uploadImage(url: String, imageBytes: ByteArray): HttpResponse {

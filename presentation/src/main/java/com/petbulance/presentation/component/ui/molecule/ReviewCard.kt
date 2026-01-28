@@ -36,6 +36,7 @@ import com.petbulance.presentation.component.ui.atom.BasicChip
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
@@ -122,7 +123,7 @@ fun ReviewCard(review: HospitalReview) {
                     style = typography.titleSmall.emp()
                 )
 
-                StarRating(rating = review.rating)
+                StarRatingView(rating = review.rating)
 
                 Text(
                     text = "${review.animalType.korean} > ${review.detailAnimalType.korean}",
@@ -222,6 +223,6 @@ fun ReviewCard(review: HospitalReview) {
 @Composable
 private fun ReviewCardPreview() {
     PetbulanceTheme {
-        ReviewCard(HospitalReview.stub)
+        ReviewCard(HospitalReview.stub())
     }
 }

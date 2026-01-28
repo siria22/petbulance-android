@@ -2,6 +2,7 @@ package com.petbulance.data.repository.feature.hospital.review
 
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
@@ -136,6 +137,15 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 items = myReviews,
                 nextCursorId = myReviews.last().id,
                 hasNext = false
+            )
+        )
+    }
+
+    override suspend fun modifyReview(param: ModifyReviewParam): Result<SaveReviewResult> {
+        return Result.success(
+            SaveReviewResult(
+                reviewId = 1,
+                uploadUrls = emptyList()
             )
         )
     }

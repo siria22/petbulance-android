@@ -4,10 +4,13 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.MyReviewGetDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptAnalysisResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReceiptItemDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewModifyReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.SearchResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
@@ -87,7 +90,7 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     kindnessRating = rating.kindness,
     facilityRating = rating.facility,
     totalPrice = price,
-    animalType = animalType,
+    animalType = animalType.name,
     detailAnimalType = detailAnimalType,
     receiptItems = receiptItems.map {
         ReceiptItemDto(name = it.name, price = it.price)
@@ -119,4 +122,26 @@ fun ReviewSearchItem.toHospitalReview() = HospitalReview(
     author = this.userNickname,
     price = this.totalPrice,
     hospitalName = this.hospitalName
+)
+
+fun ModifyReviewParam.toDto() = ReviewModifyReqDto(
+    reviewId = reviewId,
+    title = title,
+    receiptChecked = isReceipt,
+    hospitalId = hospitalId,
+    expertiseRating = rating.expertise,
+    kindnessRating = rating.kindness,
+    facilityRating = rating.facility,
+    totalPrice = price,
+    animalType = animalType.name,
+    detailAnimalType = detailAnimalType,
+    receiptItems = receiptItems.map { ReceiptItemDto(it.name, it.price) },
+    visitDate = visitDate,
+    reviewComment = comment,
+    images = images.map {
+        ReviewImageDto(
+            filename = it.filename,
+            contentType = it.contentType,
+        )
+    }
 )

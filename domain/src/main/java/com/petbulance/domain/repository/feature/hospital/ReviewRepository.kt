@@ -2,6 +2,7 @@ package com.petbulance.domain.repository.feature.hospital
 
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfo
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
+import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.MyReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
@@ -46,6 +47,8 @@ interface ReviewRepository {
         size: Int = 10,
         cursorId: Long? = null
     ): Result<PagingReviewList<MyReview>>
+
+    suspend fun modifyReview(param: ModifyReviewParam): Result<SaveReviewResult>
 
     suspend fun deleteMyReviews(ids: List<Long>): Result<String>
 

@@ -30,7 +30,7 @@ import kotlin.math.min
 import kotlin.math.round
 
 @Composable
-fun RatingBar(
+fun RatingStarsBar(
     modifier: Modifier = Modifier,
     rating: Double,
     maxRating: Int = 5,
@@ -67,8 +67,7 @@ fun RatingBar(
                                 calculateRating(
                                     change.position.x,
                                     starSizePx,
-                                    maxRating,
-                                    1.0
+                                    maxRating
                                 )
                             onRatingChanged.invoke(newRating)
                         }
@@ -111,7 +110,7 @@ fun RatingBar(
     }
 }
 
-private fun calculateRating(x: Float, starSizePx: Float, maxRating: Int, stepSize: Double): Double {
+private fun calculateRating(x: Float, starSizePx: Float, maxRating: Int, stepSize: Double = 1.0): Double {
     val rawRating = x / starSizePx
     val rating = round(rawRating / stepSize) * stepSize
     val roundedRating = round(rating * 10) / 10.0

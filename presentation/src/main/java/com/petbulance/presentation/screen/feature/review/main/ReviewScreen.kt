@@ -20,6 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.presentation.R
@@ -33,19 +36,16 @@ import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
+import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
+import com.petbulance.presentation.screen.feature.review.main.composables.CreateReceiptDialog
+import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
+import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.petbulance.presentation.screen.feature.review.main.composables.CreateReceiptDialog
-import com.petbulance.presentation.screen.feature.review.main.composables.ReviewInfoDialog
-import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
-import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -204,10 +204,7 @@ private fun ReviewScreenPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewData(
-                reviews = listOf(
-                    HospitalReview.stub,
-                    HospitalReview.stub.copy(id = 2)
-                ),
+                reviews = HospitalReview.stubs(),
 //                reviews = emptyList(),
                 selectedRegion = null,
                 selectedDistrict = null,

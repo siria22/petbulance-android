@@ -280,7 +280,7 @@ private fun HospitalCardPreview() {
                 .padding(32.dp)
         ) {
             HospitalCard(
-                hospital = Hospital.stub,
+                hospital = Hospital.stub(),
                 isShadowed = true
             )
 

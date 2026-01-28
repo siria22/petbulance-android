@@ -256,11 +256,7 @@ class ReviewCreateViewModel @Inject constructor(
     }
 
     private fun validateStep2(step2: Step2State): Boolean {
-        return step2.animalType.isNotBlank() &&
-                step2.detailAnimalType.isNotBlank() &&
-                step2.ratings.expertise > 0 &&
-                step2.ratings.kindness > 0 &&
-                step2.ratings.facility > 0
+        return step2.detailAnimalType.isNotBlank() && step2.ratings.expertise > 0 && step2.ratings.kindness > 0 && step2.ratings.facility > 0
     }
 
     private fun applyReceiptResult(result: ReceiptAnalysisResult) {

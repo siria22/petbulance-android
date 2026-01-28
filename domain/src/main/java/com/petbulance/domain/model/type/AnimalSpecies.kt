@@ -40,7 +40,8 @@ enum class AnimalSpecies(val category: AnimalCategory, val korean: String) {
     companion object {
         fun fromString(value: String?): AnimalSpecies {
             return AnimalSpecies.entries.find { it.name.equals(value, ignoreCase = true) }
-                ?: throw IllegalArgumentException("Invalid AnimalSpecies: $value")
+                ?: OTHER_SMALL_MAMMALS
+//                ?: throw IllegalArgumentException("Invalid AnimalSpecies: $value")
         }
     }
 }

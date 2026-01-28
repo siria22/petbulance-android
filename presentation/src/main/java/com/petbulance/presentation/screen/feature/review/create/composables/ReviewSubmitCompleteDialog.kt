@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.camera
+package com.petbulance.presentation.screen.feature.review.create.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,15 +19,12 @@ import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicDialog
 import com.petbulance.presentation.component.ui.spacingLarge
-import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 
 @Composable
-fun ReceiptAnalysisFailDialog(
+fun ReviewSubmitCompleteDialog(
     onDismissRequest: () -> Unit,
-    onRetry: () -> Unit,
-    onGalleryClick: () -> Unit,
-    onManualInputClick: () -> Unit
+    onNavigateToReview: () -> Unit
 ) {
     BasicDialog(
         backHandler = onDismissRequest,
@@ -42,13 +39,13 @@ fun ReceiptAnalysisFailDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "영수증을 인식하지 못했어요.",
+                    text = "후기가 등록되었습니다.",
                     style = MaterialTheme.typography.titleMedium.emp(),
                     textAlign = TextAlign.Center,
                     color = PetbulanceTheme.colorScheme.text.primary
                 )
                 Text(
-                    text = "이미지가 흐리거나 빛 반사가 있을 수 있어요.\n영수증을 다시 촬영하거나 직접 입력해주세요.",
+                    text = "작성해주신 후기는 검수 완료 후 공개됩니다.",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = PetbulanceTheme.colorScheme.text.secondary
@@ -61,21 +58,21 @@ fun ReceiptAnalysisFailDialog(
             ) {
                 BasicButton(
                     modifier = Modifier.weight(1f),
-                    text = "앨범에서 선택",
+                    text = "닫기",
                     size = BasicButtonSize.L,
                     buttonType = BasicButtonType.SECONDARY,
                     radius = 12.dp,
-                    onClicked = onGalleryClick
+                    onClicked = onDismissRequest
                 )
                 BasicButton(
                     modifier = Modifier.weight(1f),
-                    text = "다시 시도",
+                    text = "작성한 후기 보기",
                     size = BasicButtonSize.L,
                     buttonType = BasicButtonType.PRIMARY,
                     radius = 12.dp,
-                    onClicked = onRetry
+                    onClicked = onNavigateToReview
                 )
             }
         }
-    }
+    }   
 }

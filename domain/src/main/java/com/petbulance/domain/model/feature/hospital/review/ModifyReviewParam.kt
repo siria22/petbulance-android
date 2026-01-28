@@ -2,8 +2,10 @@ package com.petbulance.domain.model.feature.hospital.review
 
 import com.petbulance.domain.model.type.AnimalCategory
 
-data class SaveReviewParam(
+data class ModifyReviewParam(
+    val reviewId: Long,
     val hospitalId: Long,
+    val title: String,
     val rating: ReviewRating,
     val price: Long,
     val animalType: AnimalCategory,
@@ -12,12 +14,5 @@ data class SaveReviewParam(
     val visitDate: String,
     val comment: String,
     val isReceipt: Boolean,
-    val title: String? = null,
-)
-
-data class ReviewImageParam(
-    val filename: String,
-    val contentType: String,
-    val content: String,
-    val isReceipt: Boolean
+    val images: List<ReviewImageParam> = emptyList()
 )

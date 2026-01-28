@@ -35,6 +35,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraAnimation
+import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.NaverMap
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
 import com.petbulance.presentation.component.theme.PetbulanceTheme
@@ -64,10 +68,6 @@ import com.petbulance.presentation.screen.feature.search.main.views.common.RowRe
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.NaverMapView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.CameraAnimation
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.NaverMap
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -307,8 +307,12 @@ private fun MapUiLayer(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(spacingXS, Alignment.CenterHorizontally),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    spacingXS,
+                    Alignment.CenterHorizontally
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = spacingMedium)
@@ -373,7 +377,9 @@ private fun MapUiLayer(
             }
             if (state.filteredHospitalList.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().padding(spacingMedium)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(spacingMedium)
                 ) {
                     HospitalCard(
                         hospital = null
@@ -415,7 +421,7 @@ private fun MapViewPreview() {
             ),
             searchUiState = SearchUiState(
                 hospitalList = listOf(
-                    Hospital.stub
+                    Hospital.stub()
                 ),
 //                hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
