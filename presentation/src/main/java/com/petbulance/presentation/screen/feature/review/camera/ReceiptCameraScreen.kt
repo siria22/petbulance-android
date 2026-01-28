@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,14 +54,17 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.iconSizeLarge
 import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXXL
 import com.petbulance.presentation.screen.feature.review.camera.composables.ReceiptAnalysisFailDialog
 import com.petbulance.presentation.utils.hooks.PermissionHandler
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -152,6 +157,13 @@ fun ReceiptCameraScreen(
         onWithoutReceiptButtonClicked = {
             showFailDialog = false
             navController.safeNavigate(ScreenDestinations.Review.Create.route)
+        },
+        onGalleryOpen = {
+            photoPickerLauncher.launch(
+                PickVisualMediaRequest.Builder()
+                    .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    .build()
+            )
         }
     )
 }
@@ -167,6 +179,7 @@ private fun ReceiptCameraScreenContents(
     onCaptureError: () -> Unit,
     onDismissFailDialog: () -> Unit,
     onRetryAnalysis: () -> Unit,
+    onGalleryOpen:() -> Unit,
     onWithoutReceiptButtonClicked: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -274,14 +287,25 @@ private fun ReceiptCameraScreenContents(
             }
 
             // 하단 컨트롤 영역
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 50.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(spacingXXL),
+                horizontalArrangement = Arrangement.spacedBy(72.dp)
             ) {
 
-                // 촬영 버튼
+                // 갤러리 버튼
+                BasicIcon(
+                    iconResource = IconResource.Drawable(R.drawable.ic_gallery_open),
+                    contentDescription = "open gallery",
+                    size = iconSizeLarge,
+                    tint = colorScheme.icon.inverse,
+                    modifier = Modifier.clickable {
+                        onGalleryOpen()
+                    }
+                )
+
+                // 촬영
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -316,6 +340,9 @@ private fun ReceiptCameraScreenContents(
                             )
                     )
                 }
+
+                // 공백
+                Spacer(modifier = Modifier.size(iconSizeLarge))
             }
         }
 
@@ -328,7 +355,7 @@ private fun ReceiptCameraScreenContents(
                     .clickable(enabled = false) {},
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = PetbulanceTheme.colorScheme.action.primary.default)
+                CircularProgressIndicator(color = colorScheme.action.primary.default)
             }
         }
 
@@ -356,7 +383,8 @@ private fun ReceiptCameraScreenPreview() {
             onCaptureError = {},
             onDismissFailDialog = {},
             onRetryAnalysis = {},
-            onWithoutReceiptButtonClicked = {}
+            onWithoutReceiptButtonClicked = {},
+            onGalleryOpen = {}
         )
     }
 }
