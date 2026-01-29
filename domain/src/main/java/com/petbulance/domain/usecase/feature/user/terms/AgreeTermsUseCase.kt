@@ -9,12 +9,10 @@ class AgreeTermsUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(terms: List<Term>): Result<Unit> {
         return runCatching {
-            // 1. 로컬 DB에 저장
             repository.saveTermsConsentLocal(terms).getOrThrow()
 
-            // 2. 서버로 동의 내역 전송
-            val termsType = terms.map { (it.termsType?.ordinal?.toLong()?.plus(1L)) ?: 0L }
-            repository.saveTermsConsent(termsType).getOrThrow()
+            val termsIds = terms.map { it.id }
+            repository.saveTermsConsent(termsIds).getOrThrow()
         }
     }
 }
