@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.presentation.screen.feature.home.homeDestination
+import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
+import com.petbulance.presentation.screen.feature.mypage.profile.profileDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
 import com.petbulance.presentation.screen.feature.review.create.reviewCreateDestination
 import com.petbulance.presentation.screen.feature.review.edit.reviewEditDestination
@@ -41,5 +43,8 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         reviewCreateDestination(navController = navController)
         receiptCameraDestination(navController = navController)
         reviewEditDestination(navController = navController)
+
+        myPageDestination(navController = navController)
+        profileDestination(navController = navController)
     }
 }

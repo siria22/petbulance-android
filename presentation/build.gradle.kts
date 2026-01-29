@@ -118,7 +118,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.savedstate)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
 
+    implementation("androidx.paging:paging-runtime-ktx:3.3.0")
+    implementation("androidx.paging:paging-compose:3.3.0")
+    
     // DI
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
