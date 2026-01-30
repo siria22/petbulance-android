@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun SearchScreen(
     navController: NavController,
+    isGuest: Boolean,
     commonSearchArgument: CommonSearchArgument,
     userLocationArgument: UserLocationArgument,
     hospitalSearchArgument: HospitalSearchArgument,
@@ -49,6 +50,7 @@ fun SearchScreen(
 
     // --- UI State ---
     val searchUiState = SearchUiState(
+        isGuest = isGuest,
         hospitalList = hospitalSearchData.hospitalList,
         currentQuery = currentDraftQuery,
         selectedSortType = selectedSortType,
@@ -278,6 +280,7 @@ private fun SearchScreenPreview() {
             ),
             locationData = UserLocationData.empty,
             hospitalSearchData = HospitalSearchData.empty,
+            isGuest = false,
         )
     }
 }

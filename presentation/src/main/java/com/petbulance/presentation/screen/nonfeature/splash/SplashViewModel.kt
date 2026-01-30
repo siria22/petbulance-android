@@ -1,7 +1,6 @@
 package com.petbulance.presentation.screen.nonfeature.splash
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermsStatusUseCase
 import com.petbulance.domain.usecase.nonfeature.app.CheckAppVersionUseCase
@@ -12,7 +11,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel

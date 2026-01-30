@@ -239,6 +239,7 @@ private fun ResultViewPreview() {
                     )
                 ),
                 currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
+                isGuest = false
             ),
             onEvent = {}
         )

@@ -12,6 +12,7 @@ import com.naver.maps.map.NaverMap
  * 검색 화면 전체에서 공유하는 UI 상태
  */
 data class SearchUiState(
+    val isGuest: Boolean,
     val hospitalList: List<Hospital>,
     val currentQuery: HospitalSearchQueryUiModel,
     val selectedSortType: HospitalSortType = HospitalSortType.DISTANCE,

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -93,7 +92,9 @@ fun ListView(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(spacingMedium)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(spacingMedium)
                 ) {
                     RowChipFilters(
                         uiModel = searchUiState.currentQuery,
@@ -118,8 +119,8 @@ fun ListView(
                     verticalArrangement = Arrangement.spacedBy(spacingMedium),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if(searchUiState.filteredHospitalList.isEmpty()) {
-                        item{
+                    if (searchUiState.filteredHospitalList.isEmpty()) {
+                        item {
                             HospitalCard(
                                 hospital = null
                             )
@@ -186,6 +187,7 @@ private fun ListViewPreview() {
                     )
                 ),
                 currentQuery = HospitalSearchQueryUiModel.empty,
+                isGuest = false
             ),
             onEvent = {}
         )

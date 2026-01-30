@@ -63,11 +63,13 @@ import com.petbulance.presentation.screen.feature.search.main.UserLocationArgume
 import com.petbulance.presentation.screen.feature.search.main.UserLocationIntent
 import com.petbulance.presentation.screen.feature.search.main.UserLocationState
 import com.petbulance.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.petbulance.presentation.screen.feature.search.main.views.common.NavigateToLoginDialog
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowChipFilters
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowResultControlChips
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.NaverMapView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -197,6 +199,7 @@ fun MapView(
                     }
                 )
                 MapUiLayer(
+                    navController = navController,
                     state = searchUiState,
                     onEvent = onEvent,
                     locationPermissionState = locationPermissionState,
@@ -295,12 +298,20 @@ private fun MapLayer(
 
 @Composable
 private fun MapUiLayer(
+    navController: NavController,
     state: SearchUiState,
     onEvent: (SearchUiEvent) -> Unit,
     locationPermissionState: LocationPermissionState,
     onRecenterClick: () -> Unit,
     onHospitalClick: (Hospital) -> Unit
 ) {
+    var showLoginDialog by remember { mutableStateOf(false) }
+
+    fun requireLogin(action: () -> Unit) {
+        if (!state.isGuest) action()
+        else showLoginDialog = true
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // TOP Controls
         Column(
@@ -320,14 +331,18 @@ private fun MapUiLayer(
                 RowChipFilters(
                     uiModel = state.currentQuery,
                     onFilterButtonClicked = {
-                        onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                        requireLogin {
+                            onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                        }
                     }
                 )
                 RowResultControlChips(
                     selectedSortType = state.selectedSortType,
                     isOpenNowOnly = state.isOpenNowOnly,
-                    onSortTypeClicked = { onEvent(SearchUiEvent.OnSortTypeClicked(true)) },
-                    onOpenNowOnlyClicked = { onEvent(SearchUiEvent.OnOpenNowOnlyClicked) }
+                    onSortTypeClicked = {
+                        requireLogin { onEvent(SearchUiEvent.OnSortTypeClicked(true)) }
+                    },
+                    onOpenNowOnlyClicked = { requireLogin { onEvent(SearchUiEvent.OnOpenNowOnlyClicked) } }
                 )
             }
             RecenterSearchButton(onClick = onRecenterClick)
@@ -367,7 +382,7 @@ private fun MapUiLayer(
                 Spacer(modifier = Modifier.width(40.dp))
                 MapViewToggleButton(
                     isToggleToListView = true,
-                    onClicked = { onEvent(SearchUiEvent.OnListViewClicked) })
+                    onClicked = { requireLogin { onEvent(SearchUiEvent.OnListViewClicked) } })
 
                 if (locationPermissionState != LocationPermissionState.NO_PERMISSION) {
                     CurrentLocationFab(onClicked = { onEvent(SearchUiEvent.OnCurrentLocationClicked) })
@@ -395,10 +410,17 @@ private fun MapUiLayer(
                     HospitalCard(
                         hospital = item,
                         isShadowed = true,
-                        onCardClick = { onHospitalClick(item) }
+                        onCardClick = { requireLogin { onHospitalClick(item) } }
                     )
                 }
             }
+        }
+
+        if (showLoginDialog) {
+            NavigateToLoginDialog(
+                onConfirm = { navController.safeNavigate(ScreenDestinations.Login.route) },
+                onDismissRequest = { showLoginDialog = false }
+            )
         }
     }
 }
@@ -420,6 +442,7 @@ private fun MapViewPreview() {
                 event = MutableSharedFlow()
             ),
             searchUiState = SearchUiState(
+                isGuest = false,
                 hospitalList = listOf(
                     Hospital.stub()
                 ),

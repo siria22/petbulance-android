@@ -11,13 +11,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.presentation.screen.nonfeature.auth.AuthViewModel
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
 fun NavGraphBuilder.searchDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Search.route,
-        // [Add] 아규먼트 정의
         arguments = listOf(
             navArgument(ScreenDestinations.Search.ARG_ANIMAL) {
                 type = NavType.StringType
@@ -29,6 +29,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val commonSearchViewModel: CommonSearchViewModel = hiltViewModel()
         val hospitalSearchViewModel: HospitalSearchViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
+        val authViewModel : AuthViewModel = hiltViewModel()
 
         LaunchedEffect(Unit) {
             val animalName = entry.arguments?.getString(ScreenDestinations.Search.ARG_ANIMAL)
@@ -85,6 +86,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
             viewedHospitals = viewedHospitals
         )
 
+        val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
         // Error State
         val errorState by hospitalSearchViewModel.errorDialogState.collectAsStateWithLifecycle()
 
@@ -94,6 +96,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         ) {
             SearchScreen(
                 navController = navController,
+                isGuest = (isLoggedIn == false),
                 userLocationArgument = userLocationArgument,
                 hospitalSearchArgument = hospitalSearchArgument,
                 commonSearchArgument = commonSearchArgument,
