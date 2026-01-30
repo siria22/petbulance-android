@@ -184,9 +184,8 @@ fun ReviewScreen(
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
             when (event) {
-                is ReviewEvent.ShowErrorToast -> {
 
-                }
+                else -> {}
             }
         }
     }

@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.iconSizeXS
+import com.petbulance.presentation.component.ui.spacingXL
 
 enum class BasicButtonSize {
-    XS, S, M, L
+    XS, S, M, L, XL
 }
 
 enum class BasicButtonType {
@@ -49,6 +50,7 @@ fun BasicButton(
         BasicButtonSize.S -> 12.dp
         BasicButtonSize.M -> 16.dp
         BasicButtonSize.L -> 20.dp
+        BasicButtonSize.XL -> spacingXL
     }
 
     val minHeight = when (size) {
@@ -56,6 +58,7 @@ fun BasicButton(
         BasicButtonSize.S -> 32.dp
         BasicButtonSize.M -> 44.dp
         BasicButtonSize.L -> 52.dp
+        BasicButtonSize.XL -> 56.dp
     }
 
     val textStyle = when (size) {
@@ -63,6 +66,7 @@ fun BasicButton(
         BasicButtonSize.S -> MaterialTheme.typography.bodySmall.copy(fontWeight = W500)
         BasicButtonSize.M -> MaterialTheme.typography.bodyLarge.copy(fontWeight = W500)
         BasicButtonSize.L -> MaterialTheme.typography.titleMedium.copy(fontWeight = W500)
+        BasicButtonSize.XL -> MaterialTheme.typography.titleMedium.copy(fontWeight = W500)
     }
 
     val background = when (buttonType) {

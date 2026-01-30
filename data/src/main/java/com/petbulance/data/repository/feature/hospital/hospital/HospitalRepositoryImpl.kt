@@ -66,12 +66,16 @@ class HospitalRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
-        return safeApiCall<HospitalDetailResDto>(path = "/hospitals/$hospitalId") {
-            api.searchHospitalDetail(hospitalId)
-        }.map {
-            it.toDomain()
-        }
+    override suspend fun getHospitalDetail(
+        hospitalId: Long,
+        userLat: Double,
+        userLng: Double
+    ): Result<HospitalDetail> {
+        return safeApiCall<HospitalDetailResDto>(
+            path = "/hospitals/$hospitalId"
+        ) {
+            api.searchHospitalDetail(hospitalId, userLat, userLng)
+        }.map { it.toDomain() }
     }
 
     override suspend fun getHospitalCard(

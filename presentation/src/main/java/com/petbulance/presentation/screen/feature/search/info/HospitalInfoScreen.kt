@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -135,7 +136,7 @@ private fun HospitalInfoScreenContents(
     currentLocation: Location?,
     onNavigateButtonClicked: () -> Unit,
 ) {
-    var selectedTab by remember { mutableStateOf(TabType.REVIEWS) }
+    var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val commonPadding = 16.dp
@@ -161,7 +162,7 @@ private fun HospitalInfoScreenContents(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp)
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             item {
                 HospitalCard(
@@ -291,9 +292,10 @@ private fun BottomActionButton(
         BasicButton(
             text = text,
             buttonType = BasicButtonType.PRIMARY,
-            size = BasicButtonSize.M,
+            size = BasicButtonSize.XL,
             onClicked = onClicked,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            radius = 16.dp
         )
     }
 }

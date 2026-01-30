@@ -1,13 +1,11 @@
 package com.petbulance.presentation.screen.feature.review.main
 
-import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
-import com.petbulance.domain.repository.feature.hospital.ReviewRepository
 import com.petbulance.domain.usecase.feature.hospital.review.FilterReviewUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -118,13 +115,14 @@ class ReviewViewModel @Inject constructor(
             }
 
             val selectedCategory = _selectedAnimalType.value
-            val animalTypesParam = if (selectedCategory == null || selectedCategory == AnimalCategory.ALL) {
-                null
-            } else {
-                AnimalSpecies.entries
-                    .filter { it.category == selectedCategory }
-                    .map { it.name }
-            }
+            val animalTypesParam =
+                if (selectedCategory == null || selectedCategory == AnimalCategory.ALL) {
+                    null
+                } else {
+                    AnimalSpecies.entries
+                        .filter { it.category == selectedCategory }
+                        .map { it.name }
+                }
 
             val result = filterReviewUseCase(
                 region = if (_selectedRegion.value != null) "${_selectedRegion.value!!.name} ${_selectedDistrict.value ?: ""}" else null,
@@ -150,7 +148,12 @@ class ReviewViewModel @Inject constructor(
             }.onFailure { e ->
                 _state.value = ReviewState.Init
                 _isLoadingNextPage.value = false
-                _event.emit(ReviewEvent.ShowErrorToast(e.message ?: "알 수 없는 오류가 발생했습니다."))
+                _event.emit(
+                    ReviewEvent.DataFetch.Error(
+                        userMessage = "리뷰를 불러오지 못했어요",
+                        exceptionMessage = e.message ?: "알 수 없는 오류가 발생했습니다."
+                    )
+                )
             }
         }
     }

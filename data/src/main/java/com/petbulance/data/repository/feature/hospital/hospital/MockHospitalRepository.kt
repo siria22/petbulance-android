@@ -55,7 +55,11 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         )
     }
 
-    override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
+    override suspend fun getHospitalDetail(
+        hospitalId: Long,
+        userLat: Double,
+        userLng: Double
+    ): Result<HospitalDetail> {
         delay(500)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 

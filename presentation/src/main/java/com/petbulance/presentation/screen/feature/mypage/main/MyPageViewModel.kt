@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.user.user.UserInfo
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
+import com.petbulance.domain.usecase.nonfeature.app.GetAppVersionUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,7 @@ import javax.inject.Inject
 class MyPageViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val getVersionUseCase: GetVersionUseCase,
+    private val getAppVersionUseCase: GetAppVersionUseCase,
     @ApplicationContext private val context: Context
 ) : BaseViewModel() {
 
@@ -90,7 +91,7 @@ class MyPageViewModel @Inject constructor(
         }
 
         runCatching {
-            getVersionUseCase()
+            getAppVersionUseCase()
         }.onSuccess { version ->
             _latestVersion.value = version
         }.onFailure { exception ->

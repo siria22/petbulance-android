@@ -35,9 +35,14 @@ class HospitalApi @Inject constructor(
     }
 
     suspend fun searchHospitalDetail(
-        hospitalId: Long
+        hospitalId: Long,
+        lat: Double,
+        lng: Double
     ): HttpResponse {
-        return client.get("$baseUrl/$hospitalId")
+        return client.get("$baseUrl/$hospitalId") {
+            parameter("lat", lat)
+            parameter("lng", lng)
+        }
     }
 
     suspend fun searchHospitalCard(

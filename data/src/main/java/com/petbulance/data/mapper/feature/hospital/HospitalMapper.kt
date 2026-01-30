@@ -64,7 +64,7 @@ fun HospitalCardResDto.toDomain(): HospitalCard {
         isOpenNow = isOpenNow,
         nextOpenHours = nextOpenHours,
         thumbnailUrl = thumbnailUrl,
-        rating = rating,
+        rating = rating ?: 0.0,
         reviewCount = reviewCount
     )
 }

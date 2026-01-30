@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.AnimalSpecies
+import com.petbulance.domain.utils.dowInKorean
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
@@ -176,8 +178,13 @@ fun HospitalCard(
                 Dot()
 
                 hospital.openHours?.let { hours ->
+                    val openHour = try {
+                        hours.split(" ")[1]
+                    } catch (e: Exception) {
+                        "정보 없음"
+                    }
                     Text(
-                        text = hours,
+                        text = openHour,
                         style = typography.labelLarge,
                         color = colorScheme.text.secondary
                     )
@@ -258,7 +265,7 @@ fun HospitalCard(
                 ) {
                     hospital.types.forEach { type ->
                         val text = try {
-                            AnimalCategory.fromString(type).korean
+                            AnimalSpecies.fromString(type).korean
                         } catch (e: IllegalArgumentException) {
                             type
                         }

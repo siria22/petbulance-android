@@ -25,7 +25,7 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
         arguments = listOf(
             navArgument(name = ARG_ID) {
                 type = NavType.LongType
-                defaultValue = 0L
+                defaultValue = -1L
             }
         )
     ) {

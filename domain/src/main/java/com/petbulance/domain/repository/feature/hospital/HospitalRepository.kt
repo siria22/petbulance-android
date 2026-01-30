@@ -22,7 +22,11 @@ interface HospitalRepository {
         cursorReviewCount: Long?
     ): Result<PagingResult<Hospital>>
 
-    suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail>
+    suspend fun getHospitalDetail(
+        hospitalId: Long,
+        userLat: Double,
+        userLng: Double
+    ): Result<HospitalDetail>
 
     suspend fun getHospitalCard(
         hospitalId: Long,

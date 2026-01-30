@@ -33,6 +33,7 @@ import com.petbulance.data.repository.feature.user.terms.MockTermsRepository
 import com.petbulance.data.repository.feature.user.terms.TermsRepositoryImpl
 import com.petbulance.data.repository.feature.user.user.MockUserRepository
 import com.petbulance.data.repository.feature.user.user.UserRepositoryImpl
+import com.petbulance.data.repository.nonfeature.app.AppInfoRepositoryImpl
 import com.petbulance.data.repository.nonfeature.app.MockAppInfoRepository
 import com.petbulance.data.repository.nonfeature.device.DeviceRepositoryImpl
 import com.petbulance.data.repository.nonfeature.device.MockDeviceRepository
@@ -90,7 +91,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAppInfoRepository(
-        mock: MockAppInfoRepository
+        mock: MockAppInfoRepository // TODO : Server not ready
+//        impl: AppInfoRepositoryImpl
     ): AppInfoRepository
 
     @Binds

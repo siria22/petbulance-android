@@ -31,7 +31,8 @@ class SplashViewModel @Inject constructor(
     }
 
     private fun checkAppStatus() {
-        viewModelScope.launch {
+        launch {
+            Log.d(LOGGER_TAG, "Check app status")
             checkAppVersionUseCase()
                 .onSuccess { isUpdateNeeded ->
                     if (isUpdateNeeded) {

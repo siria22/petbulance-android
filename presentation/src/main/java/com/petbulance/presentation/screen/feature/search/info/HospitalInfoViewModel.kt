@@ -12,6 +12,7 @@ import com.petbulance.domain.usecase.feature.hospital.review.GetHospitalReviewsU
 import com.petbulance.domain.utils.zip
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
+import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,7 +32,9 @@ class HospitalInfoViewModel @Inject constructor(
     private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase
 ) : BaseViewModel() {
 
-    private val hospitalId: Long = savedStateHandle.get<Long>("hospitalId") ?: INVALID_ID
+    private val hospitalId: Long =
+        savedStateHandle.get<Long>(ScreenDestinations.Search.HospitalInfo.ARG_ID)
+            ?: INVALID_ID
 
     private val _dataState = MutableStateFlow<HospitalInfoDataState>(HospitalInfoDataState.Init)
     val dataState: StateFlow<HospitalInfoDataState> = _dataState
@@ -95,7 +98,7 @@ class HospitalInfoViewModel @Inject constructor(
             runCatching {
                 zip(
                     { fetchHospital(lat, lng) },
-                    { fetchHospitalDetail() },
+                    { fetchHospitalDetail(lat, lng) },
                     { fetchInitialReviews() }
                 )
             }.onSuccess { (hospital, detail, reviewPaging) ->
@@ -226,7 +229,12 @@ class HospitalInfoViewModel @Inject constructor(
         return card.toHospital()
     }
 
-    private suspend fun fetchHospitalDetail() = getHospitalDetailUseCase(hospitalId = hospitalId)
+    private suspend fun fetchHospitalDetail(lat: Double?, lng: Double?) =
+        getHospitalDetailUseCase(
+            hospitalId = hospitalId,
+            userLat = lat ?: 0.0,
+            userLng = lng ?: 0.0
+        )
 
     private suspend fun fetchInitialReviews() = getHospitalReviewsUseCase(
         hospitalId = hospitalId,

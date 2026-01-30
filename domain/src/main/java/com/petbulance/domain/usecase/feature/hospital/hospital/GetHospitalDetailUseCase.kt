@@ -7,7 +7,11 @@ import javax.inject.Inject
 class GetHospitalDetailUseCase @Inject constructor(
     private val repository: HospitalRepository
 ) {
-    suspend operator fun invoke(hospitalId: Long): HospitalDetail {
-        return repository.getHospitalDetail(hospitalId).getOrThrow()
+    suspend operator fun invoke(
+        hospitalId: Long,
+        userLat: Double,
+        userLng: Double
+    ): HospitalDetail {
+        return repository.getHospitalDetail(hospitalId, userLat, userLng).getOrThrow()
     }
 }

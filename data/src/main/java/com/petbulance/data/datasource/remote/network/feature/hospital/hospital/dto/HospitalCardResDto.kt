@@ -14,6 +14,6 @@ data class HospitalCardResDto(
     val isOpenNow: Boolean,
     val nextOpenHours: String,
     val thumbnailUrl: String,
-    val rating: Double,
+    val rating: Double?,
     val reviewCount: Long
 )
