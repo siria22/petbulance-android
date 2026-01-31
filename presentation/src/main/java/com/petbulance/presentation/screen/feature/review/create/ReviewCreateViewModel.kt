@@ -99,7 +99,14 @@ class ReviewCreateViewModel @Inject constructor(
 
             // Step 2: Animal & Rating
             is ReviewCreateIntent.OnAnimalTypeChanged -> {
-                _state.update { it.copy(step1 = it.step1.copy(animalType = intent.value)) }
+                _state.update {
+                    it.copy(
+                        step1 = it.step1.copy(
+                            animalType = intent.value,
+                            detailAnimalType = ""
+                        )
+                    )
+                }
             }
 
             is ReviewCreateIntent.OnDetailAnimalTypeChanged -> {

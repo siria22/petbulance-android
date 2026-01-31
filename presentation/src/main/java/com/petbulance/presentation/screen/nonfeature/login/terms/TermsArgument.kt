@@ -28,10 +28,13 @@ sealed class TermsIntent {
 
     data class OnDetailClick(val term: Term) : TermsIntent()
     data object OnCloseDetail : TermsIntent()
+    data object OnUseOtherAccount : TermsIntent()
 }
 
 sealed class TermsEvent {
     data object NavigateToNext : TermsEvent()
+
+    data object NavigateToLogin : TermsEvent()
 
     sealed class DataFetch : TermsEvent() {
         data class Error(

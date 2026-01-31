@@ -103,9 +103,7 @@ fun HomeScreen(
                     showTermsSheet = false
                 }
 
-                is TermsEvent.DataFetch.Error -> {
-
-                }
+                else -> { }
             }
         }
     }

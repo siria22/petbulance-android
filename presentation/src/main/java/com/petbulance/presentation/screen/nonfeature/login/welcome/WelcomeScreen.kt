@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.nonfeature.login.welcome
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.usecase.feature.user.auth.LogoutUseCase
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
@@ -67,6 +69,12 @@ fun WelcomeScreen(
                 is TermsEvent.DataFetch.Error -> {
                     // no-op
                 }
+
+                is TermsEvent.NavigateToLogin -> {
+                    navController.safeNavigate(ScreenDestinations.Login.route) {
+                        popUpTo(ScreenDestinations.Login.route) { inclusive = true }
+                    }
+                }
             }
         }
     }
@@ -74,20 +82,68 @@ fun WelcomeScreen(
     Scaffold(
         containerColor = colorScheme.bg.frame.default,
         bottomBar = {
-            BasicButton(
-                text = "시작하기",
-                size = BasicButtonSize.L,
-                buttonType = BasicButtonType.PRIMARY,
-                onClicked = {
-                    navController.safeNavigate(ScreenDestinations.Home.route) {
-                        popUpTo(ScreenDestinations.Login.route) { inclusive = true }
-                    }
-                },
-                radius = 16.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = spacingMedium, vertical = 56.dp)
-            )
+            if (!data.isAllRequiredAgreed) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BasicButton(
+                        text = "약관보기",
+                        size = BasicButtonSize.L,
+                        buttonType = BasicButtonType.PRIMARY,
+                        onClicked = {
+                            showTermsSheet = true
+                        },
+                        radius = 16.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = spacingMedium, vertical = 56.dp)
+                    )
+                    Text(
+                        text = "다른 소셜로그인 선택",
+                        style= typography.bodyLarge,
+                        color = colorScheme.text.caption,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = spacingMedium, vertical = 4.dp)
+                            .clickable(
+                                onClick = {
+                                    intent(TermsIntent.OnUseOtherAccount)
+                                }
+                            )
+                    )
+                    BasicButton(
+                        text = "다른 소셜로그인 선택",
+                        size = BasicButtonSize.L,
+                        buttonType = BasicButtonType.PRIMARY,
+                        onClicked = {
+                            navController.safeNavigate(ScreenDestinations.Home.route) {
+                                popUpTo(ScreenDestinations.Login.route) { inclusive = true }
+                            }
+                        },
+                        radius = 16.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = spacingMedium, vertical = 56.dp)
+                    )
+                }
+            } else {
+                BasicButton(
+                    text = "시작하기",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.PRIMARY,
+                    onClicked = {
+                        navController.safeNavigate(ScreenDestinations.Home.route) {
+                            popUpTo(ScreenDestinations.Login.route) { inclusive = true }
+                        }
+                    },
+                    radius = 16.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = spacingMedium, vertical = 56.dp)
+                )
+            }
         }
     ) { innerPadding ->
         Box(
