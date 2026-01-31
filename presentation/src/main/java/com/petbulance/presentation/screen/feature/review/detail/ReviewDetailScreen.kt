@@ -16,6 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,12 +34,17 @@ import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
+import com.petbulance.presentation.component.ui.atom.BasicButton
+import com.petbulance.presentation.component.ui.atom.BasicButtonSize
+import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicChip
+import com.petbulance.presentation.component.ui.atom.BasicDialog
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeSmall
+import com.petbulance.presentation.component.ui.molecule.ReceiptVerifiedBadge
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
@@ -55,11 +64,13 @@ fun ReviewDetailScreen(
     argument: ReviewDetailArgument,
     data: ReviewDetailData
 ) {
+    var showErrorDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
             when (event) {
                 is ReviewDetailEvent.DataFetch.Error -> {
-
+                    showErrorDialog = true
                 }
             }
         }
@@ -76,7 +87,7 @@ fun ReviewDetailScreen(
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Outlined.Info)) {
-                            // TODO : inㅁteraction
+                            // TODO : interaction
                         }
                     )
                 )
@@ -95,7 +106,36 @@ fun ReviewDetailScreen(
         }
     }
 
-    // BackHandler {  }
+    if (showErrorDialog) {
+        BasicDialog(
+            backHandler = {
+                showErrorDialog = false
+                navController.safePopBackStack()
+            },
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "리뷰를 불러오는데 실패했어요.",
+                    style = typography.titleSmall.emp(),
+                    color = colorScheme.text.secondary
+                )
+
+                BasicButton(
+                    text = "이전으로",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.PRIMARY,
+                    radius = 16.dp,
+                    onClicked = {
+                        showErrorDialog = false
+                        navController.safePopBackStack()
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -118,7 +158,8 @@ private fun ReviewDetailScreenContents(data: ReviewDetailData) {
             rating = data.rating,
             animalType = data.animalType,
             detailAnimalType = data.detailAnimalType,
-            price = data.price
+            price = data.price,
+            isReceiptVerified = data.isReceiptVerified
         )
 
         ReviewDetailImagesSection(images = data.images)
@@ -169,7 +210,8 @@ private fun ReviewDetailSummarySection(
     rating: Double,
     animalType: AnimalCategory,
     detailAnimalType: AnimalSpecies,
-    price: Int
+    price: Int,
+    isReceiptVerified: Boolean
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(spacingXS)) {
         Text(
@@ -185,11 +227,20 @@ private fun ReviewDetailSummarySection(
             color = colorScheme.text.secondary,
             style = typography.bodySmall
         )
-        Text(
-            text = "결제금액 ${String.format(Locale.KOREA, "%,d", price)}원",
-            color = colorScheme.text.secondary,
-            style = typography.bodySmall
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "결제금액 ${String.format(Locale.KOREA, "%,d", price)}원",
+                color = colorScheme.text.secondary,
+                style = typography.bodySmall
+            )
+            if (isReceiptVerified) {
+                ReceiptVerifiedBadge()
+            }
+        }
     }
 }
 

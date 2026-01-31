@@ -170,5 +170,8 @@ fun ReviewDetailResDto.toDomain() = ReviewDetail(
     likeCount = likeCount,
     liked = liked,
     visitDate = visitDate,
-    images = images
+    images = images,
+    userProfileImage = userProfileImage,
+    viewCount = viewCount,
+    isAuthor = isAuthor,
 )

@@ -22,7 +22,8 @@ class ReviewDetailViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<ReviewDetailDataState>(ReviewDetailDataState.Init)
     val dataState: StateFlow<ReviewDetailDataState> = _dataState.asStateFlow()
 
-    private val _screenState = MutableStateFlow<ReviewDetailScreenState>(ReviewDetailScreenState.Init)
+    private val _screenState =
+        MutableStateFlow<ReviewDetailScreenState>(ReviewDetailScreenState.Init)
     val screenState: StateFlow<ReviewDetailScreenState> = _screenState.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<ReviewDetailEvent>()
@@ -31,7 +32,8 @@ class ReviewDetailViewModel @Inject constructor(
     private val _reviewDetailData = MutableStateFlow(ReviewDetailData.empty)
     val reviewDetailData: StateFlow<ReviewDetailData> = _reviewDetailData.asStateFlow()
 
-    private val reviewId: Long = savedStateHandle.get<Long>(ScreenDestinations.Review.Detail.ARG_ID) ?: 0L
+    private val reviewId: Long =
+        savedStateHandle.get<Long>(ScreenDestinations.Review.Detail.ARG_ID) ?: 0L
 
     init {
         observeErrorEvent(eventFlow)
@@ -43,12 +45,18 @@ class ReviewDetailViewModel @Inject constructor(
     }
 
     private fun fetchReviewDetail() {
-        if (reviewId == 0L) {
-            // TODO : ID 오류 처리 (예: 에러 메시지 후 종료)
-            return
-        }
-
         launch {
+            if (reviewId == 0L) {
+                _eventFlow.emit(
+                    ReviewDetailEvent.DataFetch.Error(
+                        userMessage = "유효하지 않은 리뷰 접근입니다.",
+                        exceptionMessage = "Some Exception Message",
+                        displayType = ErrorDisplayType.Common
+                    )
+                )
+                return@launch
+            }
+
             _dataState.value = ReviewDetailDataState.OnProgress
 
             getReviewDetailUseCase(reviewId)
@@ -74,7 +82,7 @@ class ReviewDetailViewModel @Inject constructor(
                     _dataState.value = ReviewDetailDataState.Init
                     _eventFlow.emit(
                         ReviewDetailEvent.DataFetch.Error(
-                            displayType = ErrorDisplayType.Common,
+                            displayType = ErrorDisplayType.Custom,
                             userMessage = "리뷰 정보를 불러오는데 실패했습니다.",
                             exceptionMessage = exception.message
                         )

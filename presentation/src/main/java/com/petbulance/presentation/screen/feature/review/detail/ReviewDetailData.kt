@@ -21,15 +21,15 @@ data class ReviewDetailData(
     companion object {
         val empty = ReviewDetailData(
             id = 0L,
-            userNickname = "",
+            userNickname = "Empty",
             visitDate = "",
-            hospitalName = "",
+            hospitalName = "Empty",
             animalType = AnimalCategory.ALL,
             detailAnimalType = AnimalSpecies.PARROT,
             rating = 0.0,
             price = 0,
             isReceiptVerified = false,
-            content = "",
+            content = "Empty",
             images = emptyList(),
             likeCount = 0,
             isLiked = false

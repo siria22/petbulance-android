@@ -22,5 +22,8 @@ data class ReviewDetailResDto(
     val likeCount: Int,
     val liked: Boolean,
     val visitDate: String,
-    val images: List<String>
+    val images: List<String>,
+    val userProfileImage: String? = null,
+    val viewCount: Int = 0,
+    val isAuthor: Boolean = false,
 )

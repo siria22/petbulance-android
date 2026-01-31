@@ -154,29 +154,7 @@ fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             if (review.isReceiptVerified) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = colorScheme.text.caption,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "영수증인증 완료",
-                        color = colorScheme.tag.trust.medium,
-                        style = typography.labelSmall
-                    )
-                    BasicIcon(
-                        iconResource = IconResource.Vector(Icons.Default.CheckCircle),
-                        contentDescription = "verified",
-                        size = 12.dp,
-                        tint = colorScheme.tag.trust.medium,
-                    )
-                }
+                ReceiptVerifiedBadge()
             } else {
                 Spacer(modifier = Modifier.size(4.dp))
             }
