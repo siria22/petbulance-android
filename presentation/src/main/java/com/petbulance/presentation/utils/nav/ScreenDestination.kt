@@ -48,6 +48,11 @@ sealed class ScreenDestinations(val route: String) {
             const val ARG_ID = "id"
             fun createRoute(id: Long): String = "review/edit/$id"
         }
+
+        data object Detail : ScreenDestinations("review/detail/{id}") {
+            const val ARG_ID = "id"
+            fun createRoute(id: Long): String = "review/detail/$id"
+        }
     }
 
     data object MyPage : ScreenDestinations("mypage") {

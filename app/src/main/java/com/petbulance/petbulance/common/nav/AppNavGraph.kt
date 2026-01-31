@@ -9,6 +9,7 @@ import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
 import com.petbulance.presentation.screen.feature.mypage.profile.profileDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
 import com.petbulance.presentation.screen.feature.review.create.reviewCreateDestination
+import com.petbulance.presentation.screen.feature.review.detail.reviewDetailDestination
 import com.petbulance.presentation.screen.feature.review.edit.reviewEditDestination
 import com.petbulance.presentation.screen.feature.review.main.reviewDestination
 import com.petbulance.presentation.screen.feature.review.search.reviewSearchDestination
@@ -43,6 +44,7 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         reviewCreateDestination(navController = navController)
         receiptCameraDestination(navController = navController)
         reviewEditDestination(navController = navController)
+        reviewDetailDestination(navController = navController)
 
         myPageDestination(navController = navController)
         profileDestination(navController = navController)
