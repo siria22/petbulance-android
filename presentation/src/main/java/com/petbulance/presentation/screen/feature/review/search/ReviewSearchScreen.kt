@@ -122,7 +122,7 @@ fun ReviewSearchScreen(
             currentQuery = HospitalSearchQueryUiModel.empty.copy(
                 region = data.selectedRegion,
                 district = data.selectedDistrict,
-                species = data.selectedAnimalType
+                animalCategory = data.selectedAnimalType
             ),
             startTab = startTab,
             showBottomSheet = showBottomSheet,
@@ -132,7 +132,7 @@ fun ReviewSearchScreen(
                 query.region?.let {
                     argument.intent(ReviewSearchIntent.ChangeRegion(it, query.district ?: ""))
                 }
-                query.species?.let {
+                query.animalCategory?.let {
                     argument.intent(ReviewSearchIntent.ChangeAnimalType(it))
                 }
                 showBottomSheet = false

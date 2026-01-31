@@ -51,7 +51,7 @@ fun RowChipFilters(
                 }
 
                 FilterBottomSheetTab.SPECIES -> {
-                    uiModel.species?.korean ?: AnimalCategory.ALL.korean
+                    uiModel.animalCategory?.korean ?: AnimalCategory.ALL.korean
                 }
             }
 

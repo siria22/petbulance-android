@@ -62,10 +62,11 @@ fun HospitalCardResDto.toDomain(): HospitalCard {
         phone = phone,
         types = types,
         isOpenNow = isOpenNow,
-        nextOpenHours = nextOpenHours,
+        nextOpenHours = nextOpenHours ?: "(정보 없음)",
         thumbnailUrl = thumbnailUrl,
         rating = rating ?: 0.0,
-        reviewCount = reviewCount
+        reviewCount = reviewCount,
+        image = image
     )
 }
 

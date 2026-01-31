@@ -12,7 +12,8 @@ data class HospitalCard(
     val nextOpenHours: String,
     val thumbnailUrl: String,
     val rating: Double,
-    val reviewCount: Long
+    val reviewCount: Long,
+    val image: String?
 ) {
     fun toHospital() = Hospital(
         hospitalId = hospitalId,

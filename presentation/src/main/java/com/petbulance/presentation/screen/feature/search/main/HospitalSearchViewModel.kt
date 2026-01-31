@@ -173,7 +173,7 @@ class HospitalSearchViewModel @Inject constructor(
         }
 
         // 2. Animal 파라미터 처리 (단순화됨!)
-        val animalParam = queryModel.species?.let { category ->
+        val animalParam = queryModel.animalCategory?.let { category ->
             if (category == AnimalCategory.ALL) null
             else getBackendAnimalTypes(category)
         }

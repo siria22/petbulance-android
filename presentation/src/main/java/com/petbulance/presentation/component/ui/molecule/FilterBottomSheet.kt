@@ -77,10 +77,17 @@ fun FilterBottomSheet(
         }
     }
 
-    var selectedRegion by remember { mutableStateOf(currentQuery.region ?: Region.SEOUL) }
-    var selectedDistrict by remember { mutableStateOf(Region.SEOUL.districts.first()) }
+    var selectedRegion by remember { mutableStateOf(currentQuery.region) }
+    var selectedDistrict by remember { mutableStateOf(currentQuery.district) }
+    var selectedAnimalCategory by remember { mutableStateOf(currentQuery.animalCategory) }
 
-    var selectedAnimalCategory by remember { mutableStateOf(AnimalCategory.SMALL_MAMMAL) }
+    LaunchedEffect(showBottomSheet, currentQuery) {
+        if (showBottomSheet) {
+            selectedRegion = currentQuery.region
+            selectedDistrict = currentQuery.district
+            selectedAnimalCategory = currentQuery.animalCategory
+        }
+    }
 
     BasicBottomSheet(
         showBottomSheet = showBottomSheet,
@@ -109,7 +116,14 @@ fun FilterBottomSheet(
 
                 CommonDivider()
 
-                ResetFilterRow(onResetFilterClicked = onResetFilterClicked)
+                ResetFilterRow(
+                    onResetFilterClicked = {
+                        selectedRegion = null
+                        selectedDistrict = null
+                        selectedAnimalCategory = null
+                        onQuerySet(currentQuery.copy(region=null, district=null, animalCategory=null))
+                    }
+                )
 
                 CommonDivider()
 
@@ -127,7 +141,7 @@ fun FilterBottomSheet(
                                         currentQuery.copy(
                                             region = selectedRegion,
                                             district = selectedDistrict,
-                                            species = selectedAnimalCategory
+                                            animalCategory = selectedAnimalCategory
                                         )
                                     )
                                 },
@@ -139,10 +153,10 @@ fun FilterBottomSheet(
                                 onChipClicked = { newCategory ->
                                     selectedAnimalCategory = newCategory
                                     onQuerySet(
-                                        currentQuery.copy(species = newCategory)
+                                        currentQuery.copy(animalCategory = newCategory)
                                     )
                                 },
-                                selectedAnimalCategory = selectedAnimalCategory,
+                                selectedAnimalCategory = selectedAnimalCategory ?: AnimalCategory.ALL,
                             )
                         }
                     }
@@ -246,10 +260,10 @@ private fun ResetFilterRow(onResetFilterClicked: () -> Unit) {
 @Composable
 private fun RegionSelectColumn(
     modifier: Modifier = Modifier,
-    selectedRegion: Region,
-    selectedDistrict: String,
-    onRegionSelected: (Region) -> Unit,
-    onDistrictSelected: (String) -> Unit,
+    selectedRegion: Region?,
+    selectedDistrict: String?,
+    onRegionSelected: (Region?) -> Unit,
+    onDistrictSelected: (String?) -> Unit,
     onQuerySet: (String) -> Unit
 ) {
     Row(
@@ -279,16 +293,18 @@ private fun RegionSelectColumn(
                 .fillMaxHeight()
                 .background(colorScheme.bg.frame.default)
         ) {
-            val wholeOption = selectedRegion.districts.first()
-            val isWholeSelected = selectedDistrict == wholeOption
+            val districts = selectedRegion?.districts.orEmpty()
 
-            items(selectedRegion.districts) { district ->
+            val wholeOption = districts.firstOrNull()
+            val isWholeSelected = wholeOption != null && selectedDistrict == wholeOption
+
+            items(districts) { district ->
                 RegionDetailItem(
                     districtName = district,
                     isSelected = if (isWholeSelected) true else (selectedDistrict == district),
                     onClick = {
                         onDistrictSelected(district)
-                        onQuerySet("$selectedRegion, $selectedDistrict")
+                        onQuerySet("${selectedRegion?.displayName ?: "전체"}, ${selectedDistrict ?: ""}")
                     }
                 )
             }

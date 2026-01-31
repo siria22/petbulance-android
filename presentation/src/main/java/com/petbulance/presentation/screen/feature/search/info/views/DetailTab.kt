@@ -31,8 +31,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.naver.maps.map.NaverMap
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalDetail
 import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
+import com.petbulance.domain.utils.dowInKorean
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
@@ -42,8 +44,6 @@ import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.utils.NaverMapView
-import com.naver.maps.map.NaverMap
-import com.petbulance.domain.utils.dowInKorean
 
 @Composable
 fun DetailTab(
@@ -135,7 +135,7 @@ fun DetailTab(
 }
 
 @Composable
-private fun HospitalDescription(description: String?){
+private fun HospitalDescription(description: String?) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -258,12 +258,12 @@ private fun OpenInfo(data: List<OpenHour>?) {
 private fun HourInfoItem(day: String, hours: String, modifier: Modifier = Modifier) {
 
     val dayInKorean = dowInKorean(day)
-
     val dayColor = when (dayInKorean) {
         "토요일" -> colorScheme.tag.blue.strong
         "일요일", "공휴일" -> colorScheme.tag.red.strong
         else -> colorScheme.text.caption
     }
+    val hoursText = if (hours === "CLOSED") "휴무" else hours
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -277,7 +277,7 @@ private fun HourInfoItem(day: String, hours: String, modifier: Modifier = Modifi
             textAlign = TextAlign.Start
         )
         Text(
-            text = hours,
+            text = hoursText,
             color = colorScheme.text.secondary,
             style = typography.bodyMedium.emp(),
             modifier = Modifier.weight(0.7f),

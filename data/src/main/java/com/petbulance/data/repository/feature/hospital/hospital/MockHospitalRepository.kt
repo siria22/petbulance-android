@@ -113,7 +113,8 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     nextOpenHours = if (!hospital.isOpenNow) "내일 오전 9시" else "오후 6시까지",
                     thumbnailUrl = hospital.thumbnailUrl ?: "",
                     rating = hospital.rating ?: 0.0,
-                    reviewCount = (hospital.reviewCount ?: 0).toLong()
+                    reviewCount = (hospital.reviewCount ?: 0).toLong(),
+                    image = ""
                 )
             )
         } else {

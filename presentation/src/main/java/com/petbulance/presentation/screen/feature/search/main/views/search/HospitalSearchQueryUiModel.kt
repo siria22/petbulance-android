@@ -7,7 +7,7 @@ data class HospitalSearchQueryUiModel(
     val query: String?,
     val region: Region?,
     val district: String?,
-    val species: AnimalCategory?,
+    val animalCategory: AnimalCategory?,
     val openNowOnly: Boolean?
 ) {
     // TODO : Backend logics
@@ -24,7 +24,7 @@ data class HospitalSearchQueryUiModel(
             query = null,
             region = null,
             district = null,
-            species = null,
+            animalCategory = null,
             openNowOnly = null
         )
     }

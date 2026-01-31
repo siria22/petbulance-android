@@ -39,7 +39,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
                 val currentQuery = hospitalSearchViewModel.hospitalSearchQuery.value
                 hospitalSearchViewModel.onIntent(
                     HospitalSearchIntent.UpdateSearchQuery(
-                        currentQuery.copy(species = category)
+                        currentQuery.copy(animalCategory = category)
                     )
                 )
             }

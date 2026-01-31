@@ -93,7 +93,7 @@ fun SearchScreen(
 
             is SearchUiEvent.OnResetFilterClicked -> {
                 currentDraftQuery =
-                    currentDraftQuery.copy(region = null, district = null, species = null)
+                    currentDraftQuery.copy(region = null, district = null, animalCategory = null)
             }
 
             // Search Intents
