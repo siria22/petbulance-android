@@ -19,7 +19,7 @@ data class ReviewEditState(
     val hospitalId: Long = 0L,
     val hospitalName: String = "",
     val totalCost: String = "",
-    val animalType: AnimalCategory = AnimalCategory.BIRD,
+    val animalType: AnimalCategory = AnimalCategory.AVIAN,
     val detailAnimalType: String = "",
     val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0),
     val existingImages: List<String> = emptyList(),

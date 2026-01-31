@@ -21,6 +21,8 @@ fun NavGraphBuilder.reviewSearchDestination(navController: NavController) {
         val isReceiptVerified by viewModel.isReceiptVerified.collectAsStateWithLifecycle()
         val isPhotoReview by viewModel.isPhotoReview.collectAsStateWithLifecycle()
 
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
         val searchData = ReviewSearchData(
             searchQueryModel = searchQueryModel,
             recentKeywords = recentKeywords,
@@ -33,11 +35,10 @@ fun NavGraphBuilder.reviewSearchDestination(navController: NavController) {
         )
 
         val argument = ReviewSearchArgument(
-            state = ReviewSearchState.Init,
+            state = state,
             intent = viewModel::onIntent,
             event = viewModel.eventFlow
         )
-
         ReviewSearchScreen(
             navController = navController,
             argument = argument,

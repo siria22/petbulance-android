@@ -17,9 +17,9 @@ enum class AnimalSpecies(val category: AnimalCategory, val korean: String) {
     OTHER_SMALL_MAMMALS(AnimalCategory.SMALLMAMMALS, "기타 소동물"),
 
     // --- 조류 ---
-    PARROT(AnimalCategory.BIRD, "앵무새"),
-    FINCH_TYPES(AnimalCategory.BIRD, "핀치류"),
-    OTHER_BIRDS(AnimalCategory.BIRD, "기타 조류"),
+    PARROT(AnimalCategory.AVIAN, "앵무새"),
+    FINCH_TYPES(AnimalCategory.AVIAN, "핀치류"),
+    OTHER_BIRDS(AnimalCategory.AVIAN, "기타 조류"),
 
     // --- 파충류 ---
     GECKO(AnimalCategory.REPTILE, "게코"),

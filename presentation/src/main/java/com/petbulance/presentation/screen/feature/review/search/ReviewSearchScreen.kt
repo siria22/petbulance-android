@@ -83,35 +83,45 @@ fun ReviewSearchScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             if (data.isSearchResultMode) {
-                ReviewListContent(
-                    data = ReviewData(
-                        reviews = data.searchResults,
-                        selectedRegion = data.searchQueryModel.region,
-                        selectedDistrict = data.searchQueryModel.district,
-                        selectedAnimalType = data.searchQueryModel.animalCategory,
-                        isLoadingNextPage = data.isLoadingNextPage,
-                        selectedSort = ReviewSortType.LATEST,
-                        isReceiptVerified = false,
-                        isPhotoReview = false
-                    ),
-                    onLoadMore = { argument.intent(ReviewSearchIntent.LoadMore) },
-                    onFilterClick = { tab ->
-                        startTab = tab
-                        showBottomSheet = true
-                    },
-                    onSortClick = { showSortingDialog = true },
-                    onReceiptToggle = { argument.intent(ReviewSearchIntent.ToggleReceipt) },
-                    onPhotoToggle = { argument.intent(ReviewSearchIntent.TogglePhotoReview) },
-                    emptyView = {
-                        ReviewEmptyView(
-                            title = "'${data.searchQueryModel.query}'에 대한 결과가 없어요.",
-                            description = "오타가 있는지 확인하거나 다른 검색어를 입력해보세요."
+                if (argument.state is ReviewSearchState.Loading && data.searchResults.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = colorScheme.action.primary.default
                         )
-                    },
-                    onReviewClick = {
-                        navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(it))
                     }
-                )
+                } else {
+                    ReviewListContent(
+                        data = ReviewData(
+                            reviews = data.searchResults,
+                            selectedRegion = data.searchQueryModel.region,
+                            selectedDistrict = data.searchQueryModel.district,
+                            selectedAnimalType = data.searchQueryModel.animalCategory,
+                            isLoadingNextPage = data.isLoadingNextPage,
+                            selectedSort = ReviewSortType.LATEST,
+                            isReceiptVerified = false,
+                            isPhotoReview = false
+                        ),
+                        onLoadMore = { argument.intent(ReviewSearchIntent.LoadMore) },
+                        onFilterClick = { tab ->
+                            startTab = tab
+                            showBottomSheet = true
+                        },
+                        onSortClick = { showSortingDialog = true },
+                        onReceiptToggle = { argument.intent(ReviewSearchIntent.ToggleReceipt) },
+                        onPhotoToggle = { argument.intent(ReviewSearchIntent.TogglePhotoReview) },
+                        emptyView = {
+                            ReviewEmptyView(
+                                title = "'${data.searchQueryModel.query}'에 대한 결과가 없어요.",
+                                description = "오타가 있는지 확인하거나 다른 검색어를 입력해보세요."
+                            )
+                        },
+                        onReviewClick = {
+                            navController.safeNavigate(
+                                ScreenDestinations.Review.Detail.createRoute(it)
+                            )
+                        }
+                    )
+                }
             } else {
                 RecentSearchList(
                     keywords = data.recentKeywords,

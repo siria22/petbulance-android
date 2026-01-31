@@ -31,7 +31,7 @@ enum class BasicButtonSize {
 }
 
 enum class BasicButtonType {
-    PRIMARY, SECONDARY, DEFAULT, DISABLED
+    PRIMARY, SECONDARY, DEFAULT, DISABLED, WARNING
 }
 
 @Composable
@@ -74,6 +74,7 @@ fun BasicButton(
         BasicButtonType.SECONDARY -> colorScheme.bg.frame.default
         BasicButtonType.DEFAULT -> colorScheme.bg.frame.default
         BasicButtonType.DISABLED -> colorScheme.action.primary.disabled
+        BasicButtonType.WARNING -> colorScheme.status.error.default
     }
 
     val textColor = when (buttonType) {
@@ -81,6 +82,7 @@ fun BasicButton(
         BasicButtonType.SECONDARY -> colorScheme.action.primary.default
         BasicButtonType.DEFAULT -> colorScheme.text.tertiary
         BasicButtonType.DISABLED -> colorScheme.text.disabled
+        BasicButtonType.WARNING -> colorScheme.text.inverse
     }
 
     val borderColor = when (buttonType) {

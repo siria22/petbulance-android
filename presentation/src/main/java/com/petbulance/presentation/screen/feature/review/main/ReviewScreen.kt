@@ -114,9 +114,7 @@ fun ReviewScreen(
                 onPhotoToggle = { argument.intent(ReviewIntent.TogglePhotoReview) },
                 onReviewClick = {
                     navController.safeNavigate(
-                        ScreenDestinations.Review.Detail.createRoute(
-                            it
-                        )
+                        ScreenDestinations.Review.Detail.createRoute(it)
                     )
                 },
             )

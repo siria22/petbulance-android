@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
@@ -50,6 +51,7 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewImageSecti
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewRatingsSection
 import com.petbulance.presentation.screen.feature.review.common.ReviewTotalCostInput
+import com.petbulance.presentation.screen.feature.review.create.ReviewDetailAnimalSpeciesSelectBottomSheet
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -64,6 +66,8 @@ fun ReviewEditScreen(
     var showExitDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
 
+    var showDetailAnimalBottomSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
             when (event) {
@@ -75,7 +79,6 @@ fun ReviewEditScreen(
             }
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -100,7 +103,8 @@ fun ReviewEditScreen(
             ReviewEditScreenContents(
                 context = context,
                 state = argument.state,
-                intent = argument.intent
+                intent = argument.intent,
+                onDetailAnimalInputClicked = { showDetailAnimalBottomSheet = true }
             )
         }
     }
@@ -124,13 +128,25 @@ fun ReviewEditScreen(
             onDismissRequest = { showInfoDialog = false }
         )
     }
+
+    if (showDetailAnimalBottomSheet) {
+        ReviewDetailAnimalSpeciesSelectBottomSheet(
+            category = argument.state.animalType,
+            selectedDetail = argument.state.detailAnimalType,
+            onDismissRequest = { showDetailAnimalBottomSheet = false },
+            onDetailSelected = {
+                argument.intent(ReviewEditIntent.OnDetailAnimalTypeChanged(it.name))
+            }
+        )
+    }
 }
 
 @Composable
 private fun ReviewEditScreenContents(
     context: Context,
     state: ReviewEditState,
-    intent: (ReviewEditIntent) -> Unit
+    intent: (ReviewEditIntent) -> Unit,
+    onDetailAnimalInputClicked: () -> Unit
 ) {
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -191,9 +207,15 @@ private fun ReviewEditScreenContents(
             )
 
             // 4. 세부 동물명
+            val displayDetailAnimalType = if (state.detailAnimalType.isNotBlank()) {
+                AnimalSpecies.fromString(state.detailAnimalType).korean
+            } else {
+                ""
+            }
+
             ReviewDetailAnimalTypeInput(
-                detailAnimalType = state.detailAnimalType,
-                onDetailAnimalTypeChanged = { intent(ReviewEditIntent.OnDetailAnimalTypeChanged(it)) }
+                detailAnimalType = displayDetailAnimalType,
+                onInputClicked = onDetailAnimalInputClicked
             )
 
             // 5. 별점

@@ -9,7 +9,7 @@ data class SaveReviewParam(
     val animalType: AnimalCategory,
     val detailAnimalType: String,
     val receiptItems: List<ReceiptItem>,
-    val visitDate: String,
+    val visitDate: String?,
     val comment: String,
     val isReceipt: Boolean,
     val title: String? = null,

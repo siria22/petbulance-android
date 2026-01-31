@@ -1,10 +1,10 @@
 package com.petbulance.data.repository.feature.hospital.search
 
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.petbulance.data.datasource.local.database.dao.SearchDao
 import com.petbulance.data.datasource.local.database.dao.ViewedHospitalDao
 import com.petbulance.data.datasource.local.database.entity.SearchHistoryEntity
@@ -12,13 +12,12 @@ import com.petbulance.data.datasource.local.database.entity.ViewedHospitalEntity
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.HistoryApi
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.RecentHospitalResDto
-import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.RecentHospitalSaveResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.ViewedHospitalResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.ViewedHospitalSaveResDto
-import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
-import com.petbulance.domain.repository.feature.hospital.SearchRepository
 import com.petbulance.data.worker.SyncSearchWorker
+import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospital
+import com.petbulance.domain.repository.feature.hospital.SearchRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
@@ -64,20 +63,17 @@ class SearchRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addSearchKeyword(keyword: String) {
+        val existingEntity = searchDao.findByKeyword(keyword)
+        if (existingEntity != null) {
+            searchDao.deleteByKeyword(keyword)
+        }
+
         val entity = SearchHistoryEntity(
             keyword = keyword,
             timestamp = System.currentTimeMillis(),
             isSynced = false
         )
         searchDao.insertOrUpdate(entity)
-
-        safeApiCall<RecentHospitalSaveResDto>(path = "/recents/hospitals") {
-            historyApi.saveRecentKeyword(keyword)
-        }.onSuccess {
-            searchDao.markAsSynced(keyword, it.keywordId)
-        }.onFailure {
-            enqueueSyncWorker()
-        }
     }
 
     override suspend fun deleteSearchKeyword(keyword: String) {

@@ -60,7 +60,7 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun filterReview(
         region: String?,
-        animalTypes: List<String>?, // 변경
+        animalTypes: List<String>?,
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int

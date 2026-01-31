@@ -10,7 +10,7 @@ class FilterReviewUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         region: String?,
-        animalTypes: List<String>?, // 변경
+        animalTypes: List<String>?,
         isReceipt: Boolean?,
         cursorId: Long?,
         size: Int = 10

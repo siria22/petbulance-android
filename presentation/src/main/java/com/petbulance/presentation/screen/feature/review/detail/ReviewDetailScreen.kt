@@ -114,7 +114,7 @@ fun ReviewDetailScreen(
             },
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -131,7 +131,8 @@ fun ReviewDetailScreen(
                     onClicked = {
                         showErrorDialog = false
                         navController.safePopBackStack()
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

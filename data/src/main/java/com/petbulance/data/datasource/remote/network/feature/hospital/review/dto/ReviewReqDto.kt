@@ -13,7 +13,7 @@ data class ReviewSaveReqDto(
     val animalType: String,
     val detailAnimalType: String,
     val receiptItems: List<ReceiptItemDto>,
-    val visitDate: String = LocalDate.now().toString(),
+    val visitDate: String? = null,
     val reviewComment: String,
     val receiptChecked: Boolean,
     val images: List<ReviewImageDto>? = null

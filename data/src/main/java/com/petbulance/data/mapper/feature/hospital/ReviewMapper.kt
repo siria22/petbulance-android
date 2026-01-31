@@ -97,7 +97,7 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     receiptItems = receiptItems.map {
         ReceiptItemDto(name = it.name, price = it.price)
     },
-    visitDate = visitDate,
+    visitDate = visitDate?.ifBlank { null },
     reviewComment = comment
 )
 

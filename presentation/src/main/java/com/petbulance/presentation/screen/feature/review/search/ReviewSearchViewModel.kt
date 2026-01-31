@@ -123,6 +123,7 @@ class ReviewSearchViewModel @Inject constructor(
                 _state.value = ReviewSearchState.Loading
                 currentCursorId = null
                 _searchResults.value = emptyList()
+                _isSearchResultMode.value = true
                 addRecentKeywordUseCase(currentQueryString)
             }
 
@@ -132,7 +133,6 @@ class ReviewSearchViewModel @Inject constructor(
                     _searchResults.update { if (isLoadMore) it + newItems else newItems }
                     currentCursorId = pagingData.nextCursorId
                     hasNextPage = pagingData.hasNext
-                    _isSearchResultMode.value = true
                     _state.value = ReviewSearchState.Init
                 }
                 .onFailure {

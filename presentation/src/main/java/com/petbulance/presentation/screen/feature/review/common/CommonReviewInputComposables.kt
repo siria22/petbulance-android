@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -40,8 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
@@ -139,10 +143,10 @@ fun ReviewHospitalNameInput(
 
 @Composable
 fun ReviewTotalCostInput(
+    modifier: Modifier = Modifier,
     cost: String,
     onCostChanged: (String) -> Unit,
     title: String = "총 진료비",
-    modifier: Modifier = Modifier
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXXS),
@@ -169,6 +173,8 @@ fun ReviewAnimalTypeInput(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var inputWidth by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
 
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXXS),
@@ -182,7 +188,7 @@ fun ReviewAnimalTypeInput(
 
         Box(
             modifier = Modifier
-                .fillMaxWidth(1f)
+                .fillMaxWidth(0.6f)
                 .background(
                     color = colorScheme.bg.frame.default,
                     shape = RoundedCornerShape(6.dp)
@@ -192,6 +198,9 @@ fun ReviewAnimalTypeInput(
                     color = colorScheme.border.verySubtle,
                     shape = RoundedCornerShape(6.dp)
                 )
+                .onGloballyPositioned { coordinates ->
+                    inputWidth = with(density) { coordinates.size.width.toDp() }
+                }
                 .clickable { expanded = true }
                 .padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
@@ -225,7 +234,9 @@ fun ReviewAnimalTypeInput(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(colorScheme.bg.frame.default)
+                modifier = Modifier
+                    .width(inputWidth)
+                    .background(colorScheme.bg.frame.default)
             ) {
                 AnimalCategory.entries.filter { it != AnimalCategory.ALL }.forEach { category ->
                     DropdownMenuItem(
@@ -250,7 +261,7 @@ fun ReviewAnimalTypeInput(
 @Composable
 fun ReviewDetailAnimalTypeInput(
     detailAnimalType: String,
-    onDetailAnimalTypeChanged: (String) -> Unit,
+    onInputClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -262,11 +273,33 @@ fun ReviewDetailAnimalTypeInput(
             style = typography.bodyMedium,
             color = colorScheme.text.secondary
         )
-        ReviewInputTextField(
-            queryString = detailAnimalType,
-            placeholder = "예: 골든햄스터, 코뉴어, 코리도라스",
-            onQueryStringChanged = onDetailAnimalTypeChanged,
-        )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            ReviewInputTextField(
+                queryString = detailAnimalType,
+                placeholder = "세부 동물명을 선택해주세요",
+                onQueryStringChanged = {},
+                readOnly = true,
+                enabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    BasicIcon(
+                        iconResource = IconResource.Vector(Icons.Default.KeyboardArrowDown),
+                        contentDescription = "Select Detail Animal",
+                        size = iconSizeMS,
+                        tint = colorScheme.icon.dark
+                    )
+                }
+            )
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .zIndex(1f) // 텍스트 필드보다 위에 오도록 설정
+                    .background(Color.Transparent) // 클릭 영역 확보
+                    .clickable { onInputClicked() }
+            )
+        }
     }
 }
 
@@ -321,7 +354,7 @@ fun ReviewImageSection(
         verticalAlignment = Alignment.Top,
         modifier = modifier
     ) {
-        if(images.size < 5) {
+        if (images.size < 5) {
             Column(
                 modifier = Modifier
                     .size(72.dp)

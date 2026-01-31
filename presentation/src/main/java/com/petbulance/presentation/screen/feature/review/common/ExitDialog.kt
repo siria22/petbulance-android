@@ -51,7 +51,7 @@ fun ExitDialog(
                 modifier = Modifier.weight(1f),
                 text = "나가기",
                 size = BasicButtonSize.L,
-                buttonType = BasicButtonType.DEFAULT,
+                buttonType = BasicButtonType.WARNING,
                 radius = 28.dp,
                 onClicked = onExitButtonClicked
             )

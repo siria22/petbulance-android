@@ -121,7 +121,7 @@ class ReviewApi @Inject constructor(
     }
 
     suspend fun getReviewDetail(reviewId: Long): HttpResponse {
-        return client.get("${BASE_URL}/boards/$reviewId")
+        return client.get("$baseUrl/detail/$reviewId")
     }
 
     suspend fun modifyReview(body: ReviewModifyReqDto): HttpResponse {

@@ -309,11 +309,9 @@ class ReviewCreateViewModel @Inject constructor(
                     isReceipt = currentState.step1.isReceiptVerified
                 )
 
-                // 4. UseCase 호출
                 createReviewUseCase(param, imageBytesList)
-                    .onSuccess {
-                        emitEvent(ReviewCreateEvent.ShowToast("리뷰가 성공적으로 등록되었습니다."))
-                        emitEvent(ReviewCreateEvent.NavigateToHome)
+                    .onSuccess { response ->
+                        emitEvent(ReviewCreateEvent.OnSubmitSuccess(response.reviewId))
                     }
                     .onFailure { e ->
                         emitEvent(ReviewCreateEvent.ShowToast("리뷰 등록 실패: ${e.message}"))
