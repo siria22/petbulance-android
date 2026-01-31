@@ -60,10 +60,12 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val data: HomeData = let {
             val recentReviews by viewModel.recentReviews.collectAsStateWithLifecycle()
             val hotArticle by viewModel.hotArticles.collectAsStateWithLifecycle()
+            val homeBanners by viewModel.homeBanners.collectAsStateWithLifecycle() // 추가
 
             HomeData(
                 recentReviews = recentReviews,
-                hotArticles = hotArticle
+                hotArticles = hotArticle,
+                homeBanners = homeBanners
             )
         }
 

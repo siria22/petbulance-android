@@ -2,8 +2,10 @@ package com.petbulance.presentation.screen.feature.home
 
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.community.post.PostDetail
+import com.petbulance.domain.model.feature.home.HomeBanner
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.usecase.feature.community.GetHotArticleUseCase
+import com.petbulance.domain.usecase.feature.home.GetHomeBannersUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetRecentReviewsUseCase
 import com.petbulance.domain.utils.zip
 import com.petbulance.presentation.utils.BaseViewModel
@@ -19,6 +21,7 @@ class HomeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getRecentReviewsUseCase: GetRecentReviewsUseCase,
     private val getHotArticleUseCase: GetHotArticleUseCase,
+    private val getHomeBannersUseCase: GetHomeBannersUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<HomeDataState>(HomeDataState.Init)
@@ -36,6 +39,8 @@ class HomeViewModel @Inject constructor(
     private val _hotArticles = MutableStateFlow<List<PostDetail>?>(null)
     val hotArticles: StateFlow<List<PostDetail>?> = _hotArticles
 
+    private val _homeBanners = MutableStateFlow<List<HomeBanner>>(emptyList())
+    val homeBanners: StateFlow<List<HomeBanner>> = _homeBanners
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
@@ -57,7 +62,17 @@ class HomeViewModel @Inject constructor(
                 { getRecentReviews() },
                 { getHotArticle() }
             )
+            getHomeBanners()
         }
+    }
+
+    private suspend fun getHomeBanners() {
+        getHomeBannersUseCase()
+            .onSuccess { result ->
+                _homeBanners.value = result
+            }
+            .onFailure {
+            }
     }
 
     private suspend fun getRecentReviews() {

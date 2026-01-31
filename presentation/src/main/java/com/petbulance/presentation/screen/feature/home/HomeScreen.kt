@@ -45,6 +45,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.community.post.PostDetail
+import com.petbulance.domain.model.feature.home.HomeBanner
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.utils.LOGGER_TAG
@@ -199,6 +200,7 @@ private fun HomeScreenContents(
     ) {
         HospitalShortcut(
             onClicked = onNavigateToSearch,
+            banners = data.homeBanners,
             navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
         )
 
@@ -250,7 +252,9 @@ private fun CommonHeader(
 @Composable
 private fun HospitalShortcut(
     onClicked: () -> Unit,
-    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
+    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
+    banners: List<HomeBanner>,
+    onBannerClick: (Long) -> Unit = {}
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -262,7 +266,7 @@ private fun HospitalShortcut(
         HospitalShortcutAnimalRow(
             navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
         )
-        HospitalNoticeSlider()
+        HospitalNoticeSlider(banners, onBannerClick)
     }
 }
 
@@ -331,26 +335,26 @@ private fun AnimalCategoryCircle(resourceId: Painter) {
 }
 
 @Composable
-private fun HospitalNoticeSlider() {
-    /* Mocked ads items */
-    val items = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
+private fun HospitalNoticeSlider(
+    banners: List<HomeBanner>,
+    onBannerClick: (Long) -> Unit
+) {
+    if (banners.isEmpty()) return
 
     BaseCarousel(
-        items = items,
+        items = banners,
         contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingSmall),
         itemSpacing = 16.dp,
         isIndicatorVisible = true
     ) { _, item ->
-        Box(
+        BasicImageBox(
+            uri = item.imageUrl.toUri(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .background(Color.LightGray, RoundedCornerShape(4.dp))
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = item)
-        }
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onBannerClick(item.noticeId) },
+        )
     }
 }
 
