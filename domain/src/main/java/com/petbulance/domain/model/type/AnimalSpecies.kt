@@ -5,16 +5,16 @@ package com.petbulance.domain.model.type
  */
 enum class AnimalSpecies(val category: AnimalCategory, val korean: String) {
     // --- 소형 포유류 ---
-    HAMSTER(AnimalCategory.SMALL_MAMMAL, "햄스터"),
-    GUINEAPIG(AnimalCategory.SMALL_MAMMAL, "기니피그"),
-    CHINCHILLA(AnimalCategory.SMALL_MAMMAL, "친칠라"),
-    RABBIT(AnimalCategory.SMALL_MAMMAL, "토끼"),
-    HEDGEHOG(AnimalCategory.SMALL_MAMMAL, "고슴도치"),
-    FERRET(AnimalCategory.SMALL_MAMMAL, "페럿"),
-    SUGAR_GLIDER(AnimalCategory.SMALL_MAMMAL, "슈가글라이더"),
-    PRAIRIE_DOG(AnimalCategory.SMALL_MAMMAL, "프레리도그"),
-    FLYING_SQUIRREL(AnimalCategory.SMALL_MAMMAL, "하늘다람쥐"),
-    OTHER_SMALL_MAMMALS(AnimalCategory.SMALL_MAMMAL, "기타 소동물"),
+    HAMSTER(AnimalCategory.SMALLMAMMALS, "햄스터"),
+    GUINEAPIG(AnimalCategory.SMALLMAMMALS, "기니피그"),
+    CHINCHILLA(AnimalCategory.SMALLMAMMALS, "친칠라"),
+    RABBIT(AnimalCategory.SMALLMAMMALS, "토끼"),
+    HEDGEHOG(AnimalCategory.SMALLMAMMALS, "고슴도치"),
+    FERRET(AnimalCategory.SMALLMAMMALS, "페럿"),
+    SUGAR_GLIDER(AnimalCategory.SMALLMAMMALS, "슈가글라이더"),
+    PRAIRIE_DOG(AnimalCategory.SMALLMAMMALS, "프레리도그"),
+    FLYING_SQUIRREL(AnimalCategory.SMALLMAMMALS, "하늘다람쥐"),
+    OTHER_SMALL_MAMMALS(AnimalCategory.SMALLMAMMALS, "기타 소동물"),
 
     // --- 조류 ---
     PARROT(AnimalCategory.BIRD, "앵무새"),

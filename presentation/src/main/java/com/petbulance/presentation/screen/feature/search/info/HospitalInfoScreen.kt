@@ -60,6 +60,8 @@ import com.petbulance.presentation.screen.feature.search.info.views.EmptyReviewV
 import com.petbulance.presentation.screen.feature.search.info.views.ReviewHeader
 import com.petbulance.presentation.screen.feature.search.main.views.common.HospitalCard
 import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -116,7 +118,10 @@ fun HospitalInfoScreen(
                 reviewUiData = reviewData,
                 currentLocation = currentLocation,
                 onIntent = argument.intent,
-                onNavigateButtonClicked = { /* TODO : 병원 길 찾기 버튼*/ }
+                onNavigateButtonClicked = { /* TODO : 병원 길 찾기 버튼*/ },
+                onReviewClicked = { reviewId ->
+                    navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(reviewId))
+                }
             )
         }
     }
@@ -135,6 +140,7 @@ private fun HospitalInfoScreenContents(
     onIntent: (HospitalInfoIntent) -> Unit,
     currentLocation: Location?,
     onNavigateButtonClicked: () -> Unit,
+    onReviewClicked: (Long) -> Unit,
 ) {
     var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
@@ -212,7 +218,10 @@ private fun HospitalInfoScreenContents(
                         key = { it.id }
                     ) { review ->
                         CommonDivider(colorScheme.border.subtle)
-                        ReviewCard(review = review)
+                        ReviewCard(
+                            review = review,
+                            onReviewClicked = { onReviewClicked(review.id) }
+                        )
                     }
                 }
             }

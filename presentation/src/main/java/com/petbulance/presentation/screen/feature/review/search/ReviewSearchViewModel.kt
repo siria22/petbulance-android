@@ -3,13 +3,12 @@ package com.petbulance.presentation.screen.feature.review.search
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
-import com.petbulance.domain.model.type.AnimalCategory
-import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.usecase.feature.hospital.review.AddRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.DeleteRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetRecentSearchKeywordsUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.SearchReviewUseCase
+import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -47,14 +46,8 @@ class ReviewSearchViewModel @Inject constructor(
     private var currentCursorId: Long? = null
     private var hasNextPage = true
 
-    private val _selectedRegion = MutableStateFlow<Region?>(null)
-    val selectedRegion = _selectedRegion.asStateFlow()
-
-    private val _selectedDistrict = MutableStateFlow<String?>(null)
-    val selectedDistrict = _selectedDistrict.asStateFlow()
-
-    private val _selectedAnimalType = MutableStateFlow<AnimalCategory?>(null)
-    val selectedAnimalType = _selectedAnimalType.asStateFlow()
+    private val _searchQueryModel = MutableStateFlow(HospitalSearchQueryUiModel.empty)
+    val searchQueryModel = _searchQueryModel.asStateFlow()
 
     private val _selectedSort = MutableStateFlow(ReviewSortType.LATEST)
     val selectedSort = _selectedSort.asStateFlow()
@@ -65,7 +58,6 @@ class ReviewSearchViewModel @Inject constructor(
     private val _isPhotoReview = MutableStateFlow(false)
     val isPhotoReview = _isPhotoReview.asStateFlow()
 
-
     val recentKeywords = getRecentKeywordsUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -75,11 +67,14 @@ class ReviewSearchViewModel @Inject constructor(
     fun onIntent(intent: ReviewSearchIntent) {
         when (intent) {
             is ReviewSearchIntent.UpdateQuery -> {
-                _query.value = intent.query
+                _searchQueryModel.update { it.copy(query = intent.query) }
                 if (intent.query.isEmpty()) _isSearchResultMode.value = false
             }
 
-            is ReviewSearchIntent.Search -> performSearch()
+            is ReviewSearchIntent.Search -> {
+                performSearch()
+            }
+
             is ReviewSearchIntent.DeleteRecentKeyword -> {
                 launch { deleteRecentKeywordUseCase(intent.keyword) }
             }
@@ -92,20 +87,16 @@ class ReviewSearchViewModel @Inject constructor(
                 if (hasNextPage) performSearch(isLoadMore = true)
             }
 
-            is ReviewSearchIntent.ChangeRegion -> {
-                _selectedRegion.value = intent.region
-                _selectedDistrict.value = intent.district
+            is ReviewSearchIntent.UpdateFilter -> {
+                _searchQueryModel.value = intent.queryModel
                 performSearch()
             }
 
-            // [추가] 나머지 필터 Intent 구현
-            is ReviewSearchIntent.ChangeAnimalType -> {
-                _selectedAnimalType.value = intent.animalType
-                performSearch()
-            }
-
-            is ReviewSearchIntent.ChangeSort -> {
-                _selectedSort.value = intent.sortType
+            is ReviewSearchIntent.Refresh -> {
+                _searchQueryModel.value = HospitalSearchQueryUiModel.empty
+                _selectedSort.value = ReviewSortType.LATEST
+                _isReceiptVerified.value = false
+                _isPhotoReview.value = false
                 performSearch()
             }
 
@@ -119,30 +110,23 @@ class ReviewSearchViewModel @Inject constructor(
                 performSearch()
             }
 
-            is ReviewSearchIntent.Refresh -> {
-                _selectedRegion.value = null
-                _selectedDistrict.value = null
-                _selectedAnimalType.value = null
-                _selectedSort.value = ReviewSortType.LATEST
-                _isReceiptVerified.value = false
-                _isPhotoReview.value = false
-                performSearch()
-            }
+            else -> {}
         }
     }
 
     private fun performSearch(isLoadMore: Boolean = false) {
-        if (_query.value.isBlank()) return
+        val currentQueryString = _searchQueryModel.value.query
+        if (currentQueryString.isNullOrBlank()) return
 
         launch {
             if (!isLoadMore) {
                 _state.value = ReviewSearchState.Loading
                 currentCursorId = null
                 _searchResults.value = emptyList()
-                addRecentKeywordUseCase(_query.value)
+                addRecentKeywordUseCase(currentQueryString)
             }
 
-            searchReviewUseCase(_query.value, currentCursorId)
+            searchReviewUseCase(currentQueryString, currentCursorId)
                 .onSuccess { pagingData ->
                     val newItems = pagingData.items.map { it.toHospitalReview() }
                     _searchResults.update { if (isLoadMore) it + newItems else newItems }
@@ -174,5 +158,4 @@ class ReviewSearchViewModel @Inject constructor(
         author = this.userNickname,
         price = this.totalPrice
     )
-
 }

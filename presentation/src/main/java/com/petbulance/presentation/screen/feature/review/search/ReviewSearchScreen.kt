@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.feature.review.search
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,8 @@ import com.petbulance.presentation.screen.feature.review.main.composables.Review
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchBar
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,10 +69,14 @@ fun ReviewSearchScreen(
     Scaffold(
         topBar = {
             SearchBar(
-                queryString = data.query,
+                queryString = data.searchQueryModel.query ?: "",
                 onQueryStringChanged = { argument.intent(ReviewSearchIntent.UpdateQuery(it)) },
                 onMoveBackIconClicked = { navController.popBackStack() },
-                onSearchButtonClicked = { argument.intent(ReviewSearchIntent.Search) }
+                onSearchButtonClicked = { value ->
+                    Log.d("siria22", "Query string : ${value}")
+                    argument.intent(ReviewSearchIntent.UpdateQuery(value))
+                    argument.intent(ReviewSearchIntent.Search)
+                }
             )
         },
         containerColor = colorScheme.bg.frame.default
@@ -79,9 +86,9 @@ fun ReviewSearchScreen(
                 ReviewListContent(
                     data = ReviewData(
                         reviews = data.searchResults,
-                        selectedRegion = null,
-                        selectedDistrict = null,
-                        selectedAnimalType = null,
+                        selectedRegion = data.searchQueryModel.region,
+                        selectedDistrict = data.searchQueryModel.district,
+                        selectedAnimalType = data.searchQueryModel.animalCategory,
                         isLoadingNextPage = data.isLoadingNextPage,
                         selectedSort = ReviewSortType.LATEST,
                         isReceiptVerified = false,
@@ -97,9 +104,12 @@ fun ReviewSearchScreen(
                     onPhotoToggle = { argument.intent(ReviewSearchIntent.TogglePhotoReview) },
                     emptyView = {
                         ReviewEmptyView(
-                            title = "'${data.query}'에 대한 결과가 없어요.",
+                            title = "'${data.searchQueryModel.query}'에 대한 결과가 없어요.",
                             description = "오타가 있는지 확인하거나 다른 검색어를 입력해보세요."
                         )
+                    },
+                    onReviewClick = {
+                        navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(it))
                     }
                 )
             } else {
@@ -117,34 +127,23 @@ fun ReviewSearchScreen(
         }
     }
 
-    if (showBottomSheet) {
-        FilterBottomSheet(
-            currentQuery = HospitalSearchQueryUiModel.empty.copy(
-                region = data.selectedRegion,
-                district = data.selectedDistrict,
-                animalCategory = data.selectedAnimalType
-            ),
-            startTab = startTab,
-            showBottomSheet = showBottomSheet,
-            sheetState = sheetState,
-            onDismissRequest = { showBottomSheet = false },
-            onQuerySet = { query ->
-                query.region?.let {
-                    argument.intent(ReviewSearchIntent.ChangeRegion(it, query.district ?: ""))
-                }
-                query.animalCategory?.let {
-                    argument.intent(ReviewSearchIntent.ChangeAnimalType(it))
-                }
-                showBottomSheet = false
-            },
-            onResetFilterClicked = {
-                argument.intent(ReviewSearchIntent.Refresh)
-            },
-            onSearchButtonClicked = {
-                showBottomSheet = false
-            }
-        )
-    }
+    FilterBottomSheet(
+        currentQuery = data.searchQueryModel,
+        startTab = startTab,
+        showBottomSheet = showBottomSheet,
+        sheetState = sheetState,
+        onDismissRequest = { showBottomSheet = false },
+        onQuerySet = { query ->
+            argument.intent(ReviewSearchIntent.UpdateFilter(query))
+            showBottomSheet = false
+        },
+        onResetFilterClicked = {
+            argument.intent(ReviewSearchIntent.Refresh)
+        },
+        onSearchButtonClicked = {
+            showBottomSheet = false
+        }
+    )
 
     if (showSortingDialog) {
         ReviewSortTypeDialog(
@@ -265,7 +264,7 @@ private fun ReviewSearchScreenPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewSearchData(
-                query = "햄스터",
+                searchQueryModel = HospitalSearchQueryUiModel.empty.copy(query = "햄스터"),
                 recentKeywords = listOf(
                     RecentSearchKeyword(1, "강남 동물병원", "2024.01.01"),
                     RecentSearchKeyword(2, "골절", "2024.01.02")
@@ -290,7 +289,7 @@ private fun ReviewSearchResultPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewSearchData(
-                query = "강남",
+                searchQueryModel = HospitalSearchQueryUiModel.empty.copy(query = "강남"),
                 recentKeywords = emptyList(),
                 searchResults = listOf(
                     HospitalReview(
@@ -328,9 +327,6 @@ private fun ReviewSearchResultPreview() {
                 ),
                 isSearchResultMode = true,
                 isLoadingNextPage = false,
-                selectedRegion = null,
-                selectedDistrict = null,
-                selectedAnimalType = null,
                 selectedSort = ReviewSortType.LATEST,
                 isReceiptVerified = false,
                 isPhotoReview = false

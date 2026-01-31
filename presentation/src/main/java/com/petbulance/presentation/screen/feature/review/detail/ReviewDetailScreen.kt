@@ -76,7 +76,7 @@ fun ReviewDetailScreen(
         topBar = {
             AppTopBar(
                 topBarInfo = TopBarInfo(
-                    text = "",
+                    text = "후기 상세",
                     textAlignment = TopBarAlignment.CENTER,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = { navController.safePopBackStack() },

@@ -112,6 +112,13 @@ fun ReviewScreen(
                 onSortClick = { showSortingDialog = true },
                 onReceiptToggle = { argument.intent(ReviewIntent.ToggleReceipt) },
                 onPhotoToggle = { argument.intent(ReviewIntent.TogglePhotoReview) },
+                onReviewClick = {
+                    navController.safeNavigate(
+                        ScreenDestinations.Review.Detail.createRoute(
+                            it
+                        )
+                    )
+                },
             )
         }
     }

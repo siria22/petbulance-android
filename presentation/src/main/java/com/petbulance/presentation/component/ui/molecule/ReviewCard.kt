@@ -2,6 +2,7 @@ package com.petbulance.presentation.component.ui.molecule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,12 +46,13 @@ import com.petbulance.presentation.component.ui.spacingXXS
 import java.util.Locale
 
 @Composable
-fun ReviewCard(review: HospitalReview) {
+fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXS),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = spacingLarge, horizontal = spacingMedium)
+            .clickable { onReviewClicked() }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -218,6 +220,6 @@ fun ReviewCard(review: HospitalReview) {
 @Composable
 private fun ReviewCardPreview() {
     PetbulanceTheme {
-        ReviewCard(HospitalReview.stub())
+        ReviewCard(HospitalReview.stub(), {})
     }
 }
