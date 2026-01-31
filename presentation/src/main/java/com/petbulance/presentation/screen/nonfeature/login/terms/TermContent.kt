@@ -51,6 +51,7 @@ fun TermsContent(
                 onDetailVisible = { term -> onIntent(TermsIntent.OnDetailClick(term)) },
                 onToggle = { term -> onIntent(TermsIntent.OnToggleTerm(term)) },
                 onAgree = { onIntent(TermsIntent.OnAgreeClick) },
+                onToggleAll = { onIntent(TermsIntent.OnToggleAll) },
                 onCancel = onCancel
             )
         }
@@ -64,6 +65,7 @@ private fun TermsColumn(
     isAllRequiredAgreed: Boolean,
     onDetailVisible: (Term) -> Unit,
     onToggle: (Term) -> Unit,
+    onToggleAll: () -> Unit,
     onAgree: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -94,6 +96,15 @@ private fun TermsColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp)
         ) {
+            BasicButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = "모두 동의하기",
+                size = BasicButtonSize.L,
+                buttonType = if (isAllRequiredAgreed) BasicButtonType.PRIMARY else BasicButtonType.DISABLED,
+                radius = 12.dp,
+                onClicked = { onToggleAll() }
+            )
+
             BasicButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = "동의하기",
