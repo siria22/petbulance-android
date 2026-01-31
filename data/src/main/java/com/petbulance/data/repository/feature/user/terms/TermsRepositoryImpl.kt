@@ -63,7 +63,7 @@ class TermsRepositoryImpl @Inject constructor(
                 termsType = runCatching { TermsType.valueOf(dto.termsType ?: "") }.getOrNull(),
                 required = dto.required,
                 summary = dto.summary,
-                content = dto.content ?: "",
+                content = dto.content ?: "No content received",
                 version = dto.version
             )
         }

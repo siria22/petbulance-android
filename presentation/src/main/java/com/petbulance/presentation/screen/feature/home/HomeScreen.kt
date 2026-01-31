@@ -72,6 +72,7 @@ import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsData
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
 import com.petbulance.presentation.utils.error.collectCustomErrors
@@ -100,6 +101,7 @@ fun HomeScreen(
                 is TermsEvent.NavigateToNext -> {
                     showTermsSheet = false
                 }
+
                 is TermsEvent.DataFetch.Error -> {
 
                 }
@@ -161,6 +163,12 @@ fun HomeScreen(
     }
 
     if (showTermsSheet) {
+        if (termsData.currentTerm != null) {
+            TermsDetailOverlay(
+                termsData.currentTerm,
+                onDismissRequest = { termsIntent(TermsIntent.OnCloseDetail) }
+            )
+        }
         BasicBottomSheet(
             showBottomSheet = true,
             sheetState = sheetState,
@@ -580,7 +588,7 @@ private fun HomeScreenPreview() {
             data = HomeData.stub,
             checkTermsInitialState = false,
             termsData = TermsData.stub(),
-            termsIntent = {  },
+            termsIntent = { },
             termsEvent = MutableSharedFlow()
         )
     }

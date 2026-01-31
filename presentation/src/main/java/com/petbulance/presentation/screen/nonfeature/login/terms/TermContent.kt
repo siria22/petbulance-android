@@ -1,7 +1,6 @@
 package com.petbulance.presentation.screen.nonfeature.login.terms
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +28,6 @@ import com.petbulance.presentation.component.ui.iconSizeMS
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
-import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.utils.HtmlText
 
 @Composable
 fun TermsContent(
@@ -58,20 +53,6 @@ fun TermsContent(
                 onAgree = { onIntent(TermsIntent.OnAgreeClick) },
                 onCancel = onCancel
             )
-        }
-
-        if (data.currentTerm != null) {
-            Column(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(colorScheme.bg.frame.default)
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = spacingXXL, horizontal = spacingMedium)
-                    .clickable { onIntent(TermsIntent.OnCloseDetail) },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                HtmlText(html = data.currentTerm.content)
-            }
         }
     }
 }

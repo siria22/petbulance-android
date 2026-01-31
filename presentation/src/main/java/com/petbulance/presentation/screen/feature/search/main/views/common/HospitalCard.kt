@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.petbulance.presentation.screen.feature.search.main.views.common
 
 import android.content.ClipData
