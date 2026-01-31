@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +46,6 @@ import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.safePopBackStack
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 
@@ -57,11 +55,6 @@ fun ReviewDetailScreen(
     argument: ReviewDetailArgument,
     data: ReviewDetailData
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
-
-    val dataState = argument.dataState
-    val screenState = argument.screenState
-
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
             when (event) {
@@ -76,14 +69,14 @@ fun ReviewDetailScreen(
         topBar = {
             AppTopBar(
                 topBarInfo = TopBarInfo(
-                    text = "후기 상세",
+                    text = "",
                     textAlignment = TopBarAlignment.CENTER,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = { navController.safePopBackStack() },
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Outlined.Info)) {
-                            // TODO : interaction
+                            // TODO : inㅁteraction
                         }
                     )
                 )
@@ -237,7 +230,9 @@ private fun ReviewDetailLikesSection(
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacingXXS, Alignment.End),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = onLikeClick).fillMaxWidth()
+        modifier = Modifier
+            .clickable(onClick = onLikeClick)
+            .fillMaxWidth()
     ) {
         Text(
             text = "도움이 됐어요",

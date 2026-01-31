@@ -153,7 +153,7 @@ private fun LoginScreenContents(
             modifier = Modifier
                 .padding(vertical = spacingXXL)
                 .size(140.dp),
-            painter = painterResource(R.drawable.logo_main),
+            painter = painterResource(R.drawable.ic_logo_fav),
             contentDescription = "Main Logo"
         )
 

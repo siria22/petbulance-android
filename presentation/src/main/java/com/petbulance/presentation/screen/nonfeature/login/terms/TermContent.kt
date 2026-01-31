@@ -98,9 +98,9 @@ private fun TermsColumn(
         ) {
             BasicButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = "모두 동의하기",
+                text = "모두 동의",
                 size = BasicButtonSize.L,
-                buttonType = if (isAllRequiredAgreed) BasicButtonType.PRIMARY else BasicButtonType.DISABLED,
+                buttonType = BasicButtonType.PRIMARY,
                 radius = 12.dp,
                 onClicked = { onToggleAll() }
             )

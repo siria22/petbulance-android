@@ -163,12 +163,6 @@ fun HomeScreen(
     }
 
     if (showTermsSheet) {
-        if (termsData.currentTerm != null) {
-            TermsDetailOverlay(
-                termsData.currentTerm,
-                onDismissRequest = { termsIntent(TermsIntent.OnCloseDetail) }
-            )
-        }
         BasicBottomSheet(
             showBottomSheet = true,
             sheetState = sheetState,
@@ -179,6 +173,13 @@ fun HomeScreen(
                 onIntent = termsIntent,
                 onCancel = onDismissRequest,
                 modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (termsData.currentTerm != null) {
+            TermsDetailOverlay(
+                termsData.currentTerm,
+                onDismissRequest = { termsIntent(TermsIntent.OnCloseDetail) }
             )
         }
     }
