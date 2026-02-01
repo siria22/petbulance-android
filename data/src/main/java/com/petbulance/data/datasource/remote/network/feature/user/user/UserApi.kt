@@ -72,7 +72,7 @@ class UserApi @Inject constructor(
     }
 
     suspend fun getMyInfo(): HttpResponse {
-        return client.get("$baseUrl/me")
+        return client.get("$BASE_URL/users/me")
     }
 
     suspend fun updateNotificationSettings(request: NotificationSettingReqDto): HttpResponse {

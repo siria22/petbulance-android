@@ -16,7 +16,8 @@ data class ReviewDetailData(
     val content: String,
     val images: List<String>,
     val likeCount: Int,
-    val isLiked: Boolean
+    val isLiked: Boolean,
+    val isAuthor: Boolean
 ) {
     companion object {
         val empty = ReviewDetailData(
@@ -32,7 +33,8 @@ data class ReviewDetailData(
             content = "Empty",
             images = emptyList(),
             likeCount = 0,
-            isLiked = false
+            isLiked = false,
+            isAuthor = true
         )
     }
 }

@@ -1,7 +1,11 @@
 package com.petbulance.presentation.screen.feature.review.detail
 
 import androidx.lifecycle.SavedStateHandle
+import com.petbulance.domain.model.feature.support.report.ReportParam
+import com.petbulance.domain.model.type.ReportType
+import com.petbulance.domain.usecase.feature.hospital.review.DeleteReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetReviewDetailUseCase
+import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -16,7 +20,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ReviewDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getReviewDetailUseCase: GetReviewDetailUseCase
+    private val getReviewDetailUseCase: GetReviewDetailUseCase,
+    private val deleteReviewUseCase: DeleteReviewUseCase,
+    private val createReportUseCase: CreateReportUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<ReviewDetailDataState>(ReviewDetailDataState.Init)
@@ -41,7 +47,62 @@ class ReviewDetailViewModel @Inject constructor(
     }
 
     fun onIntent(intent: ReviewDetailIntent) {
-        // 추후 좋아요, 신고 등의 인터랙션 처리
+        when (intent) {
+            is ReviewDetailIntent.DeleteReview -> deleteReview()
+            is ReviewDetailIntent.ReportReview -> reportReview(intent.reason)
+        }
+    }
+
+    private fun deleteReview() {
+        launch {
+            if (reviewId == 0L) return@launch
+
+            _dataState.value = ReviewDetailDataState.OnProgress
+
+            deleteReviewUseCase(reviewId)
+                .onSuccess {
+                    _eventFlow.emit(ReviewDetailEvent.DeleteSuccess)
+                }
+                .onFailure { exception ->
+                    _eventFlow.emit(
+                        ReviewDetailEvent.DataFetch.Error(
+                            userMessage = "리뷰 삭제에 실패했습니다.",
+                            exceptionMessage = exception.message
+                        )
+                    )
+                }
+
+            _dataState.value = ReviewDetailDataState.Init
+        }
+    }
+
+    private fun reportReview(reason: String) {
+        launch {
+            if (reviewId == 0L) return@launch
+
+            _dataState.value = ReviewDetailDataState.OnProgress
+
+            val param = ReportParam(
+                reportType = ReportType.REVIEW,
+                reportReason = reason,
+                targetId = reviewId
+            )
+
+            createReportUseCase(param)
+                .onSuccess {
+                    _eventFlow.emit(ReviewDetailEvent.ReportSuccess)
+                }
+                .onFailure { exception ->
+                    _eventFlow.emit(
+                        ReviewDetailEvent.DataFetch.Error(
+                            userMessage = "신고 접수에 실패했습니다.",
+                            exceptionMessage = exception.message
+                        )
+                    )
+                }
+
+            _dataState.value = ReviewDetailDataState.Init
+        }
     }
 
     private fun fetchReviewDetail() {
@@ -74,7 +135,8 @@ class ReviewDetailViewModel @Inject constructor(
                         content = detail.reviewContent,
                         images = detail.images,
                         likeCount = detail.likeCount,
-                        isLiked = detail.liked
+                        isLiked = detail.liked,
+                        isAuthor = detail.isAuthor
                     )
                     _dataState.value = ReviewDetailDataState.Init
                 }

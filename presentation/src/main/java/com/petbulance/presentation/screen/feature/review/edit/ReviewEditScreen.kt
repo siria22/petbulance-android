@@ -42,7 +42,6 @@ import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.screen.feature.review.common.ExitDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewAnimalTypeInput
 import com.petbulance.presentation.screen.feature.review.common.ReviewContentInput
 import com.petbulance.presentation.screen.feature.review.common.ReviewDetailAnimalTypeInput
@@ -51,11 +50,11 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewImageSecti
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewRatingsSection
 import com.petbulance.presentation.screen.feature.review.common.ReviewTotalCostInput
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.screen.feature.review.create.ReviewDetailAnimalSpeciesSelectBottomSheet
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.collections.plus
 
 @Composable
 fun ReviewEditScreen(
@@ -114,7 +113,9 @@ fun ReviewEditScreen(
     }
 
     if (showExitDialog) {
-        ExitDialog(
+        WarningDialog(
+            title = "후기 수정을 중단하고 나가시겠어요?",
+            content = "수정된 후기는 저장되지 않아요.",
             onDismissRequest = { showExitDialog = false },
             onExitButtonClicked = {
                 showExitDialog = false
@@ -230,7 +231,8 @@ private fun ReviewEditScreenContents(
                 onImageAddClicked = {
                     val currentCount = state.existingImages.size + state.newImages.size
                     if (currentCount >= 10) {
-                        Toast.makeText(context, "이미지는 최대 10장까지 첨부 가능합니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "이미지는 최대 10장까지 첨부 가능합니다.", Toast.LENGTH_SHORT)
+                            .show()
                     } else {
                         // 권한 체크 로직이 있다면 여기에 추가
                         photoPickerLauncher.launch(

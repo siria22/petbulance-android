@@ -148,7 +148,7 @@ fun ModifyReviewParam.toDto() = ReviewModifyReqDto(
     }
 )
 
-fun ReviewDetailResDto.toDomain() = ReviewDetail(
+fun ReviewDetailResDto.toDomain(currentUserName: String) = ReviewDetail(
     userNickname = userNickname ?: "알 수 없음",
     receiptCheck = receiptCheck,
     id = id,
@@ -157,10 +157,7 @@ fun ReviewDetailResDto.toDomain() = ReviewDetail(
     hospitalName = hospitalName,
     treatmentService = treatmentService,
     animalType = AnimalCategory.fromString(animalType),
-    detailAnimalType = AnimalSpecies.fromString(
-        detailAnimalType ?: "PARROT"
-        // TODO: (01.28) 서버에서 null 내려오는 detailAnimalType을 일괄 정책으로 정리 필요
-    ),
+    detailAnimalType = AnimalSpecies.fromString(detailAnimalType ?: "PARROT"),
     reviewContent = reviewContent,
     facilityRating = facilityRating,
     expertiseRating = expertiseRating,
@@ -169,9 +166,9 @@ fun ReviewDetailResDto.toDomain() = ReviewDetail(
     totalPrice = totalPrice,
     likeCount = likeCount,
     liked = liked,
-    visitDate = visitDate,
-    images = images,
+    visitDate = visitDate ?: "",
+    images = images ?: emptyList(),
     userProfileImage = userProfileImage,
     viewCount = viewCount,
-    isAuthor = isAuthor,
+    isAuthor = (currentUserName == userNickname)
 )

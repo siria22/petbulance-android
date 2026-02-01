@@ -36,7 +36,7 @@ data class ReviewDetail(
             hospitalId = 1L,
             hospitalName = "hospital",
             treatmentService = "treatment",
-            animalType = AnimalCategory.fromString("BIRD"),
+            animalType = AnimalCategory.fromString("AVIAN"),
             detailAnimalType = AnimalSpecies.fromString("PARROT"),
             reviewContent = "review",
             facilityRating = 3.0,

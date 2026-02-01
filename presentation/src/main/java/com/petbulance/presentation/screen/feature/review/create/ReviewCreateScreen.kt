@@ -33,7 +33,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
-import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
@@ -47,14 +46,13 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.screen.feature.review.common.ExitDialog
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.screen.feature.review.create.composables.ReceiptVerifiedCard
 import com.petbulance.presentation.screen.feature.review.create.composables.ReviewProgressBar
 import com.petbulance.presentation.screen.feature.review.create.composables.ReviewSubmitCompleteDialog
 import com.petbulance.presentation.screen.feature.review.create.views.Step1HospitalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step2AnimalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step3ReviewContent
-import com.petbulance.presentation.screen.feature.review.edit.ReviewEditIntent
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -142,10 +140,12 @@ fun ReviewCreateScreen(
                 is ReviewCreateEvent.NavigateToHome -> {
                     navController.safePopBackStack()
                 }
+
                 is ReviewCreateEvent.OnSubmitSuccess -> {
                     submittedReviewId = event.reviewId
                     showSubmitCompleteDialog = true
                 }
+
                 is ReviewCreateEvent.ShowExitDialog -> showExitDialog = true
                 is ReviewCreateEvent.ShowToast -> {
                     Toast.makeText(navController.context, event.message, Toast.LENGTH_SHORT).show()
@@ -256,7 +256,9 @@ fun ReviewCreateScreen(
     }
 
     if (showExitDialog) {
-        ExitDialog(
+        WarningDialog(
+            title = "후기 작성을 중단하고 나가시겠어요?",
+            content = "지금 작성한 후기는 저장되지 않아요.",
             onDismissRequest = { showExitDialog = false },
             onExitButtonClicked = {
                 showExitDialog = false

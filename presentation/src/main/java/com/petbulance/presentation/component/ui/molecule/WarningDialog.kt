@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.review.common
+package com.petbulance.presentation.component.ui.molecule
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,7 +16,11 @@ import com.petbulance.presentation.component.ui.atom.BasicDialog
 import com.petbulance.presentation.component.ui.spacingXS
 
 @Composable
-fun ExitDialog(
+fun WarningDialog(
+    title: String,
+    content: String,
+    cancelText: String = "취소",
+    confirmText: String = "나가기",
     onDismissRequest: () -> Unit,
     onExitButtonClicked: () -> Unit
 ) {
@@ -24,12 +28,12 @@ fun ExitDialog(
         backHandler = onDismissRequest
     ) {
         Text(
-            text = "후기 작성을 중단하고 나가시겠어요?",
+            text = title,
             style = MaterialTheme.typography.titleSmall,
             color = PetbulanceTheme.colorScheme.text.primary
         )
         Text(
-            text = "지금 작성한 후기는 저장되지 않아요.",
+            text = content,
             style = MaterialTheme.typography.bodySmall,
             color = PetbulanceTheme.colorScheme.text.caption
         )
@@ -40,7 +44,7 @@ fun ExitDialog(
         ) {
             BasicButton(
                 modifier = Modifier.weight(1f),
-                text = "취소",
+                text = cancelText,
                 size = BasicButtonSize.L,
                 buttonType = BasicButtonType.DEFAULT,
                 radius = 28.dp,
@@ -49,7 +53,7 @@ fun ExitDialog(
 
             BasicButton(
                 modifier = Modifier.weight(1f),
-                text = "나가기",
+                text = confirmText,
                 size = BasicButtonSize.L,
                 buttonType = BasicButtonType.WARNING,
                 radius = 28.dp,

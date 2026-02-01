@@ -72,7 +72,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     lat = hospital.lat,
                     lng = hospital.lng,
                     phone = hospital.phone ?: "02-0000-0000",
-                    acceptedAnimals = listOf("DOG", "CAT", "HAMSTER", "BIRD"),
+                    acceptedAnimals = listOf("DOG", "CAT", "HAMSTER", "AVIAN"),
                     openHours = listOf(
                         OpenHour("월-금", "09:00-19:00"),
                         OpenHour("토", "10:00-16:00"),

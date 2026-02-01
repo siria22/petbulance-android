@@ -1,16 +1,20 @@
 package com.petbulance.presentation.screen.feature.review.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -45,15 +50,23 @@ import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeSmall
 import com.petbulance.presentation.component.ui.molecule.ReceiptVerifiedBadge
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
+import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.feature.review.common.ReviewReportReasonDialog
+import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
+import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
+import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
@@ -65,12 +78,30 @@ fun ReviewDetailScreen(
     data: ReviewDetailData
 ) {
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showMoreOption by remember { mutableStateOf(false) }
+
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+
+    var showReportSuccessToast by remember { mutableStateOf(false) }
+
+    var selectedReason by remember { mutableStateOf("") }
 
     LaunchedEffect(argument.event) {
-        argument.event.collectCustomErrors { event ->
+        argument.event.collect { event ->
             when (event) {
                 is ReviewDetailEvent.DataFetch.Error -> {
-                    showErrorDialog = true
+                    if (event.displayType == ErrorDisplayType.Custom) {
+                        showErrorDialog = true
+                    }
+                }
+                is ReviewDetailEvent.DeleteSuccess -> {
+                    // TODO : Delete Success
+                    navController.safePopBackStack()
+                }
+                is ReviewDetailEvent.ReportSuccess -> {
+                    showReportReasonDialog = false
+                    showReportSuccessToast = true
                 }
             }
         }
@@ -86,8 +117,8 @@ fun ReviewDetailScreen(
                     onLeadingIconClicked = { navController.safePopBackStack() },
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
-                        Pair(IconResource.Vector(Icons.Outlined.Info)) {
-                            // TODO : interaction
+                        Pair(IconResource.Vector(Icons.Default.MoreVert)) {
+                            showMoreOption = true
                         }
                     )
                 )
@@ -101,8 +132,91 @@ fun ReviewDetailScreen(
         },
         containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
             ReviewDetailScreenContents(data = data)
+
+            if (showMoreOption) {
+                if (data.isAuthor) {
+                    DeleteOrEdit(
+                        onDeleteOptionClicked = {
+                            showMoreOption = false
+                            showDeleteConfirmDialog = true
+                        },
+                        onEditOptionClicked = {
+                            showMoreOption = false
+                            navController.navigate(ScreenDestinations.Review.Edit.createRoute(data.id))
+                        },
+                        onDismissRequest = { showMoreOption = false }
+                    )
+                } else {
+                    ReportOptionDialog(
+                        onReportOptionClicked = {
+                            showMoreOption = false
+                            showReportReasonDialog = true
+                        },
+                        onDismissRequest = { showMoreOption = false }
+                    )
+                }
+            }
+
+            if (showDeleteConfirmDialog) {
+                WarningDialog(
+                    title = "후기를 삭제할까요?",
+                    content = "후기를 삭제하면 모든 데이터가 삭제되고 다시 볼 수 없어요.",
+                    confirmText = "삭제",
+                    onDismissRequest = { showDeleteConfirmDialog = false },
+                    onExitButtonClicked = {
+                        showDeleteConfirmDialog = false
+                        argument.intent(ReviewDetailIntent.DeleteReview)
+                    }
+                )
+            }
+
+            if (showReportReasonDialog) {
+                ReviewReportReasonDialog(
+                    selectedReason = selectedReason,
+                    onReasonClicked = { reason ->
+                        selectedReason = reason
+                    },
+                    onSubmitClicked = {
+                        showReportReasonDialog = false
+                        argument.intent(ReviewDetailIntent.ReportReview(selectedReason))
+                    },
+                    onDismissRequest = { showReportReasonDialog = false }
+                )
+            }
+
+            if (showReportSuccessToast) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(vertical = spacingXL, horizontal = spacingMedium)
+                        .background(
+                            Color(0xFF222222).copy(alpha = 0.9f),
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(spacingSmall),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "[신고 완료] 운영자 검토 후 조치 예정입니다",
+                        style = typography.bodySmall,
+                        color = colorScheme.text.inverse
+                    )
+                    BasicIcon(
+                        iconResource = IconResource.Vector(Icons.Default.Close),
+                        contentDescription = "Close toast",
+                        size = iconSizeSmall,
+                        tint = colorScheme.icon.inverse,
+                        modifier = Modifier.clickable {
+                            showReportSuccessToast = false
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -138,6 +252,7 @@ fun ReviewDetailScreen(
         }
     }
 }
+
 
 @Composable
 private fun ReviewDetailScreenContents(data: ReviewDetailData) {

@@ -21,8 +21,8 @@ sealed class ReviewDetailScreenState {
 }
 
 sealed class ReviewDetailIntent {
-    data class SomeIntentWithParams(val param: String) : ReviewDetailIntent()
-    data object SomeIntentWithoutParams : ReviewDetailIntent()
+    data object DeleteReview : ReviewDetailIntent()
+    data class ReportReview(val reason: String) : ReviewDetailIntent()
 }
 
 sealed class ReviewDetailEvent {
@@ -33,4 +33,7 @@ sealed class ReviewDetailEvent {
             override val displayType: ErrorDisplayType = ErrorDisplayType.Common
         ) : DataFetch(), ErrorEvent
     }
+
+    data object DeleteSuccess : ReviewDetailEvent()
+    data object ReportSuccess : ReviewDetailEvent()
 }

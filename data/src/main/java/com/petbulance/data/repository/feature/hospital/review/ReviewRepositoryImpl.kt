@@ -14,8 +14,11 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
+import com.petbulance.data.datasource.remote.network.feature.user.user.UserApi
+import com.petbulance.data.datasource.remote.network.feature.user.user.dto.MeResponseDto
 import com.petbulance.data.mapper.feature.hospital.toDomain
 import com.petbulance.data.mapper.feature.hospital.toDto
+import com.petbulance.data.mapper.feature.user.toDomain
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
@@ -31,12 +34,13 @@ import com.petbulance.domain.repository.feature.hospital.ReviewRepository
 import javax.inject.Inject
 
 class ReviewRepositoryImpl @Inject constructor(
-    private val api: ReviewApi
+    private val reviewApi: ReviewApi,
+    private val userApi: UserApi
 ) : ReviewRepository {
 
     override suspend fun findHospital(name: String): Result<List<HospitalInfoForReview>> {
         return safeApiCall<FindHospitalResDto>(path = "/receipts/$name") {
-            api.findHospital(name)
+            reviewApi.findHospital(name)
         }.map { dto ->
             dto.hospitals.map { HospitalInfoForReview(it.hospitalId, it.hospitalName) }
         }
@@ -48,7 +52,7 @@ class ReviewRepositoryImpl @Inject constructor(
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         return safeApiCall<CursorPagingResDto<UserReviewSearchDto>>(path = "/receipts/search/$query") {
-            api.searchReview(query, cursorId, size)
+            reviewApi.searchReview(query, cursorId, size)
         }.map { dto ->
             PagingReviewList(
                 items = dto.list.map { it.toDomain() },
@@ -66,7 +70,7 @@ class ReviewRepositoryImpl @Inject constructor(
         size: Int
     ): Result<PagingReviewList<ReviewSearchItem>> {
         return safeApiCall<CursorPagingResDto<FilterResDto>>(path = "/receipts/filter") {
-            api.filterReview(region, animalTypes, isReceipt, cursorId, size)
+            reviewApi.filterReview(region, animalTypes, isReceipt, cursorId, size)
         }.map { dto ->
             PagingReviewList(
                 items = dto.list.map { it.toDomain() },
@@ -87,7 +91,7 @@ class ReviewRepositoryImpl @Inject constructor(
         sortDirection: String
     ): Result<PagingReviewList<HospitalReview>> {
         return safeApiCall<HospitalReviewsCursorResDto>(path = "/receipts/reviews/$hospitalId") {
-            api.getHospitalReviews(
+            reviewApi.getHospitalReviews(
                 hospitalId,
                 onlyImageReview,
                 cursorId,
@@ -108,7 +112,7 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult> {
         return safeApiCall<ReviewSaveResDto>(path = "/receipts/save/reviews") {
-            api.saveReview(param.toDto())
+            reviewApi.saveReview(param.toDto())
         }.map { dto ->
             SaveReviewResult(
                 reviewId = dto.reviewId,
@@ -123,7 +127,7 @@ class ReviewRepositoryImpl @Inject constructor(
                 reviewId = reviewId,
                 saveIds = keys
             )
-            api.checkReviewImageSave(reqDto)
+            reviewApi.checkReviewImageSave(reqDto)
         }.map { it.message }
     }
 
@@ -132,7 +136,7 @@ class ReviewRepositoryImpl @Inject constructor(
         cursorId: Long?
     ): Result<PagingReviewList<MyReview>> {
         return safeApiCall<MyReviewGetResDto>(path = "/receipts/me") {
-            api.getMyReviews(size, cursorId)
+            reviewApi.getMyReviews(size, cursorId)
         }.map { dto ->
             PagingReviewList(
                 items = dto.list.map { it.toDomain() },
@@ -144,7 +148,7 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun modifyReview(param: ModifyReviewParam): Result<SaveReviewResult> {
         return safeApiCall<ReviewSaveResDto>(path = "/receipts/modify") {
-            api.modifyReview(param.toDto())
+            reviewApi.modifyReview(param.toDto())
         }.map { dto ->
             SaveReviewResult(
                 reviewId = dto.reviewId,
@@ -155,7 +159,7 @@ class ReviewRepositoryImpl @Inject constructor(
 
     override suspend fun deleteMyReviews(ids: List<Long>): Result<String> {
         return safeApiCall<ReviewDeleteResDto>(path = "/receipts") {
-            api.deleteMyReviews(ids)
+            reviewApi.deleteMyReviews(ids)
         }.map { it.message }
     }
 
@@ -164,21 +168,25 @@ class ReviewRepositoryImpl @Inject constructor(
         fileName: String
     ): Result<ReceiptAnalysisResult> {
         return safeApiCall<ReceiptAnalysisResDto>(path = "/receipts") {
-            api.analyzeReceipt(imageBytes, fileName)
+            reviewApi.analyzeReceipt(imageBytes, fileName)
         }.map { it.toDomain() }
     }
 
     override suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit> {
         return safeApiCall<Unit>(path = url) {
-            api.uploadImage(url, imageBytes)
+            reviewApi.uploadImage(url, imageBytes)
         }.map { }
     }
 
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
+        val userInfo = safeApiCall<MeResponseDto>(path = "/users/me") {
+            userApi.getMyInfo()
+        }.map { it.toDomain() }.getOrThrow()
+
         return safeApiCall<ReviewDetailResDto>(path = "/receipts/detail/$reviewId") {
-            api.getReviewDetail(reviewId)
+            reviewApi.getReviewDetail(reviewId)
         }.map { dto ->
-            dto.toDomain()
+            dto.toDomain(userInfo.nickname)
         }
     }
 }

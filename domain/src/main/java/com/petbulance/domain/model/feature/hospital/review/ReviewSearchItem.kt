@@ -30,7 +30,7 @@ data class ReviewSearchItem(
             hospitalId = 3L,
             hospitalName = "고려종합동물병원",
             treatmentService = "진료비(9900), 방사선 (X-ray) 검사(복부)(45000), 5kg 이하(129000), 검사(초음파-복부)(55000), 혈구 (NMB)(96000), *병리검사(혈액-CRP)(33000), 검사(흉수, 복수-CBC)(33000), *[KVL]Cytology(FNA)-1 site(100000), 처치-복수천자(복수 제거 목적)(77000), 비타민K(vit K)-ample(5500)",
-            animalType = AnimalCategory.fromString("BIRD"),
+            animalType = AnimalCategory.fromString("AVIAN"),
             detailAnimalType = AnimalSpecies.fromString("PARROT"),
             reviewContent = "우리집 앵무새가 감기에 걸려서 병원에 찾아갔는 데 ~~",
             totalRating = 2.83,

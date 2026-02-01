@@ -80,7 +80,7 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 hospitalName = "행복동물병원",
                 isReceiptVerified = true,
                 treatment = "예방접종",
-                animalType = AnimalCategory.fromString("BIRD"),
+                animalType = AnimalCategory.fromString("AVIAN"),
                 detailAnimalType = AnimalSpecies.fromString("PARROT"),
                 content = "휴! 행복해지네요 ㅎㅎ",
                 rating = 4.2,
