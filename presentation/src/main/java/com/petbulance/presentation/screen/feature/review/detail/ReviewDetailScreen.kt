@@ -65,7 +65,6 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewReportReas
 import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
 import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.utils.error.ErrorDisplayType
-import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -95,10 +94,12 @@ fun ReviewDetailScreen(
                         showErrorDialog = true
                     }
                 }
+
                 is ReviewDetailEvent.DeleteSuccess -> {
                     // TODO : Delete Success
                     navController.safePopBackStack()
                 }
+
                 is ReviewDetailEvent.ReportSuccess -> {
                     showReportReasonDialog = false
                     showReportSuccessToast = true
@@ -132,9 +133,11 @@ fun ReviewDetailScreen(
         },
         containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             ReviewDetailScreenContents(data = data)
 
             if (showMoreOption) {
@@ -215,7 +218,7 @@ fun ReviewDetailScreen(
                             showReportSuccessToast = false
                         }
                     )
-                }
+                } // TODO : 3초 후 사라지게 설정
             }
         }
     }

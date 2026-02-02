@@ -25,7 +25,7 @@ import com.petbulance.presentation.component.ui.spacingXXS
 
 @Composable
 fun ReviewReportReasonDialog(
-    selectedReason: String?,
+    selectedReason: String,
     onReasonClicked: (String) -> Unit,
     onSubmitClicked: () -> Unit,
     onDismissRequest: () -> Unit
@@ -74,12 +74,23 @@ fun ReviewReportReasonDialog(
                     onClicked = onDismissRequest,
                     modifier = Modifier.weight(1f)
                 )
+
+                val submitButtonType = if (selectedReason.isNullOrBlank()) {
+                    BasicButtonType.DISABLED
+                } else {
+                    BasicButtonType.SECONDARY
+                }
+
                 BasicButton(
                     text = "제출",
                     size = BasicButtonSize.M,
-                    buttonType = BasicButtonType.SECONDARY,
+                    buttonType = submitButtonType,
                     radius = 12.dp,
-                    onClicked = onSubmitClicked,
+                    onClicked = {
+                        if (selectedReason.isNotBlank()) {
+                            onSubmitClicked()
+                        }
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
