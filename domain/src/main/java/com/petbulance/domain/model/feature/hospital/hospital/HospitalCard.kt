@@ -1,5 +1,7 @@
 package com.petbulance.domain.model.feature.hospital.hospital
 
+import com.petbulance.domain.model.type.AnimalSpecies
+
 data class HospitalCard(
     val hospitalId: Long,
     val name: String,
@@ -27,6 +29,11 @@ data class HospitalCard(
         openHours = nextOpenHours,
         thumbnailUrl = thumbnailUrl,
         rating = rating,
-        reviewCount = reviewCount.toInt()
+        reviewCount = reviewCount.toInt(),
+        image = image,
+        tags = types.map { type ->
+            val species = AnimalSpecies.fromString(type)
+            HospitalTag(type = "ANIMALTYPE", value = species.korean)
+        }
     )
 }

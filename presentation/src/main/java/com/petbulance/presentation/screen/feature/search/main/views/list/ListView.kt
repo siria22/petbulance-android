@@ -170,22 +170,7 @@ private fun ListViewPreview() {
         ListView(
             navController = rememberNavController(),
             searchUiState = SearchUiState(
-                hospitalList = listOf(
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("강아지", "고양이"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    )
-                ),
+                hospitalList = Hospital.stubs(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
                 isGuest = false
             ),

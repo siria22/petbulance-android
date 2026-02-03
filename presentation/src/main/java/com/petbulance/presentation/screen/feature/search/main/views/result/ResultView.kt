@@ -208,36 +208,7 @@ private fun ResultViewPreview() {
         ResultView(
             navController = rememberNavController(),
             searchUiState = SearchUiState(
-                hospitalList = listOf(
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("댕댕이", "킹갓냥이"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    ),
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 ^o^ 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("멍멍", "야옹야옹"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    )
-                ),
+                hospitalList = Hospital.stubs(),
                 currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
                 isGuest = false
             ),

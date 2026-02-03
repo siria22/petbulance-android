@@ -17,7 +17,8 @@ data class HospitalDetailResDto(
     val description: String,
     val rating: Double = 0.0,
     val reviewCount: Int = 0,
-    val thumbnailUrl: String? = null
+    val thumbnailUrl: String? = null,
+    val tags: List<TagResDto>? = null
 )
 
 @Serializable

@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.petbulance.presentation.screen.feature.search.main.views.common
 
 import android.content.ClipData
@@ -38,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
+import com.petbulance.domain.model.feature.hospital.hospital.HospitalTag
 import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -177,18 +176,11 @@ fun HospitalCard(
 
                 Dot()
 
-                hospital.openHours?.let { hours ->
-                    val openHour = try {
-                        hours.split(" ")[1]
-                    } catch (e: Exception) {
-                        "정보 없음"
-                    }
-                    Text(
-                        text = openHour,
-                        style = typography.labelLarge,
-                        color = colorScheme.text.secondary
-                    )
-                }
+                Text(
+                    text = hospital.openHours ?: "정보 없음",
+                    style = typography.labelLarge,
+                    color = colorScheme.text.secondary
+                )
 
                 Dot()
 
@@ -246,11 +238,24 @@ fun HospitalCard(
                 }
             }
 
-            if (hospital.types.isNotEmpty()) {
+            val tags = hospital.tags.orEmpty()
+
+            if (tags.isNotEmpty()) {
+                val orderedTags = tags.sortedWith(
+                    compareBy { tag ->
+                        when (tag.type) {
+                            "WORKTYPE" -> 0
+                            "ANIMALTYPE" -> 1
+                            "LOCATIONTYPE" -> 2
+                            else -> 3
+                        }
+                    }
+                )
+
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    maxLines = 1, // TODO : Deprecated FlowRowOverflow
+                    maxLines = 1,
                     overflow = FlowRowOverflow.expandOrCollapseIndicator(
                         expandIndicator = {
                             Text(
@@ -263,13 +268,18 @@ fun HospitalCard(
                         collapseIndicator = { }
                     )
                 ) {
-                    hospital.types.forEach { type ->
-                        val text = try {
-                            AnimalSpecies.fromString(type).korean
-                        } catch (e: IllegalArgumentException) {
-                            type
+                    orderedTags.forEach { tag ->
+                        val bgColor = when (tag.type) {
+                            "WORKTYPE" -> colorScheme.tag.red.verysubtle
+                            "ANIMALTYPE" -> colorScheme.tag.yellow.subtle
+                            "LOCATIONTYPE" -> colorScheme.tag.trust.bg
+                            else -> colorScheme.tag.yellow.subtle
                         }
-                        BasicChip(text = text)
+
+                        BasicChip(
+                            text = tag.value,
+                            backgroundColor = bgColor
+                        )
                     }
                 }
             }

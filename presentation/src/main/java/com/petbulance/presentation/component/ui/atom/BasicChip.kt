@@ -8,16 +8,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.emp
 
 @Composable
-fun BasicChip(text: String) {
+fun BasicChip(
+    text: String,
+    backgroundColor: Color = PetbulanceTheme.colorScheme.tag.yellow.subtle
+) {
     Box(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .background(
-                color = PetbulanceTheme.colorScheme.tag.yellow.subtle,
+                color = backgroundColor,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(horizontal = 8.dp, vertical = 4.dp)

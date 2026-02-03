@@ -11,20 +11,7 @@ import javax.inject.Inject
 
 class MockHospitalRepository @Inject constructor() : HospitalRepository {
     private val mockHospitals = List(20) { i ->
-        Hospital(
-            hospitalId = (i + 1L),
-            name = "행복 동물병원 ${i + 1}호점 (Mock)",
-            lat = 37.5665 + (i * 0.001),
-            lng = 126.9780 + (i * 0.001),
-            distanceMeters = 1234.5 + (i * 100),
-            phone = "02-1234-5678",
-            types = if (i % 2 == 0) listOf("DOG", "CAT") else listOf("DOG"),
-            isOpenNow = i % 3 != 0,
-            openHours = "09:00 - 18:00",
-            thumbnailUrl = "https://picsum.photos/seed/${i + 1}/200/300",
-            rating = 4.5 - (i * 0.1),
-            reviewCount = 120 - (i * 5)
-        )
+        Hospital.stub()
     }
 
     override suspend fun searchHospitals(

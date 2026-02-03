@@ -7,6 +7,7 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.hospital.d
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalCard
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalDetail
+import com.petbulance.domain.model.feature.hospital.hospital.HospitalTag
 import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
 
 fun HospitalsResDto.toDomain(): Hospital {
@@ -22,7 +23,9 @@ fun HospitalsResDto.toDomain(): Hospital {
         openHours = openHours,
         thumbnailUrl = thumbnailUrl,
         rating = rating,
-        reviewCount = reviewCount
+        reviewCount = reviewCount,
+        image = image,
+        tags = tags?.map { HospitalTag(it.type, it.value) } ?: emptyList()
     )
 }
 
@@ -39,11 +42,13 @@ fun HospitalDetailResDto.toDomain(): HospitalDetail {
         notes = notes,
         openNow = openNow,
         description = description,
-        rating = rating,             // 매핑 추가
-        reviewCount = reviewCount,   // 매핑 추가
-        thumbnailUrl = thumbnailUrl  // 매핑 추가
+        rating = rating,
+        reviewCount = reviewCount,
+        thumbnailUrl = thumbnailUrl,
+        tags = tags?.map { HospitalTag(it.type, it.value) }
     )
 }
+
 
 fun OpenHourResDto.toDomain(): OpenHour {
     return OpenHour(
