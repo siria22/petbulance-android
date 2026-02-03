@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +37,7 @@ import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
@@ -50,8 +52,10 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewImageSecti
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewRatingsSection
 import com.petbulance.presentation.screen.feature.review.common.ReviewTotalCostInput
-import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.screen.feature.review.create.ReviewDetailAnimalSpeciesSelectBottomSheet
+import com.petbulance.presentation.screen.feature.review.edit.composables.ReviewEditSuccessDialog
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -64,8 +68,11 @@ fun ReviewEditScreen(
     val context = LocalContext.current
     var showExitDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     var showDetailAnimalBottomSheet by remember { mutableStateOf(false) }
+
+    var currentReviewId by remember { mutableLongStateOf(argument.state.reviewId) }
 
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
@@ -74,6 +81,10 @@ fun ReviewEditScreen(
                 is ReviewEditEvent.ShowExitDialog -> showExitDialog = true
                 is ReviewEditEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is ReviewEditEvent.EditSuccess -> {
+                    showSuccessDialog = true
                 }
             }
         }
@@ -127,6 +138,23 @@ fun ReviewEditScreen(
     if (showInfoDialog) {
         ReviewInfoDialog(
             onDismissRequest = { showInfoDialog = false }
+        )
+    }
+
+    if (showSuccessDialog) {
+        ReviewEditSuccessDialog(
+            onConfirmClick = {
+                showSuccessDialog = false
+                navController.safeNavigate(
+                    ScreenDestinations.Review.Detail.createRoute(
+                        currentReviewId
+                    )
+                )
+            },
+            onDismissRequest = {
+                showSuccessDialog = false
+                navController.safeNavigate(ScreenDestinations.Review.route)
+            }
         )
     }
 

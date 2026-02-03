@@ -67,6 +67,7 @@ import com.petbulance.presentation.screen.feature.review.detail.composables.Repo
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 
@@ -105,6 +106,13 @@ fun ReviewDetailScreen(
                     showReportSuccessToast = true
                 }
             }
+        }
+    }
+
+    LaunchedEffect(showReportSuccessToast) {
+        if (showReportSuccessToast) {
+            delay(3000)
+            showReportSuccessToast = false
         }
     }
 

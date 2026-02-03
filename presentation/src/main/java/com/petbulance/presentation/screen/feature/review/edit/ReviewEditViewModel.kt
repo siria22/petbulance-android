@@ -147,7 +147,7 @@ class ReviewEditViewModel @Inject constructor(
 
                 modifyReviewUseCase(param, imageBytes)
                     .onSuccess {
-                        emitEvent(ReviewEditEvent.ShowToast("리뷰가 수정되었습니다."))
+                        emitEvent(ReviewEditEvent.EditSuccess)
                         emitEvent(ReviewEditEvent.NavigateBack)
                     }
                     .onFailure { e ->

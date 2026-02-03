@@ -50,4 +50,6 @@ sealed interface ReviewEditEvent {
     data object ShowExitDialog : ReviewEditEvent
     data class ShowToast(val message: String) : ReviewEditEvent
     data object NavigateBack : ReviewEditEvent
+
+    data object EditSuccess : ReviewEditEvent
 }
