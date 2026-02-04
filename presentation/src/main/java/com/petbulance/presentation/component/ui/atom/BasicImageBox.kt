@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.petbulance.presentation.R
@@ -35,14 +36,13 @@ fun BasicImageBox(
     placeholderImageResource: Int = R.drawable.img_checker
 ) {
     val isUriValid = uri != null && uri.toString().isNotBlank()
-
     val dataToLoad = if (isUriValid) uri else null
 
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(dataToLoad)
                 .crossfade(true)
@@ -54,13 +54,9 @@ fun BasicImageBox(
                 .clip(RoundedCornerShape(4.dp)),
             contentDescription = "이미지 콘텐츠",
             contentScale = ContentScale.Crop,
+            loading = { CustomGreenLoader() },
+            error = { /* 필요하면 에러용 UI를 별도 구성 가능 */ }
         )
-
-        val state = rememberAsyncImagePainter(model = dataToLoad).state
-        if (state is AsyncImagePainter.State.Loading) {
-            CustomGreenLoader()
-        }
-
     }
 }
 

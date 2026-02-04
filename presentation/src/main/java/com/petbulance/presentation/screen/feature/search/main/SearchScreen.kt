@@ -78,6 +78,15 @@ fun SearchScreen(
             is SearchUiEvent.OnSortTypeSelected -> {
                 selectedSortType = event.sortType
                 isSelectSortTypeDialogVisible = false
+
+                hospitalSearchArgument.intent(
+                    HospitalSearchIntent.SearchHospitalWithCurrentParams(
+                        query = currentDraftQuery,
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType,
+                        keepPreviousBounds = true
+                    )
+                )
             }
 
             is SearchUiEvent.OnDismissFilterBottomSheet -> isFilterBottomSheetVisible = false
@@ -102,7 +111,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType
+                        sortType = selectedSortType,
+                        keepPreviousBounds = true
                     )
                 )
                 isFilterBottomSheetVisible = false

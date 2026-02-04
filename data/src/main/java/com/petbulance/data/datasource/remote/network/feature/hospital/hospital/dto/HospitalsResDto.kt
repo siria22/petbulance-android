@@ -22,6 +22,6 @@ data class HospitalsResDto(
 
 @Serializable
 data class TagResDto(
-    val type: String,
+    val type: String?,
     val value: String
 )

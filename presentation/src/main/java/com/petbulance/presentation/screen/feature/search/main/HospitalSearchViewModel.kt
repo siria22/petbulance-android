@@ -79,12 +79,14 @@ class HospitalSearchViewModel @Inject constructor(
             is HospitalSearchIntent.SearchHospitalWithCurrentParams -> {
                 _hospitalSearchQuery.value = intent.query
                 launch {
+                    val boundsToUse = if (intent.keepPreviousBounds) lastBounds else null
+
                     searchHospitals(
                         isNewSearch = true,
                         queryModel = intent.query,
                         currentUserLocation = intent.currentUserLocation,
                         sortType = intent.sortType,
-                        bounds = null
+                        bounds = boundsToUse
                     )
                 }
             }

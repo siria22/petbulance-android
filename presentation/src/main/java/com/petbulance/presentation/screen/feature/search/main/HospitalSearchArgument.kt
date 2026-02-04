@@ -21,7 +21,8 @@ sealed class HospitalSearchIntent {
     data class SearchHospitalWithCurrentParams(
         val query: HospitalSearchQueryUiModel,
         val currentUserLocation: Location,
-        val sortType: HospitalSortType
+        val sortType: HospitalSortType,
+        val keepPreviousBounds: Boolean = false
     ) : HospitalSearchIntent()
 
     data class SearchNearByHospitals(

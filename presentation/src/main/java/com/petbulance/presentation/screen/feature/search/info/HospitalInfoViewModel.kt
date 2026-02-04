@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.feature.search.info
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
+import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.type.ReviewSortType
@@ -102,8 +103,20 @@ class HospitalInfoViewModel @Inject constructor(
                     { fetchInitialReviews() }
                 )
             }.onSuccess { (hospital, detail, reviewPaging) ->
+                // [수정됨] HospitalCard의 영업 시간 정보가 없을 경우 Detail 정보로 보정
+                val patchedHospital = if (hospital.openHours == "(정보 없음)" || hospital.openHours == null) {
+                    val calculatedHours = calculateCurrentOpenHours(detail.openHours, hospital.isOpenNow)
+                    if (calculatedHours != null) {
+                        hospital.copy(openHours = calculatedHours)
+                    } else {
+                        hospital
+                    }
+                } else {
+                    hospital
+                }
+
                 _hospitalUiData.update {
-                    it.copy(hospital = hospital, hospitalDetail = detail)
+                    it.copy(hospital = patchedHospital, hospitalDetail = detail)
                 }
 
                 applyReviewData(reviewPaging, isAppend = false)
@@ -114,6 +127,38 @@ class HospitalInfoViewModel @Inject constructor(
                 emitError(exception)
                 _dataState.value = HospitalInfoDataState.Init
             }
+        }
+    }
+
+    private fun calculateCurrentOpenHours(openHours: List<OpenHour>, isOpenNow: Boolean): String? {
+        val today = java.time.LocalDate.now()
+        val dayKey = when(today.dayOfWeek) {
+            java.time.DayOfWeek.MONDAY -> "MON"
+            java.time.DayOfWeek.TUESDAY -> "TUE"
+            java.time.DayOfWeek.WEDNESDAY -> "WED"
+            java.time.DayOfWeek.THURSDAY -> "THU"
+            java.time.DayOfWeek.FRIDAY -> "FRI"
+            java.time.DayOfWeek.SATURDAY -> "SAT"
+            java.time.DayOfWeek.SUNDAY -> "SUN"
+            else -> return null
+        }
+
+        val todaySchedule = openHours.find { it.day == dayKey } ?: return null
+        val hoursStr = if (todaySchedule.hours == "CLOSED") "휴무" else todaySchedule.hours
+
+        return if (isOpenNow) {
+            if (hoursStr.contains("-")) {
+                val parts = hoursStr.split("-")
+                if (parts.size == 2) {
+                    "${parts[1]}에 영업 종료"
+                } else {
+                    hoursStr
+                }
+            } else {
+                hoursStr
+            }
+        } else {
+            hoursStr
         }
     }
 

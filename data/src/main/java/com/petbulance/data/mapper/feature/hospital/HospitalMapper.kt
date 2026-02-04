@@ -25,7 +25,7 @@ fun HospitalsResDto.toDomain(): Hospital {
         rating = rating,
         reviewCount = reviewCount,
         image = image,
-        tags = tags?.map { HospitalTag(it.type, it.value) } ?: emptyList()
+        tags = tags?.map { HospitalTag(it.type ?: "UNKNOWN", it.value) } ?: emptyList()
     )
 }
 
@@ -45,7 +45,7 @@ fun HospitalDetailResDto.toDomain(): HospitalDetail {
         rating = rating,
         reviewCount = reviewCount,
         thumbnailUrl = thumbnailUrl,
-        tags = tags?.map { HospitalTag(it.type, it.value) }
+        tags = tags?.map { HospitalTag(it.type ?: "UNKNOWN", it.value) }
     )
 }
 
