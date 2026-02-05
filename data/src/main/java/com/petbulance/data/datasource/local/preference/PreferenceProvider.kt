@@ -1,6 +1,7 @@
 package com.petbulance.data.datasource.local.preference
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -61,10 +62,23 @@ class PreferenceProvider(
         }
     }
 
+    suspend fun updateAutoLoginEnabled(isEnabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[IS_AUTO_LOGIN_ENABLED] = isEnabled
+        }
+    }
+
+    fun observeAutoLoginEnabled(): Flow<Boolean> {
+        return context.dataStore.data.map { prefs ->
+            prefs[IS_AUTO_LOGIN_ENABLED] ?: true // Default ON
+        }
+    }
+
     companion object {
         val APP_THEME = stringPreferencesKey("app_theme")
         val ACCESS_TOKEN = stringPreferencesKey("access_token")
         val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         val LAST_LOGIN_PLATFORM = stringPreferencesKey("last_login_platform")
+        val IS_AUTO_LOGIN_ENABLED = booleanPreferencesKey("is_auto_login_enabled") // Add this
     }
 }

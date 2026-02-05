@@ -16,4 +16,7 @@ interface AuthRepository {
 
     suspend fun saveLastLoginPlatform(platform: LoginProviderType): Result<Unit>
     suspend fun getLastLoginPlatform(): Result<LoginProviderType?>
+
+    suspend fun setAutoLoginEnabled(isEnabled: Boolean): Result<Unit>
+    suspend fun isAutoLoginEnabled(): Result<Boolean>
 }

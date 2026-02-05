@@ -38,6 +38,7 @@ import com.petbulance.domain.utils.dowInKorean
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
+import com.petbulance.presentation.component.ui.ThickDivider
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
@@ -127,7 +128,7 @@ fun DetailTab(
 
     HospitalDescription(hospitalDetail?.description)
 
-    HorizontalDivider(thickness = 12.dp, color = colorScheme.bg.frame.subtle)
+    ThickDivider(color = colorScheme.bg.frame.subtle)
 
     ProposeModificationsCard()
 

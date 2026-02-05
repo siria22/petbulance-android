@@ -50,6 +50,7 @@ import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
 import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.molecule.LocationPermissionDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
@@ -242,7 +243,7 @@ fun MapView(
                     onHospitalSelected = {},
                     onMapReady = { naverMap = it }
                 )
-                Ready()
+                OnContentLoadingUi(text = "지도를 로딩중입니다...")
             } else {
                 MapLayer(
                     state = searchUiState,
@@ -313,26 +314,6 @@ fun MapView(
             onTermsClick = {
                 /* TODO : 약관 보여주는 어쩌고 */
             }
-        )
-    }
-}
-
-@Composable
-private fun Ready() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.3f))
-    ) {
-        CustomGreenLoader(size = 48.dp)
-
-        Text(
-            text = "지도를 불러오고 있어요...",
-            color = colorScheme.text.inverse,
-            style = typography.titleSmall,
-            modifier = Modifier.padding(top = 16.dp)
         )
     }
 }

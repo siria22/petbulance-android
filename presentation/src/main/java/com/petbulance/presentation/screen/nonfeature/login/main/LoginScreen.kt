@@ -40,6 +40,7 @@ import com.petbulance.presentation.component.theme.color.ColorObject
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.DefaultRoundedCorner
 import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
+import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXXL
@@ -111,7 +112,7 @@ fun LoginScreen(
             )
 
             if (dataState is LoginDataState.Loading) {
-                CustomGreenLoader()
+                OnContentLoadingUi("잠시만 기다려주세요...")
             }
         }
     }

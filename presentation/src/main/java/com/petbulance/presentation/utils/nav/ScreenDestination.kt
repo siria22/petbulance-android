@@ -56,6 +56,18 @@ sealed class ScreenDestinations(val route: String) {
     }
 
     data object MyPage : ScreenDestinations("mypage") {
-        data object Profile : ScreenDestinations("mypage/profile")
+
+        sealed class Activity : ScreenDestinations("mypage/activity") {
+            data object Reviews : ScreenDestinations("mypage/activity/reviews")
+        }
+
+        sealed class User : ScreenDestinations("mypage/user") {
+            data object Profile : ScreenDestinations("mypage/user/profile")
+            data object Account: ScreenDestinations("mypage/user/account")
+        }
+
+        sealed class Help : ScreenDestinations("mypage/help") {
+            data object Notice : ScreenDestinations("mypage/help/notice")
+        }
     }
 }

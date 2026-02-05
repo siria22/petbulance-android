@@ -1,6 +1,7 @@
 package com.petbulance.presentation.screen.nonfeature.splash
 
 import android.util.Log
+import com.petbulance.domain.repository.feature.user.AuthRepository
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermsStatusUseCase
 import com.petbulance.domain.usecase.nonfeature.app.CheckAppVersionUseCase
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val checkAppVersionUseCase: CheckAppVersionUseCase,
     private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
-    private val getTermsStatusUseCase: GetTermsStatusUseCase
+    private val getTermsStatusUseCase: GetTermsStatusUseCase,
+    private val authRepository: AuthRepository
 ) : BaseViewModel() {
 
     private val _event = MutableSharedFlow<SplashEvent>()
@@ -52,10 +54,17 @@ class SplashViewModel @Inject constructor(
     }
 
     private suspend fun checkLoginAndMove() {
-        val isLoggedIn = checkLoginStatusUseCase().getOrElse { false }
+        // 자동 로그인 설정 확인
+        val isAutoLoginEnabled = authRepository.isAutoLoginEnabled().getOrElse { true }
 
-        if (!isLoggedIn) {
-            Log.d(LOGGER_TAG, "User is not logged in")
+        // 토큰 존재 여부 확인
+        val hasTokens = checkLoginStatusUseCase().getOrElse { false }
+
+        if (!isAutoLoginEnabled || !hasTokens) {
+            Log.d(LOGGER_TAG, "User is not logged in or AutoLogin disabled")
+            if (!isAutoLoginEnabled && hasTokens) {
+                authRepository.clearTokens()
+            }
             _event.emit(SplashEvent.NavigateToLogin)
             return
         }
