@@ -10,6 +10,7 @@ import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.usecase.feature.hospital.hospital.GetHospitalCardUseCase
 import com.petbulance.domain.usecase.feature.hospital.hospital.GetHospitalDetailUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetHospitalReviewsUseCase
+import com.petbulance.domain.utils.LocationUtils
 import com.petbulance.domain.utils.zip
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
@@ -78,12 +79,14 @@ class HospitalInfoViewModel @Inject constructor(
             is HospitalInfoIntent.LoadMoreReviews -> {
                 launch { loadMoreReviews() }
             }
+
             is HospitalInfoIntent.ChangeReviewSort -> {
                 if (_reviewUiData.value.sortBy != intent.sortType) {
                     _reviewUiData.update { it.copy(sortBy = intent.sortType) }
                     checkCacheAndLoad()
                 }
             }
+
             is HospitalInfoIntent.ToggleImageOnly -> {
                 _reviewUiData.update { it.copy(onlyImage = intent.isChecked) }
                 checkCacheAndLoad()
@@ -99,21 +102,22 @@ class HospitalInfoViewModel @Inject constructor(
             runCatching {
                 zip(
                     { fetchHospital(lat, lng) },
-                    { fetchHospitalDetail(lat, lng) },
+                    { fetchHospitalDetail() },
                     { fetchInitialReviews() }
                 )
             }.onSuccess { (hospital, detail, reviewPaging) ->
-                // [수정됨] HospitalCard의 영업 시간 정보가 없을 경우 Detail 정보로 보정
-                val patchedHospital = if (hospital.openHours == "(정보 없음)" || hospital.openHours == null) {
-                    val calculatedHours = calculateCurrentOpenHours(detail.openHours, hospital.isOpenNow)
-                    if (calculatedHours != null) {
-                        hospital.copy(openHours = calculatedHours)
+                val patchedHospital =
+                    if (hospital.openHours == "(정보 없음)" || hospital.openHours == null) {
+                        val calculatedHours =
+                            calculateCurrentOpenHours(detail.openHours, hospital.isOpenNow)
+                        if (calculatedHours != null) {
+                            hospital.copy(openHours = calculatedHours)
+                        } else {
+                            hospital
+                        }
                     } else {
                         hospital
                     }
-                } else {
-                    hospital
-                }
 
                 _hospitalUiData.update {
                     it.copy(hospital = patchedHospital, hospitalDetail = detail)
@@ -132,7 +136,7 @@ class HospitalInfoViewModel @Inject constructor(
 
     private fun calculateCurrentOpenHours(openHours: List<OpenHour>, isOpenNow: Boolean): String? {
         val today = java.time.LocalDate.now()
-        val dayKey = when(today.dayOfWeek) {
+        val dayKey = when (today.dayOfWeek) {
             java.time.DayOfWeek.MONDAY -> "MON"
             java.time.DayOfWeek.TUESDAY -> "TUE"
             java.time.DayOfWeek.WEDNESDAY -> "WED"
@@ -245,7 +249,8 @@ class HospitalInfoViewModel @Inject constructor(
         reviewCache[getCurrentCacheKey()] = data
     }
 
-    private fun getCurrentCacheKey() = Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
+    private fun getCurrentCacheKey() =
+        Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
 
     private fun resetPagingState() {
         currentCursorId = null
@@ -266,20 +271,12 @@ class HospitalInfoViewModel @Inject constructor(
     }
 
     private suspend fun fetchHospital(lat: Double?, lng: Double?): Hospital {
-        val card = getHospitalCardUseCase(
-            hospitalId = hospitalId,
-            userLat = lat ?: 0.0,
-            userLng = lng ?: 0.0
-        )
-        return card.toHospital()
+        val card = getHospitalCardUseCase(hospitalId = hospitalId)
+        val distance = LocationUtils.calculateDistance(lat, lng, card.lat, card.lng)
+        return card.toHospital().copy(distanceMeters = distance)
     }
 
-    private suspend fun fetchHospitalDetail(lat: Double?, lng: Double?) =
-        getHospitalDetailUseCase(
-            hospitalId = hospitalId,
-            userLat = lat ?: 0.0,
-            userLng = lng ?: 0.0
-        )
+    private suspend fun fetchHospitalDetail() = getHospitalDetailUseCase(hospitalId = hospitalId)
 
     private suspend fun fetchInitialReviews() = getHospitalReviewsUseCase(
         hospitalId = hospitalId,

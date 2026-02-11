@@ -126,7 +126,7 @@ fun ReviewScreen(
             currentQuery = HospitalSearchQueryUiModel.empty.copy(
                 region = data.selectedRegion,
                 district = data.selectedDistrict,
-                animalCategory = data.selectedAnimalType
+                animalCategories = data.selectedAnimalType?.let { listOf(it) } ?: emptyList()
             ),
             startTab = startTab,
             showBottomSheet = showBottomSheet,
@@ -136,8 +136,8 @@ fun ReviewScreen(
                 query.region?.let {
                     argument.intent(ReviewIntent.ChangeRegion(it, query.district ?: ""))
                 }
-                query.animalCategory?.let {
-                    argument.intent(ReviewIntent.ChangeAnimalType(it))
+                if (query.animalCategories.isNotEmpty()) {
+                    argument.intent(ReviewIntent.ChangeAnimalType(query.animalCategories.first()))
                 }
                 showBottomSheet = false
             },

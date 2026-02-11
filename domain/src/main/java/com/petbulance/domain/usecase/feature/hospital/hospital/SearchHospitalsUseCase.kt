@@ -12,8 +12,6 @@ class SearchHospitalsUseCase @Inject constructor(
     suspend operator fun invoke(
         q: String?,
         region: String?,
-        lat: Double?,
-        lng: Double?,
         bounds: MapBounds?,
         animal: String?,
         openNow: Boolean?,
@@ -27,8 +25,6 @@ class SearchHospitalsUseCase @Inject constructor(
         return repository.searchHospitals(
             q = q,
             region = region,
-            lat = lat,
-            lng = lng,
             bounds = bounds?.let { "${it.minLat},${it.minLng},${it.maxLat},${it.maxLng}" },
             animal = animal,
             openNow = openNow,

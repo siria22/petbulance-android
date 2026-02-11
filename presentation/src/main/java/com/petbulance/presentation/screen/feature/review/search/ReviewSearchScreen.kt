@@ -95,7 +95,7 @@ fun ReviewSearchScreen(
                             reviews = data.searchResults,
                             selectedRegion = data.searchQueryModel.region,
                             selectedDistrict = data.searchQueryModel.district,
-                            selectedAnimalType = data.searchQueryModel.animalCategory,
+                            selectedAnimalType = data.searchQueryModel.animalCategories.firstOrNull(),
                             isLoadingNextPage = data.isLoadingNextPage,
                             selectedSort = ReviewSortType.LATEST,
                             isReceiptVerified = false,

@@ -17,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicIcon
@@ -26,34 +28,38 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXXL
 import com.petbulance.presentation.utils.HtmlText
 
-
 @Composable
 fun TermsDetailOverlay(term: Term, onDismissRequest: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.bg.frame.default)
-            .verticalScroll(rememberScrollState())
-            .padding(vertical = spacingXXL, horizontal = spacingMedium)
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.End,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorScheme.bg.frame.default)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = spacingXXL, horizontal = spacingMedium)
         ) {
-            BasicIcon(
-                iconResource = IconResource.Vector(Icons.Default.Close),
-                contentDescription = "Close",
-                size = iconSizeMS,
-                tint = colorScheme.icon.dark,
-                modifier = Modifier.clickable(onClick = onDismissRequest)
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Default.Close),
+                    contentDescription = "Close",
+                    size = iconSizeMS,
+                    tint = colorScheme.icon.dark,
+                    modifier = Modifier.clickable(onClick = onDismissRequest)
+                )
+            }
+            Text(
+                text = term.title,
+                style = typography.titleMedium,
+                color = colorScheme.text.primary,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
+            HtmlText(html = term.summary)
         }
-        Text(
-            text = term.title,
-            style = typography.titleSmall,
-            color = colorScheme.text.primary,
-            modifier = Modifier.padding(bottom = 2.dp)
-        )
-        HtmlText(html = term.summary)
     }
 }

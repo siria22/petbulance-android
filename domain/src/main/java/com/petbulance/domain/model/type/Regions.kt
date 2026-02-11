@@ -7,6 +7,11 @@ enum class Region(
     val displayName: String,
     val districts: List<String>
 ) {
+    ALL(
+        displayName = "전체",
+        districts = listOf("전체")
+    ),
+
     SEOUL(
         displayName = "서울시",
         districts = listOf(

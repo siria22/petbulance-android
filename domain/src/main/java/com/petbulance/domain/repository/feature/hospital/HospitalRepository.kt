@@ -9,8 +9,6 @@ interface HospitalRepository {
     suspend fun searchHospitals(
         q: String?,
         region: String?,
-        lat: Double?,
-        lng: Double?,
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
@@ -23,14 +21,10 @@ interface HospitalRepository {
     ): Result<PagingResult<Hospital>>
 
     suspend fun getHospitalDetail(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
+        hospitalId: Long
     ): Result<HospitalDetail>
 
     suspend fun getHospitalCard(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
+        hospitalId: Long
     ): Result<HospitalCard>
 }

@@ -1,7 +1,6 @@
 package com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 @Serializable
 data class ReviewSaveReqDto(

@@ -195,6 +195,12 @@ fun HospitalCard(
                         style = typography.labelLarge,
                         color = colorScheme.text.caption
                     )
+                } ?: run {
+                    Text(
+                        text = "-",
+                        style = typography.labelLarge,
+                        color = colorScheme.text.caption
+                    )
                 }
             }
 

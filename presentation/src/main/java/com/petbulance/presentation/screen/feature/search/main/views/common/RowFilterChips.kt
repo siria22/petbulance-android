@@ -51,7 +51,12 @@ fun RowChipFilters(
                 }
 
                 FilterBottomSheetTab.SPECIES -> {
-                    uiModel.animalCategory?.korean ?: AnimalCategory.ALL.korean
+                    val categories = uiModel.animalCategories
+                    when {
+                        categories.isEmpty() -> AnimalCategory.ALL.korean
+                        categories.size == 1 -> categories.first().korean
+                        else -> "${categories.first().korean} 외 ${categories.size - 1}종"
+                    }
                 }
             }
 

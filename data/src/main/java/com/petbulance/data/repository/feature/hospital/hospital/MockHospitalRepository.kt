@@ -17,8 +17,6 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
     override suspend fun searchHospitals(
         q: String?,
         region: String?,
-        lat: Double?,
-        lng: Double?,
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
@@ -42,11 +40,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         )
     }
 
-    override suspend fun getHospitalDetail(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
-    ): Result<HospitalDetail> {
+    override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
         delay(500)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
@@ -78,11 +72,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         }
     }
 
-    override suspend fun getHospitalCard(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
-    ): Result<HospitalCard> {
+    override suspend fun getHospitalCard(hospitalId: Long): Result<HospitalCard> {
         delay(300)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 

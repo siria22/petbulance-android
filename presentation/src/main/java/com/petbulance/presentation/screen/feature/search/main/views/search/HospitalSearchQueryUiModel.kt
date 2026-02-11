@@ -7,12 +7,11 @@ data class HospitalSearchQueryUiModel(
     val query: String?,
     val region: Region?,
     val district: String?,
-    val animalCategory: AnimalCategory?,
+    val animalCategories: List<AnimalCategory>,
     val openNowOnly: Boolean?
 ) {
-    // TODO : Backend logics
-    fun getRegionFilter() : String {
-        return if (region != null){
+    fun getRegionFilter(): String {
+        return if (region != null) {
             "${region.name} ${district ?: ""}"
         } else {
             "전체"
@@ -24,7 +23,7 @@ data class HospitalSearchQueryUiModel(
             query = null,
             region = null,
             district = null,
-            animalCategory = null,
+            animalCategories = emptyList(),
             openNowOnly = null
         )
     }

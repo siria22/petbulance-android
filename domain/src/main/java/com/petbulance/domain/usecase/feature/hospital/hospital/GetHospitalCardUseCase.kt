@@ -9,13 +9,7 @@ class GetHospitalCardUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         hospitalId: Long,
-        userLat: Double,
-        userLng: Double
     ): HospitalCard {
-        return repository.getHospitalCard(
-            hospitalId = hospitalId,
-            userLat = userLat,
-            userLng = userLng
-        ).getOrThrow()
+        return repository.getHospitalCard(hospitalId = hospitalId).getOrThrow()
     }
 }

@@ -263,7 +263,7 @@ private fun HourInfoItem(day: String, hours: String, modifier: Modifier = Modifi
         "일요일", "공휴일" -> colorScheme.tag.red.strong
         else -> colorScheme.text.caption
     }
-    val hoursText = if (hours === "CLOSED") "휴무" else hours
+    val hoursText = if (hours.trim() == "CLOSED") "휴무" else hours
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),

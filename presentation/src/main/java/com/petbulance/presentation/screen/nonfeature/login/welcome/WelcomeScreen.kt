@@ -113,20 +113,6 @@ fun WelcomeScreen(
                                 }
                             )
                     )
-                    BasicButton(
-                        text = "다른 소셜로그인 선택",
-                        size = BasicButtonSize.L,
-                        buttonType = BasicButtonType.PRIMARY,
-                        onClicked = {
-                            navController.safeNavigate(ScreenDestinations.Home.route) {
-                                popUpTo(ScreenDestinations.Login.route) { inclusive = true }
-                            }
-                        },
-                        radius = 16.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = spacingMedium, vertical = 56.dp)
-                    )
                 }
             } else {
                 BasicButton(
@@ -172,13 +158,13 @@ fun WelcomeScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
 
-        if (data.currentTerm != null) {
-            TermsDetailOverlay(
-                term = data.currentTerm,
-                onDismissRequest = { intent(TermsIntent.OnCloseDetail) }
-            )
-        }
+    if (data.currentTerm != null) {
+        TermsDetailOverlay(
+            term = data.currentTerm,
+            onDismissRequest = { intent(TermsIntent.OnCloseDetail) }
+        )
     }
 }
 

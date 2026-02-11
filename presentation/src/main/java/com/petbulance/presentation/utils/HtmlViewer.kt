@@ -35,7 +35,7 @@ fun HtmlText(
 ) {
     val density = LocalDensity.current
 
-    val h3Style = typography.titleMedium
+    val h3Style = typography.titleSmall
     val h4Style = typography.titleSmall
     val pStyle = typography.bodyMedium
 
@@ -57,11 +57,12 @@ fun HtmlText(
         },
         update = { textView ->
             val processedHtml = html
+                .replace("\n", "<br/>")
                 .replace("<br>", "<br/>", ignoreCase = true)
                 .replace("<h3>", "<h3-c>", ignoreCase = true)
-                .replace("</h3>", "</h3-c>", ignoreCase = true)
+                .replace("</h3>", "</h3-c><br/>", ignoreCase = true)
                 .replace("<h4>", "<h4-c>", ignoreCase = true)
-                .replace("</h4>", "</h4-c>", ignoreCase = true)
+                .replace("</h4>", "</h4-c><br/>", ignoreCase = true)
                 .replace("<p>", "<p-c>", ignoreCase = true)
                 .replace("</p>", "</p-c>", ignoreCase = true)
 
@@ -69,6 +70,7 @@ fun HtmlText(
                 var pStart = 0
                 var h3Start = 0
                 var h4Start = 0
+
 
                 override fun handleTag(
                     opening: Boolean,

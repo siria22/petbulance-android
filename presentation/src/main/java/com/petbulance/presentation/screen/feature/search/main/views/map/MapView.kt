@@ -1,6 +1,7 @@
 package com.petbulance.presentation.screen.feature.search.main.views.map
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,8 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.naver.maps.geometry.LatLng
@@ -70,6 +73,7 @@ import com.petbulance.presentation.screen.feature.search.main.views.search.Hospi
 import com.petbulance.presentation.utils.NaverMapView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,8 +84,11 @@ fun MapView(
     searchUiState: SearchUiState,
     onEvent: (SearchUiEvent) -> Unit
 ) {
+    val context = LocalContext.current
+
     var naverMap by remember { mutableStateOf<NaverMap?>(null) }
     var selectedHospitalId by remember { mutableStateOf<Long?>(null) }
+    var hasInitialSearchTriggered by remember { mutableStateOf(false) }
 
     var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -118,6 +125,24 @@ fun MapView(
     }
 
     LaunchedEffect(Unit) {
+        val fineGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        locationPermissionState = when {
+            fineGranted -> LocationPermissionState.FINE
+            coarseGranted -> LocationPermissionState.COARSE
+            else -> LocationPermissionState.NO_PERMISSION
+        }
+    }
+
+    LaunchedEffect(userLocationArgument.event) {
         userLocationArgument.event.collect { event ->
             if (event is SearchEvent.UserLocation.MoveCamera) {
                 val cameraUpdate = CameraUpdate.scrollTo(
@@ -139,6 +164,41 @@ fun MapView(
                 naverMap?.moveCamera(cameraUpdate)
             } else if (event is SearchEvent.UserLocation.CheckPermission.Error) {
                 showPermissionDialog = true
+            }
+        }
+    }
+
+    LaunchedEffect(naverMap, userLocationArgument.locationState) {
+        if (naverMap != null &&
+            userLocationArgument.locationState is UserLocationState.Success &&
+            !hasInitialSearchTriggered
+        ) {
+            delay(200)
+
+            val bounds = naverMap?.contentBounds
+            if (bounds != null) {
+                val mapBounds = MapBounds(
+                    minLat = bounds.southWest.latitude,
+                    minLng = bounds.southWest.longitude,
+                    maxLat = bounds.northEast.latitude,
+                    maxLng = bounds.northEast.longitude
+                )
+                onEvent(SearchUiEvent.OnSearchNearby(mapBounds))
+                hasInitialSearchTriggered = true
+            } else {
+                // 200ms 후에도 bounds가 null이면 재시도
+                delay(200)
+                val retryBounds = naverMap?.contentBounds
+                if (retryBounds != null) {
+                    val mapBounds = MapBounds(
+                        minLat = retryBounds.southWest.latitude,
+                        minLng = retryBounds.southWest.longitude,
+                        maxLat = retryBounds.northEast.latitude,
+                        maxLng = retryBounds.northEast.longitude
+                    )
+                    onEvent(SearchUiEvent.OnSearchNearby(mapBounds))
+                    hasInitialSearchTriggered = true
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ import com.petbulance.domain.model.feature.hospital.recent.ViewedHospitalList
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.HospitalSortType
+import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.usecase.feature.hospital.hospital.SearchHospitalsUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.AddSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.AddViewedHospitalUseCase
@@ -15,6 +16,8 @@ import com.petbulance.domain.usecase.feature.hospital.recent.DeleteRecentSearchK
 import com.petbulance.domain.usecase.feature.hospital.recent.DeleteViewedHospitalUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.GetRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.GetViewedHospitalsUseCase
+import com.petbulance.domain.usecase.feature.hospital.recent.SyncSearchHistoryUseCase
+import com.petbulance.domain.utils.LocationUtils
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +37,8 @@ class HospitalSearchViewModel @Inject constructor(
     private val deleteRecentSearchKeywordUseCase: DeleteRecentSearchKeywordUseCase,
     private val getViewedHospitalsUseCase: GetViewedHospitalsUseCase,
     private val addViewedHospitalUseCase: AddViewedHospitalUseCase,
-    private val deleteViewedHospitalUseCase: DeleteViewedHospitalUseCase
+    private val deleteViewedHospitalUseCase: DeleteViewedHospitalUseCase,
+    private val syncSearchHistoryUseCase: SyncSearchHistoryUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<HospitalSearchDataState>(HospitalSearchDataState.Init)
@@ -139,7 +143,20 @@ class HospitalSearchViewModel @Inject constructor(
         observeErrorEvent(eventFlow)
         fetchRecentKeywords()
         fetchViewedHospitals()
+        syncSearchHistoryFromServer()
     }
+
+    private fun syncSearchHistoryFromServer() {
+        launch {
+            runCatching {
+                syncSearchHistoryUseCase()
+            }.onFailure {
+                // 동기화 실패 시 로컬 데이터 사용
+                it.printStackTrace()
+            }
+        }
+    }
+
 
     private suspend fun searchHospitals(
         isNewSearch: Boolean,
@@ -163,7 +180,7 @@ class HospitalSearchViewModel @Inject constructor(
         lastSortType = sortType
         lastBounds = bounds
 
-        val regionParam = if (queryModel.region == null) {
+        val regionParam = if (queryModel.region == null || queryModel.region == Region.ALL) {
             null
         } else {
             val district = queryModel.district
@@ -174,10 +191,11 @@ class HospitalSearchViewModel @Inject constructor(
             }
         }
 
-        // 2. Animal 파라미터 처리 (단순화됨!)
-        val animalParam = queryModel.animalCategory?.let { category ->
-            if (category == AnimalCategory.ALL) null
-            else getBackendAnimalTypes(category)
+        // 2. Animal 파라미터 처리
+        val animalParam = if (queryModel.animalCategories.isEmpty()) {
+            null
+        } else {
+            queryModel.animalCategories.joinToString(",") { it.name }
         }
 
         // 3. 검색어(q) 처리 (빈값 null)
@@ -187,8 +205,6 @@ class HospitalSearchViewModel @Inject constructor(
             searchHospitalsUseCase(
                 q = qParam,
                 region = regionParam,
-                lat = currentUserLocation.latitude,
-                lng = currentUserLocation.longitude,
                 bounds = bounds,
                 animal = animalParam,
                 openNow = queryModel.openNowOnly,
@@ -200,7 +216,16 @@ class HospitalSearchViewModel @Inject constructor(
                 cursorReviewCount = currentCursorReviewCount
             )
         }.onSuccess { result ->
-            val newItems = result.content
+            val newItems = result.content.map { hospital ->
+                val distance = LocationUtils.calculateDistance(
+                    currentUserLocation.latitude,
+                    currentUserLocation.longitude,
+                    hospital.lat,
+                    hospital.lng
+                )
+                hospital.copy(distanceMeters = distance)
+            }
+
             if (isNewSearch) {
                 _hospitalList.value = newItems
             } else {
