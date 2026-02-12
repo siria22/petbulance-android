@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.mypage.profile
+package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.presentation.utils.BaseViewModel
@@ -11,30 +11,30 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(
+class MyPageProfileViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     // private val someUseCase: SomeUseCase
 ) : BaseViewModel() {
 
-    private val _dataState = MutableStateFlow<ProfileDataState>(ProfileDataState.Init)
-    val dataState: StateFlow<ProfileDataState> = _dataState
+    private val _dataState = MutableStateFlow<MyPageProfileDataState>(MyPageProfileDataState.Init)
+    val dataState: StateFlow<MyPageProfileDataState> = _dataState
 
-    private val _screenState = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Init)
-    val screenState: StateFlow<ProfileScreenState> = _screenState
+    private val _screenState = MutableStateFlow<MyPageProfileScreenState>(MyPageProfileScreenState.Init)
+    val screenState: StateFlow<MyPageProfileScreenState> = _screenState
 
-    private val _eventFlow = MutableSharedFlow<ProfileEvent>()
-    val eventFlow: SharedFlow<ProfileEvent> = _eventFlow
+    private val _eventFlow = MutableSharedFlow<MyPageProfileEvent>()
+    val eventFlow: SharedFlow<MyPageProfileEvent> = _eventFlow
 
     private val _someData = MutableStateFlow("")
     val someData: StateFlow<String> = _someData
 
-    fun onIntent(intent: ProfileIntent) {
+    fun onIntent(intent: MyPageProfileIntent) {
         when (intent) {
-            is ProfileIntent.SomeIntentWithoutParams -> {
+            is MyPageProfileIntent.SomeIntentWithoutParamsMyPage -> {
                 //do sth
             }
 
-            is ProfileIntent.SomeIntentWithParams -> {
+            is MyPageProfileIntent.SomeIntentWithParamsMyPage -> {
                 //do sth(intent.params)
             }
         }
@@ -50,7 +50,7 @@ class ProfileViewModel @Inject constructor(
 
     // some function
     private suspend fun someFunction() {
-        _dataState.value = ProfileDataState.OnProgress
+        _dataState.value = MyPageProfileDataState.OnProgress
 
         runCatching {
             // someUseCase()
@@ -59,13 +59,13 @@ class ProfileViewModel @Inject constructor(
         }.onFailure { exception ->
             // some.value = emptyList()
             _eventFlow.emit(
-                ProfileEvent.DataFetch.Error(
+                MyPageProfileEvent.DataFetch.Error(
                     displayType = ErrorDisplayType.Common, // will be handled by BaseViewModel & CommonScreenWrapper
                     userMessage = "Error messages to be shown to users",
                     exceptionMessage = exception.message
                 )
             )
         }
-        _dataState.value = ProfileDataState.Init
+        _dataState.value = MyPageProfileDataState.Init
     }
 }

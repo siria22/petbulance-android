@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.mypage.profile
+package com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list
 
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -9,23 +9,17 @@ import androidx.navigation.compose.composable
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
-fun NavGraphBuilder.profileDestination(navController: NavController) {
+fun NavGraphBuilder.myPageNoticeDestination(navController: NavController) {
     composable(
-        route = ScreenDestinations.MyPage.Profile.route,
-//        arguments = listOf(
-//            navArgument(name = "") {
-//                type = NavType.LongType
-//                defaultValue = 0L
-//            }
-//        ) -> if route contains arguments
+        route = ScreenDestinations.MyPage.Help.Notice.route,
     ) {
-        val viewModel: ProfileViewModel = hiltViewModel()
+        val viewModel: MyPageNoticeViewModel = hiltViewModel()
 
-        val argument: ProfileArgument = let {
+        val argument: MyPageNoticeArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
             val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-            ProfileArgument(
+            MyPageNoticeArgument(
                 dataState = dataState,
                 screenState = screenState,
                 intent = viewModel::onIntent,
@@ -33,11 +27,13 @@ fun NavGraphBuilder.profileDestination(navController: NavController) {
             )
         }
 
-        val data: ProfileData = let {
-            val someData by viewModel.someData.collectAsStateWithLifecycle()
+        val data: MyPageNoticeData = let {
+            val notices by viewModel.notices.collectAsStateWithLifecycle()
+            val isLoadingNextPage by viewModel.isLoadingNextPage.collectAsStateWithLifecycle()
 
-            ProfileData(
-                data = someData
+            MyPageNoticeData(
+                notices = notices,
+                isLoadingNextPage = isLoadingNextPage
             )
         }
 
@@ -47,7 +43,7 @@ fun NavGraphBuilder.profileDestination(navController: NavController) {
             errorState = errorState,
             dismissErrorDialog = viewModel::dismissErrorDialog,
         ) {
-            ProfileScreen(
+            MyPageNoticeScreen(
                 navController = navController,
                 argument = argument,
                 data = data

@@ -67,7 +67,12 @@ sealed class ScreenDestinations(val route: String) {
         }
 
         sealed class Help : ScreenDestinations("mypage/help") {
-            data object Notice : ScreenDestinations("mypage/help/notice")
+            data object Notice : ScreenDestinations("mypage/help/notice") {
+                data object Detail : ScreenDestinations("mypage/help/notice/detail/{id}") {
+                    const val ARG_ID = "id"
+                    fun createRoute(id: Long): String = "mypage/help/notice/detail/$id"
+                }
+            }
         }
     }
 }

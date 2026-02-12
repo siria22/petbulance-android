@@ -7,7 +7,8 @@ import androidx.navigation.compose.rememberNavController
 import com.petbulance.presentation.screen.feature.home.homeDestination
 import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.myPageReviewsDestination
-import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.myPageNoticeDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.detail.myPageNoticeDetailDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list.myPageNoticeDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.account.myPageAccountDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.profile.myPageProfileDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
@@ -56,5 +57,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         myPageAccountDestination(navController = navController)
 
         myPageNoticeDestination(navController = navController)
+        myPageNoticeDetailDestination(navController = navController)
     }
 }

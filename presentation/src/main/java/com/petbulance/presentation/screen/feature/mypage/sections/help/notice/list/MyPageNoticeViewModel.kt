@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.mypage.sections.help.notice
+package com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list
 
 import com.petbulance.domain.model.feature.support.notice.NoticeListItem
 import com.petbulance.domain.usecase.feature.support.notice.GetNoticeListUseCase

@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.mypage.profile
+package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,10 +28,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
-fun ProfileScreen(
+fun MyPageProfileScreen(
     navController: NavController,
-    argument: ProfileArgument,
-    data: ProfileData
+    argument: MyPageProfileArgument,
+    data: MyPageProfileData
 ) {
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
@@ -42,7 +41,7 @@ fun ProfileScreen(
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
             when (event) {
-                is ProfileEvent.DataFetch.Error -> {
+                is MyPageProfileEvent.DataFetch.Error -> {
 
                 }
             }
@@ -95,17 +94,17 @@ private fun ProfileScreenContents(
 
 @Preview
 @Composable
-private fun ProfileScreenPreview() {
+private fun MyPageProfileScreenPreview() {
     PetbulanceTheme {
-        ProfileScreen(
+        MyPageProfileScreen(
             navController = rememberNavController(),
-            argument = ProfileArgument(
+            argument = MyPageProfileArgument(
                 intent = { },
-                dataState = ProfileDataState.Init,
-                screenState = ProfileScreenState.Init,
+                dataState = MyPageProfileDataState.Init,
+                screenState = MyPageProfileScreenState.Init,
                 event = MutableSharedFlow()
             ),
-            data = ProfileData(
+            data = MyPageProfileData(
                 data = ""
             )
         )

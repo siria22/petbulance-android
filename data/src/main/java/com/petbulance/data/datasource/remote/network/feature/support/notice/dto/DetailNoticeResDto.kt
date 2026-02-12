@@ -5,13 +5,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DetailNoticeResDto(
     val noticeId: Long,
-    val isImportant: Boolean,
+    val noticeStatus: String,
     val title: String,
     val createdAt: String,
     val content: String,
     val attachments: List<AttachmentDto> = emptyList(),
     val previousNotice: AdjacentNoticeDto? = null,
-    val nextNotice: AdjacentNoticeDto? = null
+    val nextNotice: AdjacentNoticeDto? = null,
+    val buttons: List<NoticeButtonDto>? = null
 )
 
 @Serializable

@@ -1,4 +1,4 @@
-package com.petbulance.presentation.screen.feature.mypage.sections.help.notice
+package com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,7 +46,9 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.component.ui.spacingXXXS
+import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.composables.NoticeStatusChip
 import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -112,7 +114,7 @@ private fun MyPageNoticeScreenContents(
             NoticeListItemCard(
                 noticeListItem = notice,
                 onNoticeClicked = {
-                    /* TODO : Navigate to Notice Details */
+                    ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(notice.noticeId)
                 }
             )
             CommonDivider()
@@ -161,32 +163,6 @@ private fun NoticeListItemCard(
     }
 }
 
-@Composable
-private fun NoticeStatusChip(status: NoticeStatusType) {
-    val backgroundColor = when (status) {
-        NoticeStatusType.EVENT -> colorScheme.tag.blue.bg
-        NoticeStatusType.ADVERTISING -> colorScheme.tag.green.bg
-        NoticeStatusType.NOTICE -> colorScheme.tag.yellow.subtle
-    }
-
-    val textColor = when (status) {
-        NoticeStatusType.EVENT -> colorScheme.tag.blue.strong
-        NoticeStatusType.ADVERTISING -> colorScheme.tag.green.medium
-        NoticeStatusType.NOTICE -> colorScheme.tag.trust.verystrong
-    }
-
-    Box(
-        modifier = Modifier
-            .background(color = backgroundColor, shape = RoundedCornerShape(4.dp))
-            .padding(vertical = spacingXXXS, horizontal = spacingXS)
-    ) {
-        Text(
-            text = status.korean,
-            color = textColor,
-            style = typography.labelMedium.emp()
-        )
-    }
-}
 
 @Preview
 @Composable
