@@ -17,6 +17,7 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
+import com.petbulance.domain.model.feature.hospital.review.ReviewStatus
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.AnimalSpecies
@@ -81,8 +82,11 @@ fun MyReviewGetDto.toDomain() = MyReview(
     hospitalName = hospitalName,
     content = comment,
     date = reviewDate,
-    rating = 0.0,
-    representativeImage = hospitalImageUrl
+    rating = 0.0, // TODO : 미제공 여부 다시 확인
+    representativeImage = hospitalImageUrl,
+    likeCount = likeCount,
+    isReceiptVerified = receiptChecked,
+    status = ReviewStatus.REGISTERED // TODO : 정책상 임시 고정
 )
 
 fun SaveReviewParam.toDto() = ReviewSaveReqDto(

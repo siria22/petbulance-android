@@ -68,13 +68,13 @@ fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = "review.author",
+                    text = review.author,
                     color = colorScheme.text.caption,
                     style = typography.labelMedium
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = "review.date",
+                    text = review.date,
                     color = colorScheme.text.caption,
                     style = typography.bodySmall
                 )

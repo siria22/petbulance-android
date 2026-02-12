@@ -129,10 +129,8 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         size: Int,
         cursorId: Long?
     ): Result<PagingReviewList<MyReview>> {
-        val myReviews = listOf(
-            MyReview(1, "행복 동물병원", "내 강아지가 좋아해요", "2023-11-20", 4.5, "url1"),
-            MyReview(2, "튼튼 동물병원", "고양이 전문 병원!", "2023-11-19", 5.0, null)
-        )
+        val myReviews = MyReview.stubs()
+
         return Result.success(
             PagingReviewList(
                 items = myReviews,

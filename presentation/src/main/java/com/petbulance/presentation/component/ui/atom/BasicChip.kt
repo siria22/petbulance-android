@@ -15,11 +15,12 @@ import com.petbulance.presentation.component.theme.emp
 
 @Composable
 fun BasicChip(
+    modifier: Modifier = Modifier,
     text: String,
-    backgroundColor: Color = PetbulanceTheme.colorScheme.tag.yellow.subtle
+    backgroundColor: Color = PetbulanceTheme.colorScheme.tag.yellow.subtle,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(
                 color = backgroundColor,
                 shape = RoundedCornerShape(16.dp)
