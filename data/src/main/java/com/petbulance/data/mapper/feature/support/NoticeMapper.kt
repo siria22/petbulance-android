@@ -10,6 +10,7 @@ import com.petbulance.domain.model.feature.support.notice.Attachment
 import com.petbulance.domain.model.feature.support.notice.NoticeDetail
 import com.petbulance.domain.model.feature.support.notice.NoticeListItem
 import com.petbulance.domain.model.feature.support.notice.PagingNoticeList
+import com.petbulance.domain.model.type.NoticeStatusType
 
 fun DetailNoticeResDto.toDomain() : NoticeDetail =   NoticeDetail(
     noticeId = noticeId,
@@ -41,7 +42,7 @@ fun PagingNoticeListResDto.toDomain() : PagingNoticeList = PagingNoticeList(
 
 fun NoticeListResDto.toDomain() : NoticeListItem = NoticeListItem(
     noticeId = noticeId,
-    isImportant = isImportant,
+    noticeStatus = NoticeStatusType.fromString(noticeStatus),
     title = title,
     content = content,
     createdAt = createdAt

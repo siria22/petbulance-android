@@ -174,6 +174,7 @@ private val LightColorScheme = PetbulanceColorScheme(
         disabled = PetbulancePrimitives.Gray.p400,
         dark = PetbulancePrimitives.Gray.p900,
         light = PetbulancePrimitives.Gray.p500,
+        veryLight = PetbulancePrimitives.Gray.p300,
         medium = PetbulancePrimitives.Gray.p600,
         rating = PetbulancePrimitives.Warning.p500,
     ),

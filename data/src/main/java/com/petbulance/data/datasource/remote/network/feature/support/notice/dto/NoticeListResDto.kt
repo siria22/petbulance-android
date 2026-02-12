@@ -11,7 +11,7 @@ data class PagingNoticeListResDto(
 @Serializable
 data class NoticeListResDto(
     val noticeId: Long,
-    val isImportant: Boolean,
+    val noticeStatus: String,
     val title: String,
     val content: String?,
     val createdAt: String
