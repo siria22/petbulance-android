@@ -54,6 +54,8 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -63,11 +65,6 @@ fun MyPageScreen(
     argument: MyPageArgument,
     data: MyPageData
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
-
-    val dataState = argument.dataState
-    val screenState = argument.screenState
-
     var isLoginRequiredDialogVisible by remember { mutableStateOf(false) }
 
     val userInfo = data.userInfo
@@ -104,6 +101,7 @@ fun MyPageScreen(
         Box(modifier = Modifier.padding(innerPadding)) {
             MyPageScreenContents(
                 userInfo = userInfo,
+                navController = navController,
                 appLatestVersion = data.latestVersion,
                 appCurrentVersion = data.currentVersion
             )
@@ -114,7 +112,7 @@ fun MyPageScreen(
         LoginRequiredDialog(
             onDismiss = { isLoginRequiredDialogVisible = false },
             onLoginButtonClicked = {
-                //todo : navController.safeNavigate(ScreenDestinations.Login.route)
+                navController.safeNavigate(ScreenDestinations.Login.route)
                 isLoginRequiredDialogVisible = false
             },
         )
@@ -125,6 +123,7 @@ fun MyPageScreen(
 @Composable
 private fun MyPageScreenContents(
     userInfo: UserInfo?,
+    navController: NavController,
     appLatestVersion: String,
     appCurrentVersion: String,
 ) {
@@ -134,7 +133,13 @@ private fun MyPageScreenContents(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        LoginOrUserInfo(userInfo)
+        LoginOrUserInfo(
+            userInfo,
+            navigateToLogin = { navController.safeNavigate(ScreenDestinations.Login.route) },
+            navigateToProfileEdit = {
+                navController.safeNavigate(ScreenDestinations.MyPage.User.Profile.route)
+            },
+        )
 
         MyPageSection(
             sectionTitle = "사용자 설정",
@@ -147,7 +152,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_logout),
                     title = "로그인 계정 관리",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.User.Account.route) }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_permission),
@@ -163,7 +168,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_reviews),
                     title = "후기 관리",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Reviews.route) }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_docs),
@@ -184,7 +189,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_bullhorn),
                     title = "공지사항",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Help.Notice.route) }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_headset),
@@ -205,7 +210,11 @@ private fun MyPageScreenContents(
 }
 
 @Composable
-private fun LoginOrUserInfo(user: UserInfo?) {
+private fun LoginOrUserInfo(
+    user: UserInfo?,
+    navigateToLogin: () -> Unit,
+    navigateToProfileEdit: () -> Unit,
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -247,9 +256,7 @@ private fun LoginOrUserInfo(user: UserInfo?) {
                 size = BasicButtonSize.XS,
                 buttonType = BasicButtonType.SECONDARY,
                 radius = 12.dp
-            ) {
-                /* TODO : To Profile Edit Screen */
-            }
+            ) { navigateToProfileEdit() }
 
         } else {
             Column(
@@ -273,9 +280,7 @@ private fun LoginOrUserInfo(user: UserInfo?) {
                 size = BasicButtonSize.XS,
                 buttonType = BasicButtonType.SECONDARY,
                 radius = 12.dp
-            ) {
-                /* TODO : To Login */
-            }
+            ) { navigateToLogin() }
         }
     }
 }

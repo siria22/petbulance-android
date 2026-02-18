@@ -6,8 +6,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
+import javax.inject.Inject
 
-class NoticeApi(
+class NoticeApi @Inject constructor(
     @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "${BASE_URL}/notices"
@@ -20,6 +21,10 @@ class NoticeApi(
             lastNoticeId?.let { parameter("lastNoticeId", it) }
             parameter("pageSize", pageSize)
         }
+    }
+
+    suspend fun getAttachmentDownloadUrl(noticeId: Long, fileId: Long): HttpResponse {
+        return client.get("$baseUrl/$noticeId/attachments/$fileId/download")
     }
 
     suspend fun getNoticeDetail(noticeId: Long): HttpResponse {

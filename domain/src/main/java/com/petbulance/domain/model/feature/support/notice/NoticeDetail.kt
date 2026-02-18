@@ -1,6 +1,7 @@
 package com.petbulance.domain.model.feature.support.notice
 
 import com.petbulance.domain.model.type.NoticeStatusType
+import kotlin.collections.isNullOrEmpty
 
 data class NoticeDetail(
     val noticeId: Long,
@@ -21,7 +22,7 @@ data class Attachment(
     val fileId: Long,
     val fileName: String,
     val fileUrl: String,
-    val fileType: String
+    val fileType: String? = null
 )
 
 data class AdjacentNotice(

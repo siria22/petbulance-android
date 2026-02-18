@@ -1,6 +1,5 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -24,14 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.support.notice.NoticeListItem
-import com.petbulance.domain.model.type.NoticeStatusType
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
-import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
@@ -43,9 +38,7 @@ import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
-import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.component.ui.spacingXXXS
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.composables.NoticeStatusChip
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -94,12 +87,20 @@ fun MyPageNoticeScreen(
                 navController = navController
             )
         },
+        containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             if (data.isLoadingNextPage) {
                 OnContentLoadingUi(text = "잠시만 기다려주세요...")
             } else {
-                MyPageNoticeScreenContents(notices = data.notices)
+                MyPageNoticeScreenContents(
+                    notices = data.notices,
+                    onNoticeClicked = { noticeId ->
+                        navController.navigate(
+                            ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(noticeId)
+                        )
+                    }
+                )
             }
         }
     }
@@ -107,15 +108,14 @@ fun MyPageNoticeScreen(
 
 @Composable
 private fun MyPageNoticeScreenContents(
-    notices: List<NoticeListItem>
+    notices: List<NoticeListItem>,
+    onNoticeClicked: (Long) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        items(notices) { notice ->
+        items(notices, key = { it.noticeId }) { notice ->
             NoticeListItemCard(
                 noticeListItem = notice,
-                onNoticeClicked = {
-                    ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(notice.noticeId)
-                }
+                onNoticeClicked = { onNoticeClicked(notice.noticeId) }
             )
             CommonDivider()
         }

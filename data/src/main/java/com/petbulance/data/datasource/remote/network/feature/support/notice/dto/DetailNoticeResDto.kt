@@ -20,7 +20,7 @@ data class AttachmentDto(
     val fileId: Long,
     val fileName: String,
     val fileUrl: String,
-    val fileType: String
+    val fileType: String? = null
 )
 
 @Serializable

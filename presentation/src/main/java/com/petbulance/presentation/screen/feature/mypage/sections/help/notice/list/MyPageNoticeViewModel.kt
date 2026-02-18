@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -93,15 +92,13 @@ class MyPageNoticeViewModel @Inject constructor(
                     _isLoadingNextPage.value = false
                 }
             }.onFailure { exception ->
-                launch {
-                    _eventFlow.emit(
-                        MyPageNoticeEvent.DataFetch.Error(
-                            displayType = ErrorDisplayType.Common,
-                            userMessage = "공지사항을 불러오는데 실패했습니다.",
-                            exceptionMessage = exception.message
-                        )
+                _eventFlow.emit(
+                    MyPageNoticeEvent.DataFetch.Error(
+                        displayType = ErrorDisplayType.Common,
+                        userMessage = "공지사항을 불러오는데 실패했습니다.",
+                        exceptionMessage = exception.message
                     )
-                }
+                )
 
                 if (isRefresh) {
                     _dataState.value = MyPageNoticeDataState.Init

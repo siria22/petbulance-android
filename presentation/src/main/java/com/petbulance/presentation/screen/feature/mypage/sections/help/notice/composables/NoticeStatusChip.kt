@@ -18,15 +18,15 @@ import com.petbulance.presentation.component.ui.spacingXXXS
 @Composable
 fun NoticeStatusChip(status: NoticeStatusType) {
     val backgroundColor = when (status) {
-        NoticeStatusType.EVENT -> colorScheme.tag.blue.bg
-        NoticeStatusType.ADVERTISING -> colorScheme.tag.green.bg
-        NoticeStatusType.NOTICE -> colorScheme.tag.yellow.subtle
+        NoticeStatusType.EVENT -> colorScheme.tag.green.bg
+        NoticeStatusType.ADVERTISING -> colorScheme.tag.yellow.bg
+        NoticeStatusType.NOTICE -> colorScheme.tag.blue.bg
     }
 
     val textColor = when (status) {
-        NoticeStatusType.EVENT -> colorScheme.tag.blue.strong
-        NoticeStatusType.ADVERTISING -> colorScheme.tag.green.medium
-        NoticeStatusType.NOTICE -> colorScheme.tag.trust.verystrong
+        NoticeStatusType.EVENT -> colorScheme.tag.green.strong
+        NoticeStatusType.ADVERTISING -> colorScheme.tag.trust.verystrong
+        NoticeStatusType.NOTICE -> colorScheme.tag.blue.strong
     }
 
     Box(

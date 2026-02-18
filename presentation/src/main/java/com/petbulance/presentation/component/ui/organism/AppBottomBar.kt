@@ -79,7 +79,7 @@ fun BottomNavigationBar(
             iconResource = IconResource.Drawable(R.drawable.ic_gnb_other),
             bottomNavType = CurrentBottomNav.MY,
             onClicked = {
-                /* TODO : Navigate to MyPage */
+                navController.safeNavigate(ScreenDestinations.MyPage.route)
             }
         ),
     )
