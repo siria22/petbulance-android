@@ -1,4 +1,4 @@
-package com.petbulance.data.repository.nonfeature.app
+﻿package com.petbulance.data.repository.nonfeature.app
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -89,6 +89,19 @@ class AppInfoRepositoryImpl @Inject constructor(
                     imageUrl = it.imageUrl
                 )
             }
+        }
+    }
+
+    override suspend fun uploadImage(url: String, imageBytes: ByteArray, mimeType: String): Result<Unit> {
+        return try {
+            val response = api.uploadImage(url, imageBytes, mimeType)
+            if (response.status.value in 200..299) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("S3 upload failed: ${response.status.value}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

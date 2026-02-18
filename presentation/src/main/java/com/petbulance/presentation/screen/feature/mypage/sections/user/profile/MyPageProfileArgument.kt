@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
+import android.net.Uri
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.error.ErrorEvent
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,11 +22,19 @@ sealed class MyPageProfileScreenState {
 }
 
 sealed class MyPageProfileIntent {
-    data class SomeIntentWithParamsMyPage(val param: String) : MyPageProfileIntent()
-    data object SomeIntentWithoutParamsMyPage : MyPageProfileIntent()
+    data object LoadUserInfo : MyPageProfileIntent()
+    data class UpdateNickname(val nickname: String) : MyPageProfileIntent()
+    data class SelectImage(val uri: Uri) : MyPageProfileIntent()
+    data class SaveProfile(
+        val newNickname: String,
+        val imageBytes: ByteArray?,
+        val imageFilename: String?,
+        val imageMimeType: String?
+    ) : MyPageProfileIntent()
 }
 
 sealed class MyPageProfileEvent {
+    data object SaveSuccess : MyPageProfileEvent()
     sealed class DataFetch : MyPageProfileEvent() {
         data class Error(
             override val userMessage: String = "문제가 발생했습니다.",

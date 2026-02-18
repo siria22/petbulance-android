@@ -1,15 +1,17 @@
-package com.petbulance.domain.usecase.feature.hospital.review
+﻿package com.petbulance.domain.usecase.feature.hospital.review
 
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
+import com.petbulance.domain.usecase.nonfeature.app.UploadImageUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class CreateReviewUseCase @Inject constructor(
-    private val repository: ReviewRepository
+    private val repository: ReviewRepository,
+    private val uploadImage: UploadImageUseCase
 ) {
     /**
      * 리뷰 등록 및 이미지 업로드 프로세스
@@ -39,7 +41,7 @@ class CreateReviewUseCase @Inject constructor(
         // 2. Presigned URL을 통한 이미지 업로드 실행
         val uploadJobs = uploadUrls.zip(images).map { (urlInfo, imageBytes) ->
             async {
-                repository.uploadImage(urlInfo.url, imageBytes)
+                uploadImage(urlInfo.url, imageBytes, "image/jpeg")
                     .map { urlInfo.saveId }
                     .getOrNull()
             }

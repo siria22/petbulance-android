@@ -1,7 +1,7 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
 import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -12,12 +12,6 @@ import com.petbulance.presentation.utils.nav.ScreenDestinations
 fun NavGraphBuilder.myPageProfileDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.MyPage.User.Profile.route,
-//        arguments = listOf(
-//            navArgument(name = "") {
-//                type = NavType.LongType
-//                defaultValue = 0L
-//            }
-//        ) -> if route contains arguments
     ) {
         val viewModel: MyPageProfileViewModel = hiltViewModel()
 
@@ -34,10 +28,12 @@ fun NavGraphBuilder.myPageProfileDestination(navController: NavController) {
         }
 
         val data: MyPageProfileData = let {
-            val someData by viewModel.someData.collectAsStateWithLifecycle()
+            val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
+            val selectedImageUri by viewModel.selectedImageUri.collectAsStateWithLifecycle()
 
             MyPageProfileData(
-                data = someData
+                userInfo = userInfo,
+                selectedImageUri = selectedImageUri
             )
         }
 

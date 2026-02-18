@@ -1,14 +1,16 @@
-package com.petbulance.domain.usecase.feature.hospital.review
+﻿package com.petbulance.domain.usecase.feature.hospital.review
 
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
+import com.petbulance.domain.usecase.nonfeature.app.UploadImageUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class ModifyReviewUseCase @Inject constructor(
-    private val repository: ReviewRepository
+    private val repository: ReviewRepository,
+    private val uploadImage: UploadImageUseCase
 ) {
     suspend operator fun invoke(
         param: ModifyReviewParam,
@@ -29,7 +31,7 @@ class ModifyReviewUseCase @Inject constructor(
         // 2. Presigned URL을 통한 이미지 업로드
         val uploadJobs = uploadUrls.zip(newImageBytes).map { (urlInfo, imageBytes) ->
             async {
-                repository.uploadImage(urlInfo.url, imageBytes)
+                uploadImage(urlInfo.url, imageBytes, "image/jpeg")
                     .map { urlInfo.saveId }
                     .getOrNull()
             }

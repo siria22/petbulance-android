@@ -172,12 +172,6 @@ class ReviewRepositoryImpl @Inject constructor(
         }.map { it.toDomain() }
     }
 
-    override suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit> {
-        return safeApiCall<Unit>(path = url) {
-            reviewApi.uploadImage(url, imageBytes)
-        }.map { }
-    }
-
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
         val userInfo = safeApiCall<MeResponseDto>(path = "/users/me") {
             userApi.getMyInfo()

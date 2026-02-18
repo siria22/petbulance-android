@@ -130,10 +130,4 @@ class ReviewApi @Inject constructor(
             setBody(body)
         }
     }
-
-    suspend fun uploadImage(url: String, imageBytes: ByteArray): HttpResponse {
-        return client.put(url) {
-            setBody(imageBytes)
-        }
-    }
 }

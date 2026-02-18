@@ -270,7 +270,7 @@ private fun CurrentAccountSection(
         CommonDivider()
 
         Text(
-            text = "최소 1개의 SNS 계정을 연결되어야 합니다.",
+            text = "최소 1개의 SNS 계정은 연결되어야 합니다.",
             color = colorScheme.text.caption,
             style = typography.labelSmall,
             modifier = Modifier.padding(

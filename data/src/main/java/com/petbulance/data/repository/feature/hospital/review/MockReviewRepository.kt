@@ -167,13 +167,6 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         )
     }
 
-    override suspend fun uploadImage(
-        url: String,
-        imageBytes: ByteArray
-    ): Result<Unit> {
-        return Result.success(Unit)
-    }
-
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
         return Result.success(ReviewDetail.stub())
     }
