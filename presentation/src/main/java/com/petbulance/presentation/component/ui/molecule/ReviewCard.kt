@@ -1,7 +1,6 @@
 package com.petbulance.presentation.component.ui.molecule
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -92,28 +90,29 @@ fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(spacingXS),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(contentAlignment = Alignment.TopStart) {
-                BasicImageBox(
-                    size = 90.dp,
-                    uri = review.imageUrls.firstOrNull()?.toUri(),
-                    errorImageResource = R.drawable.img_checker,
-                    placeholderImageResource = R.drawable.img_checker,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                )
-
-                if (review.imageUrls.size > 1) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(topStart = 8.dp, bottomEnd = 8.dp))
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = review.imageUrls.size.toString(),
-                            color = Color.White,
-                            style = typography.labelMedium
-                        )
+            if (!review.imageUrls.isEmpty()) {
+                Box(contentAlignment = Alignment.TopStart) {
+                    BasicImageBox(
+                        size = 90.dp,
+                        uri = review.imageUrls.firstOrNull()?.toUri(),
+                        errorImageResource = R.drawable.img_checker,
+                        placeholderImageResource = R.drawable.img_checker,
+                        modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                    )
+                    if (review.imageUrls.size > 1) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(topStart = 8.dp, bottomEnd = 8.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = review.imageUrls.size.toString(),
+                                color = Color.White,
+                                style = typography.labelMedium
+                            )
+                        }
                     }
                 }
             }

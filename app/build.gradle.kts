@@ -28,7 +28,7 @@ android {
         applicationId = "com.petbulance.petbulance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = 5
         versionName = "v1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -130,7 +130,6 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         cursorId: Long?
     ): Result<PagingReviewList<MyReview>> {
         val myReviews = MyReview.stubs()
-
         return Result.success(
             PagingReviewList(
                 items = myReviews,
