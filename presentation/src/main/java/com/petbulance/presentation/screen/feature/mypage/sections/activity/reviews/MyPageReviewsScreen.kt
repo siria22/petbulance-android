@@ -195,29 +195,6 @@ fun MyPageReviewsScreen(
 
                 else -> {}
             }
-            if (showDeleteDialog) {
-                WarningDialog(
-                    title = "주의",
-                    content = "후기를 삭제하면 되돌릴 수 없어요.\n그래도 삭제하시겠어요?",
-                    cancelText = "취소",
-                    confirmText = "삭제",
-                    onDismissRequest = { showDeleteDialog = false },
-                    onExitButtonClicked = {
-                        showDeleteDialog = false
-                        pendingDeleteIds = normalScreenState.selectedIds
-                    }
-                )
-            }
-
-            if (showMenu) {
-                MyPageReviewsDeleteReviewsDialog(
-                    onReportOptionClicked = {
-                        showMenu = false
-                        argument.intent(MyPageReviewsIntent.ToggleSelectionMode(true))
-                    },
-                    onDismissRequest = { showMenu = false }
-                )
-            }
 
             if (showDeleteSuccessToast) {
                 Row(
@@ -272,6 +249,31 @@ fun MyPageReviewsScreen(
             }
         }
     }
+
+    if (showDeleteDialog) {
+        WarningDialog(
+            title = "주의",
+            content = "후기를 삭제하면 되돌릴 수 없어요.\n그래도 삭제하시겠어요?",
+            cancelText = "취소",
+            confirmText = "삭제",
+            onDismissRequest = { showDeleteDialog = false },
+            onExitButtonClicked = {
+                showDeleteDialog = false
+                pendingDeleteIds = normalScreenState.selectedIds
+            }
+        )
+    }
+
+    if (showMenu) {
+        MyPageReviewsDeleteReviewsDialog(
+            onReportOptionClicked = {
+                showMenu = false
+                argument.intent(MyPageReviewsIntent.ToggleSelectionMode(true))
+            },
+            onDismissRequest = { showMenu = false }
+        )
+    }
+
 }
 
 @Composable

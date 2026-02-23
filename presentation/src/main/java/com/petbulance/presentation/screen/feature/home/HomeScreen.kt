@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -151,6 +152,9 @@ fun HomeScreen(
                 },
                 onNavigateToReview = { /* TODO: navController.navigate(...) */ },
                 onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
+                onBannerClick = { noticeId ->
+                    navController.safeNavigate(ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(noticeId))
+                }
             )
         }
     }
@@ -190,7 +194,8 @@ private fun HomeScreenContents(
     onNavigateToSearch: () -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     onNavigateToReview: () -> Unit,
-    onNavigateToCommunity: () -> Unit
+    onNavigateToCommunity: () -> Unit,
+    onBannerClick: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -199,7 +204,8 @@ private fun HomeScreenContents(
         HospitalShortcut(
             onClicked = onNavigateToSearch,
             banners = data.homeBanners,
-            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
+            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType,
+            onBannerClick = onBannerClick
         )
 
         HospitalReviewShortcut(
@@ -213,7 +219,6 @@ private fun HomeScreenContents(
         )
     }
 }
-
 
 @Composable
 private fun CommonHeader(
@@ -252,7 +257,7 @@ private fun HospitalShortcut(
     onClicked: () -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     banners: List<HomeBanner>,
-    onBannerClick: (Long) -> Unit = {}
+    onBannerClick: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -349,7 +354,7 @@ private fun HospitalNoticeSlider(
             uri = item.imageUrl.toUri(),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .aspectRatio(16f / 9f)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { onBannerClick(item.noticeId) },
         )

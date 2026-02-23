@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.CommonDivider
@@ -68,7 +69,7 @@ fun DeleteOrEdit(
                 Text(
                     text = "수정",
                     style = typography.bodyLarge,
-                    color = colorScheme.text.caption,
+                    color = colorScheme.text.tertiary,
                     modifier = Modifier
                         .padding(vertical = 8.dp, horizontal = 16.dp)
                         .clickable { onEditOptionClicked() }
@@ -86,7 +87,7 @@ fun DeleteOrEdit(
                 Text(
                     text = "취소",
                     style = typography.bodyLarge,
-                    color = colorScheme.text.caption,
+                    color = colorScheme.text.tertiary,
                     modifier = Modifier
                         .padding(vertical = 8.dp, horizontal = 16.dp)
                         .clickable { onDismissRequest() }
@@ -94,4 +95,14 @@ fun DeleteOrEdit(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun DeleteOrEditPreview() {
+    DeleteOrEdit(
+        onDeleteOptionClicked = {},
+        onEditOptionClicked = {},
+        onDismissRequest = {}
+    )
 }

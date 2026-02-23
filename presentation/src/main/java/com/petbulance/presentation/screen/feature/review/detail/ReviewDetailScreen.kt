@@ -148,57 +148,6 @@ fun ReviewDetailScreen(
         ) {
             ReviewDetailScreenContents(data = data)
 
-            if (showMoreOption) {
-                if (data.isAuthor) {
-                    DeleteOrEdit(
-                        onDeleteOptionClicked = {
-                            showMoreOption = false
-                            showDeleteConfirmDialog = true
-                        },
-                        onEditOptionClicked = {
-                            showMoreOption = false
-                            navController.navigate(ScreenDestinations.Review.Edit.createRoute(data.id))
-                        },
-                        onDismissRequest = { showMoreOption = false }
-                    )
-                } else {
-                    ReportOptionDialog(
-                        onReportOptionClicked = {
-                            showMoreOption = false
-                            showReportReasonDialog = true
-                        },
-                        onDismissRequest = { showMoreOption = false }
-                    )
-                }
-            }
-
-            if (showDeleteConfirmDialog) {
-                WarningDialog(
-                    title = "후기를 삭제할까요?",
-                    content = "후기를 삭제하면 모든 데이터가 삭제되고 다시 볼 수 없어요.",
-                    confirmText = "삭제",
-                    onDismissRequest = { showDeleteConfirmDialog = false },
-                    onExitButtonClicked = {
-                        showDeleteConfirmDialog = false
-                        argument.intent(ReviewDetailIntent.DeleteReview)
-                    }
-                )
-            }
-
-            if (showReportReasonDialog) {
-                ReviewReportReasonDialog(
-                    selectedReason = selectedReason,
-                    onReasonClicked = { reason ->
-                        selectedReason = reason
-                    },
-                    onSubmitClicked = {
-                        showReportReasonDialog = false
-                        argument.intent(ReviewDetailIntent.ReportReview(selectedReason))
-                    },
-                    onDismissRequest = { showReportReasonDialog = false }
-                )
-            }
-
             if (showReportSuccessToast) {
                 Row(
                     modifier = Modifier
@@ -226,9 +175,60 @@ fun ReviewDetailScreen(
                             showReportSuccessToast = false
                         }
                     )
-                } // TODO : 3초 후 사라지게 설정
+                }
             }
         }
+    }
+
+    if (showMoreOption) {
+        if (data.isAuthor) {
+            DeleteOrEdit(
+                onDeleteOptionClicked = {
+                    showMoreOption = false
+                    showDeleteConfirmDialog = true
+                },
+                onEditOptionClicked = {
+                    showMoreOption = false
+                    navController.navigate(ScreenDestinations.Review.Edit.createRoute(data.id))
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        } else {
+            ReportOptionDialog(
+                onReportOptionClicked = {
+                    showMoreOption = false
+                    showReportReasonDialog = true
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        }
+    }
+
+    if (showDeleteConfirmDialog) {
+        WarningDialog(
+            title = "후기를 삭제할까요?",
+            content = "후기를 삭제하면 모든 데이터가 삭제되고 다시 볼 수 없어요.",
+            confirmText = "삭제",
+            onDismissRequest = { showDeleteConfirmDialog = false },
+            onExitButtonClicked = {
+                showDeleteConfirmDialog = false
+                argument.intent(ReviewDetailIntent.DeleteReview)
+            }
+        )
+    }
+
+    if (showReportReasonDialog) {
+        ReviewReportReasonDialog(
+            selectedReason = selectedReason,
+            onReasonClicked = { reason ->
+                selectedReason = reason
+            },
+            onSubmitClicked = {
+                showReportReasonDialog = false
+                argument.intent(ReviewDetailIntent.ReportReview(selectedReason))
+            },
+            onDismissRequest = { showReportReasonDialog = false }
+        )
     }
 
     if (showErrorDialog) {

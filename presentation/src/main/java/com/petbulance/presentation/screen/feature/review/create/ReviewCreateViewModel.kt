@@ -339,7 +339,7 @@ class ReviewCreateViewModel @Inject constructor(
     }
 
     private fun fetchHospitalCandidates(query: String) {
-        if (query.length < 2) return
+        if (query.length < 1) return
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
