@@ -8,7 +8,26 @@ class GetRecentReviewsUseCase @Inject constructor(
     private val repository: ReviewRepository
 ) {
     suspend operator fun invoke(): List<HomeScreenReview> {
-        //TODO : Fetch recent reviews by some criteria
-        return listOf(HomeScreenReview.stub())
+        return repository.filterReview(
+            region = null,
+            animalTypes = null,
+            isReceipt = null,
+            cursorId = null,
+            size = 10
+        ).map { pagingResult ->
+            pagingResult.items
+                .filter { it.totalRating >= 4.0 }
+                .take(3)
+                .map { reviewItem ->
+                    HomeScreenReview(
+                        id = reviewItem.id,
+                        hospitalName = reviewItem.hospitalName,
+                        rating = reviewItem.totalRating,
+                        reviewCount = 0, // API에서 제공하지 않음
+                        image = reviewItem.images.firstOrNull() ?: reviewItem.hospitalImage,
+                        content = reviewItem.reviewContent
+                    )
+                }
+        }.getOrElse { emptyList() }
     }
 }

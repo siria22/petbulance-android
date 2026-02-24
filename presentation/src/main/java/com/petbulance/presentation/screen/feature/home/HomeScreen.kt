@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -36,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,20 +61,26 @@ import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeMedium
+import com.petbulance.presentation.component.ui.molecule.ComingSoonPlaceholder
+import com.petbulance.presentation.component.ui.molecule.SectionErrorView
+import com.petbulance.presentation.component.ui.molecule.SectionLoadingPlaceholder
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
+import com.petbulance.presentation.component.ui.organism.PullToRefreshContainer
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.feature.home.composables.HomeScreenEmptyStateUi
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsData
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
+import com.petbulance.presentation.utils.SectionLoadState
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -104,7 +108,7 @@ fun HomeScreen(
                     showTermsSheet = false
                 }
 
-                else -> { }
+                else -> {}
             }
         }
     }
@@ -145,15 +149,20 @@ fun HomeScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             HomeScreenContents(
+                argument = argument,
                 data = data,
                 onNavigateToSearch = { navController.safeNavigate(ScreenDestinations.Search.route) },
                 navigateToHospitalSearchPageWithAnimalType = { animalCategory ->
                     navController.safeNavigate(ScreenDestinations.Search.createRoute(animalCategory))
                 },
-                onNavigateToReview = { /* TODO: navController.navigate(...) */ },
+                onNavigateToReview = { navController.safeNavigate(ScreenDestinations.Review.route) },
                 onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
                 onBannerClick = { noticeId ->
-                    navController.safeNavigate(ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(noticeId))
+                    navController.safeNavigate(
+                        ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(
+                            noticeId
+                        )
+                    )
                 }
             )
         }
@@ -190,6 +199,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContents(
+    argument: HomeArgument,
     data: HomeData,
     onNavigateToSearch: () -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
@@ -197,26 +207,45 @@ private fun HomeScreenContents(
     onNavigateToCommunity: () -> Unit,
     onBannerClick: (Long) -> Unit
 ) {
-    Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceAround
+    val scrollState = rememberScrollState()
+
+    PullToRefreshContainer(
+        scrollState = scrollState,
+        onRefresh = {
+            argument.intent(HomeIntent.RetryReviews)
+            argument.intent(HomeIntent.RetryBanners)
+            argument.intent(HomeIntent.RetryHotArticles)
+        }
     ) {
-        HospitalShortcut(
-            onClicked = onNavigateToSearch,
-            banners = data.homeBanners,
-            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType,
-            onBannerClick = onBannerClick
-        )
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
+            HospitalShortcut(
+                onClicked = onNavigateToSearch,
+                banners = data.homeBanners,
+                bannerState = argument.bannerState,
+                onRetryBanners = { argument.intent(HomeIntent.RetryBanners) },
+                navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType,
+                onBannerClick = onBannerClick
+            )
 
-        HospitalReviewShortcut(
-            reviews = data.recentReviews,
-            onClicked = onNavigateToReview
-        )
+            HospitalReviewShortcut(
+                reviews = data.recentReviews,
+                reviewState = argument.reviewState,
+                onRetryReviews = { argument.intent(HomeIntent.RetryReviews) },
+                onClicked = onNavigateToReview
+            )
 
-        HotArticlesShortcut(
-            posts = data.hotArticles,
-            onClicked = onNavigateToCommunity
-        )
+            HotArticlesShortcut(
+                posts = data.hotArticles,
+                hotArticleState = argument.hotArticleState,
+                onRetryHotArticles = { argument.intent(HomeIntent.RetryHotArticles) },
+                onClicked = onNavigateToCommunity
+            )
+        }
     }
 }
 
@@ -257,6 +286,8 @@ private fun HospitalShortcut(
     onClicked: () -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     banners: List<HomeBanner>,
+    bannerState: SectionLoadState,
+    onRetryBanners: () -> Unit,
     onBannerClick: (Long) -> Unit
 ) {
     Column(
@@ -269,7 +300,23 @@ private fun HospitalShortcut(
         HospitalShortcutAnimalRow(
             navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
         )
-        HospitalNoticeSlider(banners, onBannerClick)
+        when (bannerState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 180.dp)
+            }
+
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = bannerState.message,
+                    onRetry = onRetryBanners,
+                    height = 180.dp
+                )
+            }
+
+            else -> {
+                HospitalNoticeSlider(banners, onBannerClick)
+            }
+        }
     }
 }
 
@@ -348,7 +395,9 @@ private fun HospitalNoticeSlider(
         items = banners,
         contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingSmall),
         itemSpacing = 16.dp,
-        isIndicatorVisible = true
+        isIndicatorVisible = true,
+        autoScroll = true,
+        autoScrollInterval = 3000L
     ) { _, item ->
         BasicImageBox(
             uri = item.imageUrl.toUri(),
@@ -364,6 +413,8 @@ private fun HospitalNoticeSlider(
 @Composable
 private fun HospitalReviewShortcut(
     reviews: List<HomeScreenReview>,
+    reviewState: SectionLoadState,
+    onRetryReviews: () -> Unit,
     onClicked: () -> Unit
 ) {
     Column(
@@ -373,7 +424,23 @@ private fun HospitalReviewShortcut(
             headerText = "최신 영수증 후기",
             onClicked = onClicked
         )
-        RecentReviewSlider(reviews)
+        when (reviewState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 150.dp)
+            }
+
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = reviewState.message,
+                    onRetry = onRetryReviews,
+                    height = 150.dp
+                )
+            }
+
+            else -> {
+                RecentReviewSlider(reviews)
+            }
+        }
     }
 }
 
@@ -384,11 +451,7 @@ private fun RecentReviewSlider(reviews: List<HomeScreenReview>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (reviews.isEmpty()) {
-            Text(
-                text = "내용이 없습니다.",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall.emp()
-            )
+            HomeScreenEmptyStateUi()
         } else {
             BaseCarousel(
                 items = reviews.take(3),
@@ -459,6 +522,8 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
 @Composable
 private fun HotArticlesShortcut(
     posts: List<PostDetail>?,
+    hotArticleState: SectionLoadState,
+    onRetryHotArticles: () -> Unit,
     onClicked: () -> Unit
 ) {
     Column(
@@ -466,19 +531,24 @@ private fun HotArticlesShortcut(
     ) {
         CommonHeader(
             headerText = "인기 게시글",
-            onClicked = onClicked
+            onClicked = { /* TODO: 커뮤니티 페이지 이동 */ }
         )
 
-        if (posts.isNullOrEmpty()) {
-            Text(
-                modifier = Modifier.padding(vertical = spacingSmall),
-                text = "내용이 없습니다.",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall.emp()
-            )
-        } else {
-            posts.forEach { post ->
-                HotArticlesItem(post = post)
+        when (hotArticleState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 200.dp)
+            }
+
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = hotArticleState.message,
+                    onRetry = onRetryHotArticles,
+                    height = 200.dp
+                )
+            }
+
+            else -> {
+                ComingSoonPlaceholder()
             }
         }
     }
@@ -589,6 +659,9 @@ private fun HomeScreenPreview() {
             navController = rememberNavController(),
             argument = HomeArgument(
                 intent = { },
+                reviewState = SectionLoadState.Success,
+                bannerState = SectionLoadState.Success,
+                hotArticleState = SectionLoadState.Success,
                 dataState = HomeDataState.Init,
                 screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()

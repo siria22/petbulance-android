@@ -48,10 +48,16 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val argument: HomeArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
             val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+            val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
+            val bannerState by viewModel.bannerState.collectAsStateWithLifecycle()
+            val hotArticleState by viewModel.hotArticleState.collectAsStateWithLifecycle()
 
             HomeArgument(
                 dataState = dataState,
                 screenState = screenState,
+                reviewState = reviewState,
+                bannerState = bannerState,
+                hotArticleState = hotArticleState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )
@@ -60,7 +66,7 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val data: HomeData = let {
             val recentReviews by viewModel.recentReviews.collectAsStateWithLifecycle()
             val hotArticle by viewModel.hotArticles.collectAsStateWithLifecycle()
-            val homeBanners by viewModel.homeBanners.collectAsStateWithLifecycle() // 추가
+            val homeBanners by viewModel.homeBanners.collectAsStateWithLifecycle()
 
             HomeData(
                 recentReviews = recentReviews,
