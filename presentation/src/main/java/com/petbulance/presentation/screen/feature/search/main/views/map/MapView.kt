@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,11 +43,11 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
+import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
-import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.molecule.LocationPermissionDialog
@@ -71,6 +70,7 @@ import com.petbulance.presentation.screen.feature.search.main.views.common.Navig
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowChipFilters
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowResultControlChips
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
 import com.petbulance.presentation.utils.NaverMapView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -83,16 +83,18 @@ fun MapView(
     navController: NavController,
     userLocationArgument: UserLocationArgument,
     searchUiState: SearchUiState,
-    onEvent: (SearchUiEvent) -> Unit
+    onEvent: (SearchUiEvent) -> Unit,
+    locationTerm: Term?,
+    onTermsClick: () -> Unit
 ) {
     val context = LocalContext.current
 
     var naverMap by remember { mutableStateOf<NaverMap?>(null) }
     var selectedHospitalId by remember { mutableStateOf<Long?>(null) }
     var hasInitialSearchTriggered by remember { mutableStateOf(false) }
-
-    var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+    var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
+    var showTermsDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -311,8 +313,23 @@ fun MapView(
                 )
                 showPermissionDialog = false
             },
-            onTermsClick = {
-                /* TODO : 약관 보여주는 어쩌고 */
+            onTermsClick = onTermsClick
+        )
+    }
+
+    // 약관 상세 조회 결과 처리
+    LaunchedEffect(locationTerm) {
+        if (locationTerm != null) {
+            showTermsDialog = true
+        }
+    }
+
+    // 약관 상세 다이얼로그
+    if (showTermsDialog && locationTerm != null) {
+        TermsDetailOverlay(
+            term = locationTerm,
+            onDismissRequest = {
+                showTermsDialog = false
             }
         )
     }
@@ -490,7 +507,9 @@ private fun MapViewPreview() {
 //                hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
             ),
-            onEvent = {}
+            onEvent = {},
+            locationTerm = null,
+            onTermsClick = {}
         )
     }
 }

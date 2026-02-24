@@ -11,7 +11,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.TermsType
 import com.petbulance.presentation.screen.nonfeature.auth.AuthViewModel
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsViewModel
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
@@ -30,6 +32,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val hospitalSearchViewModel: HospitalSearchViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
         val authViewModel : AuthViewModel = hiltViewModel()
+        val termsViewModel: TermsViewModel = hiltViewModel()
 
         LaunchedEffect(Unit) {
             val animalName = entry.arguments?.getString(ScreenDestinations.Search.ARG_ANIMAL)
@@ -90,6 +93,9 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         // Error State
         val errorState by hospitalSearchViewModel.errorDialogState.collectAsStateWithLifecycle()
 
+        // Terms Data
+        val locationTerm by termsViewModel.currentTerm.collectAsStateWithLifecycle()
+
         CommonScreenWrapper(
             errorState = errorState,
             dismissErrorDialog = hospitalSearchViewModel::dismissErrorDialog,
@@ -101,7 +107,9 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
                 hospitalSearchArgument = hospitalSearchArgument,
                 commonSearchArgument = commonSearchArgument,
                 locationData = locationData,
-                hospitalSearchData = hospitalData
+                hospitalSearchData = hospitalData,
+                locationTerm = locationTerm,
+                onTermsClick = { termsViewModel.loadTermDetail(TermsType.LOCATION.name) }
             )
         }
     }

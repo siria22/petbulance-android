@@ -8,9 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.domain.model.type.HospitalSortType
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheet
@@ -32,9 +34,12 @@ fun SearchScreen(
     userLocationArgument: UserLocationArgument,
     hospitalSearchArgument: HospitalSearchArgument,
     locationData: UserLocationData,
-    hospitalSearchData: HospitalSearchData
+    hospitalSearchData: HospitalSearchData,
+    locationTerm: Term?,
+    onTermsClick: () -> Unit
 ) {
     val screenState = commonSearchArgument.screenState
+    val context = LocalContext.current
 
     // --- Hoisted State ---
     var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
@@ -84,7 +89,7 @@ fun SearchScreen(
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
                         sortType = selectedSortType,
-                        keepPreviousBounds = true
+                        keepPreviousBounds = false
                     )
                 )
             }
@@ -112,7 +117,7 @@ fun SearchScreen(
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
                         sortType = selectedSortType,
-                        keepPreviousBounds = true
+                        keepPreviousBounds = false
                     )
                 )
                 isFilterBottomSheetVisible = false
@@ -136,7 +141,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.keyword),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -148,7 +154,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.hospitalName),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType // 추가됨
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -216,7 +223,9 @@ fun SearchScreen(
                 navController = navController,
                 userLocationArgument = userLocationArgument,
                 searchUiState = searchUiState,
-                onEvent = onEvent
+                onEvent = onEvent,
+                locationTerm = locationTerm,
+                onTermsClick = onTermsClick
             )
         }
 
@@ -291,6 +300,8 @@ private fun SearchScreenPreview() {
             locationData = UserLocationData.empty,
             hospitalSearchData = HospitalSearchData.empty,
             isGuest = false,
+            locationTerm = null,
+            onTermsClick = {}
         )
     }
 }

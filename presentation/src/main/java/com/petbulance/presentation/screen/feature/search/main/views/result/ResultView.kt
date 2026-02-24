@@ -127,14 +127,20 @@ private fun ResultViewContents(
             }
         } else {
             item {
-                NoResult(keywordName = searchUiState.currentQuery.query)
+                NoResult(
+                    keywordName = searchUiState.currentQuery.query,
+                    onNavigateToMapView = { onEvent(SearchUiEvent.OnNavigateToMapView) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun NoResult(keywordName: String?) {
+private fun NoResult(
+    keywordName: String?,
+    onNavigateToMapView: () -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingSmall),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -174,19 +180,7 @@ private fun NoResult(keywordName: String?) {
             size = BasicButtonSize.M,
             buttonType = BasicButtonType.SECONDARY,
             radius = 12.dp,
-            onClicked = {
-                /* TODO : 지도 페이지로 이동 */
-            }
-        )
-        BasicButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = "커뮤니티에 질문하기",
-            size = BasicButtonSize.M,
-            buttonType = BasicButtonType.SECONDARY,
-            radius = 12.dp,
-            onClicked = {
-                /* TODO : 지도 페이지로 이동 */
-            }
+            onClicked = { onNavigateToMapView() }
         )
         BasicButton(
             modifier = Modifier.fillMaxWidth(),
@@ -195,7 +189,7 @@ private fun NoResult(keywordName: String?) {
             buttonType = BasicButtonType.SECONDARY,
             radius = 12.dp,
             onClicked = {
-                /* TODO : 지도 페이지로 이동 */
+                /* TODO : 제보 기능 구현 후 연결 */
             }
         )
     }

@@ -157,7 +157,6 @@ class HospitalSearchViewModel @Inject constructor(
         }
     }
 
-
     private suspend fun searchHospitals(
         isNewSearch: Boolean,
         queryModel: HospitalSearchQueryUiModel,
@@ -248,12 +247,6 @@ class HospitalSearchViewModel @Inject constructor(
 
         _dataState.value = HospitalSearchDataState.Init
         isRequesting = false
-    }
-
-    private fun getBackendAnimalTypes(category: AnimalCategory): String {
-        return AnimalSpecies.entries
-            .filter { it.category == category }
-            .joinToString(",") { it.name }
     }
 
     private fun resetCursors() {
