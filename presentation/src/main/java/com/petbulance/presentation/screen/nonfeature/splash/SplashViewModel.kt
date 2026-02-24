@@ -44,7 +44,7 @@ class SplashViewModel @Inject constructor(
                 .onFailure { e ->
                     _event.emit(
                         SplashEvent.DataFetch.Error(
-                            userMessage = "서버 연결에 실패했습니다.\n네트워크 상태를 확인해주세요.",
+                            userMessage = "네트워크 연결을 확인해주세요",
                             exceptionMessage = e.message,
                             displayType = ErrorDisplayType.Common
                         )
@@ -73,7 +73,10 @@ class SplashViewModel @Inject constructor(
 
         getTermsStatusUseCase()
             .onSuccess { status ->
-                val isAllRequiredAgreed = status.service && status.privacy && status.location
+                // TODO: 서버에서 내려주는 약관 필수/선택 여부 확인 필요
+                // 정책상 위치기반 서비스는 선택 약관이므로 필수 체크에서 제외
+                // 만약 서버에서 location을 필수로 내려준다면 아래 로직 수정 필요
+                val isAllRequiredAgreed = status.service && status.privacy // && status.location
                 Log.d(LOGGER_TAG, "Is All Required terms Agreed: $isAllRequiredAgreed")
                 if (isAllRequiredAgreed) {
                     Log.d(LOGGER_TAG, "Navigate to home")

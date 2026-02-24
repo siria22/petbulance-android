@@ -1,7 +1,5 @@
 package com.petbulance.presentation.screen.nonfeature.login.main
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,12 +38,10 @@ import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.color.ColorObject
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.DefaultRoundedCorner
-import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.utils.hooks.HandleMultiplePermissions
 import com.petbulance.presentation.utils.hooks.login.rememberGoogleLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberKakaoLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberNaverLoginManager
@@ -59,28 +55,6 @@ fun LoginScreen(
     argument: LoginArgument,
 ) {
     val dataState = argument.dataState
-
-    val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        listOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.READ_MEDIA_IMAGES
-        )
-    } else {
-        listOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        )
-    }
-
-    HandleMultiplePermissions(
-        permissions = permissionsToRequest,
-        onAllGranted = { /* 모든 권한 허용됨 - 필요 시 로깅 */ },
-        onDenied = { /* 일부 권한 거부됨 - 로그인은 계속 진행 */ }
-    )
 
     LaunchedEffect(argument.event) {
         argument.event.collect { event ->
@@ -109,15 +83,15 @@ fun LoginScreen(
                     navController.safeNavigate(ScreenDestinations.Home.route) {
                         popUpTo(ScreenDestinations.Login.route) { inclusive = true }
                     }
-                }
+                },
+                lastLoginPlatform = argument.screenState.lastLoginPlatform
             )
-
-            if (dataState is LoginDataState.Loading) {
-                OnContentLoadingUi("잠시만 기다려주세요...")
-            }
         }
     }
 
+    if (dataState is LoginDataState.Loading) {
+        OnContentLoadingUi("잠시만 기다려주세요...")
+    }
     // BackHandler {  }
 }
 
@@ -125,6 +99,7 @@ fun LoginScreen(
 private fun LoginScreenContents(
     onIntent: (LoginIntent) -> Unit,
     onNavigateToHome: () -> Unit,
+    lastLoginPlatform: LoginProviderType?
 ) {
     val loginWithKakao = rememberKakaoLoginManager { token ->
         if (token != null) {
@@ -177,7 +152,7 @@ private fun LoginScreenContents(
                     withStyle(
                         style = SpanStyle(color = PetbulancePrimitives.Primary.p500)
                     ) {
-                        append("펫불런스")
+                        append("펫뷸런스")
                     }
 
                     append("에서 시작하세요!")
@@ -191,7 +166,8 @@ private fun LoginScreenContents(
             onGoogleLoginButtonClicked = loginWithGoogle,
             onKakaoLoginButtonClicked = loginWithKakao,
             onNaverLoginButtonClicked = loginWithNaver,
-            onWithoutLoginButtonClicked = onNavigateToHome
+            onWithoutLoginButtonClicked = onNavigateToHome,
+            lastLoginPlatform = lastLoginPlatform
         )
     }
 }
@@ -201,7 +177,8 @@ private fun LoginButtonColumn(
     onGoogleLoginButtonClicked: () -> Unit,
     onKakaoLoginButtonClicked: () -> Unit,
     onNaverLoginButtonClicked: () -> Unit,
-    onWithoutLoginButtonClicked: () -> Unit
+    onWithoutLoginButtonClicked: () -> Unit,
+    lastLoginPlatform: LoginProviderType?
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingSmall),
@@ -224,7 +201,15 @@ private fun LoginButtonColumn(
         WithoutLoginButton(
             handler = onWithoutLoginButtonClicked
         )
-        /* TODO : 최근에 ~로 로그인 했어요 */
+        
+        if (lastLoginPlatform != null) {
+            Text(
+                text = "최근에 ${lastLoginPlatform.korean}로 로그인했어요",
+                style = typography.bodySmall,
+                color = colorScheme.text.caption,
+                modifier = Modifier.padding(top = spacingSmall)
+            )
+        }
     }
 }
 
@@ -312,7 +297,7 @@ private fun LoginScreenPreview() {
             argument = LoginArgument(
                 intent = { },
                 dataState = LoginDataState.Init,
-                screenState = LoginScreenState.Init,
+                screenState = LoginScreenState(lastLoginPlatform = null),
                 event = MutableSharedFlow()
             ),
         )

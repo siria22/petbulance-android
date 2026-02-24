@@ -28,6 +28,8 @@ import com.petbulance.presentation.component.ui.iconSizeMS
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
+import com.petbulance.presentation.component.ui.molecule.ErrorStateMessage
+import com.petbulance.presentation.component.ui.molecule.ErrorMessages
 
 @Composable
 fun TermsContent(
@@ -41,19 +43,35 @@ fun TermsContent(
     }
 
     Box(modifier = modifier.fillMaxWidth()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TermsColumn(
-                termsList = data.termsList,
-                agreedTermIds = data.agreedTermIds,
-                isAllRequiredAgreed = data.isAllRequiredAgreed,
-                onDetailVisible = { term -> onIntent(TermsIntent.OnDetailClick(term)) },
-                onToggle = { term -> onIntent(TermsIntent.OnToggleTerm(term)) },
-                onAgree = { onIntent(TermsIntent.OnAgreeClick) },
-                onToggleAll = { onIntent(TermsIntent.OnToggleAll) },
-                onCancel = onCancel
-            )
+        if (data.termsList.isEmpty()) {
+            // 약관 로딩 실패 시 에러 UI 표시
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(spacingMedium)
+            ) {
+                ErrorStateMessage(
+                    primaryMessage = ErrorMessages.TermsLoadFailed.PRIMARY,
+                    secondaryMessage = ErrorMessages.TermsLoadFailed.SECONDARY
+                )
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TermsColumn(
+                    termsList = data.termsList,
+                    agreedTermIds = data.agreedTermIds,
+                    isAllRequiredAgreed = data.isAllRequiredAgreed,
+                    onDetailVisible = { term -> onIntent(TermsIntent.OnDetailClick(term)) },
+                    onToggle = { term -> onIntent(TermsIntent.OnToggleTerm(term)) },
+                    onAgree = { onIntent(TermsIntent.OnAgreeClick) },
+                    onToggleAll = { onIntent(TermsIntent.OnToggleAll) },
+                    onCancel = onCancel
+                )
+            }
         }
     }
 }

@@ -79,13 +79,19 @@ class TermsViewModel @Inject constructor(
 
     private fun loadTerms() {
         launch {
+            // TODO: 약관 캐싱 로직 추가 필요 - 최초 1회만 API 호출하고 이후 재사용
             _dataState.value = TermsDataState.Loading
             getTermsListUseCase().onSuccess { list ->
                 _termsList.value = list
                 _dataState.value = TermsDataState.Init
             }.onFailure { e ->
                 _dataState.value = TermsDataState.Init
-                _event.emit(TermsEvent.DataFetch.Error(exceptionMessage = e.message))
+                _event.emit(
+                    TermsEvent.DataFetch.Error(
+                        userMessage = "약관을 불러올 수 없습니다.",
+                        exceptionMessage = e.message
+                    )
+                )
             }
         }
     }

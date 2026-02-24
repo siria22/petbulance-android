@@ -458,8 +458,8 @@ private fun PreviewLongContent() {
             argument = previewArgument,
             data = MyPageNoticeDetailData(
                 noticeDetail = baseNoticeStub.copy(
-                    title = "펫불런스 오픈 기념 리뷰 작성 이벤트",
-                    content = "펫불런서 여러분 안녕하세요!\n\n펫불런스가 런칭되어 정말 기쁩니다. 이를 기념하기 위해 특별한 리뷰 작성 이벤트를 준비했습니다! 여러분의 소중한 의견을 듣고 싶습니다. 펫불런스를 이용해 주신 경험에 대해 솔직한 리뷰를 남겨주시면, 추첨을 통해 다양한 상품을 드리는 기회를 드립니다.\n\n이벤트 참여 방법은 저희 앱을 이용한 후, 웹사이트나 소셜 미디어에 캡처와 함께 리뷰를 남겨주시면 됩니다. 리뷰는 길이 제한 없이 자유롭게 작성하실 수 있으며, 여러분의 경험과 느낌을 적어주시면 됩니다.\n\n감사합니다"
+                    title = "펫뷸런스 오픈 기념 리뷰 작성 이벤트",
+                    content = "펫뷸런서 여러분 안녕하세요!\n\n펫뷸런스가 런칭되어 정말 기쁩니다. 이를 기념하기 위해 특별한 리뷰 작성 이벤트를 준비했습니다! 여러분의 소중한 의견을 듣고 싶습니다. 펫불런스를 이용해 주신 경험에 대해 솔직한 리뷰를 남겨주시면, 추첨을 통해 다양한 상품을 드리는 기회를 드립니다.\n\n이벤트 참여 방법은 저희 앱을 이용한 후, 웹사이트나 소셜 미디어에 캡처와 함께 리뷰를 남겨주시면 됩니다. 리뷰는 길이 제한 없이 자유롭게 작성하실 수 있으며, 여러분의 경험과 느낌을 적어주시면 됩니다.\n\n감사합니다"
                 )
             )
         )
@@ -476,7 +476,7 @@ private fun PreviewEventType() {
             data = MyPageNoticeDetailData(
                 noticeDetail = baseNoticeStub.copy(
                     noticeStatus = NoticeStatusType.EVENT,
-                    title = "펫불런스 오픈 기념 리뷰 작성 이벤트"
+                    title = "펫뷸런스 오픈 기념 리뷰 작성 이벤트"
                 )
             )
         )
@@ -492,7 +492,7 @@ private fun PreviewCTANotice() {
             argument = previewArgument,
             data = MyPageNoticeDetailData(
                 noticeDetail = baseNoticeStub.copy(
-                    title = "펫불런스 정상영업합니다.",
+                    title = "펫뷸런스 정상영업합니다.",
                     attachments = listOf(
                         Attachment(
                             fileId = 16L,

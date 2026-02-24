@@ -23,14 +23,11 @@ class LoginViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<LoginDataState>(LoginDataState.Init)
     val dataState: StateFlow<LoginDataState> = _dataState.asStateFlow()
 
-    private val _screenState = MutableStateFlow<LoginScreenState>(LoginScreenState.Init)
+    private val _screenState = MutableStateFlow(LoginScreenState())
     val screenState: StateFlow<LoginScreenState> = _screenState.asStateFlow()
 
     private val _event = MutableSharedFlow<LoginEvent>()
     val event: SharedFlow<LoginEvent> = _event.asSharedFlow()
-
-    private val _lastLoginPlatform = MutableStateFlow<LoginProviderType?>(null)
-    val lastLoginPlatform: StateFlow<LoginProviderType?> = _lastLoginPlatform.asStateFlow()
 
     init {
         observeErrorEvent(_event)
@@ -74,19 +71,14 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun getLastLoginPlatform() {
-        _dataState.value = LoginDataState.Loading
         runCatching {
             getLastLoginPlatformUseCase()
         }.onSuccess { result ->
-            _lastLoginPlatform.value = result.getOrThrow()
-        }.onFailure { ex ->
-            _event.emit(
-                LoginEvent.DataFetch.Error(
-                    userMessage = "error messages",
-                    exceptionMessage = ex.message
-                )
-            )
+            val platform = result.getOrNull()
+            _screenState.value = _screenState.value.copy(lastLoginPlatform = platform)
+        }.onFailure {
+            // 최근 로그인 플랫폼 로딩 실패는 로그인 플로우에 영향 없음
+            // 단순히 UI에 표시하지 않음
         }
-        _dataState.value = LoginDataState.Init
     }
 }
