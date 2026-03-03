@@ -1,4 +1,4 @@
-﻿package com.petbulance.domain.usecase.feature.hospital.review
+package com.petbulance.domain.usecase.feature.hospital.review
 
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewResult
@@ -26,9 +26,12 @@ class CreateReviewUseCase @Inject constructor(
         param: SaveReviewParam,
         images: List<ByteArray>
     ): Result<SaveReviewResult> = coroutineScope {
-        // 1. 리뷰 정보 저장 요청
-        val saveResult = repository.saveReview(param).getOrElse {
-            return@coroutineScope Result.failure(it)
+        // 1. 리뷰 정보 저장 요청 (재시도 1회)
+        val saveResult = repository.saveReview(param).getOrElse { firstError ->
+            // 네트워크 재시도 로직
+            repository.saveReview(param).getOrElse { secondError ->
+                return@coroutineScope Result.failure(secondError)
+            }
         }
 
         val uploadUrls = saveResult.uploadUrls
@@ -38,12 +41,18 @@ class CreateReviewUseCase @Inject constructor(
             return@coroutineScope Result.success(saveResult)
         }
 
-        // 2. Presigned URL을 통한 이미지 업로드 실행
+        // 2. Presigned URL을 통한 이미지 업로드 실행 (재시도 포함)
         val uploadJobs = uploadUrls.zip(images).map { (urlInfo, imageBytes) ->
             async {
+                // 첫 번째 시도
                 uploadImage(urlInfo.url, imageBytes, "image/jpeg")
                     .map { urlInfo.saveId }
-                    .getOrNull()
+                    .getOrElse {
+                        // 실패 시 재시도 1회
+                        uploadImage(urlInfo.url, imageBytes, "image/jpeg")
+                            .map { urlInfo.saveId }
+                            .getOrNull()
+                    }
             }
         }
 
@@ -51,9 +60,11 @@ class CreateReviewUseCase @Inject constructor(
 
         // 3. 서버에 이미지 업로드 완료 상태 전송
         if (uploadedKeys.isNotEmpty()) {
+            // 부분 성공: 성공한 이미지만 전송
             repository.checkReviewImageSave(saveResult.reviewId, uploadedKeys)
                 .map { saveResult }
         } else {
+            // 전체 실패
             Result.failure(Exception("이미지 업로드에 실패했습니다."))
         }
     }

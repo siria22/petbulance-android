@@ -249,7 +249,10 @@ class ReviewCreateViewModel @Inject constructor(
     }
 
     private fun validateStep2(step2: Step2State): Boolean {
-        return step2.ratings.expertise > 0 &&
+        return step2.ratings.expertise in 0.0..5.0 &&
+                step2.ratings.kindness in 0.0..5.0 &&
+                step2.ratings.facility in 0.0..5.0 &&
+                step2.ratings.expertise > 0 &&
                 step2.ratings.kindness > 0 &&
                 step2.ratings.facility > 0
     }
@@ -314,7 +317,16 @@ class ReviewCreateViewModel @Inject constructor(
                         emitEvent(ReviewCreateEvent.OnSubmitSuccess(response.reviewId))
                     }
                     .onFailure { e ->
-                        emitEvent(ReviewCreateEvent.ShowToast("리뷰 등록 실패: ${e.message}"))
+                        val errorMessage = when {
+                            e.message?.contains("duplicate", ignoreCase = true) == true ||
+                            e.message?.contains("중복", ignoreCase = true) == true -> 
+                                "동일 병원에 대해 1일 1회까지만 후기를 작성할 수 있습니다."
+                            e.message?.contains("rate limit", ignoreCase = true) == true ||
+                            e.message?.contains("제한", ignoreCase = true) == true -> 
+                                "단기간 내 연속 작성이 제한되었습니다. 잠시 후 다시 시도해주세요."
+                            else -> "리뷰 등록 실패: ${e.message}"
+                        }
+                        emitEvent(ReviewCreateEvent.ShowToast(errorMessage))
                     }
 
             } catch (e: Exception) {
