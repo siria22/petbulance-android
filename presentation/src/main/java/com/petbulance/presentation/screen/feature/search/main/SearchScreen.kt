@@ -36,7 +36,8 @@ fun SearchScreen(
     locationData: UserLocationData,
     hospitalSearchData: HospitalSearchData,
     locationTerm: Term?,
-    onTermsClick: () -> Unit
+    onTermsClick: () -> Unit,
+    initialHospitalId: Long? = null
 ) {
     val screenState = commonSearchArgument.screenState
     val context = LocalContext.current
@@ -225,7 +226,8 @@ fun SearchScreen(
                 searchUiState = searchUiState,
                 onEvent = onEvent,
                 locationTerm = locationTerm,
-                onTermsClick = onTermsClick
+                onTermsClick = onTermsClick,
+                initialHospitalId = initialHospitalId
             )
         }
 

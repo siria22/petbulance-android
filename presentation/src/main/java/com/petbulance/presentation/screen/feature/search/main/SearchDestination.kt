@@ -25,6 +25,11 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
+            },
+            navArgument(ScreenDestinations.Search.ARG_INITIAL_HOSPITAL_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
             }
         )
     ) { entry ->
@@ -33,6 +38,9 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
         val authViewModel : AuthViewModel = hiltViewModel()
         val termsViewModel: TermsViewModel = hiltViewModel()
+
+        val initialHospitalIdString = entry.arguments?.getString(ScreenDestinations.Search.ARG_INITIAL_HOSPITAL_ID)
+        val initialHospitalId = initialHospitalIdString?.toLongOrNull()
 
         LaunchedEffect(Unit) {
             val animalName = entry.arguments?.getString(ScreenDestinations.Search.ARG_ANIMAL)
@@ -45,6 +53,10 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
                         currentQuery.copy(animalCategories = listOf(category))
                     )
                 )
+            }
+
+            if (initialHospitalId != null) {
+                commonSearchViewModel.onIntent(SearchIntent.ChangeScreenState(SearchScreenState.Hospitals.MapView))
             }
         }
 
@@ -109,7 +121,8 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
                 locationData = locationData,
                 hospitalSearchData = hospitalData,
                 locationTerm = locationTerm,
-                onTermsClick = { termsViewModel.loadTermDetail(TermsType.LOCATION.name) }
+                onTermsClick = { termsViewModel.loadTermDetail(TermsType.LOCATION.name) },
+                initialHospitalId = initialHospitalId
             )
         }
     }

@@ -2,6 +2,7 @@ package com.petbulance.presentation.screen.feature.search.info
 
 import android.content.Intent
 import android.location.Location
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
@@ -70,9 +70,10 @@ fun HospitalInfoScreen(
     navController: NavController,
     argument: HospitalInfoArgument,
     data: HospitalInfoData,
-    currentLocation: Location?
+    currentLocation: Location?,
+    isLoggedIn: Boolean
 ) {
-
+    val context = LocalContext.current
     val hospitalData = data.hospitalUiData
     val reviewData = data.reviewUiData
 
@@ -96,7 +97,28 @@ fun HospitalInfoScreen(
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Outlined.Share)) {
-                            /* TODO : 공유 어떻게?? */
+                            hospitalData.hospital?.let { hospital ->
+                                try {
+                                    val shareText = buildString {
+                                        append("${hospital.name}\n")
+                                        hospitalData.hospitalDetail?.address?.let { append("주소: $it\n") }
+                                        append("https://petbulance.com/hospital/${hospital.hospitalId}")
+                                    }
+                                    val sendIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                    context.startActivity(shareIntent)
+                                } catch (e: Exception) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "공유하기 기능을 사용할 수 없습니다",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                         }
                     ),
                     isShadowed = true
@@ -113,15 +135,24 @@ fun HospitalInfoScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             HospitalInfoScreenContents(
+                navController = navController,
                 hospital = hospitalData.hospital,
                 hospitalDetail = hospitalData.hospitalDetail,
                 reviewUiData = reviewData,
                 currentLocation = currentLocation,
                 onIntent = argument.intent,
-                onNavigateButtonClicked = { /* TODO : 병원 길 찾기 버튼*/ },
+                onNavigateButtonClicked = {
+                    hospitalData.hospital?.let { hospital ->
+                        navController.safePopBackStack()
+                        navController.safeNavigate(
+                            ScreenDestinations.Search.createRoute(initialHospitalId = hospital.hospitalId)
+                        )
+                    }
+                },
                 onReviewClicked = { reviewId ->
                     navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(reviewId))
-                }
+                },
+                isLoggedIn = isLoggedIn
             )
         }
     }
@@ -134,6 +165,7 @@ private enum class TabType(val title: String) {
 
 @Composable
 private fun HospitalInfoScreenContents(
+    navController: NavController,
     hospital: Hospital?,
     hospitalDetail: HospitalDetail?,
     reviewUiData: ReviewUiData,
@@ -141,6 +173,7 @@ private fun HospitalInfoScreenContents(
     currentLocation: Location?,
     onNavigateButtonClicked: () -> Unit,
     onReviewClicked: (Long) -> Unit,
+    isLoggedIn: Boolean
 ) {
     var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
@@ -231,14 +264,25 @@ private fun HospitalInfoScreenContents(
             text = if (selectedTab == TabType.DETAILS) "전화 문의하기" else "병원 후기 작성하기",
             onClicked = {
                 if (selectedTab == TabType.DETAILS) {
-                    hospital?.phone?.let { phone ->
+                    val phone = hospital?.phone
+                    if (phone.isNullOrBlank()) {
+                        android.widget.Toast.makeText(
+                            context,
+                            "전화번호 정보가 없습니다",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
                         val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = "tel:$phone".toUri()
+                            data = Uri.parse("tel:$phone")
                         }
                         context.startActivity(intent)
                     }
                 } else {
-                    // TODO: 병원 후기 작성하기 화면 이동
+                    if (isLoggedIn) {
+                        navController.safeNavigate(ScreenDestinations.Review.route)
+                    } else {
+                        navController.safeNavigate(ScreenDestinations.Login.route)
+                    }
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -322,6 +366,7 @@ private fun HospitalInfoScreenPreview() {
             ),
             data = HospitalInfoData.stub(),
             currentLocation = null,
+            isLoggedIn = true
         )
     }
 }

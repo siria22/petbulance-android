@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.petbulance.presentation.screen.feature.search.main.UserLocationIntent
 import com.petbulance.presentation.screen.feature.search.main.UserLocationState
 import com.petbulance.presentation.screen.feature.search.main.UserLocationViewModel
+import com.petbulance.presentation.screen.nonfeature.auth.AuthViewModel
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.ScreenDestinations.Search.HospitalInfo.ARG_ID
@@ -31,6 +32,7 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
     ) {
         val viewModel: HospitalInfoViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
+        val authViewModel: AuthViewModel = hiltViewModel()
 
         val dataState by viewModel.dataState.collectAsStateWithLifecycle()
         val argument = HospitalInfoArgument(
@@ -71,6 +73,7 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
         )
 
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
+        val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
 
         CommonScreenWrapper(
             errorState = errorState,
@@ -80,7 +83,8 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
                 navController = navController,
                 argument = argument,
                 data = data,
-                currentLocation = currentLocation
+                currentLocation = currentLocation,
+                isLoggedIn = isLoggedIn ?: false
             )
         }
     }

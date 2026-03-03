@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.naver.maps.geometry.LatLng
@@ -85,12 +85,13 @@ fun MapView(
     searchUiState: SearchUiState,
     onEvent: (SearchUiEvent) -> Unit,
     locationTerm: Term?,
-    onTermsClick: () -> Unit
+    onTermsClick: () -> Unit,
+    initialHospitalId: Long? = null
 ) {
     val context = LocalContext.current
 
     var naverMap by remember { mutableStateOf<NaverMap?>(null) }
-    var selectedHospitalId by remember { mutableStateOf<Long?>(null) }
+    var selectedHospitalId by remember(initialHospitalId) { mutableStateOf(initialHospitalId) }
     var hasInitialSearchTriggered by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
     var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
@@ -128,12 +129,12 @@ fun MapView(
     }
 
     LaunchedEffect(Unit) {
-        val fineGranted = ContextCompat.checkSelfPermission(
+        val fineGranted = ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
-        val coarseGranted = ContextCompat.checkSelfPermission(
+        val coarseGranted = ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -167,6 +168,19 @@ fun MapView(
                 naverMap?.moveCamera(cameraUpdate)
             } else if (event is SearchEvent.UserLocation.CheckPermission.Error) {
                 showPermissionDialog = true
+            }
+        }
+    }
+
+    LaunchedEffect(naverMap, initialHospitalId, searchUiState.hospitalList) {
+        if (naverMap != null && initialHospitalId != null && searchUiState.hospitalList.isNotEmpty()) {
+            val targetHospital =
+                searchUiState.hospitalList.find { it.hospitalId == initialHospitalId }
+            if (targetHospital != null) {
+                val cameraUpdate = CameraUpdate.scrollTo(
+                    LatLng(targetHospital.lat, targetHospital.lng)
+                ).animate(CameraAnimation.Easing)
+                naverMap?.moveCamera(cameraUpdate)
             }
         }
     }

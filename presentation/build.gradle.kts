@@ -93,6 +93,8 @@ val generateTokensClasspath by configurations.creating
 dependencies {
     implementation(project(":domain"))
 
+    implementation("androidx.core:core-ktx:1.15.0")
+
     // UI - Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)

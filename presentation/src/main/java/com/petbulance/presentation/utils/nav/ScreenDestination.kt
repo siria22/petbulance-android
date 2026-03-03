@@ -17,12 +17,16 @@ sealed class ScreenDestinations(val route: String) {
         }
     }
 
-    data object Search : ScreenDestinations("search?animal={animal}") {
+    data object Search : ScreenDestinations("search?animal={animal}&initialHospitalId={initialHospitalId}") {
         const val ARG_ANIMAL = "animal"
+        const val ARG_INITIAL_HOSPITAL_ID = "initialHospitalId"
 
-        fun createRoute(animal: AnimalCategory = AnimalCategory.ALL): String {
-            return if (animal == AnimalCategory.ALL) "search"
-            else "search?animal=${animal.name}"
+        fun createRoute(animal: AnimalCategory = AnimalCategory.ALL, initialHospitalId: Long? = null): String {
+            val base = if (animal == AnimalCategory.ALL) "search" else "search?animal=${animal.name}"
+            return if (initialHospitalId != null) {
+                if (base.contains("?")) "$base&initialHospitalId=$initialHospitalId"
+                else "$base?initialHospitalId=$initialHospitalId"
+            } else base
         }
 
         data object HospitalInfo : ScreenDestinations("search/hospital/{id}") {
