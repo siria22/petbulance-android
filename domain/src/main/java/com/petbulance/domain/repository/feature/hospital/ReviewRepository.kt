@@ -42,7 +42,7 @@ interface ReviewRepository {
 
     suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult>
 
-    suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String>
+    suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>, type: String): Result<String>
 
     suspend fun getMyReviews(
         size: Int = 10,

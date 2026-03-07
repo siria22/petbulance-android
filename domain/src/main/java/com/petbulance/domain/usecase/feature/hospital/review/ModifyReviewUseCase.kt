@@ -1,4 +1,4 @@
-﻿package com.petbulance.domain.usecase.feature.hospital.review
+package com.petbulance.domain.usecase.feature.hospital.review
 
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
@@ -41,7 +41,7 @@ class ModifyReviewUseCase @Inject constructor(
 
         // 3. 업로드 완료 확인
         if (uploadedKeys.isNotEmpty()) {
-            repository.checkReviewImageSave(saveResult.reviewId, uploadedKeys)
+            repository.checkReviewImageSave(saveResult.reviewId, uploadedKeys, "UPDATE")
                 .map { Unit }
         } else {
             Result.failure(Exception("이미지 업로드에 실패했습니다."))

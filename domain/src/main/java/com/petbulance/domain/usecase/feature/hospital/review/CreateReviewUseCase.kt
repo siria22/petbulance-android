@@ -61,7 +61,7 @@ class CreateReviewUseCase @Inject constructor(
         // 3. 서버에 이미지 업로드 완료 상태 전송
         if (uploadedKeys.isNotEmpty()) {
             // 부분 성공: 성공한 이미지만 전송
-            repository.checkReviewImageSave(saveResult.reviewId, uploadedKeys)
+            repository.checkReviewImageSave(saveResult.reviewId, uploadedKeys, "NEW")
                 .map { saveResult }
         } else {
             // 전체 실패

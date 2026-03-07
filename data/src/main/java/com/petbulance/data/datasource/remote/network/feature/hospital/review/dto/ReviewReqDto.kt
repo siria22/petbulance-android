@@ -32,6 +32,7 @@ data class ReviewImageDto(
 
 @Serializable
 data class ReviewImageCheckReqDto(
+    val type: String, // "NEW" or "UPDATE"
     val reviewId: Long,
-    val saveIds: List<String>
+    val keys: List<String>
 )
