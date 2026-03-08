@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,26 +34,13 @@ import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
 fun CSScreen(
-    navController: NavController,
-    argument: CSArgument
+    navController: NavController
 ) {
-    LaunchedEffect(argument.event) {
-        argument.event.collectCustomErrors { event ->
-            when (event) {
-                is CSEvent.DataFetch.Error -> {
-
-                }
-            }
-        }
-    }
-
     Scaffold(
         topBar = {
             AppTopBar(
@@ -156,14 +142,6 @@ private fun CsItem(
 @Composable
 private fun CSScreenPreview() {
     PetbulanceTheme {
-        CSScreen(
-            navController = rememberNavController(),
-            argument = CSArgument(
-                intent = { },
-                dataState = CSDataState.Init,
-                screenState = CSScreenState.Init,
-                event = MutableSharedFlow()
-            )
-        )
+        CSScreen(navController = rememberNavController())
     }
 }

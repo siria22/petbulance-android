@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CoalitionViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val createInquiryUseCase: CreateInquiryUseCase
 ) : BaseViewModel() {
 
@@ -132,10 +131,6 @@ class CoalitionViewModel @Inject constructor(
 
     init {
         observeErrorEvent(eventFlow)
-
-        launch {
-
-        }
     }
 
     /**
@@ -144,8 +139,8 @@ class CoalitionViewModel @Inject constructor(
     private fun formatPhoneNumber(digits: String): String {
         return when (digits.length) {
             in 0..3 -> digits
-            in 4..7 -> "${digits.substring(0, 3)}-${digits.substring(3)}"
-            in 8..11 -> "${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7)}"
+            in 4..7 -> "${digits.take(3)}-${digits.substring(3)}"
+            in 8..11 -> "${digits.take(3)}-${digits.substring(3, 7)}-${digits.substring(7)}"
             else -> digits
         }
     }

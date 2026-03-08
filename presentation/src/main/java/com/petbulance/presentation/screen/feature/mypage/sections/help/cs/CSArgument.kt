@@ -20,10 +20,7 @@ sealed class CSScreenState {
     data object Init : CSScreenState()
 }
 
-sealed class CSIntent {
-    data class SomeIntentWithParams(val param: String) : CSIntent()
-    data object SomeIntentWithoutParams : CSIntent()
-}
+sealed class CSIntent
 
 sealed class CSEvent {
     sealed class DataFetch : CSEvent() {

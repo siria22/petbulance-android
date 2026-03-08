@@ -15,28 +15,13 @@ fun NavGraphBuilder.cSDestination(navController: NavController) {
     ) {
         val viewModel: CSViewModel = hiltViewModel()
 
-        val argument: CSArgument = let {
-            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
-
-            CSArgument(
-                dataState = dataState,
-                screenState = screenState,
-                intent = viewModel::onIntent,
-                event = viewModel.eventFlow
-            )
-        }
-
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
 
         CommonScreenWrapper(
             errorState = errorState,
             dismissErrorDialog = viewModel::dismissErrorDialog,
         ) {
-            CSScreen(
-                navController = navController,
-                argument = argument
-            )
+            CSScreen(navController = navController)
         }
     }
 }

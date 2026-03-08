@@ -23,10 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +51,6 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -74,15 +70,6 @@ fun QnaListScreen(
         if (data.successMessage != null) {
             delay(3000)
             argument.intent(QnaListIntent.OnRefresh)
-        }
-    }
-
-    LaunchedEffect(argument.event) {
-        argument.event.collectCustomErrors { event ->
-            when (event) {
-                is QnaListEvent.DataFetch.Error -> {
-                }
-            }
         }
     }
 
@@ -125,20 +112,14 @@ fun QnaListScreen(
                 }
 
                 data.qnaList.isEmpty() -> {
-                    QnaListEmptyState(
-                        onCreateClicked = {
-                            navController.safeNavigate(
-                                ScreenDestinations.MyPage.Help.CS.Qna.Create.createRoute()
-                            )
-                        }
-                    )
+                    QnaListEmptyState()
                 }
 
                 else -> {
                     QnaListContent(
                         qnaList = data.qnaList,
                         hasNext = (dataState as? QnaListDataState.Loaded)?.hasNext ?: false,
-                        isLoadingMore = isLoading && data.qnaList.isNotEmpty(),
+                        isLoadingMore = isLoading,
                         onLoadMore = { argument.intent(QnaListIntent.OnLoadMore) },
                         onQnaItemClicked = { qnaId ->
                             navController.safeNavigate(
@@ -201,7 +182,7 @@ private fun QnaListContent(
             )
             CommonDivider()
         }
-        
+
         if (isLoadingMore && hasNext) {
             item {
                 Box(
@@ -280,9 +261,7 @@ private fun QnaStatusChip(status: QnaStatus) {
 }
 
 @Composable
-private fun QnaListEmptyState(
-    onCreateClicked: () -> Unit
-) {
+private fun QnaListEmptyState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -360,7 +339,7 @@ private fun QnaListScreenPreview() {
 @Composable
 private fun QnaListEmptyStatePreview() {
     PetbulanceTheme {
-        QnaListEmptyState(onCreateClicked = {})
+        QnaListEmptyState()
     }
 }
 

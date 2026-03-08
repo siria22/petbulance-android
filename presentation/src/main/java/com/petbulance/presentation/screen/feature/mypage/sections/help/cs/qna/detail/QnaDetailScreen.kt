@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -63,7 +62,6 @@ fun QnaDetailScreen(
     data: QnaDetailData
 ) {
     val dataState = argument.dataState
-    val isOnProgress = dataState == QnaDetailDataState.OnProgress
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showErrorToast by remember { mutableStateOf(false) }
@@ -144,9 +142,7 @@ fun QnaDetailScreen(
                 title = data.title,
                 content = data.content,
                 date = data.date,
-                status = data.status,
                 answer = data.answer,
-                isLoading = data.isLoading,
                 onDeleteClicked = {
                     showDeleteDialog = true
                 },
@@ -207,79 +203,83 @@ private fun QnaDetailScreenContents(
     title: String,
     content: String,
     date: String,
-    status: QnaStatus,
     answer: QnaAnswer?,
-    isLoading: Boolean,
     onDeleteClicked: () -> Unit,
     onReturnToListClicked: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = spacingMedium, vertical = spacingXL),
-        verticalArrangement = Arrangement.spacedBy(spacingLarge)
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(spacingXXS)
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = spacingXL),
+            verticalArrangement = Arrangement.spacedBy(spacingLarge)
         ) {
-            QnaDetailStatusChip(status = status)
-            Text(
-                text = title,
-                style = typography.titleLarge,
-                color = colorScheme.text.primary
-            )
-            Text(
-                text = date,
-                style = typography.bodySmall,
-                color = colorScheme.text.caption
-            )
-        }
-
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = colorScheme.border.subtle
-        )
-
-        Text(
-            text = content,
-            style = typography.bodyMedium,
-            color = colorScheme.text.secondary,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (answer != null) {
-            ThickDivider()
             Column(
-                verticalArrangement = Arrangement.spacedBy(spacingXXS)
+                modifier = Modifier.padding(horizontal = spacingMedium),
+                verticalArrangement = Arrangement.spacedBy(spacingXL)
             ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(spacingXXS)
+                ) {
+                    Text(
+                        text = title,
+                        style = typography.titleLarge,
+                        color = colorScheme.text.primary
+                    )
+                    Text(
+                        text = date,
+                        style = typography.bodySmall,
+                        color = colorScheme.text.caption
+                    )
+                }
+
                 Text(
-                    text = "펫블런스 운영팀 답변",
-                    style = typography.titleMedium,
-                    color = colorScheme.action.primary.default
-                )
-                Text(
-                    text = answer.answeredAt,
-                    style = typography.bodySmall,
-                    color = colorScheme.text.caption
+                    text = content,
+                    style = typography.bodyMedium,
+                    color = colorScheme.text.secondary,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = colorScheme.border.subtle
-            )
+            if (answer != null) {
+                ThickDivider()
 
-            Text(
-                text = answer.content,
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary,
-                modifier = Modifier.fillMaxWidth()
-            )
+                Column(
+                    modifier = Modifier.padding(horizontal = spacingMedium),
+                    verticalArrangement = Arrangement.spacedBy(spacingXL)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(spacingXXS)
+                    ) {
+                        Text(
+                            text = "펫블런스 운영팀 답변",
+                            style = typography.titleMedium,
+                            color = colorScheme.action.primary.default
+                        )
+                        Text(
+                            text = answer.answeredAt,
+                            style = typography.bodySmall,
+                            color = colorScheme.text.caption
+                        )
+                    }
+
+                    Text(
+                        text = answer.content,
+                        style = typography.bodyMedium,
+                        color = colorScheme.text.secondary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = spacingMedium, end = spacingMedium, top = spacingMedium, bottom = spacingXL),
             horizontalArrangement = Arrangement.spacedBy(spacingMedium)
         ) {
             BasicButton(
@@ -345,36 +345,6 @@ private fun QnaDeleteConfirmDialog(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun QnaDetailStatusChip(status: QnaStatus) {
-    val (text, textColor) = when (status) {
-        QnaStatus.ANSWER_WAITING -> Pair(
-            "답변대기",
-            colorScheme.text.caption
-        )
-
-        QnaStatus.ANSWER_COMPLETED -> Pair(
-            "답변완료",
-            colorScheme.tag.trust.medium
-        )
-    }
-
-    Box(
-        modifier = Modifier
-            .background(
-                color = Color.Transparent,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = text,
-            style = typography.labelMedium,
-            color = textColor
-        )
     }
 }
 
