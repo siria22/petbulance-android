@@ -1,5 +1,7 @@
 package com.petbulance.petbulance.common.nav
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -7,6 +9,11 @@ import androidx.navigation.compose.rememberNavController
 import com.petbulance.presentation.screen.feature.home.homeDestination
 import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.myPageReviewsDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.cSDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.coalition.coalitionDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.qna.create.qnaCreateDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.qna.detail.qnaDetailDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.qna.list.qnaListDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.detail.myPageNoticeDetailDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list.myPageNoticeDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.account.myPageAccountDestination
@@ -24,6 +31,7 @@ import com.petbulance.presentation.screen.nonfeature.login.welcome.welcomeDestin
 import com.petbulance.presentation.screen.nonfeature.splash.splashDestination
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
+@RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
 @Composable
 fun AppNavGraph(modifier: Modifier = Modifier) {
 
@@ -58,5 +66,10 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
 
         myPageNoticeDestination(navController = navController)
         myPageNoticeDetailDestination(navController = navController)
+
+        cSDestination(navController = navController)
+        qnaListDestination(navController = navController)
+        qnaCreateDestination(navController = navController)
+        qnaDetailDestination(navController = navController)
     }
 }

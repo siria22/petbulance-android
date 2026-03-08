@@ -2,6 +2,7 @@ package com.petbulance.data.di.room
 
 import android.content.Context
 import androidx.room.Room
+import com.petbulance.data.datasource.local.dao.QnaDao
 import com.petbulance.data.datasource.local.database.dao.SearchDao
 import com.petbulance.data.datasource.local.database.dao.TermConsentDao
 import com.petbulance.data.datasource.local.database.dao.ViewedHospitalDao
@@ -40,5 +41,10 @@ object DatabaseModule {
     @Provides
     fun provideViewedHospitalDao(database: AppDatabase): ViewedHospitalDao {
         return database.viewedHospitalDao()
+    }
+
+    @Provides
+    fun provideQnaDao(database: AppDatabase): QnaDao {
+        return database.qnaDao()
     }
 }

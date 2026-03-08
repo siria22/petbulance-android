@@ -77,6 +77,28 @@ sealed class ScreenDestinations(val route: String) {
                     fun createRoute(id: Long): String = "mypage/help/notice/detail/$id"
                 }
             }
+
+            data object CS : ScreenDestinations("mypage/help/cs") {
+                data object Qna : ScreenDestinations("mypage/help/cs/qna") {
+                    data object List : ScreenDestinations("mypage/help/cs/qna/list")
+                    data object Create : ScreenDestinations("mypage/help/cs/qna/create?qnaId={qnaId}") {
+                        const val ARG_QNA_ID = "qnaId"
+                        fun createRoute(qnaId: Long? = null): String {
+                            return if (qnaId != null) {
+                                "mypage/help/cs/qna/create?qnaId=$qnaId"
+                            } else {
+                                "mypage/help/cs/qna/create"
+                            }
+                        }
+                    }
+                    data object Detail : ScreenDestinations("mypage/help/cs/qna/detail/{id}") {
+                        const val ARG_ID = "id"
+                        fun createRoute(id: Long): String = "mypage/help/cs/qna/detail/$id"
+                    }
+                }
+
+                data object Coalition : ScreenDestinations("mypage/help/cs/coalition")
+            }
         }
     }
 }

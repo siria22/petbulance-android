@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +55,6 @@ import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
@@ -194,7 +192,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_headset),
                     title = "문의 및 고객센터",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Help.CS.route) }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_information),

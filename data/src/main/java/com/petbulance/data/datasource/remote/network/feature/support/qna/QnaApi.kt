@@ -6,6 +6,8 @@ import com.petbulance.data.di.network.AuthHttpClient
 import com.petbulance.data.di.network.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -18,6 +20,20 @@ class QnaApi @Inject constructor(
     @param:AuthHttpClient private val client: HttpClient,
 ) {
     private val baseUrl = "${BASE_URL}/qna"
+
+    suspend fun getQnaList(
+        lastQnaId: Long? = null,
+        pageSize: Int = 10
+    ): HttpResponse {
+        return client.get(baseUrl) {
+            lastQnaId?.let { parameter("lastQnaId", it) }
+            parameter("pageSize", pageSize)
+        }
+    }
+
+    suspend fun getQnaDetail(qnaId: Long): HttpResponse {
+        return client.get("$baseUrl/$qnaId")
+    }
 
     suspend fun createQna(reqDto: CreateQnaReqDto): HttpResponse {
         return client.post(baseUrl) {

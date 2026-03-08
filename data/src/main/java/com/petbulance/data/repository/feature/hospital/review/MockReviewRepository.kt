@@ -121,7 +121,11 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         return Result.success(SaveReviewResult(reviewId = 1, uploadUrls = emptyList()))
     }
 
-    override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
+    override suspend fun checkReviewImageSave(
+        reviewId: Long,
+        keys: List<String>,
+        type: String
+    ): Result<String> {
         return Result.success("Success")
     }
 
