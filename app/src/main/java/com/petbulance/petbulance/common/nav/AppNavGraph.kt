@@ -68,6 +68,7 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         myPageNoticeDetailDestination(navController = navController)
 
         cSDestination(navController = navController)
+        coalitionDestination(navController = navController)
         qnaListDestination(navController = navController)
         qnaCreateDestination(navController = navController)
         qnaDetailDestination(navController = navController)

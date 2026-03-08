@@ -83,7 +83,7 @@ fun CSScreen(
                     navController.safeNavigate(ScreenDestinations.MyPage.Help.CS.Qna.List.route)
                 },
                 onCoalitionClicked = {
-                    // TODO
+                    navController.safeNavigate(ScreenDestinations.MyPage.Help.CS.Coalition.route)
                 }
             )
         }

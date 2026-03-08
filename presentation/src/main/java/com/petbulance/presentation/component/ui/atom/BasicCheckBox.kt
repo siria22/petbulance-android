@@ -26,7 +26,7 @@ fun BasicCheckBox(
     isChangeable: Boolean = true,
 ) {
     val borderColor = if (isChangeable) {
-        PetbulanceTheme.colorScheme.icon.basic
+        PetbulanceTheme.colorScheme.action.primary.default
     } else {
         PetbulanceTheme.colorScheme.action.link.pressed
     }
