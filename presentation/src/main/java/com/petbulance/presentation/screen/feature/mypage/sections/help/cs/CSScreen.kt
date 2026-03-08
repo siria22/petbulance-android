@@ -30,6 +30,7 @@ import com.petbulance.presentation.component.ui.iconSizeMedium
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
+import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
@@ -46,6 +47,7 @@ fun CSScreen(
             AppTopBar(
                 topBarInfo = TopBarInfo(
                     text = "문의 및 고객센터",
+                    textAlignment = TopBarAlignment.START,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = {
                         navController.safeNavigate(ScreenDestinations.MyPage.route)

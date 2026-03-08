@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.petbulance.data.datasource.local.dao.QnaDao
 import com.petbulance.data.datasource.local.database.dao.SearchDao
 import com.petbulance.data.datasource.local.database.dao.TermConsentDao
+import com.petbulance.data.datasource.local.database.dao.TermsCacheDao
+import com.petbulance.data.datasource.local.database.dao.TermsStatusDao
 import com.petbulance.data.datasource.local.database.dao.ViewedHospitalDao
 import dagger.Module
 import dagger.Provides
@@ -46,5 +48,15 @@ object DatabaseModule {
     @Provides
     fun provideQnaDao(database: AppDatabase): QnaDao {
         return database.qnaDao()
+    }
+
+    @Provides
+    fun provideTermsCacheDao(database: AppDatabase): TermsCacheDao {
+        return database.termsCacheDao()
+    }
+
+    @Provides
+    fun provideTermsStatusDao(database: AppDatabase): TermsStatusDao {
+        return database.termsStatusDao()
     }
 }

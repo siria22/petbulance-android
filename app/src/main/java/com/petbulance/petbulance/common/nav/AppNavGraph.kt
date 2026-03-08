@@ -16,6 +16,8 @@ import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.qna.de
 import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.qna.list.qnaListDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.detail.myPageNoticeDetailDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.list.myPageNoticeDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.termsListDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.detail.termsDetailDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.account.myPageAccountDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.profile.myPageProfileDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
@@ -72,5 +74,8 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         qnaListDestination(navController = navController)
         qnaCreateDestination(navController = navController)
         qnaDetailDestination(navController = navController)
+
+        termsListDestination(navController = navController)
+        termsDetailDestination(navController = navController)
     }
 }

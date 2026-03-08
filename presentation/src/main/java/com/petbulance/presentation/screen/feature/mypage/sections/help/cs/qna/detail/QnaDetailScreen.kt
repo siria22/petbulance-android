@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.support.qna.QnaAnswer
-import com.petbulance.domain.model.feature.support.qna.QnaStatus
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
@@ -279,7 +278,12 @@ private fun QnaDetailScreenContents(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = spacingMedium, end = spacingMedium, top = spacingMedium, bottom = spacingXL),
+                .padding(
+                    start = spacingMedium,
+                    end = spacingMedium,
+                    top = spacingMedium,
+                    bottom = spacingXL
+                ),
             horizontalArrangement = Arrangement.spacedBy(spacingMedium)
         ) {
             BasicButton(

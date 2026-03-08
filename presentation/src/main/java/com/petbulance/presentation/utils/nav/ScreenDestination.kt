@@ -99,6 +99,13 @@ sealed class ScreenDestinations(val route: String) {
 
                 data object Coalition : ScreenDestinations("mypage/help/cs/coalition")
             }
+
+            data object Terms : ScreenDestinations("mypage/help/terms") {
+                data object Detail : ScreenDestinations("mypage/help/terms/detail/{termsType}") {
+                    const val ARG_TERMS_TYPE = "termsType"
+                    fun createRoute(termsType: String): String = "mypage/help/terms/detail/$termsType"
+                }
+            }
         }
     }
 }

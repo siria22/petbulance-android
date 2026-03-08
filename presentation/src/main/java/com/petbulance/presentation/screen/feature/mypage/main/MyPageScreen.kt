@@ -197,7 +197,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_information),
                     title = "약관 및 정책",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Help.Terms.route) }
                 )
             ),
             isLast = true,

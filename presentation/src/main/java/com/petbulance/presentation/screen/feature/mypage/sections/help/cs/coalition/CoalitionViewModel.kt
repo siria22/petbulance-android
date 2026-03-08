@@ -1,6 +1,5 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.help.cs.coalition
 
-import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.support.inquiry.InquiryRequest
 import com.petbulance.domain.usecase.feature.support.inquiry.CreateInquiryUseCase
 import com.petbulance.presentation.utils.BaseViewModel

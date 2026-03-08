@@ -45,6 +45,7 @@ import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
+import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
@@ -100,6 +101,7 @@ fun CoalitionScreen(
             AppTopBar(
                 topBarInfo = TopBarInfo(
                     text = "광고/병원 제휴 문의",
+                    textAlignment = TopBarAlignment.START,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = {
                         val hasInput = data.inquiryType.isNotBlank() ||
