@@ -36,6 +36,7 @@ hiltAndroid = "2.57.2"
 coilBom = "2.7.0"
 
 # Data Persistence (Room, Datastore)
+pagingRuntimeKtx = "3.4.1"
 roomRuntime = "2.8.4"
 datastorePreferences = "1.2.0"
 datastoreCoreAndroid = "1.2.0"
@@ -125,6 +126,10 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
+## Paging
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingRuntimeKtx" }
+androidx-paging-runtime-ktx = { module = "androidx.paging:paging-runtime-ktx", version.ref = "pagingRuntimeKtx" }
 
 ## Tooling & Preveiw
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

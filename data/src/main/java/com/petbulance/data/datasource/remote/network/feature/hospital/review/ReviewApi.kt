@@ -130,4 +130,12 @@ class ReviewApi @Inject constructor(
             setBody(body)
         }
     }
+
+    suspend fun likeReview(reviewId: Long): HttpResponse {
+        return client.post("$baseUrl/$reviewId/like")
+    }
+
+    suspend fun unlikeReview(reviewId: Long): HttpResponse {
+        return client.delete("$baseUrl/$reviewId/like")
+    }
 }

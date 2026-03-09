@@ -98,6 +98,7 @@ fun ReviewDetailScreen(
 
                 is ReviewDetailEvent.DeleteSuccess -> {
                     // TODO : Delete Success
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh", true)
                     navController.safePopBackStack()
                 }
 
@@ -123,7 +124,10 @@ fun ReviewDetailScreen(
                     text = "",
                     textAlignment = TopBarAlignment.CENTER,
                     isLeadingIconAvailable = true,
-                    onLeadingIconClicked = { navController.safePopBackStack() },
+                    onLeadingIconClicked = {
+                        navController.previousBackStackEntry?.savedStateHandle?.set("refresh", true)
+                        navController.safePopBackStack()
+                    },
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Default.MoreVert)) {
@@ -146,7 +150,10 @@ fun ReviewDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            ReviewDetailScreenContents(data = data)
+            ReviewDetailScreenContents(
+                data = data,
+                onLikeClicked = { argument.intent(ReviewDetailIntent.ToggleLike) }
+            )
 
             if (showReportSuccessToast) {
                 Row(
@@ -266,7 +273,9 @@ fun ReviewDetailScreen(
 
 
 @Composable
-private fun ReviewDetailScreenContents(data: ReviewDetailData) {
+private fun ReviewDetailScreenContents(
+    data: ReviewDetailData, onLikeClicked: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -296,7 +305,7 @@ private fun ReviewDetailScreenContents(data: ReviewDetailData) {
         ReviewDetailLikesSection(
             isLiked = data.isLiked,
             likeCount = data.likeCount,
-            onLikeClick = { /* TODO : 좋아요 or 취소 */ }
+            onLikeClick = { onLikeClicked() }
         )
     }
 }

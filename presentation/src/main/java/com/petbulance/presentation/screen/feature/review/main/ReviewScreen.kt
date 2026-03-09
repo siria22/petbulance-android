@@ -77,6 +77,19 @@ fun ReviewScreen(
     // 1. 카메라 권한 상태 관리
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
+    // 2. 화면 재진입 감지 및 데이터 리프레시
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val savedStateHandle = currentBackStackEntry?.savedStateHandle
+
+    LaunchedEffect(savedStateHandle) {
+        savedStateHandle?.getStateFlow("refresh", false)?.collectLatest { shouldRefresh ->
+            if (shouldRefresh) {
+                argument.intent(ReviewIntent.Refresh)
+                savedStateHandle["refresh"] = false
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             AppTopBar(

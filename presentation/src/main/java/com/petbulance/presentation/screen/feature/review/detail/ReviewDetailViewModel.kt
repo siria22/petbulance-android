@@ -5,6 +5,8 @@ import com.petbulance.domain.model.feature.support.report.ReportParam
 import com.petbulance.domain.model.type.ReportType
 import com.petbulance.domain.usecase.feature.hospital.review.DeleteReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetReviewDetailUseCase
+import com.petbulance.domain.usecase.feature.hospital.review.LikeReviewUseCase
+import com.petbulance.domain.usecase.feature.hospital.review.UnlikeReviewUseCase
 import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
@@ -22,7 +24,9 @@ class ReviewDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getReviewDetailUseCase: GetReviewDetailUseCase,
     private val deleteReviewUseCase: DeleteReviewUseCase,
-    private val createReportUseCase: CreateReportUseCase
+    private val createReportUseCase: CreateReportUseCase,
+    private val likeReviewUseCase: LikeReviewUseCase,
+    private val unlikeReviewUseCase: UnlikeReviewUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<ReviewDetailDataState>(ReviewDetailDataState.Init)
@@ -41,6 +45,9 @@ class ReviewDetailViewModel @Inject constructor(
     private val reviewId: Long =
         savedStateHandle.get<Long>(ScreenDestinations.Review.Detail.ARG_ID) ?: 0L
 
+    private var lastLikeToggleTime = 0L
+    private var isLikeProcessing = false
+
     init {
         observeErrorEvent(eventFlow)
         fetchReviewDetail()
@@ -50,6 +57,7 @@ class ReviewDetailViewModel @Inject constructor(
         when (intent) {
             is ReviewDetailIntent.DeleteReview -> deleteReview()
             is ReviewDetailIntent.ReportReview -> reportReview(intent.reason)
+            is ReviewDetailIntent.ToggleLike -> toggleLike()
         }
     }
 
@@ -150,6 +158,52 @@ class ReviewDetailViewModel @Inject constructor(
                         )
                     )
                 }
+        }
+    }
+
+    private fun toggleLike() {
+        launch {
+            if (reviewId == 0L) return@launch
+
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastLikeToggleTime < 200) {
+                return@launch
+            }
+            lastLikeToggleTime = currentTime
+
+            if (isLikeProcessing) return@launch
+            isLikeProcessing = true
+
+            val currentData = _reviewDetailData.value
+            val wasLiked = currentData.isLiked
+            val previousLikeCount = currentData.likeCount
+
+            _reviewDetailData.value = currentData.copy(
+                isLiked = !wasLiked,
+                likeCount = if (wasLiked) previousLikeCount - 1 else previousLikeCount + 1
+            )
+
+            val result = if (wasLiked) {
+                unlikeReviewUseCase(reviewId)
+            } else {
+                likeReviewUseCase(reviewId)
+            }
+
+            result.onFailure { exception ->
+                _reviewDetailData.value = currentData.copy(
+                    isLiked = wasLiked,
+                    likeCount = previousLikeCount
+                )
+
+                _eventFlow.emit(
+                    ReviewDetailEvent.DataFetch.Error(
+                        userMessage = "좋아요 처리에 실패했습니다.",
+                        exceptionMessage = exception.message
+                    )
+                )
+            }
+
+            isLikeProcessing = false
         }
     }
 }

@@ -125,3 +125,8 @@ data class MyReviewGetDto(
 data class ReviewDeleteResDto(
     val message: String
 )
+
+@Serializable
+data class ReviewLikeResDto(
+    val message: String
+)

@@ -12,6 +12,7 @@ import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewDetailResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckReqDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewImageCheckResDto
+import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewLikeResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.ReviewSaveResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.review.dto.UserReviewSearchDto
 import com.petbulance.data.datasource.remote.network.feature.user.user.UserApi
@@ -183,5 +184,17 @@ class ReviewRepositoryImpl @Inject constructor(
         }.map { dto ->
             dto.toDomain(userInfo.nickname)
         }
+    }
+
+    override suspend fun likeReview(reviewId: Long): Result<String> {
+        return safeApiCall<ReviewLikeResDto>(path = "/receipts/$reviewId/like") {
+            reviewApi.likeReview(reviewId)
+        }.map { it.message }
+    }
+
+    override suspend fun unlikeReview(reviewId: Long): Result<String> {
+        return safeApiCall<ReviewLikeResDto>(path = "/receipts/$reviewId/like") {
+            reviewApi.unlikeReview(reviewId)
+        }.map { it.message }
     }
 }

@@ -174,4 +174,12 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
         return Result.success(ReviewDetail.stub())
     }
+
+    override suspend fun likeReview(reviewId: Long): Result<String> {
+        return Result.success("Like success")
+    }
+
+    override suspend fun unlikeReview(reviewId: Long): Result<String> {
+        return Result.success("Unlike success")
+    }
 }

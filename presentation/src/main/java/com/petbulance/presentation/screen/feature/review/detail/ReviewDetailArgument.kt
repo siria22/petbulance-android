@@ -23,6 +23,7 @@ sealed class ReviewDetailScreenState {
 sealed class ReviewDetailIntent {
     data object DeleteReview : ReviewDetailIntent()
     data class ReportReview(val reason: String) : ReviewDetailIntent()
+    data object ToggleLike : ReviewDetailIntent()
 }
 
 sealed class ReviewDetailEvent {
