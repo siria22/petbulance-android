@@ -45,9 +45,13 @@ class AppInfoRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getVersion(): Result<String> {
-        return safeApiCall<String>(path = "/app/version") {
-            api.getVersion()
-        }
+        // TODO: 서버 /app/version 엔드포인트 구현 후 아래 주석 해제하고 더미 데이터 제거
+        // return safeApiCall<String>(path = "/app/version") {
+        //     api.getVersion()
+        // }
+        
+        // 임시 더미 데이터 반환
+        return Result.success("v1.01")
     }
 
     // 실제 앱 버전 조회 구현

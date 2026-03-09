@@ -37,6 +37,9 @@ import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
+import com.petbulance.presentation.screen.feature.review.common.ReviewReportReasonDialog
+import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
+import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.screen.feature.review.main.composables.CreateReceiptDialog
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
@@ -62,6 +65,12 @@ fun ReviewScreen(
     var showSortingDialog by remember { mutableStateOf(false) }
 
     var showReceiptDialog by remember { mutableStateOf(false) }
+
+    var showMoreOption by remember { mutableStateOf(false) }
+    var selectedReviewId by remember { mutableStateOf<Long?>(null) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedReason by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -116,6 +125,10 @@ fun ReviewScreen(
                     navController.safeNavigate(
                         ScreenDestinations.Review.Detail.createRoute(it)
                     )
+                },
+                onMoreClick = { reviewId ->
+                    selectedReviewId = reviewId
+                    showMoreOption = true
                 },
             )
         }
@@ -182,6 +195,71 @@ fun ReviewScreen(
                     cameraPermissionState.launchPermissionRequest()
                     Toast.makeText(context, "카메라 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
                 }
+            }
+        )
+    }
+
+    if (showMoreOption) {
+        val selectedReview = selectedReviewId?.let { id ->
+            data.reviews.find { it.id == id }
+        }
+        
+        if (selectedReview?.isAuthor == true) {
+            DeleteOrEdit(
+                onDeleteOptionClicked = {
+                    showMoreOption = false
+                    showDeleteConfirmDialog = true
+                },
+                onEditOptionClicked = {
+                    showMoreOption = false
+                    selectedReviewId?.let { reviewId ->
+                        navController.safeNavigate(
+                            ScreenDestinations.Review.Edit.createRoute(reviewId)
+                        )
+                    }
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        } else {
+            ReportOptionDialog(
+                onReportOptionClicked = {
+                    showMoreOption = false
+                    showReportReasonDialog = true
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        }
+    }
+
+    if (showDeleteConfirmDialog) {
+        // TODO: 삭제 확인 다이얼로그 추가 필요
+        // WarningDialog 또는 유사한 컴포넌트 사용
+        showDeleteConfirmDialog = false
+        selectedReviewId?.let { reviewId ->
+            // argument.intent(ReviewIntent.DeleteReview(reviewId))
+        }
+        selectedReviewId = null
+    }
+
+    if (showReportReasonDialog) {
+        ReviewReportReasonDialog(
+            selectedReason = selectedReason,
+            onReasonClicked = { reason ->
+                selectedReason = reason
+            },
+            onSubmitClicked = {
+                showReportReasonDialog = false
+                selectedReviewId?.let { reviewId ->
+                    argument.intent(ReviewIntent.ReportReview(reviewId, selectedReason))
+                    Toast.makeText(context, "신고가 접수되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+                selectedReviewId = null
+                selectedReason = ""
+            },
+            onDismissRequest = {
+                showReportReasonDialog = false
+                selectedReviewId = null
+                selectedReason = ""
             }
         )
     }

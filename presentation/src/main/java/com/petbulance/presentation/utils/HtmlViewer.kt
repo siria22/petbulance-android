@@ -64,7 +64,7 @@ fun HtmlText(
                 .replace("<h4>", "<h4-c>", ignoreCase = true)
                 .replace("</h4>", "</h4-c><br/>", ignoreCase = true)
                 .replace("<p>", "<p-c>", ignoreCase = true)
-                .replace("</p>", "</p-c>", ignoreCase = true)
+                .replace("</p>", "</p-c><br/><br/>", ignoreCase = true)
 
             val tagHandler = object : Html.TagHandler {
                 var pStart = 0

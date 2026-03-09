@@ -59,6 +59,8 @@ sealed class ScreenDestinations(val route: String) {
         }
     }
 
+    data object Community : ScreenDestinations("community")
+
     data object MyPage : ScreenDestinations("mypage") {
 
         sealed class Activity : ScreenDestinations("mypage/activity") {

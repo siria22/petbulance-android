@@ -71,7 +71,7 @@ fun BottomNavigationBar(
             iconResource = IconResource.Drawable(R.drawable.ic_gnb_community),
             bottomNavType = CurrentBottomNav.COMMUNITY,
             onClicked = {
-                /* TODO : Navigate to Community Page */
+                navController.safeNavigate(ScreenDestinations.Community.route)
             }
         ),
         BottomNavInfo(

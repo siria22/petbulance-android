@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.feature.mypage.sections.help.terms.de
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,12 +18,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.petbulance.presentation.component.theme.emp
+import com.petbulance.presentation.component.ui.atom.BasicButton
+import com.petbulance.presentation.component.ui.atom.BasicButtonSize
+import com.petbulance.presentation.component.ui.atom.BasicButtonType
+import com.petbulance.presentation.component.ui.atom.BasicDialog
 import com.petbulance.presentation.component.ui.atom.BasicToggleSwitch
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
@@ -31,8 +39,10 @@ import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
+import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
+import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.composables.RequiredTermsWithdrawDialog
 import com.petbulance.presentation.utils.HtmlText
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -84,6 +94,7 @@ fun TermsDetailScreen(
                     TermsDetailContent(
                         term = data.term,
                         isAgreed = data.isAgreed,
+                        isToggleEnabled = data.term.content.isNotBlank(),
                         onToggleChanged = { isAgreed ->
                             argument.intent(TermsDetailIntent.OnToggleChanged(isAgreed))
                         }
@@ -106,6 +117,15 @@ fun TermsDetailScreen(
             )
         }
 
+        is TermsDetailScreenState.ShowContentLoadFailedDialog -> {
+            ContentLoadFailedDialog(
+                onDismiss = {
+                    argument.intent(TermsDetailIntent.DismissContentLoadFailedDialog)
+                    navController.navigateUp()
+                }
+            )
+        }
+
         is TermsDetailScreenState.Init -> {
             // No dialog
         }
@@ -116,6 +136,7 @@ fun TermsDetailScreen(
 private fun TermsDetailContent(
     term: Term,
     isAgreed: Boolean,
+    isToggleEnabled: Boolean = true,
     onToggleChanged: (Boolean) -> Unit
 ) {
     Column(
@@ -143,7 +164,9 @@ private fun TermsDetailContent(
             )
             BasicToggleSwitch(
                 checked = isAgreed,
-                onCheckedChange = onToggleChanged
+                onCheckedChange = if (isToggleEnabled) onToggleChanged else {
+                    {}
+                }
             )
         }
     }
@@ -156,13 +179,60 @@ private fun EmptyTermsDetailState() {
             .fillMaxSize()
             .padding(spacingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "약관 내용을 불러올 수 없습니다",
             style = typography.bodyLarge,
             color = colorScheme.text.secondary
         )
+    }
+}
+
+@Composable
+private fun ContentLoadFailedDialog(
+    onDismiss: () -> Unit,
+) {
+    BasicDialog(
+        backHandler = onDismiss,
+        paddingValues = PaddingValues(horizontal = 16.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(spacingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(spacingXS),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "약관을 불러오지 못했어요.",
+                    style = typography.titleMedium.emp(),
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.text.primary
+                )
+                Text(
+                    text = "약관 내용을 불러올 수 없습니다.\n네트워크 연결을 확인하고 다시 시도해주세요.",
+                    style = typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.text.secondary
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(spacingXS),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BasicButton(
+                    modifier = Modifier.weight(3f),
+                    text = "돌아가기",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.SECONDARY,
+                    radius = 12.dp,
+                    onClicked = onDismiss
+                )
+            }
+        }
     }
 }
 

@@ -17,7 +17,8 @@ data class HospitalReview(
     val isLiked: Boolean,
     val imageUrls: List<String>,
     val author: String,
-    val price: Int
+    val price: Int,
+    val isAuthor: Boolean = false
 ) {
     companion object {
         fun stub() = HospitalReview(

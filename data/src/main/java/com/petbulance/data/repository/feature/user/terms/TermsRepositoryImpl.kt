@@ -145,18 +145,31 @@ class TermsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTermDetail(type: String): Result<Term> {
-        return safeApiCall<TermDto>("terms/$type") {
-            api.getTermDetail(type)
-        }.map { dto ->
-            Term(
-                id = dto.id,
-                title = dto.title,
-                termsType = runCatching { TermsType.valueOf(dto.termsType ?: "") }.getOrNull(),
-                required = dto.required,
-                summary = dto.summary,
-                content = dto.content ?: "No content received",
-                version = dto.version
+        // 캐시 확인
+        val cached = withContext(Dispatchers.IO) {
+            termsCacheDao.getTermByType(type)
+        }
+        val currentTime = System.currentTimeMillis()
+
+        // 캐시가 유효하고 내용이 비어있지 않은 경우에만 로컬 데이터 반환
+        if (cached != null && (currentTime - cached.cachedAt) < CACHE_VALIDITY_MS && cached.content.isNotBlank()) {
+            return Result.success(
+                Term(
+                    id = cached.id,
+                    title = cached.title,
+                    termsType = cached.termsType?.let { runCatching { TermsType.valueOf(it) }.getOrNull() },
+                    required = cached.required,
+                    summary = cached.summary,
+                    content = cached.content,
+                    version = cached.version
+                )
             )
+        }
+
+        // 캐시가 없거나 만료된 경우, 전체 약관 목록을 API로 받아와서 갱신 후 해당 약관 반환
+        return fetchAndCacheTermsList().mapCatching { terms ->
+            terms.find { it.termsType?.name == type }
+                ?: throw IllegalStateException("해당 약관을 찾을 수 없습니다: $type")
         }
     }
 
@@ -181,6 +194,48 @@ class TermsRepositoryImpl @Inject constructor(
     override suspend fun withdrawTermsConsent(type: String): Result<Unit> {
         return safeApiCall<Unit>("terms/$type") {
             api.withdrawTermsConsent(type)
+        }
+    }
+
+    private suspend fun fetchAndCacheTermsList(): Result<List<Term>> {
+        val currentTime = System.currentTimeMillis()
+        
+        return safeApiCall<List<TermDto>>("terms") {
+            api.getTermsList()
+        }.map { dtoList ->
+            val terms = dtoList.map { dto ->
+                Term(
+                    id = dto.id,
+                    title = dto.title,
+                    termsType = runCatching {
+                        TermsType.valueOf(dto.termsType ?: "")
+                    }.getOrNull(),
+                    required = dto.required,
+                    summary = dto.summary,
+                    content = dto.content ?: dto.summary,
+                    version = dto.version
+                )
+            }
+
+            // 캐시에 저장
+            withContext(Dispatchers.IO) {
+                termsCacheDao.deleteAll()
+                val cacheEntities = terms.map { term ->
+                    TermsCacheEntity(
+                        id = term.id,
+                        title = term.title,
+                        termsType = term.termsType?.name,
+                        required = term.required,
+                        summary = term.summary,
+                        content = term.content,
+                        version = term.version,
+                        cachedAt = currentTime
+                    )
+                }
+                termsCacheDao.insertAll(cacheEntities)
+            }
+
+            terms
         }
     }
 }

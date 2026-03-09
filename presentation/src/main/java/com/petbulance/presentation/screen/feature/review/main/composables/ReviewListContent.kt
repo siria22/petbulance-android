@@ -29,6 +29,7 @@ fun ReviewListContent(
     onReceiptToggle: () -> Unit,
     onPhotoToggle: () -> Unit,
     onReviewClick: (Long) -> Unit,
+    onMoreClick: (Long) -> Unit,
     emptyView: @Composable () -> Unit = { ReviewEmptyView() }
 ) {
     val listState = rememberLazyListState()
@@ -76,7 +77,11 @@ fun ReviewListContent(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(data.reviews) { review ->
-                    ReviewCard(review = review, onReviewClicked = { onReviewClick(review.id) })
+                    ReviewCard(
+                        review = review,
+                        onReviewClicked = { onReviewClick(review.id) },
+                        onMoreClicked = { onMoreClick(review.id) }
+                    )
                     HorizontalDivider(
                         thickness = 1.dp,
                         color = colorScheme.border.verySubtle

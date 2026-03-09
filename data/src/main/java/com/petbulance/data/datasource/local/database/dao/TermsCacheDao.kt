@@ -14,6 +14,12 @@ interface TermsCacheDao {
     @Query("SELECT cachedAt FROM terms_cache ORDER BY cachedAt DESC LIMIT 1")
     suspend fun getLatestCacheTime(): Long?
 
+    @Query("SELECT * FROM terms_cache WHERE termsType = :type LIMIT 1")
+    suspend fun getTermByType(type: String): TermsCacheEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(term: TermsCacheEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(terms: List<TermsCacheEntity>)
 

@@ -6,7 +6,11 @@ import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
+import com.petbulance.domain.model.feature.support.report.ReportParam
+import com.petbulance.domain.model.type.ReportType
 import com.petbulance.domain.usecase.feature.hospital.review.FilterReviewUseCase
+import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
+import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +23,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
-    private val filterReviewUseCase: FilterReviewUseCase
+    private val filterReviewUseCase: FilterReviewUseCase,
+    private val getMyInfoUseCase: GetMyInfoUseCase,
+    private val createReportUseCase: CreateReportUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<ReviewState>(ReviewState.Init)
@@ -53,6 +59,8 @@ class ReviewViewModel @Inject constructor(
     private val _isLoadingNextPage = MutableStateFlow(false)
     val isLoadingNextPage = _isLoadingNextPage.asStateFlow()
 
+    // Current User Info
+    private var currentUserNickname: String? = null
 
     // Pagination Info
     private var currentCursorId: Long? = null
@@ -60,7 +68,16 @@ class ReviewViewModel @Inject constructor(
     private val pageSize = 5
 
     init {
+        loadCurrentUserInfo()
         loadReviews(isRefresh = true)
+    }
+
+    private fun loadCurrentUserInfo() {
+        launch {
+            getMyInfoUseCase().onSuccess { userInfo ->
+                currentUserNickname = userInfo.nickname
+            }
+        }
     }
 
     fun onIntent(intent: ReviewIntent) {
@@ -100,6 +117,10 @@ class ReviewViewModel @Inject constructor(
             is ReviewIntent.Refresh -> {
                 loadReviews(isRefresh = true)
             }
+
+            is ReviewIntent.ReportReview -> {
+                reportReview(intent.reviewId, intent.reason)
+            }
         }
     }
 
@@ -136,7 +157,14 @@ class ReviewViewModel @Inject constructor(
                 currentCursorId = pagingData.nextCursorId
                 hasNextPage = pagingData.hasNext
 
-                val newReviews = pagingData.items.map { it.toHospitalReviewDummy() }
+                var newReviews = pagingData.items.map { item ->
+                    toHospitalReview(item, currentUserNickname)
+                }
+                
+                // 사진 후기 필터 적용
+                if (_isPhotoReview.value) {
+                    newReviews = newReviews.filter { it.imageUrls.isNotEmpty() }
+                }
 
                 if (isRefresh) {
                     _reviews.value = newReviews
@@ -158,23 +186,47 @@ class ReviewViewModel @Inject constructor(
         }
     }
 
-    // FIXME : 이거 꼭 이렇게 해야하는지?
-    private fun ReviewSearchItem.toHospitalReviewDummy(): HospitalReview {
+    private fun reportReview(reviewId: Long, reason: String) {
+        launch {
+            val param = ReportParam(
+                reportType = ReportType.REVIEW,
+                reportReason = reason,
+                targetId = reviewId
+            )
+            createReportUseCase(param)
+                .onSuccess {
+                    _event.emit(
+                        ReviewEvent.DataFetch.Success
+                    )
+                }
+                .onFailure { e ->
+                    _event.emit(
+                        ReviewEvent.DataFetch.Error(
+                            userMessage = "신고 접수에 실패했습니다.",
+                            exceptionMessage = e.message
+                        )
+                    )
+                }
+        }
+    }
+
+    private fun toHospitalReview(item: ReviewSearchItem, currentUserNickname: String?): HospitalReview {
         return HospitalReview(
-            id = this.id,
-            isReceiptVerified = this.receiptCheck,
-            treatment = this.treatmentService,
-            animalType = this.animalType,
-            detailAnimalType = this.detailAnimalType,
-            content = this.reviewContent,
-            rating = this.totalRating,
-            date = this.createDate,
-            likeCount = this.likeCount,
-            isLiked = this.liked,
-            imageUrls = this.images,
-            author = this.userNickname,
-            price = this.totalPrice,
-            hospitalName = this.hospitalName
+            id = item.id,
+            isReceiptVerified = item.receiptCheck,
+            treatment = item.treatmentService,
+            animalType = item.animalType,
+            detailAnimalType = item.detailAnimalType,
+            content = item.reviewContent,
+            rating = item.totalRating,
+            date = item.createDate,
+            likeCount = item.likeCount,
+            isLiked = item.liked,
+            imageUrls = item.images,
+            author = item.userNickname,
+            price = item.totalPrice,
+            hospitalName = item.hospitalName,
+            isAuthor = (currentUserNickname == item.userNickname)
         )
     }
 }

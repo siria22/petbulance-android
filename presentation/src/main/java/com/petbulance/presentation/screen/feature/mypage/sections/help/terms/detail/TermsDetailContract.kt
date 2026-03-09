@@ -33,12 +33,14 @@ sealed class TermsDetailDataState {
 sealed class TermsDetailScreenState {
     data object Init : TermsDetailScreenState()
     data class ShowRequiredTermsDialog(val term: Term) : TermsDetailScreenState()
+    data object ShowContentLoadFailedDialog : TermsDetailScreenState()
 }
 
 sealed class TermsDetailIntent {
     data object OnRefresh : TermsDetailIntent()
     data class OnToggleChanged(val isAgreed: Boolean) : TermsDetailIntent()
     data object DismissRequiredTermsDialog : TermsDetailIntent()
+    data object DismissContentLoadFailedDialog : TermsDetailIntent()
 }
 
 sealed class TermsDetailEvent {

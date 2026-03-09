@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -151,6 +151,9 @@ fun HomeScreen(
             HomeScreenContents(
                 argument = argument,
                 data = data,
+                navigateToReviewDetail = { reviewId ->
+                    navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(reviewId))
+                },
                 onNavigateToSearch = { navController.safeNavigate(ScreenDestinations.Search.route) },
                 navigateToHospitalSearchPageWithAnimalType = { animalCategory ->
                     navController.safeNavigate(ScreenDestinations.Search.createRoute(animalCategory))
@@ -202,6 +205,7 @@ private fun HomeScreenContents(
     argument: HomeArgument,
     data: HomeData,
     onNavigateToSearch: () -> Unit,
+    navigateToReviewDetail: (Long) -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     onNavigateToReview: () -> Unit,
     onNavigateToCommunity: () -> Unit,
@@ -236,7 +240,10 @@ private fun HomeScreenContents(
                 reviews = data.recentReviews,
                 reviewState = argument.reviewState,
                 onRetryReviews = { argument.intent(HomeIntent.RetryReviews) },
-                onClicked = onNavigateToReview
+                onClicked = onNavigateToReview,
+                onReviewItemClicked = { reviewId ->
+                    navigateToReviewDetail(reviewId)
+                }
             )
 
             HotArticlesShortcut(
@@ -259,6 +266,7 @@ private fun CommonHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClicked)
             .padding(
                 top = spacingXS,
                 bottom = spacingXS,
@@ -275,8 +283,7 @@ private fun CommonHeader(
             iconResource = IconResource.Vector(Icons.Default.ChevronRight),
             contentDescription = "Move to Hospital Search Page",
             size = iconSizeMedium,
-            tint = colorScheme.icon.dark,
-            modifier = Modifier.clickable { onClicked() }
+            tint = colorScheme.icon.dark
         )
     }
 }
@@ -403,7 +410,7 @@ private fun HospitalNoticeSlider(
             uri = item.imageUrl.toUri(),
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
+                .heightIn(max = 180.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { onBannerClick(item.noticeId) },
         )
@@ -415,7 +422,8 @@ private fun HospitalReviewShortcut(
     reviews: List<HomeScreenReview>,
     reviewState: SectionLoadState,
     onRetryReviews: () -> Unit,
-    onClicked: () -> Unit
+    onClicked: () -> Unit,
+    onReviewItemClicked: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -438,14 +446,17 @@ private fun HospitalReviewShortcut(
             }
 
             else -> {
-                RecentReviewSlider(reviews)
+                RecentReviewSlider(reviews, onReviewItemClicked)
             }
         }
     }
 }
 
 @Composable
-private fun RecentReviewSlider(reviews: List<HomeScreenReview>) {
+private fun RecentReviewSlider(
+    reviews: List<HomeScreenReview>,
+    onReviewItemClicked: (Long) -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -458,14 +469,17 @@ private fun RecentReviewSlider(reviews: List<HomeScreenReview>) {
                 contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingXS),
                 itemSpacing = spacingXS
             ) { _, item ->
-                RecentReviewSliderItem(item)
+                RecentReviewSliderItem(item, onReviewItemClicked)
             }
         }
     }
 }
 
 @Composable
-private fun RecentReviewSliderItem(item: HomeScreenReview) {
+private fun RecentReviewSliderItem(
+    item: HomeScreenReview,
+    onReviewItemClicked: (Long) -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacingSmall),
         modifier = Modifier
@@ -473,6 +487,7 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
                 color = colorScheme.bg.frame.subtle,
                 shape = RoundedCornerShape(16.dp)
             )
+            .clickable { onReviewItemClicked(item.id) }
             .padding(vertical = spacingMedium, horizontal = spacingSmall)
     ) {
         if (item.image != null) {

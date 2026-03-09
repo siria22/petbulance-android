@@ -57,6 +57,10 @@ class TermsDetailViewModel @Inject constructor(
             is TermsDetailIntent.DismissRequiredTermsDialog -> {
                 _screenState.value = TermsDetailScreenState.Init
             }
+
+            is TermsDetailIntent.DismissContentLoadFailedDialog -> {
+                _screenState.value = TermsDetailScreenState.Init
+            }
         }
     }
 
@@ -108,6 +112,11 @@ class TermsDetailViewModel @Inject constructor(
                     _term.value = term
                     updateAgreedState()
                     _dataState.value = TermsDetailDataState.Loaded
+                    
+                    // content가 비어있으면 로드 실패 다이얼로그 표시
+                    if (term.content.isBlank()) {
+                        _screenState.value = TermsDetailScreenState.ShowContentLoadFailedDialog
+                    }
                 }
                 .onFailure { exception ->
                     _eventFlow.emit(
@@ -118,6 +127,7 @@ class TermsDetailViewModel @Inject constructor(
                         )
                     )
                     _dataState.value = TermsDetailDataState.Init
+                    _screenState.value = TermsDetailScreenState.ShowContentLoadFailedDialog
                 }
         }
     }

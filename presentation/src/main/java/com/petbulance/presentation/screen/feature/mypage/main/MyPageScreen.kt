@@ -321,6 +321,7 @@ private fun MyPageSection(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable(onClick = elem.onClicked)
                     .padding(horizontal = spacingMedium, vertical = spacingSmall)
             ) {
                 Row(
@@ -340,7 +341,6 @@ private fun MyPageSection(
                     )
                 }
                 BasicIcon(
-                    modifier = Modifier.clickable(onClick = elem.onClicked),
                     iconResource = IconResource.Vector(Icons.Filled.ChevronRight),
                     contentDescription = "Navigate to screen",
                     size = iconSizeMS,

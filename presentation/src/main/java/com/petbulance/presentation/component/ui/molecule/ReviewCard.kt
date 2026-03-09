@@ -41,10 +41,15 @@ import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.utils.formatReviewDate
 import java.util.Locale
 
 @Composable
-fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
+fun ReviewCard(
+    review: HospitalReview,
+    onReviewClicked: () -> Unit,
+    onMoreClicked: () -> Unit = {}
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXS),
         modifier = Modifier
@@ -72,7 +77,7 @@ fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = review.date,
+                    text = review.date.formatReviewDate(),
                     color = colorScheme.text.caption,
                     style = typography.bodySmall
                 )
@@ -81,8 +86,8 @@ fun ReviewCard(review: HospitalReview, onReviewClicked: () -> Unit) {
                 iconResource = IconResource.Vector(Icons.Default.MoreVert),
                 size = iconSizeMedium,
                 contentDescription = "More",
-                tint = colorScheme.icon.light
-                //TODO : More 버튼 클릭 시
+                tint = colorScheme.icon.light,
+                modifier = Modifier.clickable { onMoreClicked() }
             )
         }
 

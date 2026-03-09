@@ -256,10 +256,12 @@ private fun CoalitionScreenContents(
             modifier = Modifier.fillMaxWidth(),
             text = if (isOnProgress) "제출 중..." else "문의 제출",
             size = BasicButtonSize.L,
-            buttonType = BasicButtonType.PRIMARY,
+            buttonType = if (data.isSubmitEnabled && !isOnProgress) BasicButtonType.PRIMARY else BasicButtonType.DISABLED,
             radius = 16.dp
         ) {
-            onIntent(CoalitionIntent.OnSubmitClicked)
+            if (data.isSubmitEnabled && !isOnProgress) {
+                onIntent(CoalitionIntent.OnSubmitClicked)
+            }
         }
         Spacer(modifier = Modifier.height(spacingXL))
     }

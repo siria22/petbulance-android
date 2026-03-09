@@ -44,6 +44,9 @@ import com.petbulance.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXXS
+import com.petbulance.presentation.screen.feature.review.common.ReviewReportReasonDialog
+import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
+import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.screen.feature.review.main.ReviewData
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewEmptyView
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
@@ -65,6 +68,14 @@ fun ReviewSearchScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var startTab by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
     var showSortingDialog by remember { mutableStateOf(false) }
+    
+    var showMoreOption by remember { mutableStateOf(false) }
+    var selectedReviewId by remember { mutableStateOf<Long?>(null) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedReason by remember { mutableStateOf("") }
+    
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -119,6 +130,10 @@ fun ReviewSearchScreen(
                             navController.safeNavigate(
                                 ScreenDestinations.Review.Detail.createRoute(it)
                             )
+                        },
+                        onMoreClick = { reviewId ->
+                            selectedReviewId = reviewId
+                            showMoreOption = true
                         }
                     )
                 }
@@ -162,6 +177,70 @@ fun ReviewSearchScreen(
             onSortTypeSelected = { sortType ->
                 argument.intent(ReviewSearchIntent.ChangeSort(sortType))
                 showSortingDialog = false
+            }
+        )
+    }
+    
+    if (showMoreOption) {
+        val selectedReview = selectedReviewId?.let { id ->
+            data.searchResults.find { it.id == id }
+        }
+        
+        if (selectedReview?.isAuthor == true) {
+            DeleteOrEdit(
+                onDeleteOptionClicked = {
+                    showMoreOption = false
+                    showDeleteConfirmDialog = true
+                },
+                onEditOptionClicked = {
+                    showMoreOption = false
+                    selectedReviewId?.let { reviewId ->
+                        navController.safeNavigate(
+                            ScreenDestinations.Review.Edit.createRoute(reviewId)
+                        )
+                    }
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        } else {
+            ReportOptionDialog(
+                onReportOptionClicked = {
+                    showMoreOption = false
+                    showReportReasonDialog = true
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        }
+    }
+    
+    if (showDeleteConfirmDialog) {
+        // TODO: 삭제 확인 다이얼로그 추가 필요
+        showDeleteConfirmDialog = false
+        selectedReviewId?.let { reviewId ->
+            // argument.intent(ReviewSearchIntent.DeleteReview(reviewId))
+        }
+        selectedReviewId = null
+    }
+    
+    if (showReportReasonDialog) {
+        ReviewReportReasonDialog(
+            selectedReason = selectedReason,
+            onReasonClicked = { reason ->
+                selectedReason = reason
+            },
+            onSubmitClicked = {
+                showReportReasonDialog = false
+                selectedReviewId?.let { reviewId ->
+                    argument.intent(ReviewSearchIntent.ReportReview(reviewId, selectedReason))
+                    android.widget.Toast.makeText(context, "신고가 접수되었습니다.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                selectedReviewId = null
+                selectedReason = ""
+            },
+            onDismissRequest = {
+                showReportReasonDialog = false
+                selectedReviewId = null
+                selectedReason = ""
             }
         )
     }
