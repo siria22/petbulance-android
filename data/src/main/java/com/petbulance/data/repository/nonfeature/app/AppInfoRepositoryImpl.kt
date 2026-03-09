@@ -3,7 +3,6 @@ package com.petbulance.data.repository.nonfeature.app
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.datasource.remote.network.nonfeature.app.AppApi
 import com.petbulance.data.datasource.remote.network.nonfeature.app.dto.GetPresignReqDto
@@ -49,7 +48,7 @@ class AppInfoRepositoryImpl @Inject constructor(
         // return safeApiCall<String>(path = "/app/version") {
         //     api.getVersion()
         // }
-        
+
         // 임시 더미 데이터 반환
         return Result.success("v1.01")
     }
@@ -101,10 +100,14 @@ class AppInfoRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadImage(url: String, imageBytes: ByteArray, mimeType: String): Result<Unit> {
+    override suspend fun uploadImage(
+        url: String,
+        imageBytes: ByteArray,
+        mimeType: String
+    ): Result<Unit> {
         return try {
             val response = api.uploadImage(url, imageBytes, mimeType)
-            
+
             if (response.status.value in 200..299) {
                 Result.success(Unit)
             } else {
