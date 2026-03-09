@@ -125,8 +125,7 @@ private fun IconTextChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val contentColor =
-        if (isSelected) colorScheme.tag.trust.medium else colorScheme.tag.trust.verysubtle
+    val contentColor = colorScheme.icon.dark
     val borderColor =
         if (isSelected) colorScheme.tag.trust.medium else colorScheme.tag.trust.verysubtle
 

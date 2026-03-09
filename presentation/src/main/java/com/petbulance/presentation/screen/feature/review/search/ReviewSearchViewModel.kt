@@ -3,11 +3,15 @@ package com.petbulance.presentation.screen.feature.review.search
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
+import com.petbulance.domain.model.feature.support.report.ReportParam
+import com.petbulance.domain.model.type.ReportType
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.usecase.feature.hospital.review.AddRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.DeleteRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetRecentSearchKeywordsUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.SearchReviewUseCase
+import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
+import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +29,9 @@ class ReviewSearchViewModel @Inject constructor(
     private val searchReviewUseCase: SearchReviewUseCase,
     private val getRecentKeywordsUseCase: GetRecentSearchKeywordsUseCase,
     private val addRecentKeywordUseCase: AddRecentSearchKeywordUseCase,
-    private val deleteRecentKeywordUseCase: DeleteRecentSearchKeywordUseCase
+    private val deleteRecentKeywordUseCase: DeleteRecentSearchKeywordUseCase,
+    private val getMyInfoUseCase: GetMyInfoUseCase,
+    private val createReportUseCase: CreateReportUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<ReviewSearchState>(ReviewSearchState.Init)
@@ -58,11 +64,25 @@ class ReviewSearchViewModel @Inject constructor(
     private val _isPhotoReview = MutableStateFlow(false)
     val isPhotoReview = _isPhotoReview.asStateFlow()
 
+    private var currentUserNickname: String? = null
+
     val recentKeywords = getRecentKeywordsUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+    
+    init {
+        loadCurrentUserInfo()
+    }
+    
+    private fun loadCurrentUserInfo() {
+        launch {
+            getMyInfoUseCase().onSuccess { userInfo ->
+                currentUserNickname = userInfo.nickname
+            }
+        }
+    }
 
     fun onIntent(intent: ReviewSearchIntent) {
         when (intent) {
@@ -110,6 +130,10 @@ class ReviewSearchViewModel @Inject constructor(
                 performSearch()
             }
 
+            is ReviewSearchIntent.ReportReview -> {
+                reportReview(intent.reviewId, intent.reason)
+            }
+
             else -> {}
         }
     }
@@ -142,6 +166,23 @@ class ReviewSearchViewModel @Inject constructor(
         }
     }
 
+    private fun reportReview(reviewId: Long, reason: String) {
+        launch {
+            val param = ReportParam(
+                reportType = ReportType.REVIEW,
+                reportReason = reason,
+                targetId = reviewId
+            )
+            createReportUseCase(param)
+                .onSuccess {
+                    _eventFlow.emit(ReviewSearchEvent.Error("신고가 접수되었습니다."))
+                }
+                .onFailure { e ->
+                    _eventFlow.emit(ReviewSearchEvent.Error("신고 접수에 실패했습니다."))
+                }
+        }
+    }
+
     private fun ReviewSearchItem.toHospitalReview() = HospitalReview(
         id = this.id,
         hospitalName = this.hospitalName,
@@ -156,6 +197,7 @@ class ReviewSearchViewModel @Inject constructor(
         isLiked = this.liked,
         imageUrls = this.images,
         author = this.userNickname,
-        price = this.totalPrice
+        price = this.totalPrice,
+        isAuthor = (currentUserNickname == this.userNickname)
     )
 }

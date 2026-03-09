@@ -79,7 +79,6 @@ class TermsViewModel @Inject constructor(
 
     private fun loadTerms() {
         launch {
-            // TODO: 약관 캐싱 로직 추가 필요 - 최초 1회만 API 호출하고 이후 재사용
             _dataState.value = TermsDataState.Loading
             getTermsListUseCase().onSuccess { list ->
                 _termsList.value = list

@@ -33,6 +33,9 @@ sealed interface ReviewIntent {
 
     // 초기화 및 기타
     data object Refresh : ReviewIntent
+
+    // 신고
+    data class ReportReview(val reviewId: Long, val reason: String) : ReviewIntent
 }
 
 sealed interface ReviewEvent {

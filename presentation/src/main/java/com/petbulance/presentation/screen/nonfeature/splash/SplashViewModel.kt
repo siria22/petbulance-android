@@ -1,11 +1,10 @@
 package com.petbulance.presentation.screen.nonfeature.splash
 
-import android.util.Log
 import com.petbulance.domain.repository.feature.user.AuthRepository
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
+import com.petbulance.domain.usecase.feature.user.terms.GetTermsListUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermsStatusUseCase
 import com.petbulance.domain.usecase.nonfeature.app.CheckAppVersionUseCase
-import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +18,7 @@ class SplashViewModel @Inject constructor(
     private val checkAppVersionUseCase: CheckAppVersionUseCase,
     private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
     private val getTermsStatusUseCase: GetTermsStatusUseCase,
+    private val getTermsListUseCase: GetTermsListUseCase,
     private val authRepository: AuthRepository
 ) : BaseViewModel() {
 
@@ -32,13 +32,11 @@ class SplashViewModel @Inject constructor(
 
     private fun checkAppStatus() {
         launch {
-            Log.d(LOGGER_TAG, "Check app status")
             checkAppVersionUseCase()
                 .onSuccess { isUpdateNeeded ->
                     if (isUpdateNeeded) {
                         // TODO: 업데이트 필요 시 처리 (강제 업데이트 다이얼로그 등)
                     }
-                    Log.d(LOGGER_TAG, "App version check success: $isUpdateNeeded")
                     checkLoginAndMove()
                 }
                 .onFailure { e ->
@@ -54,14 +52,10 @@ class SplashViewModel @Inject constructor(
     }
 
     private suspend fun checkLoginAndMove() {
-        // 자동 로그인 설정 확인
         val isAutoLoginEnabled = authRepository.isAutoLoginEnabled().getOrElse { true }
-
-        // 토큰 존재 여부 확인
         val hasTokens = checkLoginStatusUseCase().getOrElse { false }
 
         if (!isAutoLoginEnabled || !hasTokens) {
-            Log.d(LOGGER_TAG, "User is not logged in or AutoLogin disabled")
             if (!isAutoLoginEnabled && hasTokens) {
                 authRepository.clearTokens()
             }
@@ -69,33 +63,44 @@ class SplashViewModel @Inject constructor(
             return
         }
 
-        Log.d(LOGGER_TAG, "User is logged in")
+        // 약관 목록과 동의 상태를 함께 확인
+        val termsListResult = getTermsListUseCase()
+        val termsStatusResult = getTermsStatusUseCase()
 
-        getTermsStatusUseCase()
-            .onSuccess { status ->
-                // TODO: 서버에서 내려주는 약관 필수/선택 여부 확인 필요
-                // 정책상 위치기반 서비스는 선택 약관이므로 필수 체크에서 제외
-                // 만약 서버에서 location을 필수로 내려준다면 아래 로직 수정 필요
-                val isAllRequiredAgreed = status.service && status.privacy // && status.location
-                Log.d(LOGGER_TAG, "Is All Required terms Agreed: $isAllRequiredAgreed")
-                if (isAllRequiredAgreed) {
-                    Log.d(LOGGER_TAG, "Navigate to home")
-                    _event.emit(SplashEvent.NavigateToHome)
-                } else {
-                    Log.d(LOGGER_TAG, "Navigate to Home with Terms check")
-                    _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
-                }
-            }
-            .onFailure { ex ->
-                Log.d(LOGGER_TAG, "Failed to get Terms status: ${ex.stackTrace}")
-                _event.emit(
-                    SplashEvent.DataFetch.Error(
-                        userMessage = "서버와의 통신이 원활하지 않습니다.",
-                        exceptionMessage = ex.message,
-                        displayType = ErrorDisplayType.Custom
-                    )
+        if (termsListResult.isFailure || termsStatusResult.isFailure) {
+            _event.emit(
+                SplashEvent.DataFetch.Error(
+                    userMessage = "서버와의 통신이 원활하지 않습니다.",
+                    exceptionMessage = termsListResult.exceptionOrNull()?.message 
+                        ?: termsStatusResult.exceptionOrNull()?.message,
+                    displayType = ErrorDisplayType.Custom
                 )
+            )
+            return
+        }
+
+        val termsList = termsListResult.getOrNull() ?: emptyList()
+        val termsStatus = termsStatusResult.getOrNull() ?: return
+
+        // 필수 약관 목록 추출
+        val requiredTerms = termsList.filter { it.required }
+        
+        // 각 필수 약관이 동의되었는지 확인
+        val isAllRequiredAgreed = requiredTerms.all { term ->
+            when (term.termsType?.name) {
+                "SERVICE" -> termsStatus.service
+                "PRIVACY" -> termsStatus.privacy
+                "LOCATION" -> termsStatus.location
+                "MARKETING" -> termsStatus.marketing
+                else -> false
             }
+        }
+
+        if (isAllRequiredAgreed) {
+            _event.emit(SplashEvent.NavigateToHome)
+        } else {
+            _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
+        }
     }
 
     fun onIntent(intent: SplashIntent) {
