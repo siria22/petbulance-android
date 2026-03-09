@@ -1,8 +1,9 @@
-﻿package com.petbulance.data.repository.nonfeature.app
+package com.petbulance.data.repository.nonfeature.app
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.datasource.remote.network.nonfeature.app.AppApi
 import com.petbulance.data.datasource.remote.network.nonfeature.app.dto.GetPresignReqDto
@@ -24,6 +25,10 @@ class AppInfoRepositoryImpl @Inject constructor(
     private val api: AppApi,
     @param:ApplicationContext private val context: Context
 ) : AppInfoRepository {
+
+    companion object {
+        private const val TAG = "AppInfoRepository"
+    }
 
     override suspend fun checkHealth(): Result<HealthCheckResult> {
         return safeApiCall<TestResponseDto>(path = "/app/health") {
@@ -95,6 +100,7 @@ class AppInfoRepositoryImpl @Inject constructor(
     override suspend fun uploadImage(url: String, imageBytes: ByteArray, mimeType: String): Result<Unit> {
         return try {
             val response = api.uploadImage(url, imageBytes, mimeType)
+            
             if (response.status.value in 200..299) {
                 Result.success(Unit)
             } else {

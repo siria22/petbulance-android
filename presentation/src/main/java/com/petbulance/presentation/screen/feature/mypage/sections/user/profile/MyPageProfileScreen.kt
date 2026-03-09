@@ -152,21 +152,28 @@ fun MyPageProfileScreen(
                 onSaveClicked = {
                     coroutineScope.launch {
                         val uri = data.selectedImageUri
+                        android.util.Log.d("siria22", "Selected URI: $uri")
+                        
                         val imageBytes = if (uri != null) {
                             withContext(Dispatchers.IO) {
                                 try {
-                                    context.contentResolver.openInputStream(uri)
+                                    val bytes = context.contentResolver.openInputStream(uri)
                                         ?.use { it.readBytes() }
+                                    android.util.Log.d("siria22", "Image bytes read: ${bytes?.size}")
+                                    bytes
                                 } catch (e: Exception) {
+                                    android.util.Log.e("siria22", "Failed to read image bytes: ${e.message}", e)
                                     null
                                 }
                             }
                         } else null
 
-                        val filename = uri?.lastPathSegment
+                        val filename = uri?.lastPathSegment ?: uri?.toString()?.substringAfterLast("/") ?: "profile_image"
                         val mimeType = if (uri != null) {
                             context.contentResolver.getType(uri) ?: "image/jpeg"
                         } else null
+
+                        android.util.Log.d("siria22", "Sending to ViewModel - bytes: ${imageBytes?.size}, filename: $filename, mimeType: $mimeType")
 
                         argument.intent(
                             MyPageProfileIntent.SaveProfile(

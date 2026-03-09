@@ -13,6 +13,7 @@ data class SaveReviewParam(
     val comment: String,
     val isReceipt: Boolean,
     val title: String? = null,
+    val imageCount: Int = 0
 )
 
 data class ReviewImageParam(

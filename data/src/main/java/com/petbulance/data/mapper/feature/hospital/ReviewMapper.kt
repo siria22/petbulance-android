@@ -102,7 +102,15 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
         ReceiptItemDto(name = it.name, price = it.price)
     },
     visitDate = visitDate?.ifBlank { null },
-    reviewComment = comment
+    reviewComment = comment,
+    images = if (imageCount > 0) {
+        (1..imageCount).map { index ->
+            ReviewImageDto(
+                filename = "review_image_$index",
+                contentType = "image/jpeg"
+            )
+        }
+    } else null
 )
 
 fun ReceiptAnalysisResDto.toDomain() = ReceiptAnalysisResult(

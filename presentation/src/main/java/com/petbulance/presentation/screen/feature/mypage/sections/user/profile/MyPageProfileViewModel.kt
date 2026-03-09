@@ -2,6 +2,7 @@ package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.user.user.UserInfo
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
@@ -79,6 +80,8 @@ class MyPageProfileViewModel @Inject constructor(
     ) {
         launch {
             _dataState.value = MyPageProfileDataState.OnProgress
+
+            Log.d("siria22", "imageBytes = ${imageBytes?.size}, imageFileName = ${imageFilename}, imageMimeType = ${imageMimeType}")
             updateProfileUseCase(
                 currentNickname = _userInfo.value?.nickname ?: "",
                 newNickname = newNickname,

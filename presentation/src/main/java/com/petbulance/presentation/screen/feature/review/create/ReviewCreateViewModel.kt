@@ -309,7 +309,8 @@ class ReviewCreateViewModel @Inject constructor(
                     receiptItems = currentState.step2.receiptItems,
                     visitDate = currentState.step2.visitDate,
                     comment = currentState.step3.content,
-                    isReceipt = currentState.step1.isReceiptVerified
+                    isReceipt = currentState.step1.isReceiptVerified,
+                    imageCount = imageBytesList.size
                 )
 
                 createReviewUseCase(param, imageBytesList)

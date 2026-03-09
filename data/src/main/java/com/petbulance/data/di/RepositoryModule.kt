@@ -1,4 +1,5 @@
 @file:Suppress("UNUSED_IMPORT")
+
 package com.petbulance.data.di
 
 import com.petbulance.data.repository.feature.community.board.BoardRepositoryImpl
@@ -7,9 +8,9 @@ import com.petbulance.data.repository.feature.community.post.PostRepositoryImpl
 import com.petbulance.data.repository.feature.community.recent.RecentRepositoryImpl
 import com.petbulance.data.repository.feature.home.BannerRepositoryImpl
 import com.petbulance.data.repository.feature.hospital.history.HistoryRepositoryImpl
+import com.petbulance.data.repository.feature.hospital.history.SearchRepositoryImpl
 import com.petbulance.data.repository.feature.hospital.hospital.HospitalRepositoryImpl
 import com.petbulance.data.repository.feature.hospital.review.ReviewRepositoryImpl
-import com.petbulance.data.repository.feature.hospital.history.SearchRepositoryImpl
 import com.petbulance.data.repository.feature.support.inquiry.InquiryRepositoryImpl
 import com.petbulance.data.repository.feature.support.notice.NoticeRepositoryImpl
 import com.petbulance.data.repository.feature.support.qna.QnaRepositoryImpl
@@ -17,7 +18,7 @@ import com.petbulance.data.repository.feature.support.report.ReportRepositoryImp
 import com.petbulance.data.repository.feature.user.auth.AuthRepositoryImpl
 import com.petbulance.data.repository.feature.user.terms.TermsRepositoryImpl
 import com.petbulance.data.repository.feature.user.user.UserRepositoryImpl
-import com.petbulance.data.repository.nonfeature.app.MockAppInfoRepository
+import com.petbulance.data.repository.nonfeature.app.AppInfoRepositoryImpl
 import com.petbulance.data.repository.nonfeature.device.DeviceRepositoryImpl
 import com.petbulance.data.repository.nonfeature.preference.PreferenceRepositoryImpl
 import com.petbulance.domain.repository.feature.community.BoardRepository
@@ -73,8 +74,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAppInfoRepository(
-        mock: MockAppInfoRepository // TODO : Server not ready
-//        impl: AppInfoRepositoryImpl
+        impl: AppInfoRepositoryImpl
     ): AppInfoRepository
 
     @Binds
