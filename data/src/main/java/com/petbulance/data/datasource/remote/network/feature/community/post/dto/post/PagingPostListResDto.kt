@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PagingPostListResDto(
+    val noticeBanner: NoticeBannerInfoDto? = null,
+    val lastPostId: Long? = null,
     val content: List<PostListResDto>,
     val hasNext: Boolean
 )
@@ -11,16 +13,15 @@ data class PagingPostListResDto(
 @Serializable
 data class PostListResDto(
     val postId: Long,
-    val boardId: Long,
-    val boardName: String,
-    val category: String,
+    val type: String,
+    val topic: String,
     val createdAt: String,
     val thumbnailUrl: String? = null,
-    val imageCount: Int,
+    val imageCount: Long,
     val title: String,
     val content: String,
-    val likeCount: Int,
-    val commentCount: Int,
-    val viewCount: Int,
+    val likeCount: Long,
+    val commentCount: Long,
+    val viewCount: Long,
     val likedByUser: Boolean
 )

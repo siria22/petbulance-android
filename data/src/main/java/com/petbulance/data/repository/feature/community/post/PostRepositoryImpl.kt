@@ -60,28 +60,28 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPostList(
-        boardId: Long?,
-        category: String?,
+        type: String?,
+        topic: String?,
         sort: String,
         lastPostId: Long?,
         pageSize: Int
     ): Result<PagingPostList> {
         return safeApiCall<PagingPostListResDto>(path = "/posts") {
-            api.getPostList(boardId, category, sort, lastPostId, pageSize)
+            api.getPostList(type, topic, sort, lastPostId, pageSize)
         }.map { it.toDomain() }
     }
 
     override suspend fun getPostSearchList(
-        boardId: Long?,
-        categories: List<String>?,
+        type: String?,
+        topic: String?,
         sort: String,
         lastPostId: Long?,
         pageSize: Int,
-        searchKeyword: String?,
+        searchKeyword: String,
         searchScope: String
     ): Result<PagingPostSearchList> {
         return safeApiCall<PagingPostSearchListResDto>(path = "/posts/search") {
-            api.getPostSearchList(boardId, categories, sort, lastPostId, pageSize, searchKeyword, searchScope)
+            api.getPostSearchList(type, topic, sort, lastPostId, pageSize, searchKeyword, searchScope)
         }.map { it.toDomain() }
     }
 

@@ -11,6 +11,7 @@ import com.petbulance.data.datasource.remote.network.feature.community.post.dto.
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.DetailPostResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.ImageUpdateDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.MyPostListResDto
+import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.NoticeBannerInfoDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingMyPostListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingPostListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingPostSearchListResDto
@@ -20,6 +21,7 @@ import com.petbulance.data.datasource.remote.network.feature.community.post.dto.
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.UpdatePostResDto
 import com.petbulance.domain.model.feature.community.post.BoardInfo
 import com.petbulance.domain.model.feature.community.post.Comment
+import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.model.feature.community.post.DeletedPost
 import com.petbulance.domain.model.feature.community.post.MyPostSummary
 import com.petbulance.domain.model.feature.community.post.PagingCommentList
@@ -128,22 +130,29 @@ fun DeletePostResDto.toDomain() = DeletedPost(
 )
 
 fun PagingPostListResDto.toDomain() = PagingPostList(
+    noticeBanner = noticeBanner?.toDomain(),
     items = content.map { it.toDomain() },
     hasNext = hasNext
 )
 
+fun NoticeBannerInfoDto.toDomain() = NoticeBanner(
+    noticeId = noticeId,
+    noticeStatus = noticeStatus,
+    title = title,
+    content = content
+)
+
 fun PostListResDto.toDomain() = PostSummary(
     id = postId,
-    boardId = boardId,
-    boardName = boardName,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     thumbnailUrl = thumbnailUrl,
-    imageCount = imageCount,
-    viewCount = viewCount,
-    commentCount = commentCount,
-    likeCount = likeCount,
+    imageCount = imageCount.toInt(),
+    viewCount = viewCount.toInt(),
+    commentCount = commentCount.toInt(),
+    likeCount = likeCount.toInt(),
     createdAt = createdAt,
     isLiked = likedByUser
 )

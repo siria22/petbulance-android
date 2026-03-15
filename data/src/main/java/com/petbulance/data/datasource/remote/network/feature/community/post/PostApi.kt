@@ -17,71 +17,66 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import javax.inject.Inject
 
-
 class PostApi @Inject constructor(
-    @param:AuthHttpClient private val client: HttpClient,
+    @param:AuthHttpClient private val authClient: HttpClient
 ) {
     private val baseUrl = "${BASE_URL}/posts"
 
     suspend fun createPost(reqDto: CreatePostReqDto): HttpResponse {
-        return client.post(baseUrl) {
+        return authClient.post(baseUrl) {
             contentType(ContentType.Application.Json)
             setBody(reqDto)
         }
     }
 
     suspend fun getPostDetail(postId: Long): HttpResponse {
-        return client.get("$baseUrl/$postId")
+        return authClient.get("$baseUrl/$postId")
     }
 
     suspend fun updatePost(postId: Long, reqDto: UpdatePostReqDto): HttpResponse {
-        return client.put("$baseUrl/$postId") {
+        return authClient.put("$baseUrl/$postId") {
             contentType(ContentType.Application.Json)
             setBody(reqDto)
         }
     }
 
     suspend fun deletePost(postId: Long): HttpResponse {
-        return client.delete("$baseUrl/$postId")
+        return authClient.delete("$baseUrl/$postId")
     }
 
     suspend fun getPostList(
-        boardId: Long? = null,
-        category: String? = null,
-        sort: String = "popular",
+        type: String? = null,
+        topic: String? = null,
+        sort: String = "latest",
         lastPostId: Long? = null,
         pageSize: Int = 10
     ): HttpResponse {
-        return client.get(baseUrl) {
-            boardId?.let { parameter("boardId", it) }
-            category?.let { parameter("category", it) }
-            lastPostId?.let { parameter("lastPostId", it) }
+        return authClient.get(baseUrl) {
+            type?.let { parameter("type", it) }
+            topic?.let { parameter("topic", it) }
             parameter("sort", sort)
+            lastPostId?.let { parameter("lastPostId", it) }
             parameter("pageSize", pageSize)
         }
     }
 
     suspend fun getPostSearchList(
-        boardId: Long? = null,
-        categories: List<String>? = null,
-        sort: String = "popular",
+        type: String? = null,
+        topic: String? = null,
+        sort: String = "latest",
         lastPostId: Long? = null,
-        pageSize: Int = 10,
-        searchKeyword: String? = null,
+        pageSize: Int = 20,
+        searchKeyword: String,
         searchScope: String = "title_content"
     ): HttpResponse {
-        return client.get("$baseUrl/search") {
-            boardId?.let { parameter("boardId", it) }
-            lastPostId?.let { parameter("lastPostId", it) }
-            searchKeyword?.let { parameter("searchKeyword", it) }
-
+        return authClient.get("$baseUrl/search") {
+            type?.let { parameter("type", it) }
+            topic?.let { parameter("topic", it) }
             parameter("sort", sort)
+            lastPostId?.let { parameter("lastPostId", it) }
             parameter("pageSize", pageSize)
+            parameter("searchKeyword", searchKeyword)
             parameter("searchScope", searchScope)
-
-            categories?.forEach { category ->
-                parameter("category", category)
-            }
         }
     }
 
@@ -90,7 +85,7 @@ class PostApi @Inject constructor(
         lastPostId: Long? = null,
         pageSize: Int = 10
     ): HttpResponse {
-        return client.get("$baseUrl/me") {
+        return authClient.get("$baseUrl/me") {
             keyword?.let { parameter("keyword", it) }
             lastPostId?.let { parameter("lastPostId", it) }
             parameter("pageSize", pageSize)
@@ -98,18 +93,18 @@ class PostApi @Inject constructor(
     }
 
     suspend fun likePost(postId: Long): HttpResponse {
-        return client.post("$baseUrl/$postId/likes")
+        return authClient.post("$baseUrl/$postId/likes")
     }
 
     suspend fun unlikePost(postId: Long): HttpResponse {
-        return client.delete("$baseUrl/$postId/likes")
+        return authClient.delete("$baseUrl/$postId/likes")
     }
 
     suspend fun createComment(
         postId: Long,
         reqDto: CreatePostCommentReqDto
     ): HttpResponse {
-        return client.post("$baseUrl/$postId/comments") {
+        return authClient.post("$baseUrl/$postId/comments") {
             contentType(ContentType.Application.Json)
             setBody(reqDto)
         }
@@ -121,7 +116,7 @@ class PostApi @Inject constructor(
         lastCommentId: Long? = null,
         pageSize: Int = 15
     ): HttpResponse {
-        return client.get("$baseUrl/$postId/comments") {
+        return authClient.get("$baseUrl/$postId/comments") {
             lastParentCommentId?.let { parameter("lastParentCommentId", it) }
             lastCommentId?.let { parameter("lastCommentId", it) }
             parameter("pageSize", pageSize)

@@ -13,7 +13,8 @@ data class CommunityArgument(
 
 sealed class CommunityDataState {
     data object Init : CommunityDataState()
-    data object OnProgress : CommunityDataState()
+    data object Loading : CommunityDataState()
+    data object LoadingMore : CommunityDataState()
 }
 
 sealed class CommunityScreenState {
@@ -21,16 +22,30 @@ sealed class CommunityScreenState {
 }
 
 sealed class CommunityIntent {
-    data class SomeIntentWithParams(val param: String) : CommunityIntent()
-    data object SomeIntentWithoutParams : CommunityIntent()
+    data object LoadInitialPosts : CommunityIntent()
+    data object LoadMorePosts : CommunityIntent()
+    data object Refresh : CommunityIntent()
+    data class FilterByType(val type: String?) : CommunityIntent()
+    data class FilterByTopic(val topic: String?) : CommunityIntent()
+    data class ChangeSort(val sort: String) : CommunityIntent()
+    data class NavigateToPostDetail(val postId: Long) : CommunityIntent()
+    data class NavigateToNotice(val noticeId: Long) : CommunityIntent()
+    data class ToggleLike(val postId: Long) : CommunityIntent()
+    data object NavigateToSearch : CommunityIntent()
+    data object NavigateToNotifications : CommunityIntent()
+    data object NavigateToCreatePost : CommunityIntent()
 }
 
 sealed class CommunityEvent {
     sealed class DataFetch : CommunityEvent() {
         data class Error(
-            override val userMessage: String = "문제가 발생했습니다.",
+            override val userMessage: String = "게시글을 불러올 수 없습니다",
             override val exceptionMessage: String?,
             override val displayType: ErrorDisplayType = ErrorDisplayType.Common
         ) : DataFetch(), ErrorEvent
     }
+    
+    data class NavigateToPostDetail(val postId: Long) : CommunityEvent()
+    data class NavigateToNotice(val noticeId: Long) : CommunityEvent()
+    data class ShowComingSoonMessage(val feature: String) : CommunityEvent()
 }

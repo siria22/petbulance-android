@@ -28,10 +28,20 @@ fun NavGraphBuilder.communityDestination(navController: NavController) {
         }
 
         val data: CommunityData = let {
-            val someData by viewModel.someData.collectAsStateWithLifecycle()
+            val noticeBanner by viewModel.noticeBanner.collectAsStateWithLifecycle()
+            val posts by viewModel.posts.collectAsStateWithLifecycle()
+            val hasNext by viewModel.hasNext.collectAsStateWithLifecycle()
+            val currentType by viewModel.currentType.collectAsStateWithLifecycle()
+            val currentTopic by viewModel.currentTopic.collectAsStateWithLifecycle()
+            val currentSort by viewModel.currentSort.collectAsStateWithLifecycle()
 
             CommunityData(
-                data = someData
+                noticeBanner = noticeBanner,
+                posts = posts,
+                hasNext = hasNext,
+                currentType = currentType,
+                currentTopic = currentTopic,
+                currentSort = currentSort
             )
         }
 
