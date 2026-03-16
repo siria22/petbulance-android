@@ -66,7 +66,8 @@ class AuthRepositoryImpl @Inject constructor(
             return safeApiCall<RefreshResponseDto>("auth/refresh") {
                 authApi.refresh(refreshToken)
             }.map { dto ->
-                Pair(dto.accessToken, dto.refreshToken)
+                val cleanAccessToken = dto.accessToken?.removePrefix("Bearer ")
+                Pair(cleanAccessToken, dto.refreshToken)
             }
         }
 
@@ -81,7 +82,7 @@ class AuthRepositoryImpl @Inject constructor(
                 isNewUser = dto.isNewUser,
                 signUpToken = dto.signUpToken,
                 firebaseCustomToken = dto.firebaseCustomToken,
-                accessToken = dto.accessToken,
+                accessToken = dto.accessToken?.removePrefix("Bearer "),
                 refreshToken = dto.refreshToken
             )
         }
