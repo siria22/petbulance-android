@@ -18,7 +18,14 @@ sealed class CommunityDataState {
 }
 
 sealed class CommunityScreenState {
-    data object Init : CommunityScreenState()
+    data object Home : CommunityScreenState()
+
+    data object Search : CommunityScreenState()
+
+    sealed class Result: CommunityScreenState() {
+        data object Post : Result()
+        data object Comment : Result()
+    }
 }
 
 sealed class CommunityIntent {
@@ -32,6 +39,7 @@ sealed class CommunityIntent {
     data class NavigateToNotice(val noticeId: Long) : CommunityIntent()
     data class ToggleLike(val postId: Long) : CommunityIntent()
     data object NavigateToSearch : CommunityIntent()
+    data class ChangeSearchScreenState(val state: CommunityScreenState) : CommunityIntent()
     data object NavigateToNotifications : CommunityIntent()
     data object NavigateToCreatePost : CommunityIntent()
 }

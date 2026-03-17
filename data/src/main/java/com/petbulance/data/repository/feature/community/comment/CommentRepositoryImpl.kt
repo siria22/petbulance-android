@@ -38,32 +38,32 @@ class CommentRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchPostCommentList(
-        keyword: String,
+        searchKeyword: String,
         searchScope: String,
         lastCommentId: Long?,
         pageSize: Int,
-        category: List<String>?,
-        boardId: Long?
+        topic: String?,
+        type: String?
     ): Result<SearchPostCommentListRes> {
         return safeApiCall<SearchPostCommentListResDto>(path = "/comments/search") {
             api.searchPostCommentList(
-                keyword,
+                searchKeyword,
                 searchScope,
                 lastCommentId,
                 pageSize,
-                category,
-                boardId
+                topic,
+                type
             )
         }.map { it.toDomain() }
     }
 
     override suspend fun getMyCommentList(
-        keyword: String?,
+        searchKeyword: String?,
         lastCommentId: Long?,
         pageSize: Int
     ): Result<MyCommentList> {
         return safeApiCall<PagingMyCommentListResDto>(path = "/comments/me") {
-            api.getMyCommentList(keyword, lastCommentId, pageSize)
+            api.getMyCommentList(searchKeyword, lastCommentId, pageSize)
         }.map { it.toDomain() }
     }
 }

@@ -35,12 +35,12 @@ class MockCommentRepository @Inject constructor() : CommentRepository {
     }
 
     override suspend fun searchPostCommentList(
-        keyword: String,
+        searchKeyword: String,
         searchScope: String,
         lastCommentId: Long?,
         pageSize: Int,
-        category: List<String>?,
-        boardId: Long?
+        topic: String?,
+        type: String?
     ): Result<SearchPostCommentListRes> {
         return Result.success(
             SearchPostCommentListRes(
@@ -52,7 +52,7 @@ class MockCommentRepository @Inject constructor() : CommentRepository {
     }
 
     override suspend fun getMyCommentList(
-        keyword: String?,
+        searchKeyword: String?,
         lastCommentId: Long?,
         pageSize: Int
     ): Result<MyCommentList> {

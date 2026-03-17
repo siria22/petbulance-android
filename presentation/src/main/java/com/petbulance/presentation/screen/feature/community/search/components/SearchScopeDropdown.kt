@@ -1,9 +1,10 @@
-package com.petbulance.presentation.screen.feature.community.components
+package com.petbulance.presentation.screen.feature.community.search.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
@@ -19,40 +20,45 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.petbulance.domain.model.type.SearchScope
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
 
-enum class SortType(val korean: String, val value: String) {
-    LATEST("최신순", "latest"),
-    POPULAR("인기순", "popular"),
-    COMMENT("댓글순", "comment")
-}
-
 @Composable
-fun SortDropdown(
-    modifier: Modifier = Modifier,
-    selectedSort: String,
-    onSortSelected: (String) -> Unit
+fun SearchScopeDropdown(
+    selectedScope: String,
+    isCommentTab: Boolean,
+    onScopeSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val currentSortType = SortType.entries.find { it.value == selectedSort } ?: SortType.LATEST
+
+    val availableScopes = if (isCommentTab) {
+        SearchScope.getCommentSearchScopes()
+    } else {
+        SearchScope.getPostSearchScopes()
+    }
+
+    val currentScope = availableScopes.find { it.value == selectedScope }
+        ?: availableScopes.first()
 
     Box(modifier = modifier) {
         Row(
-            modifier = Modifier.clickable { expanded = true },
+            modifier = Modifier
+                .clickable { expanded = true }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = currentSortType.korean,
-                style = MaterialTheme.typography.bodySmall,
+                text = currentScope.korean,
+                style = MaterialTheme.typography.bodyMedium,
                 color = PetbulanceTheme.colorScheme.text.secondary
             )
             BasicIcon(
                 iconResource = IconResource.Vector(Icons.Default.ArrowDropDown),
-                contentDescription = "정렬 선택",
-                tint = PetbulanceTheme.colorScheme.icon.dark,
-                size = 20.dp
+                contentDescription = "검색 대상 선택",
+                tint = PetbulanceTheme.colorScheme.icon.dark
             )
         }
 
@@ -61,27 +67,29 @@ fun SortDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(PetbulanceTheme.colorScheme.bg.frame.default)
         ) {
-            SortType.entries.forEach { sortType ->
+            availableScopes.forEach { scope ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = sortType.korean,
+                            text = scope.korean,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (currentSortType == sortType)
+                            color = if (scope.value == selectedScope) {
                                 PetbulanceTheme.colorScheme.text.primary
-                            else
+                            } else {
                                 PetbulanceTheme.colorScheme.text.secondary
+                            }
                         )
                     },
                     onClick = {
-                        onSortSelected(sortType.value)
+                        onScopeSelected(scope.value)
                         expanded = false
                     },
                     modifier = Modifier.background(
-                        if (currentSortType == sortType)
+                        if (scope.value == selectedScope) {
                             PetbulanceTheme.colorScheme.bg.frame.subtle
-                        else
+                        } else {
                             PetbulanceTheme.colorScheme.bg.frame.default
+                        }
                     )
                 )
             }
@@ -89,13 +97,26 @@ fun SortDropdown(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun SortDropdownPreview() {
+private fun SearchScopeDropdownPostPreview() {
     PetbulanceTheme {
-        SortDropdown(
-            selectedSort = "latest",
-            onSortSelected = {}
+        SearchScopeDropdown(
+            selectedScope = "title_content",
+            isCommentTab = false,
+            onScopeSelected = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScopeDropdownCommentPreview() {
+    PetbulanceTheme {
+        SearchScopeDropdown(
+            selectedScope = "content",
+            isCommentTab = true,
+            onScopeSelected = {}
         )
     }
 }

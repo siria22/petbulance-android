@@ -129,20 +129,18 @@ class MockPostRepository @Inject constructor() : PostRepository {
             val index = (lastPostId?.toInt() ?: 0) + i
             PostSearchSummary(
                 id = index.toLong() + 1,
-                boardId = 1L,
-                boardName = "자유게시판",
-                categories = listOf("DOG", "HEALTH"),
-                title = "검색된 게시글 ${index + 1} - $searchKeyword",
-                content = "검색된 게시글의 내용입니다. 키워드: $searchKeyword 를 포함하고 있습니다.",
-                thumbnailUrl = if (i % 2 == 0) "https://example.com/search${i}.jpg" else null,
-                imageCount = if (i % 2 == 0) 2 else 0,
-                viewCount = 120 + index * 10,
-                commentCount = 5 + index,
-                likeCount = 10 + index * 2,
+                type = type ?: listOf("DOG", "CAT", "SMALLMAMMALS", "AVIAN", "REPTILE", "FISH")[index % 6],
+                topic = topic ?: listOf("HEALTH", "DAILY", "INFORMATION", "QUESTION", "REVIEW")[index % 5],
+                title = "검색 결과 게시글 ${index + 1} - $searchKeyword",
+                content = "검색어 '$searchKeyword'와 관련된 게시글 내용입니다. 이 글은 ${searchScope}에서 검색되었습니다.",
+                thumbnailUrl = if (i % 3 == 0) "https://example.com/search_image${i}.jpg" else null,
+                imageCount = if (i % 3 == 0) (i % 5) + 1 else 0,
+                viewCount = (index + 1) * 30,
+                commentCount = index * 2,
+                likeCount = index * 3,
                 createdAt = "${index + 1}시간 전",
-                writerNickname = "유저${index + 1}",
-                writerProfileUrl = null,
-                isLiked = index % 3 == 0
+                writerNickname = "작성자${index + 1}",
+                isLiked = index % 2 == 0
             )
         }
         return Result.success(

@@ -159,9 +159,8 @@ fun PostListResDto.toDomain() = PostSummary(
 
 fun PostSearchListResDto.toDomain() = PostSearchSummary(
     id = postId,
-    boardId = boardId,
-    boardName = boardName,
-    categories = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     thumbnailUrl = thumbnailUrl,
@@ -171,14 +170,13 @@ fun PostSearchListResDto.toDomain() = PostSearchSummary(
     likeCount = likeCount,
     createdAt = createdAt,
     writerNickname = writerNickname,
-    writerProfileUrl = writerProfileUrl,
-    isLiked = likedByUser
+    isLiked = likedByUser,
 )
 
 fun PagingPostSearchListResDto.toDomain() = PagingPostSearchList(
     items = content.map { it.toDomain() },
     hasNext = hasNext,
-    totalPostCount = totalPostCount
+    totalPostCount = lastPostId
 )
 
 fun PagingMyPostListResDto.toDomain() = PagingMyPostList(

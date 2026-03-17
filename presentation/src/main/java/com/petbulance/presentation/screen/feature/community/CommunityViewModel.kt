@@ -23,7 +23,7 @@ class CommunityViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<CommunityDataState>(CommunityDataState.Init)
     val dataState: StateFlow<CommunityDataState> = _dataState
 
-    private val _screenState = MutableStateFlow<CommunityScreenState>(CommunityScreenState.Init)
+    private val _screenState = MutableStateFlow<CommunityScreenState>(CommunityScreenState.Home)
     val screenState: StateFlow<CommunityScreenState> = _screenState
 
     private val _eventFlow = MutableSharedFlow<CommunityEvent>(extraBufferCapacity = 1)
@@ -61,7 +61,8 @@ class CommunityViewModel @Inject constructor(
             is CommunityIntent.NavigateToPostDetail -> navigateToPostDetail(intent.postId)
             is CommunityIntent.NavigateToNotice -> navigateToNotice(intent.noticeId)
             is CommunityIntent.ToggleLike -> toggleLike(intent.postId)
-            is CommunityIntent.NavigateToSearch -> showComingSoon("검색")
+            is CommunityIntent.NavigateToSearch -> navigateToSearch()
+            is CommunityIntent.ChangeSearchScreenState -> changeSearchScreenState(intent.state)
             is CommunityIntent.NavigateToNotifications -> showComingSoon("알림")
             is CommunityIntent.NavigateToCreatePost -> showComingSoon("글쓰기")
         }
@@ -217,6 +218,14 @@ class CommunityViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun navigateToSearch() {
+        _screenState.update { CommunityScreenState.Search }
+    }
+
+    private fun changeSearchScreenState(state: CommunityScreenState) {
+        _screenState.update { state }
     }
 
     private fun showComingSoon(feature: String) {

@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
@@ -27,9 +29,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
+import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.dropShadow
 import com.petbulance.presentation.component.ui.spacingMedium
 
 @Composable
@@ -45,7 +49,14 @@ fun CommunityTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(PetbulanceTheme.colorScheme.bg.frame.default)
+            .height(48.dp)
+            .dropShadow(
+                shape = RoundedCornerShape(0.dp),
+                color = colorScheme.border.subtle,
+                blur = 0.dp,
+                offsetY = 1.dp
+            )
+            .background(colorScheme.bg.frame.default)
     ) {
         Row(
             modifier = Modifier
@@ -64,12 +75,12 @@ fun CommunityTopBar(
                 Text(
                     text = selectedAnimalType?.korean ?: "전체",
                     style = MaterialTheme.typography.bodyLarge.emp(),
-                    color = PetbulanceTheme.colorScheme.text.primary
+                    color = colorScheme.text.primary
                 )
                 BasicIcon(
                     iconResource = IconResource.Vector(Icons.Default.ArrowDropDown),
                     contentDescription = "동물종 선택",
-                    tint = PetbulanceTheme.colorScheme.icon.dark
+                    tint = colorScheme.icon.dark
                 )
             }
 
@@ -80,13 +91,13 @@ fun CommunityTopBar(
                 BasicIcon(
                     iconResource = IconResource.Vector(Icons.Default.Search),
                     contentDescription = "검색",
-                    tint = PetbulanceTheme.colorScheme.icon.basic,
+                    tint = colorScheme.icon.basic,
                     modifier = Modifier.clickable(onClick = onSearchClick)
                 )
                 BasicIcon(
                     iconResource = IconResource.Vector(Icons.Default.Notifications),
                     contentDescription = "알림",
-                    tint = PetbulanceTheme.colorScheme.icon.basic,
+                    tint = colorScheme.icon.basic,
                     modifier = Modifier.clickable(onClick = onNotificationClick)
                 )
             }
@@ -95,7 +106,7 @@ fun CommunityTopBar(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(PetbulanceTheme.colorScheme.bg.frame.default)
+            modifier = Modifier.background(colorScheme.bg.frame.default)
         ) {
             DropdownMenuItem(
                 text = {
@@ -103,9 +114,9 @@ fun CommunityTopBar(
                         text = "전체",
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (selectedAnimalType == null) 
-                            PetbulanceTheme.colorScheme.text.primary 
+                            colorScheme.text.primary
                         else 
-                            PetbulanceTheme.colorScheme.text.secondary
+                            colorScheme.text.secondary
                     )
                 },
                 onClick = {
@@ -114,9 +125,9 @@ fun CommunityTopBar(
                 },
                 modifier = Modifier.background(
                     if (selectedAnimalType == null) 
-                        PetbulanceTheme.colorScheme.bg.frame.subtle
+                        colorScheme.bg.frame.subtle
                     else 
-                        PetbulanceTheme.colorScheme.bg.frame.default
+                        colorScheme.bg.frame.default
                 )
             )
 
@@ -127,9 +138,9 @@ fun CommunityTopBar(
                             text = category.korean,
                             style = MaterialTheme.typography.bodyLarge,
                             color = if (selectedAnimalType == category) 
-                                PetbulanceTheme.colorScheme.text.primary 
+                                colorScheme.text.primary
                             else 
-                                PetbulanceTheme.colorScheme.text.secondary
+                                colorScheme.text.secondary
                         )
                     },
                     onClick = {
@@ -138,9 +149,9 @@ fun CommunityTopBar(
                     },
                     modifier = Modifier.background(
                         if (selectedAnimalType == category) 
-                            PetbulanceTheme.colorScheme.bg.frame.subtle
+                            colorScheme.bg.frame.subtle
                         else 
-                            PetbulanceTheme.colorScheme.bg.frame.default
+                            colorScheme.bg.frame.default
                     )
                 )
             }

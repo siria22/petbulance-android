@@ -36,30 +36,30 @@ class CommentApi @Inject constructor(
     }
 
     suspend fun searchPostCommentList(
-        keyword: String,
+        searchKeyword: String,
         searchScope: String,
         lastCommentId: Long?,
         pageSize: Int,
-        category: List<String>?,
-        boardId: Long?
+        topic: String?,
+        type: String?
     ): HttpResponse {
         return client.get("$baseUrl/search") {
-            parameter("keyword", keyword)
+            parameter("searchKeyword", searchKeyword)
             parameter("searchScope", searchScope)
             lastCommentId?.let { parameter("lastCommentId", it) }
             parameter("pageSize", pageSize)
-            category?.forEach { parameter("category", it) }
-            boardId?.let { parameter("boardId", it) }
+            topic?.let { parameter("topic", it) }
+            type?.let { parameter("type", it) }
         }
     }
 
     suspend fun getMyCommentList(
-        keyword: String?,
+        searchKeyword: String?,
         lastCommentId: Long?,
         pageSize: Int
     ): HttpResponse {
         return client.get("$baseUrl/me") {
-            keyword?.let { parameter("keyword", it) }
+            searchKeyword?.let { parameter("keyword", it) }
             lastCommentId?.let { parameter("lastCommentId", it) }
             parameter("pageSize", pageSize)
         }
