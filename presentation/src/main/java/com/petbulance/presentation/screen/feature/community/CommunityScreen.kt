@@ -53,6 +53,7 @@ import com.petbulance.presentation.screen.feature.community.search.views.Comment
 import com.petbulance.presentation.screen.feature.community.search.views.CommunityMainView
 import com.petbulance.presentation.screen.feature.community.search.views.PostSearchResultView
 import com.petbulance.presentation.screen.feature.community.search.views.SearchInputView
+import com.petbulance.presentation.utils.nav.ScreenDestinations
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
@@ -75,7 +76,7 @@ fun CommunityScreen(
                 }
 
                 is CommunityEvent.NavigateToPostDetail -> {
-                    // TODO: [구현 필요] 게시글 상세 화면 이동
+                    navController.navigate(ScreenDestinations.Community.PostDetail.createRoute(event.postId))
                 }
 
                 is CommunityEvent.NavigateToNotice -> {

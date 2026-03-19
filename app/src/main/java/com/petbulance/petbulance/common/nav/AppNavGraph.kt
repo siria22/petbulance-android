@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.presentation.screen.feature.community.communityDestination
+import com.petbulance.presentation.screen.feature.community.detail.postDetailDestination
 import com.petbulance.presentation.screen.feature.home.homeDestination
 import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.myPageReviewsDestination
@@ -80,5 +81,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         termsDetailDestination(navController = navController)
 
         communityDestination(navController = navController)
+        postDetailDestination(navController = navController)
     }
 }

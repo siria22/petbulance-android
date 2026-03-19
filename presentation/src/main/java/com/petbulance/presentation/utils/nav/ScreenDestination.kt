@@ -59,7 +59,12 @@ sealed class ScreenDestinations(val route: String) {
         }
     }
 
-    data object Community : ScreenDestinations("community")
+    data object Community : ScreenDestinations("community") {
+        data object PostDetail : ScreenDestinations("community/post/{id}") {
+            const val ARG_ID = "id"
+            fun createRoute(id: Long) = "community/post/$id"
+        }
+    }
 
     data object MyPage : ScreenDestinations("mypage") {
 

@@ -41,7 +41,7 @@ class MockPostRepository @Inject constructor() : PostRepository {
     }
 
     override suspend fun getPostDetail(postId: Long): Result<PostDetail> {
-        return Result.failure(NotImplementedError("Mock implementation not available"))
+        return Result.success(PostDetail.stub)
     }
 
     override suspend fun updatePost(postId: Long, param: UpdatePostParam): Result<Post> {
