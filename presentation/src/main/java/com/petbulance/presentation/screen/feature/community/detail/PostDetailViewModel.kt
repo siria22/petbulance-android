@@ -91,8 +91,15 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailIntent.SelectCommentImage -> selectCommentImage(intent.uri)
             is PostDetailIntent.ClearCommentImage -> clearCommentImage()
             is PostDetailIntent.StartEditComment -> startEditComment(intent.commentId, intent.content, intent.imageUrl, intent.isSecret)
+            is PostDetailIntent.NavigateToEdit -> navigateToEdit()
             is PostDetailIntent.CancelEditComment -> cancelEditComment()
             is PostDetailIntent.UpdateComment -> updateComment(intent.commentId, intent.content, intent.imageUrl, intent.isSecret)
+        }
+    }
+
+    private fun navigateToEdit() {
+        launch {
+            _eventFlow.emit(PostDetailEvent.NavigateToEditPost(postId))
         }
     }
 

@@ -72,6 +72,12 @@ fun PostDetailScreen(
                     }
                 }
 
+                is PostDetailEvent.NavigateToEditPost -> {
+                    navController.navigate(
+                        ScreenDestinations.Community.WritePost.createRoute(event.postId)
+                    )
+                }
+
                 is PostDetailEvent.DeleteSuccess -> {
                     showDeleteToast = true
                     navController.navigate(ScreenDestinations.Community.route) {
@@ -109,6 +115,9 @@ fun PostDetailScreen(
                     replyToCommentId = null
                     replyToNickname = null
                     argument.intent(PostDetailIntent.ClearCommentImage)
+                    // 화면 전체 refresh
+                    argument.intent(PostDetailIntent.LoadDetail)
+                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentDeleteSuccess -> {
@@ -116,6 +125,9 @@ fun PostDetailScreen(
                     showDeleteToast = true
                     reportToastMessage = "댓글을 삭제했어요"
                     showReportSuccessToast = true
+                    // 화면 전체 refresh
+                    argument.intent(PostDetailIntent.LoadDetail)
+                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentReportSuccess -> {
@@ -133,6 +145,9 @@ fun PostDetailScreen(
                 is PostDetailEvent.CommentUpdateSuccess -> {
                     reportToastMessage = "댓글을 수정했어요"
                     showReportSuccessToast = true
+                    // 화면 전체 refresh
+                    argument.intent(PostDetailIntent.LoadDetail)
+                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentCreateError,
@@ -147,6 +162,20 @@ fun PostDetailScreen(
 
     LaunchedEffect(Unit) {
         argument.intent(PostDetailIntent.LoadComments)
+        
+        // WritePost에서 전달된 스낵바 메시지 확인
+        val showSnackbar = navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.get<Boolean>("showPostCreatedSnackbar") ?: false
+        
+        if (showSnackbar) {
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.remove<Boolean>("showPostCreatedSnackbar")
+            
+            reportToastMessage = "작성이 완료 게시했어요"
+            showReportSuccessToast = true
+        }
     }
 
     LaunchedEffect(data.editingCommentId) {

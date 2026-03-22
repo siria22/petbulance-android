@@ -1,7 +1,7 @@
 package com.petbulance.domain.model.feature.community.post.param
 
 data class UpdatePostParam(
-    val category: String,
+    val topic: String,
     val title: String,
     val content: String,
     val imagesToKeepOrAdd: List<ImageUpdateParam> = emptyList(),

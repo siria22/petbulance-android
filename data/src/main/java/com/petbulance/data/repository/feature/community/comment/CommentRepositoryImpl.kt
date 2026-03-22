@@ -1,9 +1,9 @@
 package com.petbulance.data.repository.feature.community.comment
 
 import com.petbulance.data.datasource.remote.network.feature.community.comment.CommentApi
+import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.CommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.DelCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PagingMyCommentListResDto
-import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PostCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.SearchPostCommentListResDto
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.mapper.feature.community.toDomain
@@ -24,7 +24,7 @@ class CommentRepositoryImpl @Inject constructor(
         commentId: Long,
         request: UpdatePostCommentReq
     ): Result<PostComment> {
-        return safeApiCall<PostCommentResDto>(path = "/comments/$commentId") {
+        return safeApiCall<CommentResDto>(path = "/comments/$commentId") {
             api.updatePostComment(commentId, request.toDto())
         }.map { it.toDomain() }
     }

@@ -56,4 +56,5 @@ sealed class CommunityEvent {
     data class NavigateToPostDetail(val postId: Long) : CommunityEvent()
     data class NavigateToNotice(val noticeId: Long) : CommunityEvent()
     data class ShowComingSoonMessage(val feature: String) : CommunityEvent()
+    data object NavigateToWritePost : CommunityEvent()
 }

@@ -86,6 +86,10 @@ fun CommunityScreen(
                 is CommunityEvent.DataFetch.Error -> {
                     // BaseViewModel에서 처리
                 }
+
+                is CommunityEvent.NavigateToWritePost -> {
+                    navController.navigate(ScreenDestinations.Community.WritePost.createRoute())
+                }
             }
         }
     }

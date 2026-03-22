@@ -85,7 +85,7 @@ class AppInfoRepositoryImpl @Inject constructor(
 
     override suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>> {
         val reqDto = GetPresignReqDto(
-            files = files.map { NoticeFileReqDto(it.filename, it.contentType) }
+            files = files.map { NoticeFileReqDto(it.filename, it.contentType, it.usage) }
         )
 
         return safeApiCall<GetPresignResDto>("app/image/presign") {

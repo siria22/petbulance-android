@@ -64,6 +64,13 @@ sealed class ScreenDestinations(val route: String) {
             const val ARG_ID = "id"
             fun createRoute(id: Long) = "community/post/$id"
         }
+
+        data object WritePost : ScreenDestinations("community/write?postId={postId}") {
+            const val ARG_POST_ID = "postId"
+            const val NO_POST_ID = -1L
+            fun createRoute(postId: Long? = null): String =
+                if (postId != null) "community/write?postId=$postId" else "community/write"
+        }
     }
 
     data object MyPage : ScreenDestinations("mypage") {

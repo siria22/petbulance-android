@@ -40,6 +40,7 @@ sealed class PostDetailIntent {
     data class SelectCommentImage(val uri: android.net.Uri) : PostDetailIntent()
     data object ClearCommentImage : PostDetailIntent()
     data class StartEditComment(val commentId: Long, val content: String?, val imageUrl: String?, val isSecret: Boolean) : PostDetailIntent()
+    data object NavigateToEdit : PostDetailIntent()
     data object CancelEditComment : PostDetailIntent()
     data class UpdateComment(val commentId: Long, val content: String, val imageUrl: String?, val isSecret: Boolean) : PostDetailIntent()
 }
@@ -53,6 +54,7 @@ sealed class PostDetailEvent {
         ) : DataFetch(), ErrorEvent
     }
 
+    data class NavigateToEditPost(val postId: Long) : PostDetailEvent()
     data object DeleteSuccess : PostDetailEvent()
     data object ReportFirstSuccess : PostDetailEvent()
     data object ReportDuplicate : PostDetailEvent()

@@ -21,9 +21,9 @@ import com.petbulance.data.datasource.remote.network.feature.community.post.dto.
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.UpdatePostResDto
 import com.petbulance.domain.model.feature.community.post.BoardInfo
 import com.petbulance.domain.model.feature.community.post.Comment
-import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.model.feature.community.post.DeletedPost
 import com.petbulance.domain.model.feature.community.post.MyPostSummary
+import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.model.feature.community.post.PagingCommentList
 import com.petbulance.domain.model.feature.community.post.PagingMyPostList
 import com.petbulance.domain.model.feature.community.post.PagingPostList
@@ -46,8 +46,8 @@ import com.petbulance.domain.model.feature.community.post.param.UpdatePostParam
 import java.time.LocalDateTime
 
 fun CreatePostParam.toDto() = CreatePostReqDto(
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls
@@ -55,8 +55,8 @@ fun CreatePostParam.toDto() = CreatePostReqDto(
 
 fun CreatePostResDto.toDomain() = Post(
     postId = postId,
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls,
@@ -99,8 +99,8 @@ fun DetailPostResDto.toDomain() = PostDetail(
 
 fun UpdatePostResDto.toDomain() = Post(
     postId = postId,
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls,
@@ -108,7 +108,7 @@ fun UpdatePostResDto.toDomain() = Post(
 )
 
 fun UpdatePostParam.toDto() = UpdatePostReqDto(
-    category = category,
+    topic = topic,
     title = title,
     content = content,
     imagesToKeepOrAdd = imagesToKeepOrAdd.map { it.toImageUpdateDto() },

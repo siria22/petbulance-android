@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 
 data class Post(
     val postId: Long,
-    val boardId: Long,
-    val category: String,
+    val type: String,
+    val topic: String,
     val title: String,
     val content: String,
     val imageUrls: List<String>,

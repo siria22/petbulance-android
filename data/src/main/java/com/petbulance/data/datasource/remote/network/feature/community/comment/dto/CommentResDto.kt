@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 @Serializable
-data class PostCommentResDto(
+data class CommentResDto(
     val commentId: Long,
     val content: String,
     val parentId: Long?,

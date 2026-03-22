@@ -30,8 +30,8 @@ class MockPostRepository @Inject constructor() : PostRepository {
         return Result.success(
             Post(
                 postId = postIdCounter++,
-                boardId = param.boardId,
-                category = param.category,
+                type = param.type,
+                topic = param.topic,
                 title = param.title,
                 content = param.content,
                 imageUrls = param.imageUrls,
@@ -48,8 +48,8 @@ class MockPostRepository @Inject constructor() : PostRepository {
         return Result.success(
             Post(
                 postId = postId,
-                boardId = 1L,
-                category = param.category,
+                type = "DOG",
+                topic = param.topic,
                 title = param.title,
                 content = param.content,
                 imageUrls = param.imagesToKeepOrAdd.map { it.imageUrl },

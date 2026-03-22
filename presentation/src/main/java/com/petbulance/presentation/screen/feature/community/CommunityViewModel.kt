@@ -64,7 +64,7 @@ class CommunityViewModel @Inject constructor(
             is CommunityIntent.NavigateToSearch -> navigateToSearch()
             is CommunityIntent.ChangeSearchScreenState -> changeSearchScreenState(intent.state)
             is CommunityIntent.NavigateToNotifications -> showComingSoon("알림")
-            is CommunityIntent.NavigateToCreatePost -> showComingSoon("글쓰기")
+            is CommunityIntent.NavigateToCreatePost -> navigateToCreatePost()
         }
     }
 
@@ -226,6 +226,12 @@ class CommunityViewModel @Inject constructor(
 
     private fun changeSearchScreenState(state: CommunityScreenState) {
         _screenState.update { state }
+    }
+
+    private fun navigateToCreatePost() {
+        launch {
+            _eventFlow.tryEmit(CommunityEvent.NavigateToWritePost)
+        }
     }
 
     private fun showComingSoon(feature: String) {
