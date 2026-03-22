@@ -28,12 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import android.util.Log
+import android.content.Intent
+import androidx.compose.material.icons.filled.Share
 import coil.compose.AsyncImage
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
@@ -86,9 +89,6 @@ fun PostDetailMainView(
     showDeleteConfirmDialog: Boolean,
     onConfirmDelete: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
-    showReportBottomSheet: Boolean,
-    onReportBottomSheetClick: () -> Unit,
-    onDismissReportBottomSheet: () -> Unit,
     showReportReasonDialog: Boolean,
     selectedReportReason: String,
     onReasonSelected: (String) -> Unit,
@@ -125,10 +125,8 @@ fun PostDetailMainView(
     onSubmitCommentReport: () -> Unit,
     onDismissCommentReportReasonDialog: () -> Unit
 ) {
-    Log.d("PostDetailMainView", "PostDetailMainView recomposed with ${data.comments.size} comments, hasMore: ${data.hasMoreComments}")
-    data.comments.forEach { comment ->
-        Log.d("PostDetailMainView", "Comment in UI: id=${comment.commentId}, visible=${comment.visibleToUser}, deleted=${comment.deleted}")
-    }
+    val context = LocalContext.current
+    
     Scaffold(
         topBar = {
             AppTopBar(
@@ -141,6 +139,15 @@ fun PostDetailMainView(
                     },
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
+                        Pair(IconResource.Vector(Icons.Default.Share)) {
+                            val shareIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, data.title)
+                                putExtra(Intent.EXTRA_TEXT, "https://petbulance.cloud/posts/${data.postId}")
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "게시글 공유"))
+                        },
                         Pair(IconResource.Vector(Icons.Default.MoreVert)) {
                             onKebabMenuClick()
                         }
@@ -531,9 +538,6 @@ private fun PostDetailMainViewPreview() {
             showDeleteConfirmDialog = false,
             onConfirmDelete = {},
             onDismissDeleteDialog = {},
-            showReportBottomSheet = false,
-            onReportBottomSheetClick = {},
-            onDismissReportBottomSheet = {},
             showReportReasonDialog = false,
             selectedReportReason = "",
             onReasonSelected = {},

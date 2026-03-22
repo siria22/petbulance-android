@@ -30,7 +30,6 @@ fun PostDetailScreen(
     
     var showMoreOption by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-    var showReportBottomSheet by remember { mutableStateOf(false) }
     var showReportReasonDialog by remember { mutableStateOf(false) }
     var selectedReportReason by remember { mutableStateOf("") }
 
@@ -188,7 +187,7 @@ fun PostDetailScreen(
         },
         onReportOptionClick = {
             showMoreOption = false
-            showReportBottomSheet = true
+            showReportReasonDialog = true
         },
         onDismissMoreOption = { showMoreOption = false },
         showMoreOption = showMoreOption,
@@ -198,12 +197,6 @@ fun PostDetailScreen(
             argument.intent(PostDetailIntent.DeletePost)
         },
         onDismissDeleteDialog = { showDeleteConfirmDialog = false },
-        showReportBottomSheet = showReportBottomSheet,
-        onReportBottomSheetClick = {
-            showReportBottomSheet = false
-            showReportReasonDialog = true
-        },
-        onDismissReportBottomSheet = { showReportBottomSheet = false },
         showReportReasonDialog = showReportReasonDialog,
         selectedReportReason = selectedReportReason,
         onReasonSelected = { selectedReportReason = it },

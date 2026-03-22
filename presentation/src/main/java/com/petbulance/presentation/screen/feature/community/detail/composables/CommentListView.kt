@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ModeEdit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -22,11 +20,6 @@ import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.Space16
-import com.petbulance.presentation.component.ui.atom.BasicButton
-import com.petbulance.presentation.component.ui.atom.BasicButtonSize
-import com.petbulance.presentation.component.ui.atom.BasicButtonType
-import com.petbulance.presentation.component.ui.atom.IconResource
-import com.petbulance.presentation.component.ui.iconSizeSmall
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
@@ -41,8 +34,6 @@ fun CommentListView(
     onEmptyCommentButtonClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Log.d("CommentListView", "CommentListView recomposed with ${comments.size} comments")
-
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXL),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -81,17 +72,6 @@ fun CommentListView(
                     style = typography.labelLarge,
                     color = colorScheme.text.caption
                 )
-
-                BasicButton(
-                    leadingIcon = IconResource.Vector(Icons.Default.ModeEdit),
-                    leadingIconSize = iconSizeSmall,
-                    text = "댓글 쓰기",
-                    size = BasicButtonSize.S,
-                    buttonType = BasicButtonType.DEFAULT,
-                    radius = 8.dp
-                ) {
-                    onEmptyCommentButtonClick()
-                }
 
                 Space16()
             }
