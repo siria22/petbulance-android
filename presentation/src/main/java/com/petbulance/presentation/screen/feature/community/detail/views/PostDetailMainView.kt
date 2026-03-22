@@ -27,15 +27,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import android.util.Log
+import coil.compose.AsyncImage
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
+import com.petbulance.presentation.component.ui.ThickDivider
 import com.petbulance.presentation.component.ui.atom.BasicChip
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
@@ -47,6 +51,7 @@ import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
+import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
@@ -99,8 +104,12 @@ fun PostDetailMainView(
     onCommentReplyClick: (Long, String) -> Unit,
     onCommentMenuClick: (Long, Boolean) -> Unit,
     onLoadMoreComments: () -> Unit,
+    onImageAttachClick: () -> Unit,
+    onImageRemoveClick: () -> Unit,
+    commentImageUri: android.net.Uri?,
     showCommentMoreOption: Boolean,
     isSelectedCommentMine: Boolean,
+    onCommentEditOptionClick: () -> Unit,
     onCommentDeleteOptionClick: () -> Unit,
     onCommentReportOptionClick: () -> Unit,
     onDismissCommentMoreOption: () -> Unit,
@@ -116,6 +125,10 @@ fun PostDetailMainView(
     onSubmitCommentReport: () -> Unit,
     onDismissCommentReportReasonDialog: () -> Unit
 ) {
+    Log.d("PostDetailMainView", "PostDetailMainView recomposed with ${data.comments.size} comments, hasMore: ${data.hasMoreComments}")
+    data.comments.forEach { comment ->
+        Log.d("PostDetailMainView", "Comment in UI: id=${comment.commentId}, visible=${comment.visibleToUser}, deleted=${comment.deleted}")
+    }
     Scaffold(
         topBar = {
             AppTopBar(
@@ -136,23 +149,10 @@ fun PostDetailMainView(
             )
         },
         bottomBar = {
-            Column {
-                CommentInputArea(
-                    commentText = commentText,
-                    onCommentTextChange = onCommentTextChange,
-                    isSecret = isCommentSecret,
-                    onSecretToggle = onCommentSecretToggle,
-                    onImageAttachClick = { },
-                    onMentionClick = { },
-                    onSubmitClick = onCommentSubmit,
-                    replyToNickname = replyToNickname,
-                    onCancelReply = onCancelReply
-                )
-                BottomNavigationBar(
-                    selectedItem = CurrentBottomNav.COMMUNITY,
-                    navController = navController
-                )
-            }
+            BottomNavigationBar(
+                selectedItem = CurrentBottomNav.COMMUNITY,
+                navController = navController
+            )
         },
         containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
@@ -162,19 +162,42 @@ fun PostDetailMainView(
                 .padding(innerPadding)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
                 PostDetailContent(
                     data = data,
-                    modifier = Modifier.weight(1f)
+                    onLikeClick = onLikeClick
                 )
+
+                ThickDivider()
+
+                CommentInputArea(
+                    commentText = commentText,
+                    onCommentTextChange = onCommentTextChange,
+                    isSecret = isCommentSecret,
+                    onSecretToggle = onCommentSecretToggle,
+                    onImageAttachClick = onImageAttachClick,
+                    onMentionClick = { },
+                    onSubmitClick = onCommentSubmit,
+                    replyToNickname = replyToNickname,
+                    onCancelReply = onCancelReply,
+                    isEditMode = data.editingCommentId != null,
+                    onCancelEdit = onCancelReply,
+                    onImageRemoveClick = onImageRemoveClick,
+                    commentImageUri = commentImageUri
+                )
+
+                ThickDivider()
 
                 CommentListView(
                     comments = data.comments,
                     hasMoreComments = data.hasMoreComments,
                     onLoadMore = onLoadMoreComments,
                     onReplyClick = onCommentReplyClick,
-                    onMenuClick = onCommentMenuClick
+                    onMenuClick = onCommentMenuClick,
+                    onEmptyCommentButtonClick = { }
                 )
             }
 
@@ -274,6 +297,7 @@ fun PostDetailMainView(
     if (showCommentMoreOption) {
         if (isSelectedCommentMine) {
             CommentDeleteBottomSheet(
+                onEditOptionClicked = onCommentEditOptionClick,
                 onDeleteOptionClicked = onCommentDeleteOptionClick,
                 onDismissRequest = onDismissCommentMoreOption
             )
@@ -312,14 +336,14 @@ fun PostDetailMainView(
 @Composable
 private fun PostDetailContent(
     data: PostDetailData,
+    onLikeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(spacingMedium)
+            .padding(vertical = spacingLarge, horizontal = spacingXL),
+        verticalArrangement = Arrangement.spacedBy(spacingLarge)
     ) {
         PostDetailHeader(
             boardName = data.boardName,
@@ -341,7 +365,8 @@ private fun PostDetailContent(
         PostDetailStats(
             likeCount = data.likeCount,
             viewCount = data.viewCount,
-            commentCount = data.commentCount
+            commentCount = data.commentCount,
+            onLikeClick = onLikeClick
         )
     }
 }
@@ -379,7 +404,7 @@ private fun PostAuthorInfo(writerNickname: String, profileUrl: String?, createdA
         BasicImageBox(
             modifier = Modifier.clip(CircleShape),
             uri = profileUrl?.toUri(),
-            size = 48.dp
+            size = 40.dp
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(spacingXXXS)) {
@@ -405,9 +430,11 @@ private fun PostDetailImages(images: List<String>) {
             verticalArrangement = Arrangement.spacedBy(spacingMedium)
         ) {
             images.forEach { imageUrl ->
-                BasicImageBox(
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
                     modifier = Modifier.fillMaxWidth(),
-                    uri = imageUrl.toUri()
+                    contentScale = ContentScale.FillWidth
                 )
             }
         }
@@ -427,13 +454,17 @@ private fun PostDetailBody(content: String) {
 private fun PostDetailStats(
     likeCount: Int,
     viewCount: Int,
-    commentCount: Int
+    commentCount: Int,
+    onLikeClick: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         BasicIcon(
+            modifier = Modifier.clickable{
+                onLikeClick()
+            },
             iconResource = IconResource.Vector(Icons.Default.Favorite),
             contentDescription = "Fav count",
             size = iconSizeSmall,
@@ -518,8 +549,12 @@ private fun PostDetailMainViewPreview() {
             onCommentReplyClick = { _, _ -> },
             onCommentMenuClick = { _, _ -> },
             onLoadMoreComments = {},
+            onImageAttachClick = {},
+            onImageRemoveClick = {},
+            commentImageUri = null,
             showCommentMoreOption = false,
             isSelectedCommentMine = false,
+            onCommentEditOptionClick = {},
             onCommentDeleteOptionClick = {},
             onCommentReportOptionClick = {},
             onDismissCommentMoreOption = {},

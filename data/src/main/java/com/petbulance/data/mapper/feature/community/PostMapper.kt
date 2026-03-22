@@ -65,9 +65,9 @@ fun CreatePostResDto.toDomain() = Post(
 
 fun DetailPostResDto.toDomain() = PostDetail(
     boardInfo = BoardInfo(
-        id = board.boardId,
-        name = board.boardName,
-        category = board.category
+        id = 0L,
+        name = post.type,
+        category = post.topic
     ),
     postInfo = PostDetailInfo(
         id = post.postId,

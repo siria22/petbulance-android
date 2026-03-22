@@ -39,6 +39,9 @@ sealed class PostDetailIntent {
     data class ReportComment(val commentId: Long, val reason: String) : PostDetailIntent()
     data class SelectCommentImage(val uri: android.net.Uri) : PostDetailIntent()
     data object ClearCommentImage : PostDetailIntent()
+    data class StartEditComment(val commentId: Long, val content: String?, val imageUrl: String?, val isSecret: Boolean) : PostDetailIntent()
+    data object CancelEditComment : PostDetailIntent()
+    data class UpdateComment(val commentId: Long, val content: String, val imageUrl: String?, val isSecret: Boolean) : PostDetailIntent()
 }
 
 sealed class PostDetailEvent {
@@ -72,6 +75,14 @@ sealed class PostDetailEvent {
     data object CommentReportDuplicate : PostDetailEvent()
     data class CommentReportError(
         override val userMessage: String = "댓글 신고에 실패했습니다",
+        override val exceptionMessage: String?,
+        override val displayType: ErrorDisplayType = ErrorDisplayType.Common
+    ) : PostDetailEvent(), ErrorEvent
+
+    data object CommentUpdateSuccess : PostDetailEvent()
+
+    data class CommentUpdateError(
+        override val userMessage: String = "댓글 수정에 실패했습니다",
         override val exceptionMessage: String?,
         override val displayType: ErrorDisplayType = ErrorDisplayType.Common
     ) : PostDetailEvent(), ErrorEvent

@@ -1,24 +1,33 @@
 package com.petbulance.presentation.screen.feature.community.detail
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import android.util.Log
 import com.petbulance.presentation.screen.feature.community.detail.views.PostDetailMainView
 import com.petbulance.presentation.utils.error.ErrorDisplayType
+import com.petbulance.presentation.utils.hooks.PhotoPickerMediaType
+import com.petbulance.presentation.utils.hooks.rememberPhotoPickerLauncher
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.delay
 
+@RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
 @Composable
 fun PostDetailScreen(
     navController: NavController,
     argument: PostDetailArgument,
     data: PostDetailData
 ) {
+    Log.d("PostDetailScreen", "PostDetailScreen recomposed with ${data.comments.size} comments")
+    
     var showMoreOption by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var showReportBottomSheet by remember { mutableStateOf(false) }
@@ -44,6 +53,17 @@ fun PostDetailScreen(
     var showCommentReportReasonDialog by remember { mutableStateOf(false) }
     var selectedCommentReportReason by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val photoPickerLauncher = rememberPhotoPickerLauncher(
+        multiple = false,
+        maxItems = 1,
+        mediaType = PhotoPickerMediaType.IMAGE
+    ) { uris ->
+        uris.firstOrNull()?.let { uri ->
+            argument.intent(PostDetailIntent.SelectCommentImage(uri))
+        }
+    }
+
     LaunchedEffect(argument.event) {
         argument.event.collect { event ->
             when (event) {
@@ -60,7 +80,10 @@ fun PostDetailScreen(
                     }
 
                     pendingDeleteJob = {
-                        navController.previousBackStackEntry?.savedStateHandle?.set("postDeleted", true)
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            "postDeleted",
+                            true
+                        )
                     }
 
                     delay(3000)
@@ -86,6 +109,7 @@ fun PostDetailScreen(
                     isCommentSecret = false
                     replyToCommentId = null
                     replyToNickname = null
+                    argument.intent(PostDetailIntent.ClearCommentImage)
                 }
 
                 is PostDetailEvent.CommentDeleteSuccess -> {
@@ -107,9 +131,15 @@ fun PostDetailScreen(
                     showReportSuccessToast = true
                 }
 
+                is PostDetailEvent.CommentUpdateSuccess -> {
+                    reportToastMessage = "댓글을 수정했어요"
+                    showReportSuccessToast = true
+                }
+
                 is PostDetailEvent.CommentCreateError,
                 is PostDetailEvent.CommentDeleteError,
-                is PostDetailEvent.CommentReportError -> {
+                is PostDetailEvent.CommentReportError,
+                is PostDetailEvent.CommentUpdateError -> {
                     // ErrorEvent는 BaseViewModel에서 처리
                 }
             }
@@ -118,6 +148,15 @@ fun PostDetailScreen(
 
     LaunchedEffect(Unit) {
         argument.intent(PostDetailIntent.LoadComments)
+    }
+
+    LaunchedEffect(data.editingCommentId) {
+        if (data.editingCommentId != null) {
+            commentText = data.editingCommentContent
+            isCommentSecret = data.editingCommentIsSecret
+            replyToCommentId = null
+            replyToNickname = null
+        }
     }
 
     LaunchedEffect(showReportSuccessToast) {
@@ -179,19 +218,36 @@ fun PostDetailScreen(
         onCommentSecretToggle = { isCommentSecret = !isCommentSecret },
         replyToNickname = replyToNickname,
         onCancelReply = {
-            replyToCommentId = null
-            replyToNickname = null
+            if (data.editingCommentId != null) {
+                argument.intent(PostDetailIntent.CancelEditComment)
+                commentText = ""
+                isCommentSecret = false
+            } else {
+                replyToCommentId = null
+                replyToNickname = null
+            }
         },
         onCommentSubmit = {
-            argument.intent(
-                PostDetailIntent.CreateComment(
-                    content = commentText,
-                    parentId = replyToCommentId,
-                    mentionUserNickname = replyToNickname,
-                    imageUrl = null,
-                    isSecret = isCommentSecret
+            if (data.editingCommentId != null) {
+                argument.intent(
+                    PostDetailIntent.UpdateComment(
+                        commentId = data.editingCommentId,
+                        content = commentText,
+                        imageUrl = data.commentImageUrl,
+                        isSecret = isCommentSecret
+                    )
                 )
-            )
+            } else {
+                argument.intent(
+                    PostDetailIntent.CreateComment(
+                        content = commentText,
+                        parentId = replyToCommentId,
+                        mentionUserNickname = replyToNickname,
+                        imageUrl = data.commentImageUrl,
+                        isSecret = isCommentSecret
+                    )
+                )
+            }
         },
         onCommentReplyClick = { commentId, nickname ->
             replyToCommentId = commentId
@@ -203,8 +259,25 @@ fun PostDetailScreen(
             showCommentMoreOption = true
         },
         onLoadMoreComments = { argument.intent(PostDetailIntent.LoadMoreComments) },
+        onImageAttachClick = { photoPickerLauncher() },
+        onImageRemoveClick = { argument.intent(PostDetailIntent.ClearCommentImage) },
+        commentImageUri = data.commentImageUri,
         showCommentMoreOption = showCommentMoreOption,
         isSelectedCommentMine = isSelectedCommentMine,
+        onCommentEditOptionClick = {
+            showCommentMoreOption = false
+            val comment = data.comments.find { it.commentId == selectedCommentId }
+            comment?.let {
+                argument.intent(
+                    PostDetailIntent.StartEditComment(
+                        commentId = it.commentId,
+                        content = it.content,
+                        imageUrl = it.imageUrl,
+                        isSecret = it.isSecret
+                    )
+                )
+            }
+        },
         onCommentDeleteOptionClick = {
             showCommentMoreOption = false
             showCommentDeleteDialog = true

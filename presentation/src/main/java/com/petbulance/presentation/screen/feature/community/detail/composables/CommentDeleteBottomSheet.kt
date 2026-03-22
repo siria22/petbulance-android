@@ -19,6 +19,7 @@ import com.petbulance.presentation.component.ui.spacingSmall
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentDeleteBottomSheet(
+    onEditOptionClicked: () -> Unit,
     onDeleteOptionClicked: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -34,6 +35,17 @@ fun CommentDeleteBottomSheet(
                 .fillMaxWidth()
                 .padding(vertical = spacingSmall)
         ) {
+            Text(
+                text = "댓글 수정",
+                style = typography.bodyLarge,
+                color = colorScheme.text.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEditOptionClicked() }
+                    .padding(vertical = spacingMedium)
+            )
+
             Text(
                 text = "댓글 삭제",
                 style = typography.bodyLarge,

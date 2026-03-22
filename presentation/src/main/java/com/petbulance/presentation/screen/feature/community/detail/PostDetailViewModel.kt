@@ -5,9 +5,12 @@ import com.petbulance.domain.model.feature.community.post.PostDetail
 import com.petbulance.domain.model.feature.support.report.ReportParam
 import com.petbulance.domain.model.type.ReportType
 import android.net.Uri
+import android.util.Log
 import com.petbulance.domain.model.feature.community.post.param.CreateCommentParam
 import com.petbulance.domain.model.nonfeature.app.PresignFileRequest
+import com.petbulance.domain.model.feature.community.comment.UpdatePostCommentReq
 import com.petbulance.domain.usecase.feature.community.comment.DeleteCommentUseCase
+import com.petbulance.domain.usecase.feature.community.comment.UpdateCommentUseCase
 import com.petbulance.domain.usecase.feature.community.post.CreateCommentUseCase
 import com.petbulance.domain.usecase.feature.community.post.DeletePostUseCase
 import com.petbulance.domain.usecase.feature.community.post.GetCommentListUseCase
@@ -35,6 +38,7 @@ class PostDetailViewModel @Inject constructor(
     private val getCommentListUseCase: GetCommentListUseCase,
     private val createCommentUseCase: CreateCommentUseCase,
     private val deleteCommentUseCase: DeleteCommentUseCase,
+    private val updateCommentUseCase: UpdateCommentUseCase,
     private val appInfoRepository: AppInfoRepository,
     private val uploadImageUseCase: UploadImageUseCase
 ) : BaseViewModel() {
@@ -86,6 +90,9 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailIntent.ReportComment -> reportComment(intent.commentId, intent.reason)
             is PostDetailIntent.SelectCommentImage -> selectCommentImage(intent.uri)
             is PostDetailIntent.ClearCommentImage -> clearCommentImage()
+            is PostDetailIntent.StartEditComment -> startEditComment(intent.commentId, intent.content, intent.imageUrl, intent.isSecret)
+            is PostDetailIntent.CancelEditComment -> cancelEditComment()
+            is PostDetailIntent.UpdateComment -> updateComment(intent.commentId, intent.content, intent.imageUrl, intent.isSecret)
         }
     }
 
@@ -188,6 +195,7 @@ class PostDetailViewModel @Inject constructor(
         launch {
             if (postId == 0L) return@launch
 
+            Log.d("PostDetailViewModel", "loadComments() called for postId: $postId")
             _dataState.value = PostDetailDataState.OnProgress
 
             getCommentListUseCase(
@@ -197,16 +205,22 @@ class PostDetailViewModel @Inject constructor(
                 pageSize = 15
             )
                 .onSuccess { pagingCommentList ->
+                    Log.d("PostDetailViewModel", "loadComments success: ${pagingCommentList.items.size} comments loaded")
+                    Log.d("PostDetailViewModel", "Comments: ${pagingCommentList.items.map { "id=${it.commentId}, visible=${it.visibleToUser}, deleted=${it.deleted}" }}")
+                    
                     _postDetailData.update { current ->
-                        current.copy(
+                        val updated = current.copy(
                             comments = pagingCommentList.items,
                             hasMoreComments = pagingCommentList.hasNext,
                             totalCommentCount = pagingCommentList.totalCount
                         )
+                        Log.d("PostDetailViewModel", "Updated postDetailData with ${updated.comments.size} comments")
+                        updated
                     }
                     _dataState.value = PostDetailDataState.Init
                 }
                 .onFailure { exception ->
+                    Log.e("PostDetailViewModel", "loadComments failed", exception)
                     _eventFlow.emit(
                         PostDetailEvent.DataFetch.Error(
                             userMessage = "댓글을 불러올 수 없습니다",
@@ -354,6 +368,59 @@ class PostDetailViewModel @Inject constructor(
         _postDetailData.update { it.copy(commentImageUri = null, commentImageUrl = null) }
     }
 
+    private fun startEditComment(commentId: Long, content: String?, imageUrl: String?, isSecret: Boolean) {
+        _postDetailData.update {
+            it.copy(
+                editingCommentId = commentId,
+                editingCommentContent = content ?: "",
+                editingCommentImageUrl = imageUrl,
+                editingCommentIsSecret = isSecret
+            )
+        }
+    }
+
+    private fun cancelEditComment() {
+        _postDetailData.update {
+            it.copy(
+                editingCommentId = null,
+                editingCommentContent = "",
+                editingCommentImageUrl = null,
+                editingCommentIsSecret = false
+            )
+        }
+    }
+
+    private fun updateComment(commentId: Long, content: String, imageUrl: String?, isSecret: Boolean) {
+        launch {
+            _dataState.value = PostDetailDataState.OnProgress
+
+            val request = UpdatePostCommentReq(
+                content = content,
+                imageUrl = imageUrl,
+                isSecret = isSecret
+            )
+
+            updateCommentUseCase(commentId, request)
+                .onSuccess {
+                    _eventFlow.emit(PostDetailEvent.CommentUpdateSuccess)
+                    cancelEditComment()
+                    loadDetail()
+                    loadComments()
+                }
+                .onFailure { exception ->
+                    _eventFlow.emit(
+                        PostDetailEvent.CommentUpdateError(
+                            userMessage = "댓글 수정에 실패했습니다",
+                            exceptionMessage = exception.message,
+                            displayType = ErrorDisplayType.Common
+                        )
+                    )
+                }
+
+            _dataState.value = PostDetailDataState.Init
+        }
+    }
+
     fun uploadCommentImageIfNeeded(context: android.content.Context) {
         launch {
             val uri = _postDetailData.value.commentImageUri ?: return@launch
@@ -421,7 +488,7 @@ class PostDetailViewModel @Inject constructor(
             postId = this.postInfo.id,
             boardName = this.boardInfo.name,
             category = this.boardInfo.category,
-            writerNickname = this.postInfo.writer.nickname,
+            writerNickname = this.postInfo.writer.nickname ?: "",
             profileUrl = this.postInfo.writer.profileUrl,
             createdAt = this.postInfo.createdAt,
             title = this.postInfo.title,
@@ -436,7 +503,11 @@ class PostDetailViewModel @Inject constructor(
             hasMoreComments = false,
             totalCommentCount = 0L,
             commentImageUri = null,
-            commentImageUrl = null
+            commentImageUrl = null,
+            editingCommentId = null,
+            editingCommentContent = "",
+            editingCommentImageUrl = null,
+            editingCommentIsSecret = false
         )
     }
 }

@@ -1,28 +1,35 @@
 package com.petbulance.presentation.screen.feature.community.detail.composables
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ModeEdit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.domain.model.feature.community.post.Comment
+import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
+import com.petbulance.presentation.component.ui.CommonDivider
+import com.petbulance.presentation.component.ui.Space16
+import com.petbulance.presentation.component.ui.atom.BasicButton
+import com.petbulance.presentation.component.ui.atom.BasicButtonSize
+import com.petbulance.presentation.component.ui.atom.BasicButtonType
+import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.iconSizeSmall
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXL
 
 @Composable
 fun CommentListView(
@@ -31,73 +38,108 @@ fun CommentListView(
     onLoadMore: () -> Unit,
     onReplyClick: (Long, String) -> Unit,
     onMenuClick: (Long, Boolean) -> Unit,
+    onEmptyCommentButtonClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberLazyListState()
+    Log.d("CommentListView", "CommentListView recomposed with ${comments.size} comments")
 
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-            val totalItems = listState.layoutInfo.totalItemsCount
-            lastVisibleItem != null && lastVisibleItem.index >= totalItems - 3 && hasMoreComments
-        }
-    }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacingXL),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            onLoadMore()
-        }
-    }
-
-    if (comments.isEmpty()) {
-        Box(
-            modifier = modifier
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(spacingMedium),
-            contentAlignment = Alignment.Center
+                .padding(start = spacingXL, end = spacingXL, top = spacingMedium)
         ) {
             Text(
-                text = "아직 댓글이 없습니다.",
-                style = typography.bodyMedium,
-                color = colorScheme.text.disabled
+                text = "댓글",
+                style = typography.labelLarge,
+                color = colorScheme.text.tertiary
+            )
+
+            Text(
+                text = "${comments.count { !it.deleted }}개",
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
             )
         }
-    } else {
-        LazyColumn(
-            modifier = modifier.fillMaxWidth(),
-            state = listState,
-            contentPadding = PaddingValues(vertical = spacingSmall),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            val groupedComments = comments.groupBy { it.parentId }
-            val rootComments = groupedComments[0L] ?: emptyList()
 
-            rootComments.forEach { rootComment ->
-                item(key = "root_${rootComment.commentId}") {
+        if (comments.isEmpty()) {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(spacingMedium),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(spacingSmall)
+            ) {
+                Text(
+                    text = "첫 댓글을 남겨보세요.",
+                    style = typography.labelLarge,
+                    color = colorScheme.text.caption
+                )
+
+                BasicButton(
+                    leadingIcon = IconResource.Vector(Icons.Default.ModeEdit),
+                    leadingIconSize = iconSizeSmall,
+                    text = "댓글 쓰기",
+                    size = BasicButtonSize.S,
+                    buttonType = BasicButtonType.DEFAULT,
+                    radius = 8.dp
+                ) {
+                    onEmptyCommentButtonClick()
+                }
+
+                Space16()
+            }
+
+        } else {
+            Column(
+                modifier = modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                val groupedComments = comments.groupBy { it.parentId }
+                val rootComments = comments.filter { it.isRoot }
+
+                Log.d(
+                    "CommentListView",
+                    "Processing comments: total=${comments.size}, root=${rootComments.size}"
+                )
+                rootComments.forEach { rootComment ->
+                    Log.d(
+                        "CommentListView",
+                        "Rendering root comment: id=${rootComment.commentId}, visible=${rootComment.visibleToUser}, deleted=${rootComment.deleted}"
+                    )
                     CommentItem(
                         comment = rootComment,
                         onReplyClick = onReplyClick,
                         onMenuClick = onMenuClick,
                         isReply = false
                     )
+                    CommonDivider()
+
+                    val replies =
+                        groupedComments[rootComment.commentId]?.filter { it.commentId != rootComment.commentId }
+                            ?: emptyList()
+                    replies.forEach { reply ->
+                        Log.d(
+                            "CommentListView",
+                            "Rendering reply: id=${reply.commentId}, visible=${reply.visibleToUser}, deleted=${reply.deleted}"
+                        )
+                        CommentItem(
+                            comment = reply,
+                            onReplyClick = onReplyClick,
+                            onMenuClick = onMenuClick,
+                            isReply = true
+                        )
+                        CommonDivider()
+                    }
                 }
 
-                val replies = groupedComments[rootComment.commentId] ?: emptyList()
-                items(
-                    items = replies,
-                    key = { reply -> "reply_${reply.commentId}" }
-                ) { reply ->
-                    CommentItem(
-                        comment = reply,
-                        onReplyClick = onReplyClick,
-                        onMenuClick = onMenuClick,
-                        isReply = true
-                    )
-                }
-            }
-
-            if (hasMoreComments) {
-                item {
+                if (hasMoreComments) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -111,5 +153,35 @@ fun CommentListView(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommentListViewPreview() {
+    PetbulanceTheme {
+        CommentListView(
+            comments = Comment.stubs,
+            hasMoreComments = true,
+            onLoadMore = {},
+            onReplyClick = { _, _ -> },
+            onMenuClick = { _, _ -> },
+            onEmptyCommentButtonClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommentListViewEmptyPreview() {
+    PetbulanceTheme {
+        CommentListView(
+            comments = emptyList(),
+            hasMoreComments = false,
+            onLoadMore = {},
+            onReplyClick = { _, _ -> },
+            onMenuClick = { _, _ -> },
+            onEmptyCommentButtonClick = {}
+        )
     }
 }

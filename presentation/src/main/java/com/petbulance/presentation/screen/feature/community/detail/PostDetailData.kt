@@ -1,6 +1,7 @@
 package com.petbulance.presentation.screen.feature.community.detail
 
 import com.petbulance.domain.model.feature.community.post.Comment
+import com.petbulance.domain.model.feature.community.post.WriterInfo
 
 data class PostDetailData(
     val postId: Long,
@@ -21,7 +22,11 @@ data class PostDetailData(
     val hasMoreComments: Boolean = false,
     val totalCommentCount: Long = 0L,
     val commentImageUri: android.net.Uri? = null,
-    val commentImageUrl: String? = null
+    val commentImageUrl: String? = null,
+    val editingCommentId: Long? = null,
+    val editingCommentContent: String = "",
+    val editingCommentImageUrl: String? = null,
+    val editingCommentIsSecret: Boolean = false
 ) {
     companion object {
         val empty = PostDetailData(
@@ -43,7 +48,11 @@ data class PostDetailData(
             hasMoreComments = false,
             totalCommentCount = 0L,
             commentImageUri = null,
-            commentImageUrl = null
+            commentImageUrl = null,
+            editingCommentId = null,
+            editingCommentContent = "",
+            editingCommentImageUrl = null,
+            editingCommentIsSecret = false
         )
 
         fun stub(isMine: Boolean = false) = PostDetailData(
@@ -64,11 +73,64 @@ data class PostDetailData(
             viewCount = 132,
             isLiked = false,
             isMine = isMine,
-            comments = emptyList(),
+            comments = listOf(
+                Comment(
+                    isRoot = true,
+                    commentId = 1L,
+                    parentId = 0L,
+                    writerInfo = WriterInfo("햄스러버", null),
+                    mentionUserNickname = null,
+                    content = "우와 햄스터 정말 귀여워요! 저희 집 햄스터도 아직 손에서 안 먹는데 ㅠㅠ 팁 좀 알려주세요!",
+                    isSecret = false,
+                    isCommentFromPostAuthor = false,
+                    isCommentAuthor = false,
+                    deleted = false,
+                    hidden = false,
+                    imageUrl = null,
+                    visibleToUser = true,
+                    createdAt = "30분 전"
+                ),
+                Comment(
+                    isRoot = false,
+                    commentId = 2L,
+                    parentId = 1L,
+                    writerInfo = WriterInfo("햄스터집사", null),
+                    mentionUserNickname = "햄스러버",
+                    content = "먼저 햄스터가 손에 익숙해지게 하는 게 중요해요! 손에 간식을 올려놓고 기다리다 보면 먹게 될거예요.",
+                    isSecret = false,
+                    isCommentFromPostAuthor = true,
+                    isCommentAuthor = true,
+                    deleted = false,
+                    hidden = false,
+                    imageUrl = null,
+                    visibleToUser = true,
+                    createdAt = "25분 전"
+                ),
+                Comment(
+                    isRoot = true,
+                    commentId = 3L,
+                    parentId = 0L,
+                    writerInfo = WriterInfo("햄스터고수", null),
+                    mentionUserNickname = null,
+                    content = "저희 집 햄스터도 처음에는 무서워했는데, 일주일 정도 꾸준히 손으로 간식 주니까 이제는 손만 보면 달려와요!",
+                    isSecret = false,
+                    isCommentFromPostAuthor = false,
+                    isCommentAuthor = false,
+                    deleted = false,
+                    hidden = false,
+                    imageUrl = null,
+                    visibleToUser = true,
+                    createdAt = "15분 전"
+                )
+            ),
             hasMoreComments = false,
-            totalCommentCount = 0L,
+            totalCommentCount = 3L,
             commentImageUri = null,
-            commentImageUrl = null
+            commentImageUrl = null,
+            editingCommentId = null,
+            editingCommentContent = "",
+            editingCommentImageUrl = null,
+            editingCommentIsSecret = false
         )
     }
 }
