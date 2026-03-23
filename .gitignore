@@ -20,4 +20,6 @@ local.properties
 
 # Windsurf Instructions
 /_windsurf
-./pol
+.windsurf
+
+AGENTS.md

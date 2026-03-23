@@ -83,6 +83,7 @@ fun PostDetailMainView(
     onKebabMenuClick: () -> Unit,
     onLikeClick: () -> Unit,
     onDeleteOptionClick: () -> Unit,
+    onEditOptionClick: () -> Unit,
     onReportOptionClick: () -> Unit,
     onDismissMoreOption: () -> Unit,
     showMoreOption: Boolean,
@@ -271,6 +272,7 @@ fun PostDetailMainView(
                 onDeleteOptionClicked = onDeleteOptionClick,
                 onEditOptionClicked = {
                     onDismissMoreOption()
+                    onEditOptionClick()
                 },
                 onDismissRequest = onDismissMoreOption
             )
@@ -532,6 +534,7 @@ private fun PostDetailMainViewPreview() {
             onKebabMenuClick = {},
             onLikeClick = {},
             onDeleteOptionClick = {},
+            onEditOptionClick = {},
             onReportOptionClick = {},
             onDismissMoreOption = {},
             showMoreOption = false,

@@ -78,7 +78,9 @@ fun WritePostView(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showAnimalTypeDialog by remember { mutableStateOf(data.selectedAnimalType == null) }
+    var showAnimalTypeDialog by remember { 
+        mutableStateOf(data.mode == WritePostData.WritePostMode.CREATE && data.selectedAnimalType == null) 
+    }
     var tempSelectedAnimalType by remember { mutableStateOf<AnimalCategory?>(null) }
 
     Scaffold(

@@ -16,6 +16,7 @@ import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.hooks.PhotoPickerMediaType
 import com.petbulance.presentation.utils.hooks.rememberPhotoPickerLauncher
 import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.delay
 
@@ -73,7 +74,7 @@ fun PostDetailScreen(
                 }
 
                 is PostDetailEvent.NavigateToEditPost -> {
-                    navController.navigate(
+                    navController.safeNavigate(
                         ScreenDestinations.Community.WritePost.createRoute(event.postId)
                     )
                 }
@@ -115,9 +116,6 @@ fun PostDetailScreen(
                     replyToCommentId = null
                     replyToNickname = null
                     argument.intent(PostDetailIntent.ClearCommentImage)
-                    // 화면 전체 refresh
-                    argument.intent(PostDetailIntent.LoadDetail)
-                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentDeleteSuccess -> {
@@ -125,9 +123,6 @@ fun PostDetailScreen(
                     showDeleteToast = true
                     reportToastMessage = "댓글을 삭제했어요"
                     showReportSuccessToast = true
-                    // 화면 전체 refresh
-                    argument.intent(PostDetailIntent.LoadDetail)
-                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentReportSuccess -> {
@@ -143,11 +138,10 @@ fun PostDetailScreen(
                 }
 
                 is PostDetailEvent.CommentUpdateSuccess -> {
+                    commentText = ""
+                    isCommentSecret = false
                     reportToastMessage = "댓글을 수정했어요"
                     showReportSuccessToast = true
-                    // 화면 전체 refresh
-                    argument.intent(PostDetailIntent.LoadDetail)
-                    argument.intent(PostDetailIntent.LoadComments)
                 }
 
                 is PostDetailEvent.CommentCreateError,
@@ -213,6 +207,9 @@ fun PostDetailScreen(
         onDeleteOptionClick = {
             showMoreOption = false
             showDeleteConfirmDialog = true
+        },
+        onEditOptionClick = {
+            argument.intent(PostDetailIntent.NavigateToEdit)
         },
         onReportOptionClick = {
             showMoreOption = false

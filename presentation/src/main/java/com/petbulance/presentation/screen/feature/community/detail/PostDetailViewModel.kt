@@ -111,7 +111,24 @@ class PostDetailViewModel @Inject constructor(
 
             getPostDetailUseCase(postId)
                 .onSuccess { postDetail ->
-                    _postDetailData.value = postDetail.toUiModel()
+                    _postDetailData.update { current ->
+                        current.copy(
+                            postId = postDetail.postInfo.id,
+                            boardName = postDetail.boardInfo.name,
+                            category = postDetail.boardInfo.category,
+                            writerNickname = postDetail.postInfo.writer.nickname ?: "",
+                            profileUrl = postDetail.postInfo.writer.profileUrl,
+                            createdAt = postDetail.postInfo.createdAt,
+                            title = postDetail.postInfo.title,
+                            content = postDetail.postInfo.content,
+                            images = postDetail.postInfo.images.map { it.url },
+                            likeCount = postDetail.postInfo.stats.likeCount,
+                            commentCount = postDetail.postInfo.stats.commentCount,
+                            viewCount = postDetail.postInfo.stats.viewCount,
+                            isLiked = postDetail.postInfo.userInteraction.isLiked,
+                            isMine = postDetail.postInfo.userInteraction.isMine
+                        )
+                    }
                     _dataState.value = PostDetailDataState.Init
                 }
                 .onFailure { exception ->
@@ -490,31 +507,4 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    private fun PostDetail.toUiModel(): PostDetailData {
-        return PostDetailData(
-            postId = this.postInfo.id,
-            boardName = this.boardInfo.name,
-            category = this.boardInfo.category,
-            writerNickname = this.postInfo.writer.nickname ?: "",
-            profileUrl = this.postInfo.writer.profileUrl,
-            createdAt = this.postInfo.createdAt,
-            title = this.postInfo.title,
-            content = this.postInfo.content,
-            images = this.postInfo.images.map { it.url },
-            likeCount = this.postInfo.stats.likeCount,
-            commentCount = this.postInfo.stats.commentCount,
-            viewCount = this.postInfo.stats.viewCount,
-            isLiked = this.postInfo.userInteraction.isLiked,
-            isMine = this.postInfo.userInteraction.isMine,
-            comments = emptyList(),
-            hasMoreComments = false,
-            totalCommentCount = 0L,
-            commentImageUri = null,
-            commentImageUrl = null,
-            editingCommentId = null,
-            editingCommentContent = "",
-            editingCommentImageUrl = null,
-            editingCommentIsSecret = false
-        )
-    }
 }

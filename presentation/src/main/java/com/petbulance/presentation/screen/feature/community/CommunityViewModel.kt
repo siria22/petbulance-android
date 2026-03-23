@@ -55,6 +55,7 @@ class CommunityViewModel @Inject constructor(
             is CommunityIntent.LoadInitialPosts -> loadInitialPosts()
             is CommunityIntent.LoadMorePosts -> loadMorePosts()
             is CommunityIntent.Refresh -> refreshPosts()
+            is CommunityIntent.SilentRefresh -> silentRefresh()
             is CommunityIntent.FilterByType -> filterByType(intent.type)
             is CommunityIntent.FilterByTopic -> filterByTopic(intent.topic)
             is CommunityIntent.ChangeSort -> changeSort(intent.sort)
@@ -172,6 +173,53 @@ class CommunityViewModel @Inject constructor(
         _posts.update { emptyList() }
         _hasNext.update { false }
         loadInitialPosts()
+    }
+
+    private fun silentRefresh() {
+        launch {
+            val currentPostCount = _posts.value.size
+            if (currentPostCount == 0) {
+                loadInitialPosts()
+                return@launch
+            }
+
+            val pagesToLoad = (currentPostCount / 10) + 1
+            val allPosts = mutableListOf<com.petbulance.domain.model.feature.community.post.PostSummary>()
+            var lastPostId: Long? = null
+            var hasMorePages = true
+
+            for (page in 1..pagesToLoad) {
+                if (!hasMorePages) break
+
+                runCatching {
+                    getPostListUseCase(
+                        type = _currentType.value,
+                        topic = _currentTopic.value,
+                        sort = _currentSort.value,
+                        lastPostId = lastPostId,
+                        pageSize = 10
+                    )
+                }.onSuccess { result ->
+                    result.onSuccess { pagingPostList ->
+                        if (page == 1) {
+                            _noticeBanner.update { pagingPostList.noticeBanner }
+                        }
+                        allPosts.addAll(pagingPostList.items)
+                        lastPostId = pagingPostList.items.lastOrNull()?.id
+                        hasMorePages = pagingPostList.hasNext
+                    }.onFailure {
+                        hasMorePages = false
+                    }
+                }.onFailure {
+                    hasMorePages = false
+                }
+            }
+
+            if (allPosts.isNotEmpty()) {
+                _posts.update { allPosts }
+                _hasNext.update { hasMorePages }
+            }
+        }
     }
 
     private fun filterByType(type: String?) {

@@ -32,6 +32,7 @@ sealed class CommunityIntent {
     data object LoadInitialPosts : CommunityIntent()
     data object LoadMorePosts : CommunityIntent()
     data object Refresh : CommunityIntent()
+    data object SilentRefresh : CommunityIntent()
     data class FilterByType(val type: String?) : CommunityIntent()
     data class FilterByTopic(val topic: String?) : CommunityIntent()
     data class ChangeSort(val sort: String) : CommunityIntent()

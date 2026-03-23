@@ -73,6 +73,7 @@ fun PostDeleteBottomSheet(
                     color = colorScheme.text.disabled,
                     modifier = Modifier
                         .padding(vertical = 8.dp, horizontal = 16.dp)
+                        .clickable { onEditOptionClicked() }
                 )
             }
             Column(
