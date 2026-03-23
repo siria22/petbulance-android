@@ -27,7 +27,9 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 
 @Composable
-fun PostDeleteBottomSheet(
+fun PostAndCommentDeleteBottomSheet(
+    deleteText: String,
+    editText: String,
     onDeleteOptionClicked: () -> Unit,
     onEditOptionClicked: () -> Unit,
     onDismissRequest: () -> Unit
@@ -59,7 +61,7 @@ fun PostDeleteBottomSheet(
                 )
             ) {
                 Text(
-                    text = "게시글 삭제",
+                    text = deleteText,
                     style = typography.bodyLarge,
                     color = colorScheme.status.error.default,
                     modifier = Modifier
@@ -68,7 +70,7 @@ fun PostDeleteBottomSheet(
                 )
                 CommonDivider()
                 Text(
-                    text = "게시글 수정",
+                    text = editText,
                     style = typography.bodyLarge,
                     color = colorScheme.text.disabled,
                     modifier = Modifier
@@ -100,9 +102,11 @@ fun PostDeleteBottomSheet(
 
 @Preview
 @Composable
-private fun PostDeleteBottomSheetPreview() {
+private fun PostAndCommentDeleteBottomSheetPreview() {
     PetbulanceTheme {
-        PostDeleteBottomSheet(
+        PostAndCommentDeleteBottomSheet(
+            deleteText = "게시글 삭제",
+            editText = "수정",
             onDeleteOptionClicked = {},
             onEditOptionClicked = {},
             onDismissRequest = {}

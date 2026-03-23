@@ -15,8 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,9 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.petbulance.domain.model.feature.community.post.PostSearchSummary
@@ -81,7 +88,9 @@ fun PostSearchResultView(
         data = data,
         dataState = dataState,
         onFilterClick = onFilterClick,
-        onSortClick = onSortClick,
+        onSortChange = { sort ->
+            argument.intent(CommunitySearchIntent.ChangeSort(sort))
+        },
         onScopeChange = { scope ->
             argument.intent(CommunitySearchIntent.ChangeSearchScope(scope))
         },
@@ -91,7 +100,7 @@ fun PostSearchResultView(
             argument.intent(CommunitySearchIntent.NavigateToPostDetail(postId))
         },
         onLikeClick = { postId ->
-            // TODO: 좋아요 기능 구현
+            argument.intent(CommunitySearchIntent.ToggleLike(postId))
         },
         modifier = modifier
     )
@@ -102,7 +111,7 @@ private fun PostSearchResultViewContent(
     data: CommunitySearchData,
     dataState: CommunitySearchDataState,
     onFilterClick: () -> Unit,
-    onSortClick: () -> Unit,
+    onSortChange: (String) -> Unit,
     onScopeChange: (String) -> Unit,
     onCreatePostClick: () -> Unit,
     listState: LazyListState,
@@ -121,7 +130,7 @@ private fun PostSearchResultViewContent(
             currentSort = data.currentSort,
             searchScope = data.searchScope,
             onFilterClick = onFilterClick,
-            onSortClick = onSortClick,
+            onSortChange = onSortChange,
             onScopeChange = onScopeChange
         )
 
@@ -165,10 +174,13 @@ private fun FilterAndSortRow(
     currentSort: String,
     searchScope: String,
     onFilterClick: () -> Unit,
-    onSortClick: () -> Unit,
+    onSortChange: (String) -> Unit,
     onScopeChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var sortExpanded by remember { mutableStateOf(false) }
+    var sortDropdownWidth by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -206,17 +218,82 @@ private fun FilterAndSortRow(
             horizontalArrangement = Arrangement.spacedBy(spacingMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 정렬 드롭다운 (추후 구현)
-            Text(
-                text = when (currentSort) {
-                    "latest" -> "최신순"
-                    "popular" -> "인기순"
-                    "comment" -> "댓글순"
-                    else -> "최신순"
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.text.secondary
-            )
+            // 정렬 드롭다운
+            Box(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    sortDropdownWidth = with(density) { coordinates.size.width.toDp() }
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable { sortExpanded = true }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = when (currentSort) {
+                            "latest" -> "최신순"
+                            "popular" -> "인기순"
+                            "comment" -> "댓글순"
+                            else -> "최신순"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colorScheme.text.secondary
+                    )
+                    BasicIcon(
+                        iconResource = IconResource.Vector(Icons.Default.ArrowDropDown),
+                        contentDescription = "Sort",
+                        tint = colorScheme.icon.dark
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = sortExpanded,
+                    onDismissRequest = { sortExpanded = false },
+                    modifier = Modifier
+                        .background(colorScheme.bg.frame.default)
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "최신순",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.text.secondary
+                            )
+                        },
+                        onClick = {
+                            onSortChange("latest")
+                            sortExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "인기순",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.text.secondary
+                            )
+                        },
+                        onClick = {
+                            onSortChange("popular")
+                            sortExpanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "댓글순",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.text.secondary
+                            )
+                        },
+                        onClick = {
+                            onSortChange("comment")
+                            sortExpanded = false
+                        }
+                    )
+                }
+            }
 
             // 검색 대상 드롭다운
             SearchScopeDropdown(

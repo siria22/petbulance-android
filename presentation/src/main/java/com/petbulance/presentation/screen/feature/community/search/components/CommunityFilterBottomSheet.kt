@@ -36,6 +36,7 @@ import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
+import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
@@ -110,11 +111,11 @@ fun CommunityFilterBottomSheet(
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(spacingXXS, Alignment.End),
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = spacingLarge)
+                    .padding(spacingLarge)
                     .clickable {
                         tempAnimalCategory = null
                         tempPostCategory = null
@@ -132,6 +133,8 @@ fun CommunityFilterBottomSheet(
                     tint = colorScheme.icon.medium
                 )
             }
+
+            CommonDivider()
 
             // 컨텐츠 영역
             Box(
@@ -179,9 +182,9 @@ private fun SpeciesSelectColumn(
     onCategoryChanged: (String?) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(spacingXL),
+        verticalArrangement = Arrangement.spacedBy(spacingXXL),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = spacingXXL, horizontal = spacingXL)
+        modifier = Modifier.padding(vertical = spacingMedium, horizontal = spacingXXL)
     ) {
         AnimalCategory.entries.forEach { animalCategory ->
             val isSelected = if (animalCategory == AnimalCategory.ALL) {
@@ -229,9 +232,9 @@ private fun CategorySelectColumn(
     onCategoryChanged: (String?) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(spacingXL),
+        verticalArrangement = Arrangement.spacedBy(spacingXXL),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(vertical = spacingXXL, horizontal = spacingXL)
+        modifier = Modifier.padding(vertical = spacingMedium, horizontal = spacingXXL)
     ) {
         // "전체" 옵션
         val isAllSelected = selectedPostCategory == null

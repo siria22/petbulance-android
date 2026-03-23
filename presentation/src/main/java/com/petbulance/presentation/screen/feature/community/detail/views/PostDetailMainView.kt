@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import android.util.Log
 import android.content.Intent
 import androidx.compose.material.icons.filled.Share
 import coil.compose.AsyncImage
@@ -66,7 +65,7 @@ import com.petbulance.presentation.screen.feature.community.detail.composables.C
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentInputArea
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentListView
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentReportBottomSheet
-import com.petbulance.presentation.screen.feature.community.detail.composables.PostDeleteBottomSheet
+import com.petbulance.presentation.screen.feature.community.detail.composables.PostAndCommentDeleteBottomSheet
 import com.petbulance.presentation.screen.feature.community.detail.composables.PostReportBottomSheet
 import com.petbulance.presentation.screen.feature.community.detail.composables.PostReportReasonDialog
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -205,7 +204,6 @@ fun PostDetailMainView(
                     onLoadMore = onLoadMoreComments,
                     onReplyClick = onCommentReplyClick,
                     onMenuClick = onCommentMenuClick,
-                    onEmptyCommentButtonClick = { }
                 )
             }
 
@@ -268,7 +266,9 @@ fun PostDetailMainView(
 
     if (showMoreOption) {
         if (data.isMine) {
-            PostDeleteBottomSheet(
+            PostAndCommentDeleteBottomSheet(
+                deleteText = "게시글 삭제",
+                editText = "수정",
                 onDeleteOptionClicked = onDeleteOptionClick,
                 onEditOptionClicked = {
                     onDismissMoreOption()
@@ -287,7 +287,7 @@ fun PostDetailMainView(
     if (showDeleteConfirmDialog) {
         WarningDialog(
             title = "게시글을 삭제할까요?",
-            content = "게시글을 삭제하면 모든 데이터가 삭제되고 다시 볼 수 없어요.",
+            content = "게시글을 삭제하면 작성한 모든 데이터가 삭제되고 다시 볼 수 없어요.",
             confirmText = "삭제",
             onDismissRequest = onDismissDeleteDialog,
             onExitButtonClicked = onConfirmDelete
@@ -305,9 +305,14 @@ fun PostDetailMainView(
 
     if (showCommentMoreOption) {
         if (isSelectedCommentMine) {
-            CommentDeleteBottomSheet(
-                onEditOptionClicked = onCommentEditOptionClick,
+            PostAndCommentDeleteBottomSheet(
+                deleteText = "게시글 삭제",
+                editText = "수정",
                 onDeleteOptionClicked = onCommentDeleteOptionClick,
+                onEditOptionClicked = {
+                    onDismissCommentMoreOption()
+                    onCommentEditOptionClick()
+                },
                 onDismissRequest = onDismissCommentMoreOption
             )
         } else {

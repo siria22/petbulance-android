@@ -74,6 +74,7 @@ class CommunitySearchViewModel @Inject constructor(
             is CommunitySearchIntent.ChangeSearchScope -> changeSearchScope(intent.scope)
             is CommunitySearchIntent.ApplyFilter -> applyFilter(intent.animalCategory, intent.postCategory)
             is CommunitySearchIntent.ClearFilter -> clearFilter()
+            is CommunitySearchIntent.ToggleLike -> toggleLike(intent.postId)
             is CommunitySearchIntent.NavigateToPostDetail -> navigateToPostDetail(intent.postId, intent.commentId)
             is CommunitySearchIntent.DeleteRecentKeyword -> deleteRecentKeyword(intent.keyword)
             is CommunitySearchIntent.DeleteAllRecentKeywords -> deleteAllRecentKeywords()
@@ -328,6 +329,25 @@ class CommunitySearchViewModel @Inject constructor(
         launch {
             keywords.forEach { keyword ->
                 addRecentSearchKeywordUseCase(keyword)
+            }
+        }
+    }
+
+    private fun toggleLike(postId: Long) {
+        launch {
+            _data.update { currentData ->
+                currentData.copy(
+                    postResults = currentData.postResults.map { post ->
+                        if (post.id == postId) {
+                            post.copy(
+                                isLiked = !post.isLiked,
+                                likeCount = if (post.isLiked) post.likeCount - 1 else post.likeCount + 1
+                            )
+                        } else {
+                            post
+                        }
+                    }
+                )
             }
         }
     }

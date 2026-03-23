@@ -31,7 +31,6 @@ fun CommentListView(
     onLoadMore: () -> Unit,
     onReplyClick: (Long, String) -> Unit,
     onMenuClick: (Long, Boolean) -> Unit,
-    onEmptyCommentButtonClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -146,7 +145,6 @@ fun CommentListViewPreview() {
             onLoadMore = {},
             onReplyClick = { _, _ -> },
             onMenuClick = { _, _ -> },
-            onEmptyCommentButtonClick = {}
         )
     }
 }
@@ -161,7 +159,6 @@ fun CommentListViewEmptyPreview() {
             onLoadMore = {},
             onReplyClick = { _, _ -> },
             onMenuClick = { _, _ -> },
-            onEmptyCommentButtonClick = {}
         )
     }
 }

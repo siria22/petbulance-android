@@ -53,11 +53,6 @@ fun CommentItem(
     modifier: Modifier = Modifier,
     isReply: Boolean = false
 ) {
-    Log.d(
-        "CommentItem",
-        "CommentItem rendering: id=${comment.commentId}, visible=${comment.visibleToUser}, deleted=${comment.deleted}, isReply=$isReply, nickname=${comment.writerInfo.nickname}"
-    )
-
     val backgroundColor = when {
         comment.deleted -> colorScheme.bg.frame.default
         comment.isCommentAuthor -> colorScheme.bg.frame.subtle

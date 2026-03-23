@@ -25,6 +25,7 @@ sealed class CommunitySearchIntent {
     data class ChangeSearchScope(val scope: String) : CommunitySearchIntent()
     data class ApplyFilter(val animalCategory: String?, val postCategory: String?) : CommunitySearchIntent()
     data object ClearFilter : CommunitySearchIntent()
+    data class ToggleLike(val postId: Long) : CommunitySearchIntent()
     data class NavigateToPostDetail(val postId: Long, val commentId: Long? = null) : CommunitySearchIntent()
     data class DeleteRecentKeyword(val keyword: String) : CommunitySearchIntent()
     data object DeleteAllRecentKeywords : CommunitySearchIntent()
