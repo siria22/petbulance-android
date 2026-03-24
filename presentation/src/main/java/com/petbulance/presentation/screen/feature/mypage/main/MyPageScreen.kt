@@ -176,7 +176,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_comments),
                     title = "댓글 관리",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Comments.route) }
                 )
             ),
         )

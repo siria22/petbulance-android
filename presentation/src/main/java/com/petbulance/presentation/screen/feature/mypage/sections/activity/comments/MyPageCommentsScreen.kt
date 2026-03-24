@@ -1,8 +1,7 @@
-package com.petbulance.presentation.screen.feature.mypage.sections.activity.posts
+package com.petbulance.presentation.screen.feature.mypage.sections.activity.comments
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,16 +11,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,29 +30,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.petbulance.domain.model.feature.community.post.MyPostSummary
+import com.petbulance.domain.model.feature.community.comment.MyCommentListRes
 import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
-import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicCheckBox
 import com.petbulance.presentation.component.ui.atom.BasicIcon
-import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
+import com.petbulance.presentation.component.ui.iconSizeSmall
 import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
@@ -69,8 +62,7 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.component.ui.spacingXXXS
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.posts.composables.MyPagePostsDeletePostsDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.comments.composables.MyPageCommentsDeleteDialog
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -78,16 +70,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
-fun MyPagePostsScreen(
+fun MyPageCommentsScreen(
     navController: NavController,
-    argument: MyPagePostsArgument,
-    data: MyPagePostsData
+    argument: MyPageCommentsArgument,
+    data: MyPageCommentsData
 ) {
     val dataState = argument.dataState
     val screenState = argument.screenState
 
-    val normalScreenState = (screenState as? MyPagePostsScreenState.Normal)
-        ?: MyPagePostsScreenState.Normal()
+    val normalScreenState = (screenState as? MyPageCommentsScreenState.Normal)
+        ?: MyPageCommentsScreenState.Normal()
 
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -97,7 +89,7 @@ fun MyPagePostsScreen(
 
     BackHandler {
         if (normalScreenState.isSelectionMode) {
-            argument.intent(MyPagePostsIntent.ToggleSelectionMode(false))
+            argument.intent(MyPageCommentsIntent.ToggleSelectionMode(false))
         } else {
             navController.safePopBackStack()
         }
@@ -106,8 +98,8 @@ fun MyPagePostsScreen(
     LaunchedEffect(argument.event) {
         argument.event.collect { event ->
             when (event) {
-                is MyPagePostsEvent.Post.DeleteSuccess -> {
-                    argument.intent(MyPagePostsIntent.ToggleSelectionMode(false))
+                is MyPageCommentsEvent.Comment.DeleteSuccess -> {
+                    argument.intent(MyPageCommentsIntent.ToggleSelectionMode(false))
                 }
 
                 else -> {}
@@ -121,7 +113,7 @@ fun MyPagePostsScreen(
             delay(3000)
             showDeleteSuccessToast = false
             if (pendingDeleteIds != null) {
-                argument.intent(MyPagePostsIntent.DeleteSelected)
+                argument.intent(MyPageCommentsIntent.DeleteSelected)
                 pendingDeleteIds = null
             }
         }
@@ -138,7 +130,7 @@ fun MyPagePostsScreen(
         topBar = {
             AppTopBar(
                 topBarInfo = TopBarInfo(
-                    text = "게시글 관리",
+                    text = "댓글 관리",
                     textAlignment = TopBarAlignment.START,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = { navController.safePopBackStack() },
@@ -162,33 +154,37 @@ fun MyPagePostsScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (dataState) {
-                is MyPagePostsDataState.Loading -> {
+                is MyPageCommentsDataState.Loading -> {
                     OnContentLoadingUi(text = "잠시만 기다려주세요...")
                 }
 
-                is MyPagePostsDataState.Loaded -> {
-                    if (dataState.posts.isEmpty()) {
-                        MyPostsEmptyView(
+                is MyPageCommentsDataState.Loaded -> {
+                    if (dataState.comments.isEmpty()) {
+                        MyCommentsEmptyView(
                             onMoveToCommunityButtonClicked = {
                                 navController.safeNavigate(ScreenDestinations.Community.route)
                             }
                         )
                     } else {
-                        MyPagePostsListView(
-                            posts = dataState.posts,
+                        MyPageCommentsListView(
+                            comments = dataState.comments,
                             hasNext = dataState.hasNext,
                             screenState = normalScreenState,
-                            onLoadMore = { argument.intent(MyPagePostsIntent.LoadMore) },
-                            onPostClick = { id ->
+                            onLoadMore = { argument.intent(MyPageCommentsIntent.LoadMore) },
+                            onCommentClick = { commentId, postId ->
                                 if (normalScreenState.isSelectionMode) {
-                                    argument.intent(MyPagePostsIntent.TogglePostSelection(id))
+                                    argument.intent(
+                                        MyPageCommentsIntent.ToggleCommentSelection(
+                                            commentId
+                                        )
+                                    )
                                 } else {
                                     navController.safeNavigate(
-                                        ScreenDestinations.Community.PostDetail.createRoute(id)
+                                        ScreenDestinations.Community.PostDetail.createRoute(postId)
                                     )
                                 }
                             },
-                            onSelectAllClick = { argument.intent(MyPagePostsIntent.SelectAll) },
+                            onSelectAllClick = { argument.intent(MyPageCommentsIntent.SelectAll) },
                             onDeleteClick = { showDeleteDialog = true }
                         )
                     }
@@ -215,7 +211,7 @@ fun MyPagePostsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "게시글을 삭제했어요",
+                            text = "댓글을 삭제했어요",
                             style = typography.bodySmall,
                             color = colorScheme.text.inverse
                         )
@@ -251,7 +247,7 @@ fun MyPagePostsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "게시글 삭제를 취소했어요",
+                            text = "댓글 삭제를 취소했어요",
                             style = typography.bodySmall,
                             color = colorScheme.text.inverse
                         )
@@ -264,9 +260,9 @@ fun MyPagePostsScreen(
     if (showDeleteDialog) {
         WarningDialog(
             title = "주의",
-            content = "게시글을 삭제하면 되돌릴 수 없어요.\n그래도 삭제하시겠어요?",
+            content = "댓글을 삭제하면 되돌릴 수 없어요.\n그래도 삭제하시겠어요?",
             cancelText = "취소",
-            confirmText = "삭제",
+            confirmText = "전체 삭제",
             onDismissRequest = { showDeleteDialog = false },
             onExitButtonClicked = {
                 showDeleteDialog = false
@@ -276,10 +272,10 @@ fun MyPagePostsScreen(
     }
 
     if (showMenu) {
-        MyPagePostsDeletePostsDialog(
+        MyPageCommentsDeleteDialog(
             onDeleteOptionClicked = {
                 showMenu = false
-                argument.intent(MyPagePostsIntent.ToggleSelectionMode(true))
+                argument.intent(MyPageCommentsIntent.ToggleSelectionMode(true))
             },
             onDismissRequest = { showMenu = false }
         )
@@ -287,12 +283,12 @@ fun MyPagePostsScreen(
 }
 
 @Composable
-private fun MyPagePostsListView(
-    posts: List<MyPostSummary>,
+private fun MyPageCommentsListView(
+    comments: List<MyCommentListRes>,
     hasNext: Boolean,
-    screenState: MyPagePostsScreenState.Normal,
+    screenState: MyPageCommentsScreenState.Normal,
     onLoadMore: () -> Unit,
-    onPostClick: (Long) -> Unit,
+    onCommentClick: (Long, Long) -> Unit,
     onSelectAllClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -316,26 +312,30 @@ private fun MyPagePostsListView(
         state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
-        if(screenState.isSelectionMode) {
+        if (screenState.isSelectionMode) {
             item {
-                Column {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     SelectionControlBar(
-                        isAllSelected = screenState.selectedIds.size == posts.size && posts.isNotEmpty(),
+                        isAllSelected = screenState.selectedIds.size == comments.size && comments.isNotEmpty(),
                         hasSelection = screenState.selectedIds.isNotEmpty(),
                         onSelectAllClick = onSelectAllClick,
                         onDeleteClick = onDeleteClick
                     )
+
                     CommonDivider()
                 }
             }
         }
 
-        items(posts, key = { it.postId }) { post ->
-            MyPagePostItem(
-                post = post,
+        items(comments, key = { it.commentId }) { comment ->
+            MyPageCommentItem(
+                comment = comment,
                 isSelectionMode = screenState.isSelectionMode,
-                isSelected = screenState.selectedIds.contains(post.postId),
-                onClick = { onPostClick(post.postId) }
+                isSelected = screenState.selectedIds.contains(comment.commentId),
+                onClick = { onCommentClick(comment.commentId, comment.postId) }
             )
             CommonDivider()
         }
@@ -375,137 +375,77 @@ private fun SelectionControlBar(
         BasicButton(
             text = "삭제",
             size = BasicButtonSize.S,
-            buttonType = BasicButtonType.DEFAULT,
+            buttonType = if (hasSelection) BasicButtonType.DEFAULT else BasicButtonType.DISABLED,
             onClicked = { if (hasSelection) onDeleteClick() }
         )
     }
 }
 
 @Composable
-private fun MyPagePostItem(
-    post: MyPostSummary,
+private fun MyPageCommentItem(
+    comment: MyCommentListRes,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
+    val background =
+        if (comment.hidden) colorScheme.bg.frame.subtle else colorScheme.bg.frame.default
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(spacingMedium),
+        verticalArrangement = Arrangement.spacedBy(spacingXXS),
         modifier = Modifier
             .fillMaxWidth()
-            .background(colorScheme.bg.frame.default)
+            .background(background)
             .padding(vertical = spacingMedium, horizontal = spacingXL)
             .clickable { onClick() },
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(spacingXXS),
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isSelectionMode) {
-                    BasicCheckBox(
-                        checkState = isSelected,
-                        onCheckedChange = onClick
-                    )
-                }
-                if (post.hidden) {
-                    Text(
-                        text = "숨김",
-                        style = typography.labelSmall,
-                        color = colorScheme.text.caption,
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = colorScheme.border.subtle,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-
-                Text(
-                    text = post.title,
-                    style = typography.bodyMedium.emp(),
-                    color = colorScheme.text.primary
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(spacingXXXS)
-            ) {
-                Text(
-                    text = post.createdAt,
-                    style = typography.labelSmall,
-                    color = colorScheme.text.caption
-                )
-
-                Dot(dotColor = colorScheme.icon.veryLight)
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Visibility,
-                        contentDescription = null,
-                        tint = colorScheme.icon.veryLight,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = post.viewCount.toString(),
-                        style = typography.labelSmall,
-                        color = colorScheme.text.caption
-                    )
-                }
-
-                Dot(dotColor = colorScheme.icon.veryLight)
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = colorScheme.icon.veryLight,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = (post.likeCount ?: 0L).toString(),
-                        style = typography.labelSmall,
-                        color = colorScheme.text.caption
-                    )
-                }
-            }
-        }
-
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (post.thumbnailUrl != null) {
-                BasicImageBox(
-                    size = 90.dp,
-                    uri = post.thumbnailUrl?.toUri(),
-                    errorImageResource = R.drawable.img_checker,
-                    placeholderImageResource = R.drawable.img_checker,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+            if (isSelectionMode) {
+                BasicCheckBox(
+                    checkState = isSelected,
+                    onCheckedChange = onClick
                 )
             }
+            if (comment.hidden) {
+                BasicIcon(
+                    iconResource = IconResource.Vector(Icons.Filled.Lock),
+                    contentDescription = "Secret",
+                    size = iconSizeSmall,
+                    tint = colorScheme.icon.dark
+                )
+            }
+
             Text(
-                text = post.content,
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary,
-                maxLines = 2
+                text = comment.postTitle,
+                style = typography.bodyMedium.emp(),
+                color = colorScheme.text.primary,
+                maxLines = 1
             )
         }
+
+        /* TODO : API 명세 확인 필요
+            Text(
+                text = comment.createdAt,
+                style = typography.labelSmall.emp(),
+                color = colorScheme.text.caption,
+                maxLines = 1
+            )
+         */
+
+        Text(
+            text = comment.commentContent,
+            style = typography.bodyMedium,
+            color = colorScheme.text.secondary,
+            maxLines = 2
+        )
     }
 }
 
 @Composable
-fun MyPostsEmptyView(
+fun MyCommentsEmptyView(
     onMoveToCommunityButtonClicked: () -> Unit
 ) {
     Column(
@@ -522,12 +462,12 @@ fun MyPostsEmptyView(
             tint = Color.Unspecified
         )
         Text(
-            text = "작성한 글이 없어요",
+            text = "작성한 댓글이 없어요.",
             style = typography.titleSmall,
             color = colorScheme.text.tertiary
         )
         Text(
-            text = "첫 게시글을 작성하고\n펫뷸런스 커뮤니티에 참여해보세요!",
+            text = "첫 댓글을 작성하고\n펫뷸런스 커뮤니티에 참여해보세요!",
             textAlign = TextAlign.Center,
             style = typography.bodySmall,
             color = colorScheme.text.tertiary
@@ -551,69 +491,65 @@ fun MyPostsEmptyView(
 
 @Preview(showBackground = true)
 @Composable
-private fun MyPagePostsScreenPreview() {
-    val mockPosts = listOf(
-        MyPostSummary(
-            postId = 1L,
-            title = "첫 번째 게시글 제목",
-            content = "첫 번째 게시글 내용입니다. 아주 긴 내용을 적어서 두 줄이 넘어가는지 확인해봅시다. 이 게시글은 삭제되지 않았습니다.",
-            createdAt = "2024.01.01",
-            viewCount = 10,
-            likeCount = 5,
-            thumbnailUrl = null,
+private fun MyPageCommentsScreenPreview() {
+    val mockComments = listOf(
+        MyCommentListRes(
+            commentId = 1L,
+            boardId = 1L,
+            postId = 100L,
+            postTitle = "게시글 제목",
+            commentContent = "너무 많이 궁어하는 것 같아요. 저는 상세정보에 써있는 정량만 먹 급여해요.",
             hidden = false
         ),
-        MyPostSummary(
-            postId = 2L,
-            title = "두 번째 게시글 제목 (숨김)",
-            content = "두 번째 게시글 내용입니다. 이 게시글은 숨김 처리된 게시글입니다.",
-            createdAt = "2024.01.02",
-            viewCount = 5,
-            likeCount = 2,
-            thumbnailUrl = null,
+        MyCommentListRes(
+            commentId = 2L,
+            boardId = 1L,
+            postId = 101L,
+            postTitle = "숨김 처리된 게시글",
+            commentContent = "우리집 햄스터 병원 2살 된 경과 할배인데.. 최근에 예가 너무 노쇠해진건지 슬...",
             hidden = true
         )
     )
 
     PetbulanceTheme {
-        MyPagePostsScreen(
+        MyPageCommentsScreen(
             navController = rememberNavController(),
-            argument = MyPagePostsArgument(
+            argument = MyPageCommentsArgument(
                 intent = {},
-                dataState = MyPagePostsDataState.Loaded(
-                    posts = mockPosts,
+                dataState = MyPageCommentsDataState.Loaded(
+                    comments = mockComments,
                     hasNext = false
                 ),
-                screenState = MyPagePostsScreenState.Normal(
+                screenState = MyPageCommentsScreenState.Normal(
                     isSelectionMode = false,
                     selectedIds = emptySet()
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPagePostsData.stub()
+            data = MyPageCommentsData.stub()
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun MyPagePostsEmptyScreenPreview() {
+private fun MyPageCommentsEmptyScreenPreview() {
     PetbulanceTheme {
-        MyPagePostsScreen(
+        MyPageCommentsScreen(
             navController = rememberNavController(),
-            argument = MyPagePostsArgument(
+            argument = MyPageCommentsArgument(
                 intent = {},
-                dataState = MyPagePostsDataState.Loaded(
-                    posts = emptyList(),
+                dataState = MyPageCommentsDataState.Loaded(
+                    comments = emptyList(),
                     hasNext = false
                 ),
-                screenState = MyPagePostsScreenState.Normal(
+                screenState = MyPageCommentsScreenState.Normal(
                     isSelectionMode = false,
                     selectedIds = emptySet()
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPagePostsData.stub()
+            data = MyPageCommentsData.stub()
         )
     }
 }

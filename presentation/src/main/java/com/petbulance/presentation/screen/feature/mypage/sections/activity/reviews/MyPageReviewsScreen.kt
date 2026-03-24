@@ -391,52 +391,56 @@ private fun MyPageReviewsItem(
             .padding(spacingMedium)
             .clickable { onClick() },
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (isSelectionMode) {
-                BasicCheckBox(
-                    checkState = isSelected,
-                    onCheckedChange = onClick
-                )
-            }
-            ReviewStatusChip(review.status)
-            Text(
-                text = review.hospitalName,
-                style = typography.bodyMedium.emp(),
-                color = colorScheme.text.secondary
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(spacingXXS)
+        ){
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(spacingXXS)
+                horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                if (isSelectionMode) {
+                    BasicCheckBox(
+                        checkState = isSelected,
+                        onCheckedChange = onClick
+                    )
+                }
+                ReviewStatusChip(review.status)
                 Text(
-                    text = review.date,
-                    color = colorScheme.text.caption,
-                    style = typography.labelMedium
-                )
-                Dot(dotColor = PetbulancePrimitives.Gray.p300)
-                BasicIcon(
-                    iconResource = IconResource.Drawable(R.drawable.ic_thumbs_up_double_filled),
-                    contentDescription = "Like counts",
-                    size = iconSizeSmall,
-                    tint = colorScheme.icon.light
-                )
-                Text(
-                    text = review.likeCount.toString(),
-                    color = colorScheme.text.caption,
-                    style = typography.bodySmall
+                    text = review.hospitalName,
+                    style = typography.bodyMedium.emp(),
+                    color = colorScheme.text.secondary
                 )
             }
-            ReceiptVerifiedBadge()
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(spacingXXS)
+                ) {
+                    Text(
+                        text = review.date,
+                        color = colorScheme.text.caption,
+                        style = typography.labelMedium
+                    )
+                    Dot(dotColor = PetbulancePrimitives.Gray.p300)
+                    BasicIcon(
+                        iconResource = IconResource.Drawable(R.drawable.ic_thumbs_up_double_filled),
+                        contentDescription = "Like counts",
+                        size = iconSizeSmall,
+                        tint = colorScheme.icon.light
+                    )
+                    Text(
+                        text = review.likeCount.toString(),
+                        color = colorScheme.text.caption,
+                        style = typography.bodySmall
+                    )
+                }
+                ReceiptVerifiedBadge()
+            }
         }
 
         Row(
