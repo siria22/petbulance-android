@@ -171,7 +171,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_docs),
                     title = "게시글 관리",
-                    onClicked = { /* TODO */ }
+                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Posts.route) }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_comments),

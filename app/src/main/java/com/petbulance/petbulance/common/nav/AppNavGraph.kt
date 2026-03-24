@@ -11,6 +11,7 @@ import com.petbulance.presentation.screen.feature.community.detail.postDetailDes
 import com.petbulance.presentation.screen.feature.community.write.writePostDestination
 import com.petbulance.presentation.screen.feature.home.homeDestination
 import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.posts.myPagePostsDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.myPageReviewsDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.cSDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.help.cs.coalition.coalitionDestination
@@ -67,6 +68,7 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
 
         myPageProfileDestination(navController = navController)
         myPageReviewsDestination(navController = navController)
+        myPagePostsDestination(navController = navController)
         myPageAccountDestination(navController = navController)
 
         myPageNoticeDestination(navController = navController)

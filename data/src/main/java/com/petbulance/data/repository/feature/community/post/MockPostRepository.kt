@@ -161,12 +161,13 @@ class MockPostRepository @Inject constructor() : PostRepository {
             val index = (lastPostId?.toInt() ?: 0) + i
             MyPostSummary(
                 postId = index.toLong() + 1,
-                boardId = 1L,
                 title = "내가 쓴 글 ${index + 1}${if (keyword != null) " - $keyword" else ""}",
                 content = "내가 작성한 게시글의 내용입니다.",
                 createdAt = "${index + 1}시간 전",
                 viewCount = (index + 1) * 10L,
-                hidden = index % 5 == 0
+                hidden = index % 5 == 0,
+                likeCount = 10,
+                thumbnailUrl = null
             )
         }
         return Result.success(PagingMyPostList(items = items, hasNext = true))

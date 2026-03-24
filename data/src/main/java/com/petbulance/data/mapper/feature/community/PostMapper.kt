@@ -123,7 +123,7 @@ fun ImageUpdateParam.toImageUpdateDto() = ImageUpdateDto(
 
 fun DeletePostResDto.toDomain() = DeletedPost(
     postId = postId,
-    boardId = boardId,
+    boardId = null,
     deleted = deleted,
     hidden = hidden,
     deletedAt = deletedAt
@@ -186,11 +186,12 @@ fun PagingMyPostListResDto.toDomain() = PagingMyPostList(
 
 fun MyPostListResDto.toDomain() = MyPostSummary(
     postId = postId,
-    boardId = boardId,
     title = title,
     content = content,
     createdAt = createdAt,
     viewCount = viewCount,
+    likeCount = likeCount,
+    thumbnailUrl = thumbnailUrl,
     hidden = hidden
 )
 

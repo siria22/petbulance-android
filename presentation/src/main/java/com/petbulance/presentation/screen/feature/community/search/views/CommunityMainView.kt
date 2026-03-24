@@ -209,9 +209,7 @@ private fun CommunityScreenContents(
                             post = post,
                             onPostClick = {
                                 argument.intent(
-                                    CommunityIntent.NavigateToPostDetail(
-                                        post.id
-                                    )
+                                    CommunityIntent.NavigateToPostDetail(post.id)
                                 )
                             },
                             onLikeClick = { argument.intent(CommunityIntent.ToggleLike(post.id)) },
