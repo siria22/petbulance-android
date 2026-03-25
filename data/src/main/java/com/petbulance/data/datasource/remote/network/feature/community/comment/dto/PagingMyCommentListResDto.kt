@@ -1,10 +1,14 @@
 package com.petbulance.data.datasource.remote.network.feature.community.comment.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PagingMyCommentListResDto(
     val content: List<MyCommentListResDto>,
     val hasNext: Boolean,
 )
 
+@Serializable
 data class MyCommentListResDto(
     val commentId: Long,
     val boardId: Long,
