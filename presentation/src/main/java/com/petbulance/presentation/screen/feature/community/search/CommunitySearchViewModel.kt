@@ -358,7 +358,4 @@ class CommunitySearchViewModel @Inject constructor(
         }
     }
 
-    init {
-        observeErrorEvent(eventFlow)
-    }
 }

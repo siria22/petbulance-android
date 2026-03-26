@@ -47,7 +47,7 @@ fun NavGraphBuilder.writePostDestination(navController: NavController) {
                 navController = navController,
                 argument = argument,
                 data = data,
-                onSubmit = viewModel::submit
+                onSubmit = { viewModel.submit() }
             )
         }
     }

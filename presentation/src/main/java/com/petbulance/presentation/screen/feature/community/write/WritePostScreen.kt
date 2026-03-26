@@ -2,7 +2,6 @@ package com.petbulance.presentation.screen.feature.community.write
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
@@ -11,10 +10,8 @@ fun WritePostScreen(
     navController: NavController,
     argument: WritePostArgument,
     data: WritePostData,
-    onSubmit: (android.content.Context) -> Unit
+    onSubmit: () -> Unit
 ) {
-    val context = LocalContext.current
-
     LaunchedEffect(Unit) {
         argument.event.collect { event ->
             when (event) {
@@ -45,6 +42,6 @@ fun WritePostScreen(
         navController = navController,
         argument = argument,
         data = data,
-        onSubmit = { onSubmit(context) }
+        onSubmit = onSubmit
     )
 }

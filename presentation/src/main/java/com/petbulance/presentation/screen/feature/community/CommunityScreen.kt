@@ -237,65 +237,43 @@ private fun CommunitySearchContent(
                     )
                 }
 
-                is CommunityScreenState.Result.Post -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        SearchTabRow(
-                            selectedTab = currentTab,
-                            onTabSelected = { tab ->
-                                when (tab) {
-                                    SearchTab.POST -> {}
-                                    SearchTab.COMMENT -> {
-                                        if (searchData.searchKeyword.isNotBlank()) {
-                                            searchArgument.intent(
-                                                SearchComments(
-                                                    searchData.searchKeyword
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        )
-
-                        PostSearchResultView(
-                            argument = searchArgument,
-                            data = searchData,
-                            dataState = searchArgument.dataState,
-                            onFilterClick = { showFilterBottomSheet = true },
-                            onCreatePostClick = { },
-                            onSortClick = { /* TODO : Sort */ },
-                        )
-                    }
-                }
-
+                is CommunityScreenState.Result.Post,
                 is CommunityScreenState.Result.Comment -> {
                     Column(modifier = Modifier.fillMaxSize()) {
                         SearchTabRow(
                             selectedTab = currentTab,
                             onTabSelected = { tab ->
-                                when (tab) {
-                                    SearchTab.POST -> {
-                                        if (searchData.searchKeyword.isNotBlank()) {
-                                            searchArgument.intent(
-                                                SearchPosts(
-                                                    searchData.searchKeyword
-                                                )
-                                            )
-                                        }
+                                if (searchData.searchKeyword.isNotBlank()) {
+                                    when (tab) {
+                                        SearchTab.POST -> searchArgument.intent(SearchPosts(searchData.searchKeyword))
+                                        SearchTab.COMMENT -> searchArgument.intent(SearchComments(searchData.searchKeyword))
                                     }
-
-                                    SearchTab.COMMENT -> {}
                                 }
                             }
                         )
 
-                        CommentSearchResultView(
-                            argument = searchArgument,
-                            data = searchData,
-                            dataState = searchArgument.dataState,
-                            onFilterClick = { showFilterBottomSheet = true },
-                            onCreatePostClick = { }
-                        )
+                        when (screenState) {
+                            is CommunityScreenState.Result.Post -> {
+                                PostSearchResultView(
+                                    argument = searchArgument,
+                                    data = searchData,
+                                    dataState = searchArgument.dataState,
+                                    onFilterClick = { showFilterBottomSheet = true },
+                                    onCreatePostClick = { },
+                                    onSortClick = { /* TODO : Sort */ },
+                                )
+                            }
+                            is CommunityScreenState.Result.Comment -> {
+                                CommentSearchResultView(
+                                    argument = searchArgument,
+                                    data = searchData,
+                                    dataState = searchArgument.dataState,
+                                    onFilterClick = { showFilterBottomSheet = true },
+                                    onCreatePostClick = { }
+                                )
+                            }
+                            else -> {}
+                        }
                     }
                 }
 

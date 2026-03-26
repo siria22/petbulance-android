@@ -5,7 +5,6 @@ import com.petbulance.domain.model.feature.community.post.PostDetail
 import com.petbulance.domain.model.feature.support.report.ReportParam
 import com.petbulance.domain.model.type.ReportType
 import android.net.Uri
-import android.util.Log
 import com.petbulance.domain.model.feature.community.post.param.CreateCommentParam
 import com.petbulance.domain.model.nonfeature.app.PresignFileRequest
 import com.petbulance.domain.model.feature.community.comment.UpdatePostCommentReq
@@ -18,6 +17,7 @@ import com.petbulance.domain.usecase.feature.community.post.GetPostDetailUseCase
 import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
 import com.petbulance.domain.usecase.nonfeature.app.UploadImageUseCase
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -40,7 +40,8 @@ class PostDetailViewModel @Inject constructor(
     private val deleteCommentUseCase: DeleteCommentUseCase,
     private val updateCommentUseCase: UpdateCommentUseCase,
     private val appInfoRepository: AppInfoRepository,
-    private val uploadImageUseCase: UploadImageUseCase
+    private val uploadImageUseCase: UploadImageUseCase,
+    private val contentFileReader: ContentFileReader
 ) : BaseViewModel() {
 
     private val postId: Long = savedStateHandle.get<Long>(ScreenDestinations.Community.PostDetail.ARG_ID) ?: 0L
@@ -219,7 +220,6 @@ class PostDetailViewModel @Inject constructor(
         launch {
             if (postId == 0L) return@launch
 
-            Log.d("PostDetailViewModel", "loadComments() called for postId: $postId")
             _dataState.value = PostDetailDataState.OnProgress
 
             getCommentListUseCase(
@@ -229,22 +229,16 @@ class PostDetailViewModel @Inject constructor(
                 pageSize = 15
             )
                 .onSuccess { pagingCommentList ->
-                    Log.d("PostDetailViewModel", "loadComments success: ${pagingCommentList.items.size} comments loaded")
-                    Log.d("PostDetailViewModel", "Comments: ${pagingCommentList.items.map { "id=${it.commentId}, visible=${it.visibleToUser}, deleted=${it.deleted}" }}")
-                    
                     _postDetailData.update { current ->
-                        val updated = current.copy(
+                        current.copy(
                             comments = pagingCommentList.items,
                             hasMoreComments = pagingCommentList.hasNext,
                             totalCommentCount = pagingCommentList.totalCount
                         )
-                        Log.d("PostDetailViewModel", "Updated postDetailData with ${updated.comments.size} comments")
-                        updated
                     }
                     _dataState.value = PostDetailDataState.Init
                 }
                 .onFailure { exception ->
-                    Log.e("PostDetailViewModel", "loadComments failed", exception)
                     _eventFlow.emit(
                         PostDetailEvent.DataFetch.Error(
                             userMessage = "댓글을 불러올 수 없습니다",
@@ -445,21 +439,27 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    fun uploadCommentImageIfNeeded(context: android.content.Context) {
+    fun uploadCommentImageIfNeeded() {
         launch {
             val uri = _postDetailData.value.commentImageUri ?: return@launch
-            
+
             _uploadingImage.value = true
 
             try {
-                val contentResolver = context.contentResolver
-                val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-                val inputStream = contentResolver.openInputStream(uri)
-                val imageBytes = inputStream?.readBytes() ?: byteArrayOf()
-                inputStream?.close()
+                val fileData = contentFileReader.readBytes(uri.toString())
+                if (fileData == null) {
+                    _eventFlow.emit(
+                        PostDetailEvent.CommentCreateError(
+                            userMessage = "이미지 처리에 실패했습니다",
+                            exceptionMessage = "Failed to read image file",
+                            displayType = ErrorDisplayType.Common
+                        )
+                    )
+                    return@launch
+                }
 
-                val filename = "comment_${System.currentTimeMillis()}.${mimeType.substringAfter("/")}"
-                val presignRequest = listOf(PresignFileRequest(filename, mimeType))
+                val filename = "comment_${System.currentTimeMillis()}.${fileData.mimeType.substringAfter("/")}"
+                val presignRequest = listOf(PresignFileRequest(filename, fileData.mimeType))
 
                 appInfoRepository.getPresignedUrl(presignRequest)
                     .onSuccess { presignedUrls ->
@@ -467,8 +467,8 @@ class PostDetailViewModel @Inject constructor(
                         if (presignedUrl != null) {
                             uploadImageUseCase(
                                 presignedUrl.preSignedUrl,
-                                imageBytes,
-                                mimeType
+                                fileData.bytes,
+                                fileData.mimeType
                             )
                                 .onSuccess {
                                     _postDetailData.update { it.copy(commentImageUrl = presignedUrl.imageUrl) }

@@ -59,8 +59,11 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXXS
+import com.petbulance.presentation.screen.feature.community.detail.CommentDialogState
+import com.petbulance.presentation.screen.feature.community.detail.CommentInputState
 import com.petbulance.presentation.screen.feature.community.detail.PostDetailData
-import com.petbulance.presentation.screen.feature.community.detail.composables.CommentDeleteBottomSheet
+import com.petbulance.presentation.screen.feature.community.detail.PostDialogState
+import com.petbulance.presentation.screen.feature.community.detail.ToastState
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentDeleteConfirmDialog
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentInputArea
 import com.petbulance.presentation.screen.feature.community.detail.composables.CommentListView
@@ -74,59 +77,26 @@ import com.petbulance.presentation.utils.nav.safePopBackStack
 fun PostDetailMainView(
     navController: NavController,
     data: PostDetailData,
-    showReportSuccessToast: Boolean,
-    reportToastMessage: String,
-    showDeleteToast: Boolean,
-    onCloseReportToast: () -> Unit,
-    onCancelDelete: () -> Unit,
-    onKebabMenuClick: () -> Unit,
+    postDialogState: PostDialogState,
+    commentDialogState: CommentDialogState,
+    commentInputState: CommentInputState,
+    toastState: ToastState,
     onLikeClick: () -> Unit,
-    onDeleteOptionClick: () -> Unit,
     onEditOptionClick: () -> Unit,
-    onReportOptionClick: () -> Unit,
-    onDismissMoreOption: () -> Unit,
-    showMoreOption: Boolean,
-    showDeleteConfirmDialog: Boolean,
     onConfirmDelete: () -> Unit,
-    onDismissDeleteDialog: () -> Unit,
-    showReportReasonDialog: Boolean,
-    selectedReportReason: String,
-    onReasonSelected: (String) -> Unit,
     onSubmitReport: () -> Unit,
-    onDismissReportReasonDialog: () -> Unit,
-    commentText: String,
-    onCommentTextChange: (String) -> Unit,
-    isCommentSecret: Boolean,
-    onCommentSecretToggle: () -> Unit,
-    replyToNickname: String?,
+    onCancelDelete: () -> Unit,
     onCancelReply: () -> Unit,
     onCommentSubmit: () -> Unit,
-    onCommentReplyClick: (Long, String) -> Unit,
-    onCommentMenuClick: (Long, Boolean) -> Unit,
     onLoadMoreComments: () -> Unit,
     onImageAttachClick: () -> Unit,
     onImageRemoveClick: () -> Unit,
-    commentImageUri: android.net.Uri?,
-    showCommentMoreOption: Boolean,
-    isSelectedCommentMine: Boolean,
     onCommentEditOptionClick: () -> Unit,
-    onCommentDeleteOptionClick: () -> Unit,
-    onCommentReportOptionClick: () -> Unit,
-    onDismissCommentMoreOption: () -> Unit,
-    showCommentDeleteDialog: Boolean,
     onConfirmCommentDelete: () -> Unit,
-    onDismissCommentDeleteDialog: () -> Unit,
-    showCommentReportBottomSheet: Boolean,
-    onCommentReportBottomSheetClick: () -> Unit,
-    onDismissCommentReportBottomSheet: () -> Unit,
-    showCommentReportReasonDialog: Boolean,
-    selectedCommentReportReason: String,
-    onCommentReasonSelected: (String) -> Unit,
     onSubmitCommentReport: () -> Unit,
-    onDismissCommentReportReasonDialog: () -> Unit
 ) {
     val context = LocalContext.current
-    
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -149,7 +119,7 @@ fun PostDetailMainView(
                             context.startActivity(Intent.createChooser(shareIntent, "게시글 공유"))
                         },
                         Pair(IconResource.Vector(Icons.Default.MoreVert)) {
-                            onKebabMenuClick()
+                            postDialogState.openMoreOption()
                         }
                     )
                 )
@@ -181,19 +151,19 @@ fun PostDetailMainView(
                 ThickDivider()
 
                 CommentInputArea(
-                    commentText = commentText,
-                    onCommentTextChange = onCommentTextChange,
-                    isSecret = isCommentSecret,
-                    onSecretToggle = onCommentSecretToggle,
+                    commentText = commentInputState.text,
+                    onCommentTextChange = { commentInputState.text = it },
+                    isSecret = commentInputState.isSecret,
+                    onSecretToggle = { commentInputState.isSecret = !commentInputState.isSecret },
                     onImageAttachClick = onImageAttachClick,
                     onMentionClick = { },
                     onSubmitClick = onCommentSubmit,
-                    replyToNickname = replyToNickname,
+                    replyToNickname = commentInputState.replyToNickname,
                     onCancelReply = onCancelReply,
                     isEditMode = data.editingCommentId != null,
                     onCancelEdit = onCancelReply,
                     onImageRemoveClick = onImageRemoveClick,
-                    commentImageUri = commentImageUri
+                    commentImageUri = data.commentImageUri
                 )
 
                 ThickDivider()
@@ -202,148 +172,157 @@ fun PostDetailMainView(
                     comments = data.comments,
                     hasMoreComments = data.hasMoreComments,
                     onLoadMore = onLoadMoreComments,
-                    onReplyClick = onCommentReplyClick,
-                    onMenuClick = onCommentMenuClick,
+                    onReplyClick = { commentId, nickname ->
+                        commentInputState.setReplyTarget(commentId, nickname)
+                    },
+                    onMenuClick = { commentId, isMine ->
+                        commentDialogState.openMoreOption(commentId, isMine)
+                    },
                 )
             }
 
-            if (showReportSuccessToast) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(vertical = spacingXL, horizontal = spacingMedium)
-                        .background(
-                            Color(0xFF222222).copy(alpha = 0.9f),
-                            RoundedCornerShape(4.dp)
+            // Toasts
+            if (toastState.showReportToast) {
+                InfoToast(
+                    message = toastState.reportToastMessage,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    trailingContent = {
+                        BasicIcon(
+                            iconResource = IconResource.Vector(Icons.Default.Close),
+                            contentDescription = "Close toast",
+                            size = iconSizeSmall,
+                            tint = colorScheme.icon.inverse,
+                            modifier = Modifier.clickable { toastState.dismissReportToast() }
                         )
-                        .padding(spacingSmall),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = reportToastMessage,
-                        style = typography.bodySmall,
-                        color = colorScheme.text.inverse
-                    )
-                    BasicIcon(
-                        iconResource = IconResource.Vector(Icons.Default.Close),
-                        contentDescription = "Close toast",
-                        size = iconSizeSmall,
-                        tint = colorScheme.icon.inverse,
-                        modifier = Modifier.clickable { onCloseReportToast() }
-                    )
-                }
+                    }
+                )
             }
 
-            if (showDeleteToast) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(vertical = spacingXL, horizontal = spacingMedium)
-                        .background(
-                            Color(0xFF222222).copy(alpha = 0.9f),
-                            RoundedCornerShape(4.dp)
+            if (toastState.showDeleteToast) {
+                InfoToast(
+                    message = "게시글이 삭제되었습니다",
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    trailingContent = {
+                        Text(
+                            text = "취소",
+                            style = typography.bodySmall.emp(),
+                            color = colorScheme.text.inverse,
+                            modifier = Modifier.clickable { onCancelDelete() }
                         )
-                        .padding(spacingSmall),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "게시글이 삭제되었습니다",
-                        style = typography.bodySmall,
-                        color = colorScheme.text.inverse
-                    )
-                    Text(
-                        text = "취소",
-                        style = typography.bodySmall.emp(),
-                        color = colorScheme.text.inverse,
-                        modifier = Modifier.clickable { onCancelDelete() }
-                    )
-                }
+                    }
+                )
             }
         }
     }
 
-    if (showMoreOption) {
+    // Post dialogs
+    if (postDialogState.showMoreOption) {
         if (data.isMine) {
             PostAndCommentDeleteBottomSheet(
                 deleteText = "게시글 삭제",
                 editText = "수정",
-                onDeleteOptionClicked = onDeleteOptionClick,
+                onDeleteOptionClicked = { postDialogState.openDeleteConfirm() },
                 onEditOptionClicked = {
-                    onDismissMoreOption()
+                    postDialogState.dismissMoreOption()
                     onEditOptionClick()
                 },
-                onDismissRequest = onDismissMoreOption
+                onDismissRequest = { postDialogState.dismissMoreOption() }
             )
         } else {
             PostReportBottomSheet(
-                onReportOptionClicked = onReportOptionClick,
-                onDismissRequest = onDismissMoreOption
+                onReportOptionClicked = { postDialogState.openReportReason() },
+                onDismissRequest = { postDialogState.dismissMoreOption() }
             )
         }
     }
 
-    if (showDeleteConfirmDialog) {
+    if (postDialogState.showDeleteConfirm) {
         WarningDialog(
             title = "게시글을 삭제할까요?",
             content = "게시글을 삭제하면 작성한 모든 데이터가 삭제되고 다시 볼 수 없어요.",
             confirmText = "삭제",
-            onDismissRequest = onDismissDeleteDialog,
+            onDismissRequest = { postDialogState.dismissDeleteConfirm() },
             onExitButtonClicked = onConfirmDelete
         )
     }
 
-    if (showReportReasonDialog) {
+    if (postDialogState.showReportReason) {
         PostReportReasonDialog(
-            selectedReason = selectedReportReason,
-            onReasonClicked = onReasonSelected,
+            selectedReason = postDialogState.selectedReportReason,
+            onReasonClicked = { postDialogState.selectedReportReason = it },
             onSubmitClicked = onSubmitReport,
-            onDismissRequest = onDismissReportReasonDialog
+            onDismissRequest = { postDialogState.dismissReportReason() }
         )
     }
 
-    if (showCommentMoreOption) {
-        if (isSelectedCommentMine) {
+    // Comment dialogs
+    if (commentDialogState.showMoreOption) {
+        if (commentDialogState.isSelectedCommentMine) {
             PostAndCommentDeleteBottomSheet(
-                deleteText = "게시글 삭제",
+                deleteText = "댓글 삭제",
                 editText = "수정",
-                onDeleteOptionClicked = onCommentDeleteOptionClick,
+                onDeleteOptionClicked = { commentDialogState.openDeleteDialog() },
                 onEditOptionClicked = {
-                    onDismissCommentMoreOption()
+                    commentDialogState.dismissMoreOption()
                     onCommentEditOptionClick()
                 },
-                onDismissRequest = onDismissCommentMoreOption
+                onDismissRequest = { commentDialogState.dismissMoreOption() }
             )
         } else {
             CommentReportBottomSheet(
-                onReportOptionClicked = onCommentReportOptionClick,
-                onDismissRequest = onDismissCommentMoreOption
+                onReportOptionClicked = { commentDialogState.openReportBottomSheet() },
+                onDismissRequest = { commentDialogState.dismissMoreOption() }
             )
         }
     }
 
-    if (showCommentDeleteDialog) {
+    if (commentDialogState.showDeleteDialog) {
         CommentDeleteConfirmDialog(
             onConfirmDelete = onConfirmCommentDelete,
-            onDismissRequest = onDismissCommentDeleteDialog
+            onDismissRequest = { commentDialogState.dismissDeleteDialog() }
         )
     }
 
-    if (showCommentReportBottomSheet) {
+    if (commentDialogState.showReportBottomSheet) {
         CommentReportBottomSheet(
-            onReportOptionClicked = onCommentReportBottomSheetClick,
-            onDismissRequest = onDismissCommentReportBottomSheet
+            onReportOptionClicked = { commentDialogState.openReportReasonDialog() },
+            onDismissRequest = { commentDialogState.dismissReportBottomSheet() }
         )
     }
 
-    if (showCommentReportReasonDialog) {
+    if (commentDialogState.showReportReasonDialog) {
         PostReportReasonDialog(
-            selectedReason = selectedCommentReportReason,
-            onReasonClicked = onCommentReasonSelected,
+            selectedReason = commentDialogState.selectedReportReason,
+            onReasonClicked = { commentDialogState.selectedReportReason = it },
             onSubmitClicked = onSubmitCommentReport,
-            onDismissRequest = onDismissCommentReportReasonDialog
+            onDismissRequest = { commentDialogState.dismissReportReasonDialog() }
         )
+    }
+}
+
+@Composable
+private fun InfoToast(
+    message: String,
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = spacingXL, horizontal = spacingMedium)
+            .background(
+                Color(0xFF222222).copy(alpha = 0.9f),
+                RoundedCornerShape(4.dp)
+            )
+            .padding(spacingSmall),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = message,
+            style = typography.bodySmall,
+            color = colorScheme.text.inverse
+        )
+        trailingContent()
     }
 }
 
@@ -433,7 +412,6 @@ private fun PostAuthorInfo(writerNickname: String, profileUrl: String?, createdA
                 color = colorScheme.text.caption
             )
         }
-
     }
 }
 
@@ -476,11 +454,9 @@ private fun PostDetailStats(
         verticalAlignment = Alignment.CenterVertically
     ) {
         BasicIcon(
-            modifier = Modifier.clickable{
-                onLikeClick()
-            },
+            modifier = Modifier.clickable { onLikeClick() },
             iconResource = IconResource.Vector(Icons.Default.Favorite),
-            contentDescription = "Fav count",
+            contentDescription = "Like count",
             size = iconSizeSmall,
             tint = colorScheme.icon.veryLight
         )
@@ -495,7 +471,7 @@ private fun PostDetailStats(
 
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.Visibility),
-            contentDescription = "Fav count",
+            contentDescription = "View count",
             size = iconSizeSmall,
             tint = colorScheme.icon.veryLight
         )
@@ -510,7 +486,7 @@ private fun PostDetailStats(
 
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.Comment),
-            contentDescription = "Fav count",
+            contentDescription = "Comment count",
             size = iconSizeSmall,
             tint = colorScheme.icon.veryLight
         )
@@ -531,56 +507,23 @@ private fun PostDetailMainViewPreview() {
         PostDetailMainView(
             navController = rememberNavController(),
             data = PostDetailData.stub(isMine = false),
-            showReportSuccessToast = false,
-            reportToastMessage = "",
-            showDeleteToast = false,
-            onCloseReportToast = {},
-            onCancelDelete = {},
-            onKebabMenuClick = {},
+            postDialogState = PostDialogState(),
+            commentDialogState = CommentDialogState(),
+            commentInputState = CommentInputState(),
+            toastState = ToastState(),
             onLikeClick = {},
-            onDeleteOptionClick = {},
             onEditOptionClick = {},
-            onReportOptionClick = {},
-            onDismissMoreOption = {},
-            showMoreOption = false,
-            showDeleteConfirmDialog = false,
             onConfirmDelete = {},
-            onDismissDeleteDialog = {},
-            showReportReasonDialog = false,
-            selectedReportReason = "",
-            onReasonSelected = {},
             onSubmitReport = {},
-            onDismissReportReasonDialog = {},
-            commentText = "",
-            onCommentTextChange = {},
-            isCommentSecret = false,
-            onCommentSecretToggle = {},
-            replyToNickname = null,
+            onCancelDelete = {},
             onCancelReply = {},
             onCommentSubmit = {},
-            onCommentReplyClick = { _, _ -> },
-            onCommentMenuClick = { _, _ -> },
             onLoadMoreComments = {},
             onImageAttachClick = {},
             onImageRemoveClick = {},
-            commentImageUri = null,
-            showCommentMoreOption = false,
-            isSelectedCommentMine = false,
             onCommentEditOptionClick = {},
-            onCommentDeleteOptionClick = {},
-            onCommentReportOptionClick = {},
-            onDismissCommentMoreOption = {},
-            showCommentDeleteDialog = false,
             onConfirmCommentDelete = {},
-            onDismissCommentDeleteDialog = {},
-            showCommentReportBottomSheet = false,
-            onCommentReportBottomSheetClick = {},
-            onDismissCommentReportBottomSheet = {},
-            showCommentReportReasonDialog = false,
-            selectedCommentReportReason = "",
-            onCommentReasonSelected = {},
-            onSubmitCommentReport = {},
-            onDismissCommentReportReasonDialog = {}
+            onSubmitCommentReport = {}
         )
     }
 }

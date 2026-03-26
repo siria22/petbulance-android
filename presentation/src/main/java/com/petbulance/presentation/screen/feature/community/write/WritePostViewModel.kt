@@ -7,6 +7,7 @@ import com.petbulance.domain.model.feature.community.post.param.ImageUpdateParam
 import com.petbulance.domain.model.feature.community.post.param.UpdatePostParam
 import com.petbulance.domain.model.nonfeature.app.PresignFileRequest
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.domain.usecase.feature.community.post.CreatePostUseCase
 import com.petbulance.domain.usecase.feature.community.post.GetPostDetailUseCase
 import com.petbulance.domain.usecase.feature.community.post.UpdatePostUseCase
@@ -30,7 +31,8 @@ class WritePostViewModel @Inject constructor(
     private val updatePostUseCase: UpdatePostUseCase,
     private val getPostDetailUseCase: GetPostDetailUseCase,
     private val appInfoRepository: AppInfoRepository,
-    private val uploadImageUseCase: UploadImageUseCase
+    private val uploadImageUseCase: UploadImageUseCase,
+    private val contentFileReader: ContentFileReader
 ) : BaseViewModel() {
 
     private val postId: Long? = savedStateHandle
@@ -68,14 +70,14 @@ class WritePostViewModel @Inject constructor(
         }
     }
 
-    fun submit(context: android.content.Context) {
+    fun submit() {
         val data = _writePostData.value
         if (!data.isSubmitEnabled) return
 
         _writePostData.update { it.copy(isSubmitting = true) }
 
         launch {
-            val uploadedUrls = uploadNewImages(context, data.newImageUris)
+            val uploadedUrls = uploadNewImages(data.newImageUris)
 
             when (data.mode) {
                 WritePostData.WritePostMode.CREATE -> {
@@ -227,13 +229,13 @@ class WritePostViewModel @Inject constructor(
     }
 
     private suspend fun uploadNewImages(
-        context: android.content.Context,
         uris: List<Uri>
     ): List<String> {
         return uris.mapIndexedNotNull { index, uri ->
-            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            val fileData = contentFileReader.readBytes(uri.toString())
                 ?: return@mapIndexedNotNull null
-            val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+            val bytes = fileData.bytes
+            val mimeType = fileData.mimeType
             val ext = mimeType.substringAfter("/", "jpg")
             val filename = "post_${System.currentTimeMillis()}_$index.$ext"
 
