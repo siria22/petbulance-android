@@ -19,8 +19,6 @@ private fun HomeScreenLoadingPreview() {
                 reviewState = SectionLoadState.Loading,
                 bannerState = SectionLoadState.Loading,
                 hotArticleState = SectionLoadState.Loading,
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = HomeData.stub,
@@ -43,8 +41,6 @@ private fun HomeScreenErrorPreview() {
                 reviewState = SectionLoadState.Error("최근 리뷰를 불러올 수 없습니다"),
                 bannerState = SectionLoadState.Error("배너를 불러올 수 없습니다"),
                 hotArticleState = SectionLoadState.Error("인기 게시글을 불러올 수 없습니다"),
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = HomeData(
@@ -71,32 +67,6 @@ private fun HomeScreenSuccessPreview() {
                 reviewState = SectionLoadState.Success,
                 bannerState = SectionLoadState.Success,
                 hotArticleState = SectionLoadState.Success,
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
-                event = MutableSharedFlow()
-            ),
-            data = HomeData.stub,
-            checkTermsInitialState = false,
-            termsData = TermsData.stub(),
-            termsIntent = { },
-            termsEvent = MutableSharedFlow()
-        )
-    }
-}
-
-@Preview(name = "홈 화면 - Coming Soon (인기 게시글)")
-@Composable
-private fun HomeScreenComingSoonPreview() {
-    PetbulanceTheme {
-        HomeScreen(
-            navController = rememberNavController(),
-            argument = HomeArgument(
-                intent = { },
-                reviewState = SectionLoadState.Success,
-                bannerState = SectionLoadState.Success,
-                hotArticleState = SectionLoadState.Success,
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = HomeData.stub,

@@ -25,12 +25,6 @@ class HomeViewModel @Inject constructor(
     private val getHomeBannersUseCase: GetHomeBannersUseCase
 ) : BaseViewModel() {
 
-    private val _dataState = MutableStateFlow<HomeDataState>(HomeDataState.Init)
-    val dataState: StateFlow<HomeDataState> = _dataState
-
-    private val _screenState = MutableStateFlow<HomeScreenState>(HomeScreenState.Init)
-    val screenState: StateFlow<HomeScreenState> = _screenState
-
     private val _eventFlow = MutableSharedFlow<HomeEvent>()
     val eventFlow: SharedFlow<HomeEvent> = _eventFlow
 
@@ -54,14 +48,6 @@ class HomeViewModel @Inject constructor(
 
     fun onIntent(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.SomeIntentWithoutParams -> {
-                //do sth
-            }
-
-            is HomeIntent.SomeIntentWithParams -> {
-                //do sth(intent.params)
-            }
-
             is HomeIntent.RetryReviews -> {
                 launch { getRecentReviews() }
             }

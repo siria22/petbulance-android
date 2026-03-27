@@ -13,11 +13,11 @@ class GetRecentReviewsUseCase @Inject constructor(
             animalTypes = null,
             isReceipt = null,
             cursorId = null,
-            size = 10
+            size = PAGE_SIZE
         ).map { pagingResult ->
             pagingResult.items
-                .filter { it.totalRating >= 4.0 }
-                .take(3)
+                .filter { it.totalRating >= MIN_RATING_THRESHOLD }
+                .take(MAX_DISPLAY_COUNT)
                 .map { reviewItem ->
                     HomeScreenReview(
                         id = reviewItem.id,
@@ -28,6 +28,12 @@ class GetRecentReviewsUseCase @Inject constructor(
                         content = reviewItem.reviewContent
                     )
                 }
-        }.getOrElse { emptyList() }
+        }.getOrThrow()
+    }
+
+    companion object {
+        private const val MIN_RATING_THRESHOLD = 4.0
+        private const val MAX_DISPLAY_COUNT = 3
+        private const val PAGE_SIZE = 10
     }
 }

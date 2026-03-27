@@ -46,15 +46,11 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val checkTerms = entry.arguments?.getBoolean(ScreenDestinations.Home.ARG_CHECK_TERMS) ?: false
 
         val argument: HomeArgument = let {
-            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
             val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
             val bannerState by viewModel.bannerState.collectAsStateWithLifecycle()
             val hotArticleState by viewModel.hotArticleState.collectAsStateWithLifecycle()
 
             HomeArgument(
-                dataState = dataState,
-                screenState = screenState,
                 reviewState = reviewState,
                 bannerState = bannerState,
                 hotArticleState = hotArticleState,

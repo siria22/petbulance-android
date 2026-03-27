@@ -9,8 +9,13 @@ class GetHotArticleUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): List<PostSummary> {
         return getPostListUseCase(
-            sort = "popular",
-            pageSize = 4
-        ).getOrNull()?.items ?: emptyList()
+            sort = SORT_POPULAR,
+            pageSize = PAGE_SIZE
+        ).getOrThrow().items
+    }
+
+    companion object {
+        private const val SORT_POPULAR = "popular"
+        private const val PAGE_SIZE = 4
     }
 }

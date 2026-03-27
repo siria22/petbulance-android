@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -74,8 +74,8 @@ import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
-import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXL
+import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.screen.feature.home.composables.HomeScreenEmptyStateUi
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
@@ -164,7 +164,11 @@ fun HomeScreen(
                 onNavigateToReview = { navController.safeNavigate(ScreenDestinations.Review.route) },
                 onNavigateToCommunity = { navController.safeNavigate(ScreenDestinations.Community.route) },
                 onPostClick = { postId ->
-                    navController.safeNavigate(ScreenDestinations.Community.PostDetail.createRoute(postId))
+                    navController.safeNavigate(
+                        ScreenDestinations.Community.PostDetail.createRoute(
+                            postId
+                        )
+                    )
                 },
                 onBannerClick = { noticeId ->
                     navController.safeNavigate(
@@ -178,7 +182,6 @@ fun HomeScreen(
     }
 
     val onDismissRequest = {
-        // TODO: 정책 확정 시 추가 처리
         Log.d("$LOGGER_TAG - HomeScreen", "Terms sheet dismissed without full agreement")
         showTermsSheet = false
     }
@@ -285,7 +288,7 @@ private fun CommonHeader(
         Text(
             text = headerText,
             color = colorScheme.text.primary,
-            style = MaterialTheme.typography.bodyLarge.emp(),
+            style = typography.bodyLarge.emp(),
         )
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.ChevronRight),
@@ -371,7 +374,7 @@ private fun HospitalShortcutAnimalRow(
                 Text(
                     text = category[idx].korean,
                     color = colorScheme.text.primary,
-                    style = MaterialTheme.typography.bodySmall.emp(),
+                    style = typography.bodySmall.emp(),
                 )
             }
         }
@@ -511,7 +514,7 @@ private fun RecentReviewSliderItem(
         ) {
             Text(
                 text = item.hospitalName,
-                style = MaterialTheme.typography.bodyMedium.emp(),
+                style = typography.bodyMedium.emp(),
                 color = colorScheme.text.primary,
             )
             Row(
@@ -522,18 +525,18 @@ private fun RecentReviewSliderItem(
                 StarRatingView(rating = item.rating)
                 Text(
                     text = "(${item.rating})",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = typography.labelMedium,
                     color = colorScheme.text.tertiary,
                 )
                 Text(
                     text = "${item.reviewCount}",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = typography.labelMedium,
                     color = colorScheme.text.tertiary,
                 )
             }
             Text(
                 text = item.content,
-                style = MaterialTheme.typography.labelSmall,
+                style = typography.labelSmall,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
                 color = colorScheme.text.primary,
@@ -614,7 +617,7 @@ private fun HotArticleItem(
     ) {
         Text(
             text = post.title,
-            style = MaterialTheme.typography.bodyMedium.emp(),
+            style = typography.bodyMedium.emp(),
             color = colorScheme.text.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -623,19 +626,39 @@ private fun HotArticleItem(
             horizontalArrangement = Arrangement.spacedBy(spacingXXS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = animalKorean, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Text(
+                text = animalKorean,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
             Dot(dotColor = colorScheme.icon.veryLight)
-            Text(text = topicKorean, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Text(
+                text = topicKorean,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
             Dot(dotColor = colorScheme.icon.veryLight)
-            Text(text = post.createdAt, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Text(
+                text = post.createdAt,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
         }
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacingXXS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "좋아요 ${post.likeCount}", style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Text(
+                text = "좋아요 ${post.likeCount}",
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
             Dot(dotColor = colorScheme.icon.veryLight)
-            Text(text = "댓글 ${post.commentCount}", style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Text(
+                text = "댓글 ${post.commentCount}",
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
         }
     }
 }
@@ -651,8 +674,6 @@ private fun HomeScreenPreview() {
                 reviewState = SectionLoadState.Success,
                 bannerState = SectionLoadState.Success,
                 hotArticleState = SectionLoadState.Success,
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = HomeData.stub,
