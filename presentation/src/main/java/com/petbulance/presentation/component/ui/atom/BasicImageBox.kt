@@ -54,7 +54,14 @@ fun BasicImageBox(
                 .clip(RoundedCornerShape(4.dp)),
             contentDescription = "이미지 콘텐츠",
             contentScale = ContentScale.Crop,
-            loading = { CustomGreenLoader() },
+            loading = {
+                Box(
+                    modifier = Modifier.matchParentSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CustomGreenLoader()
+                }
+            },
             error = { /* 필요하면 에러용 UI를 별도 구성 가능 */ }
         )
     }

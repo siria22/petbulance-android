@@ -232,7 +232,14 @@ private fun NoticeAttachmentSection(attachments: List<Attachment>) {
                 contentDescription = attachment.fileName,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth(),
-                loading = { CustomGreenLoader() }
+                loading = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CustomGreenLoader()
+                    }
+                }
             )
         }
     }
