@@ -17,11 +17,9 @@ fun NavGraphBuilder.qnaListDestination(navController: NavController) {
 
         val argument: QnaListArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
             QnaListArgument(
                 dataState = dataState,
-                screenState = screenState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )

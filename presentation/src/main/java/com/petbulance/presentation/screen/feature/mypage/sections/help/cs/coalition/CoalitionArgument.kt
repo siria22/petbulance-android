@@ -7,17 +7,12 @@ import kotlinx.coroutines.flow.SharedFlow
 data class CoalitionArgument(
     val intent: (CoalitionIntent) -> Unit,
     val dataState: CoalitionDataState,
-    val screenState: CoalitionScreenState,
     val event: SharedFlow<CoalitionEvent>
 )
 
 sealed class CoalitionDataState {
     data object Init : CoalitionDataState()
     data object OnProgress : CoalitionDataState()
-}
-
-sealed class CoalitionScreenState {
-    data object Init : CoalitionScreenState()
 }
 
 sealed class CoalitionIntent {

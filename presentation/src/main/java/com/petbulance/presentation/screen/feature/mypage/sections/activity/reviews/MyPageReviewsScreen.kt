@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
@@ -44,9 +43,6 @@ import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
-import com.petbulance.presentation.component.ui.atom.BasicButton
-import com.petbulance.presentation.component.ui.atom.BasicButtonSize
-import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicCheckBox
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
@@ -67,7 +63,6 @@ import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityDeleteOptionDialog
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivitySelectionControlBar
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityUndoToast
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.composables.MyPageReviewsNoResultView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -357,7 +352,7 @@ private fun MyPageReviewsItem(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(spacingXXS)
-        ){
+        ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                 verticalAlignment = Alignment.CenterVertically

@@ -479,7 +479,6 @@ private fun CoalitionScreenPreview() {
             argument = CoalitionArgument(
                 intent = { },
                 dataState = CoalitionDataState.Init,
-                screenState = CoalitionScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = CoalitionData.stub()
@@ -496,7 +495,6 @@ private fun CoalitionScreenEmptyPreview() {
             argument = CoalitionArgument(
                 intent = { },
                 dataState = CoalitionDataState.Init,
-                screenState = CoalitionScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = CoalitionData.empty()

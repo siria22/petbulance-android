@@ -17,11 +17,9 @@ fun NavGraphBuilder.myPageNoticeDestination(navController: NavController) {
 
         val argument: MyPageNoticeArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
             MyPageNoticeArgument(
                 dataState = dataState,
-                screenState = screenState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )

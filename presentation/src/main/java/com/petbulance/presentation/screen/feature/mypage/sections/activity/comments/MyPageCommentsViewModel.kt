@@ -17,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyPageCommentsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val getMyCommentListUseCase: GetMyCommentListUseCase,
     private val deleteMyCommentsUseCase: DeleteMyCommentsUseCase
 ) : BaseViewModel() {

@@ -7,17 +7,12 @@ import kotlinx.coroutines.flow.SharedFlow
 data class MyPageNoticeArgument(
     val intent: (MyPageNoticeIntent) -> Unit,
     val dataState: MyPageNoticeDataState,
-    val screenState: MyPageNoticeScreenState,
     val event: SharedFlow<MyPageNoticeEvent>
 )
 
 sealed class MyPageNoticeDataState {
     data object Init : MyPageNoticeDataState()
     data object Loading : MyPageNoticeDataState()
-}
-
-sealed class MyPageNoticeScreenState {
-    data object Init : MyPageNoticeScreenState()
 }
 
 sealed class MyPageNoticeIntent {

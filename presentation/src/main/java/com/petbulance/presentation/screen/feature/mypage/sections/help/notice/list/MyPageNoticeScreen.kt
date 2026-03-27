@@ -55,7 +55,6 @@ fun MyPageNoticeScreen(
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
     val dataState = argument.dataState
-    val screenState = argument.screenState
 
     LaunchedEffect(argument.event) {
         argument.event.collectCustomErrors { event ->
@@ -173,7 +172,6 @@ private fun MyPageNoticeScreenPreview() {
             argument = MyPageNoticeArgument(
                 intent = { },
                 dataState = MyPageNoticeDataState.Init,
-                screenState = MyPageNoticeScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = MyPageNoticeData.stub()

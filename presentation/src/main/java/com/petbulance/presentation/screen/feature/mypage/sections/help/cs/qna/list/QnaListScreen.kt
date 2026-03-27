@@ -327,7 +327,6 @@ private fun QnaListScreenPreview() {
             argument = QnaListArgument(
                 intent = { },
                 dataState = QnaListDataState.Loaded(hasNext = false),
-                screenState = QnaListScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = QnaListData.stub()

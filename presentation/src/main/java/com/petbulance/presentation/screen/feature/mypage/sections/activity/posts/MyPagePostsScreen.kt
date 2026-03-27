@@ -72,7 +72,6 @@ import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.component.ui.spacingXXXS
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityDeleteOptionDialog
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivitySelectionControlBar
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityUndoToast
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -319,7 +318,7 @@ private fun MyPagePostsListView(
         state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
-        if(screenState.isSelectionMode) {
+        if (screenState.isSelectionMode) {
             item {
                 Column {
                     ActivitySelectionControlBar(

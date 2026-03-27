@@ -7,17 +7,12 @@ import kotlinx.coroutines.flow.SharedFlow
 data class QnaDetailArgument(
     val intent: (QnaDetailIntent) -> Unit,
     val dataState: QnaDetailDataState,
-    val screenState: QnaDetailScreenState,
     val event: SharedFlow<QnaDetailEvent>
 )
 
 sealed class QnaDetailDataState {
     data object Init : QnaDetailDataState()
     data object OnProgress : QnaDetailDataState()
-}
-
-sealed class QnaDetailScreenState {
-    data object Init : QnaDetailScreenState()
 }
 
 sealed class QnaDetailIntent {

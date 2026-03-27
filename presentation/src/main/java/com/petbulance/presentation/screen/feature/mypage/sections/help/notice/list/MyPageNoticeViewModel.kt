@@ -21,10 +21,6 @@ class MyPageNoticeViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<MyPageNoticeDataState>(MyPageNoticeDataState.Init)
     val dataState: StateFlow<MyPageNoticeDataState> = _dataState
 
-    private val _screenState =
-        MutableStateFlow<MyPageNoticeScreenState>(MyPageNoticeScreenState.Init)
-    val screenState: StateFlow<MyPageNoticeScreenState> = _screenState
-
     private val _eventFlow = MutableSharedFlow<MyPageNoticeEvent>()
     val eventFlow: SharedFlow<MyPageNoticeEvent> = _eventFlow
 

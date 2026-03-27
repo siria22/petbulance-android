@@ -21,9 +21,6 @@ class QnaListViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<QnaListDataState>(QnaListDataState.Init)
     val dataState: StateFlow<QnaListDataState> = _dataState
 
-    private val _screenState = MutableStateFlow<QnaListScreenState>(QnaListScreenState.Init)
-    val screenState: StateFlow<QnaListScreenState> = _screenState
-
     private val _eventFlow = MutableSharedFlow<QnaListEvent>()
     val eventFlow: SharedFlow<QnaListEvent> = _eventFlow
 

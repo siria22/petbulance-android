@@ -177,11 +177,11 @@ private fun NoticeCTAContent(
 
         NoticeAttachmentSection(attachments = notice.attachments)
 
-        if (!notice.buttons.isNullOrEmpty()) {
+        notice.buttons?.takeIf { it.isNotEmpty() }?.let { buttons ->
             NoticeButtonSection(
                 navController = navController,
                 modifier = Modifier.padding(spacingMedium),
-                buttons = notice.buttons!!
+                buttons = buttons
             )
         }
     }
@@ -207,10 +207,10 @@ private fun NoticeTextContent(
             color = colorScheme.text.secondary
         )
 
-        if (!notice.buttons.isNullOrEmpty()) {
+        notice.buttons?.takeIf { it.isNotEmpty() }?.let { buttons ->
             NoticeButtonSection(
                 modifier = Modifier.padding(spacingMedium),
-                buttons = notice.buttons!!,
+                buttons = buttons,
                 navController = navController
             )
         }

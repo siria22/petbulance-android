@@ -361,7 +361,6 @@ private fun QnaDetailScreenPreview() {
             argument = QnaDetailArgument(
                 intent = { },
                 dataState = QnaDetailDataState.Init,
-                screenState = QnaDetailScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = QnaDetailData.stub()

@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.SharedFlow
 data class QnaListArgument(
     val intent: (QnaListIntent) -> Unit,
     val dataState: QnaListDataState,
-    val screenState: QnaListScreenState,
     val event: SharedFlow<QnaListEvent>
 )
 
@@ -15,10 +14,6 @@ sealed class QnaListDataState {
     data object Init : QnaListDataState()
     data object Loading : QnaListDataState()
     data class Loaded(val hasNext: Boolean) : QnaListDataState()
-}
-
-sealed class QnaListScreenState {
-    data object Init : QnaListScreenState()
 }
 
 sealed class QnaListIntent {
