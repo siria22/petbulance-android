@@ -53,7 +53,7 @@ fun SearchPostCommentResDto.toDomain(): SearchPostCommentRes = SearchPostComment
 )
 
 fun PagingMyCommentListResDto.toDomain(): MyCommentList = MyCommentList(
-    content = content.map { it.toDomain() },
+    items = content.map { it.toDomain() },
     hasNext = hasNext
 )
 
@@ -63,5 +63,6 @@ fun MyCommentListResDto.toDomain(): MyCommentListRes = MyCommentListRes(
     postId = postId,
     postTitle = postTitle,
     commentContent = commentContent,
+    createdAt = createdAt,
     hidden = hidden
 )

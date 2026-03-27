@@ -56,6 +56,6 @@ sealed class MyPagePostsEvent {
             override val userMessage: String = "문제가 발생했습니다.",
             override val exceptionMessage: String?,
             override val displayType: ErrorDisplayType = ErrorDisplayType.Common
-        ) : DataFetch(), ErrorEvent
+        ) : Post(), ErrorEvent
     }
 }

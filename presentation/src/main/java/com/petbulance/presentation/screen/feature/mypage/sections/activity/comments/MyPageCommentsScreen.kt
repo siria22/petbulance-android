@@ -62,7 +62,9 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.comments.composables.MyPageCommentsDeleteDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityDeleteOptionDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivitySelectionControlBar
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityUndoToast
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -272,7 +274,8 @@ fun MyPageCommentsScreen(
     }
 
     if (showMenu) {
-        MyPageCommentsDeleteDialog(
+        ActivityDeleteOptionDialog(
+            title = "댓글 삭제",
             onDeleteOptionClicked = {
                 showMenu = false
                 argument.intent(MyPageCommentsIntent.ToggleSelectionMode(true))
@@ -318,7 +321,7 @@ private fun MyPageCommentsListView(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    SelectionControlBar(
+                    ActivitySelectionControlBar(
                         isAllSelected = screenState.selectedIds.size == comments.size && comments.isNotEmpty(),
                         hasSelection = screenState.selectedIds.isNotEmpty(),
                         onSelectAllClick = onSelectAllClick,
@@ -339,45 +342,6 @@ private fun MyPageCommentsListView(
             )
             CommonDivider()
         }
-    }
-}
-
-@Composable
-private fun SelectionControlBar(
-    isAllSelected: Boolean,
-    hasSelection: Boolean,
-    onSelectAllClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacingMedium, vertical = spacingXS),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { onSelectAllClick() }
-        ) {
-            BasicCheckBox(
-                checkState = isAllSelected,
-                onCheckedChange = onSelectAllClick
-            )
-            Text(
-                text = "전체선택",
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary
-            )
-        }
-
-        BasicButton(
-            text = "삭제",
-            size = BasicButtonSize.S,
-            buttonType = if (hasSelection) BasicButtonType.DEFAULT else BasicButtonType.DISABLED,
-            onClicked = { if (hasSelection) onDeleteClick() }
-        )
     }
 }
 
@@ -426,14 +390,12 @@ private fun MyPageCommentItem(
             )
         }
 
-        /* TODO : API 명세 확인 필요
-            Text(
-                text = comment.createdAt,
-                style = typography.labelSmall.emp(),
-                color = colorScheme.text.caption,
-                maxLines = 1
-            )
-         */
+        Text(
+            text = comment.createdAt,
+            style = typography.labelSmall.emp(),
+            color = colorScheme.text.caption,
+            maxLines = 1
+        )
 
         Text(
             text = comment.commentContent,
@@ -499,6 +461,7 @@ private fun MyPageCommentsScreenPreview() {
             postId = 100L,
             postTitle = "게시글 제목",
             commentContent = "너무 많이 궁어하는 것 같아요. 저는 상세정보에 써있는 정량만 먹 급여해요.",
+            createdAt = "2024-12-07",
             hidden = false
         ),
         MyCommentListRes(
@@ -507,6 +470,7 @@ private fun MyPageCommentsScreenPreview() {
             postId = 101L,
             postTitle = "숨김 처리된 게시글",
             commentContent = "우리집 햄스터 병원 2살 된 경과 할배인데.. 최근에 예가 너무 노쇠해진건지 슬...",
+            createdAt = "2024-12-06",
             hidden = true
         )
     )

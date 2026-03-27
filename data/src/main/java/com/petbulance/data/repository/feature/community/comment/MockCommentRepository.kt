@@ -58,7 +58,7 @@ class MockCommentRepository @Inject constructor() : CommentRepository {
     ): Result<MyCommentList> {
         return Result.success(
             MyCommentList(
-                content = mockMyCommentList,
+                items = mockMyCommentList,
                 hasNext = true
             )
         )
@@ -105,6 +105,7 @@ private val mockMyCommentList = listOf(
         postId = 1L,
         postTitle = "첫 번째 게시글 제목",
         commentContent = "이것은 첫 번째 목업 댓글입니다.",
+        createdAt = "2024-12-07",
         hidden = false
     ),
     MyCommentListRes(
@@ -113,6 +114,7 @@ private val mockMyCommentList = listOf(
         postId = 1L,
         postTitle = "첫 번째 게시글 제목",
         commentContent = "이것은 두 번째 목업 댓글입니다.",
+        createdAt = "2024-12-06",
         hidden = false
     ),
     MyCommentListRes(
@@ -121,6 +123,7 @@ private val mockMyCommentList = listOf(
         postId = 2L,
         postTitle = "두 번째 게시글 제목",
         commentContent = "이것은 세 번째 목업 댓글입니다. 이 댓글은 숨김 처리됩니다.",
+        createdAt = "2024-12-05",
         hidden = true
     )
 )

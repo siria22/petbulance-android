@@ -65,7 +65,9 @@ import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.composables.MyPageReviewsDeleteReviewsDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityDeleteOptionDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivitySelectionControlBar
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityUndoToast
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.reviews.composables.MyPageReviewsNoResultView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -265,8 +267,9 @@ fun MyPageReviewsScreen(
     }
 
     if (showMenu) {
-        MyPageReviewsDeleteReviewsDialog(
-            onReportOptionClicked = {
+        ActivityDeleteOptionDialog(
+            title = "영수증 후기 삭제",
+            onDeleteOptionClicked = {
                 showMenu = false
                 argument.intent(MyPageReviewsIntent.ToggleSelectionMode(true))
             },
@@ -309,7 +312,7 @@ private fun MyPageMyReviewsListView(
     ) {
         if (screenState.isSelectionMode) {
             item {
-                SelectionControlBar(
+                ActivitySelectionControlBar(
                     isAllSelected = screenState.selectedIds.size == reviews.size && reviews.isNotEmpty(),
                     hasSelection = screenState.selectedIds.isNotEmpty(),
                     onSelectAllClick = onSelectAllClick,
@@ -326,45 +329,6 @@ private fun MyPageMyReviewsListView(
                 onClick = { onReviewClick(review.id) }
             )
         }
-    }
-}
-
-@Composable
-private fun SelectionControlBar(
-    isAllSelected: Boolean,
-    hasSelection: Boolean,
-    onSelectAllClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacingMedium, vertical = spacingXS),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { onSelectAllClick() }
-        ) {
-            BasicCheckBox(
-                checkState = isAllSelected,
-                onCheckedChange = onSelectAllClick
-            )
-            Text(
-                text = "전체선택",
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary
-            )
-        }
-
-        BasicButton(
-            text = "삭제",
-            size = BasicButtonSize.S,
-            buttonType = if (hasSelection) BasicButtonType.DEFAULT else BasicButtonType.DISABLED,
-            onClicked = { if (hasSelection) onDeleteClick() }
-        )
     }
 }
 
@@ -447,10 +411,10 @@ private fun MyPageReviewsItem(
             horizontalArrangement = Arrangement.spacedBy(spacingXS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (review.representativeImage != null) {
+            review.representativeImage?.let { imageUrl ->
                 BasicImageBox(
                     size = 72.dp,
-                    uri = review.representativeImage!!.toUri(),
+                    uri = imageUrl.toUri(),
                 )
             }
             Text(
@@ -525,19 +489,19 @@ private fun SelectionControlBarPreview() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.background(colorScheme.bg.frame.default)
         ) {
-            SelectionControlBar(
+            ActivitySelectionControlBar(
                 isAllSelected = false,
                 hasSelection = false,
                 onSelectAllClick = {},
                 onDeleteClick = {}
             )
-            SelectionControlBar(
+            ActivitySelectionControlBar(
                 isAllSelected = false,
                 hasSelection = true,
                 onSelectAllClick = {},
                 onDeleteClick = {}
             )
-            SelectionControlBar(
+            ActivitySelectionControlBar(
                 isAllSelected = true,
                 hasSelection = true,
                 onSelectAllClick = {},

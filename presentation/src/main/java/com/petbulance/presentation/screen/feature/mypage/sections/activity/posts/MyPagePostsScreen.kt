@@ -70,7 +70,9 @@ import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.component.ui.spacingXXXS
-import com.petbulance.presentation.screen.feature.mypage.sections.activity.posts.composables.MyPagePostsDeletePostsDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityDeleteOptionDialog
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivitySelectionControlBar
+import com.petbulance.presentation.screen.feature.mypage.sections.activity.common.ActivityUndoToast
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -276,7 +278,8 @@ fun MyPagePostsScreen(
     }
 
     if (showMenu) {
-        MyPagePostsDeletePostsDialog(
+        ActivityDeleteOptionDialog(
+            title = "커뮤니티 게시글 삭제",
             onDeleteOptionClicked = {
                 showMenu = false
                 argument.intent(MyPagePostsIntent.ToggleSelectionMode(true))
@@ -319,7 +322,7 @@ private fun MyPagePostsListView(
         if(screenState.isSelectionMode) {
             item {
                 Column {
-                    SelectionControlBar(
+                    ActivitySelectionControlBar(
                         isAllSelected = screenState.selectedIds.size == posts.size && posts.isNotEmpty(),
                         hasSelection = screenState.selectedIds.isNotEmpty(),
                         onSelectAllClick = onSelectAllClick,
@@ -342,44 +345,6 @@ private fun MyPagePostsListView(
     }
 }
 
-@Composable
-private fun SelectionControlBar(
-    isAllSelected: Boolean,
-    hasSelection: Boolean,
-    onSelectAllClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacingMedium, vertical = spacingXS),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { onSelectAllClick() }
-        ) {
-            BasicCheckBox(
-                checkState = isAllSelected,
-                onCheckedChange = onSelectAllClick
-            )
-            Text(
-                text = "전체선택",
-                style = typography.bodyMedium,
-                color = colorScheme.text.secondary
-            )
-        }
-
-        BasicButton(
-            text = "삭제",
-            size = BasicButtonSize.S,
-            buttonType = BasicButtonType.DEFAULT,
-            onClicked = { if (hasSelection) onDeleteClick() }
-        )
-    }
-}
 
 @Composable
 private fun MyPagePostItem(

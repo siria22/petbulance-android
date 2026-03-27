@@ -62,7 +62,7 @@ class MyPageCommentsViewModel @Inject constructor(
 
             getMyCommentListUseCase(lastCommentId = null, pageSize = 20)
                 .onSuccess { result ->
-                    currentComments.addAll(result.content)
+                    currentComments.addAll(result.items)
                     _dataState.value = MyPageCommentsDataState.Loaded(
                         comments = currentComments.toList(),
                         hasNext = result.hasNext
@@ -81,7 +81,7 @@ class MyPageCommentsViewModel @Inject constructor(
 
             getMyCommentListUseCase(lastCommentId = lastCommentId, pageSize = 20)
                 .onSuccess { result ->
-                    currentComments.addAll(result.content)
+                    currentComments.addAll(result.items)
                     _dataState.value = currentState.copy(
                         comments = currentComments.toList(),
                         hasNext = result.hasNext

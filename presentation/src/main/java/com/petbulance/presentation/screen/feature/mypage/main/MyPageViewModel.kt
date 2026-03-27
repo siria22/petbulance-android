@@ -1,6 +1,7 @@
 package com.petbulance.presentation.screen.feature.mypage.main
 
 import com.petbulance.domain.model.feature.user.user.UserInfo
+import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.domain.usecase.nonfeature.app.GetAppVersionUseCase
 import com.petbulance.presentation.utils.BaseViewModel
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MyPageViewModel @Inject constructor(
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val getAppVersionUseCase: GetAppVersionUseCase
+    private val getAppVersionUseCase: GetAppVersionUseCase,
+    private val checkLoginStatusUseCase: CheckLoginStatusUseCase
 ) : BaseViewModel() {
 
     private val _eventFlow = MutableSharedFlow<MyPageEvent>()
@@ -37,6 +39,9 @@ class MyPageViewModel @Inject constructor(
     }
 
     private suspend fun fetchUserInfo() {
+        val isLoggedIn = checkLoginStatusUseCase().getOrElse { false }
+        if (!isLoggedIn) return
+
         getMyInfoUseCase()
             .onSuccess { userInfo ->
                 _userInfo.value = userInfo
