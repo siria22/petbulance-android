@@ -16,7 +16,6 @@ import com.petbulance.presentation.utils.nav.ScreenDestinations
 fun NavGraphBuilder.homeDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Home.route,
-        // argument 정의 추가 필요 (navArgument)
         arguments = listOf(
             navArgument(ScreenDestinations.Home.ARG_CHECK_TERMS) {
                 defaultValue = false

@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +51,6 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
-import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,15 +64,10 @@ fun MyPageScreen(
     var isLoginRequiredDialogVisible by remember { mutableStateOf(false) }
 
     val userInfo = data.userInfo
+    val isLoggedIn = userInfo != null
 
-    LaunchedEffect(argument.event) {
-        argument.event.collectCustomErrors { event ->
-            when (event) {
-                is MyPageEvent.DataFetch.Error -> {
-
-                }
-            }
-        }
+    fun requireLoginOr(action: () -> Unit) {
+        if (isLoggedIn) action() else isLoginRequiredDialogVisible = true
     }
 
     Scaffold(
@@ -101,7 +94,8 @@ fun MyPageScreen(
                 userInfo = userInfo,
                 navController = navController,
                 appLatestVersion = data.latestVersion,
-                appCurrentVersion = data.currentVersion
+                appCurrentVersion = data.currentVersion,
+                requireLoginOr = ::requireLoginOr
             )
         }
     }
@@ -115,7 +109,6 @@ fun MyPageScreen(
             },
         )
     }
-    // BackHandler {  }
 }
 
 @Composable
@@ -124,12 +117,13 @@ private fun MyPageScreenContents(
     navController: NavController,
     appLatestVersion: String,
     appCurrentVersion: String,
+    requireLoginOr: (() -> Unit) -> Unit
 ) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(spacingMedium),
+        verticalArrangement = Arrangement.spacedBy(spacingSmall)
     ) {
         LoginOrUserInfo(
             userInfo,
@@ -145,12 +139,16 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_notification),
                     title = "알림 설정",
-                    onClicked = { /* TODO */ }
+                    onClicked = { requireLoginOr { /* TODO: 알림 설정 화면 이동 */ } }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_logout),
                     title = "로그인 계정 관리",
-                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.User.Account.route) }
+                    onClicked = {
+                        requireLoginOr {
+                            navController.safeNavigate(ScreenDestinations.MyPage.User.Account.route)
+                        }
+                    }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_permission),
@@ -166,17 +164,29 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_reviews),
                     title = "후기 관리",
-                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Reviews.route) }
+                    onClicked = {
+                        requireLoginOr {
+                            navController.safeNavigate(ScreenDestinations.MyPage.Activity.Reviews.route)
+                        }
+                    }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_docs),
                     title = "게시글 관리",
-                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Posts.route) }
+                    onClicked = {
+                        requireLoginOr {
+                            navController.safeNavigate(ScreenDestinations.MyPage.Activity.Posts.route)
+                        }
+                    }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_comments),
                     title = "댓글 관리",
-                    onClicked = { navController.safeNavigate(ScreenDestinations.MyPage.Activity.Comments.route) }
+                    onClicked = {
+                        requireLoginOr {
+                            navController.safeNavigate(ScreenDestinations.MyPage.Activity.Comments.route)
+                        }
+                    }
                 )
             ),
         )
@@ -304,7 +314,7 @@ private fun MyPageSection(
                 colorScheme.bg.frame.default,
                 RoundedCornerShape(20.dp)
             )
-            .padding(top = 8.dp, bottom = 16.dp)
+            .padding(top = spacingXXS, bottom = spacingMedium)
     ) {
         Box(
             modifier = Modifier.padding(vertical = spacingXXS, horizontal = spacingMedium)
@@ -357,7 +367,7 @@ private fun MyPageSection(
                     .fillMaxWidth()
                     .padding(horizontal = spacingMedium, vertical = spacingSmall)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(spacingXXS)) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(spacingXS),
                         verticalAlignment = Alignment.CenterVertically
@@ -398,8 +408,6 @@ private fun MyPageScreenPreview() {
             navController = rememberNavController(),
             argument = MyPageArgument(
                 intent = { },
-                dataState = MyPageDataState.Init,
-                screenState = MyPageScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = MyPageData(

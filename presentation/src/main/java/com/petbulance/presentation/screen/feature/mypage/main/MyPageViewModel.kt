@@ -1,14 +1,11 @@
 package com.petbulance.presentation.screen.feature.mypage.main
 
-import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.user.user.UserInfo
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.domain.usecase.nonfeature.app.GetAppVersionUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,17 +14,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyPageViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val getAppVersionUseCase: GetAppVersionUseCase,
-    @ApplicationContext private val context: Context
+    private val getAppVersionUseCase: GetAppVersionUseCase
 ) : BaseViewModel() {
-
-    private val _dataState = MutableStateFlow<MyPageDataState>(MyPageDataState.Init)
-    val dataState: StateFlow<MyPageDataState> = _dataState
-
-    private val _screenState = MutableStateFlow<MyPageScreenState>(MyPageScreenState.Init)
-    val screenState: StateFlow<MyPageScreenState> = _screenState
 
     private val _eventFlow = MutableSharedFlow<MyPageEvent>()
     val eventFlow: SharedFlow<MyPageEvent> = _eventFlow
@@ -41,30 +30,13 @@ class MyPageViewModel @Inject constructor(
     private val _latestVersion = MutableStateFlow("")
     val latestVersion: StateFlow<String> = _latestVersion
 
-    fun onIntent(intent: MyPageIntent) {
-        when (intent) {
-            is MyPageIntent.SomeIntentWithoutParams -> {
-                //do sth
-            }
-
-            is MyPageIntent.SomeIntentWithParams -> {
-                //do sth(intent.params)
-            }
-        }
-    }
-
     init {
         observeErrorEvent(eventFlow)
-
-        launch {
-            fetchUserInfo()
-            fetchVersionInfo()
-        }
+        launch { fetchUserInfo() }
+        launch { fetchVersionInfo() }
     }
 
     private suspend fun fetchUserInfo() {
-        _dataState.value = MyPageDataState.OnProgress
-
         getMyInfoUseCase()
             .onSuccess { userInfo ->
                 _userInfo.value = userInfo
@@ -78,30 +50,20 @@ class MyPageViewModel @Inject constructor(
                     )
                 )
             }
-
-        _dataState.value = MyPageDataState.Init
     }
 
     private suspend fun fetchVersionInfo() {
-        try {
-            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            _currentVersion.value = pInfo.versionName ?: "Unknown"
-        } catch (e: Exception) {
-            _currentVersion.value = "Unknown"
-        }
+        getAppVersionUseCase.getCurrentVersion()
+            .onSuccess { version -> _currentVersion.value = version }
+            .onFailure { _currentVersion.value = "Unknown" }
 
-        runCatching {
-            getAppVersionUseCase()
-        }.onSuccess { version ->
-            _latestVersion.value = version
-        }.onFailure { exception ->
-            _eventFlow.emit(
-                MyPageEvent.DataFetch.Error(
-                    displayType = ErrorDisplayType.Common,
-                    userMessage = "앱 최신 버전을 불러오는데 실패했습니다.",
-                    exceptionMessage = exception.message
-                )
-            )
-        }
+        // TODO: 앱 버전 관리 방식 결정 필요
+        //  - Google Play In-App Updates API (com.google.android.play:app-update)로 최신 버전 확인 가능
+        //  - AppUpdateManager.appUpdateInfo에서 availableVersionCode 조회
+        //  - 서버 API 없이도 Play Store 기준 업데이트 유도 가능
+        //  - 현재는 서버 API가 더미 데이터를 반환하므로, Play Store 배포 후 In-App Updates 전환 검토
+        getAppVersionUseCase.getLatestVersion()
+            .onSuccess { version -> _latestVersion.value = version }
+            .onFailure { _latestVersion.value = "" }
     }
 }

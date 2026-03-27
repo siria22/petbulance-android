@@ -15,17 +15,10 @@ fun NavGraphBuilder.myPageDestination(navController: NavController) {
     ) {
         val viewModel: MyPageViewModel = hiltViewModel()
 
-        val argument: MyPageArgument = let {
-            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
-
-            MyPageArgument(
-                dataState = dataState,
-                screenState = screenState,
-                intent = viewModel::onIntent,
-                event = viewModel.eventFlow
-            )
-        }
+        val argument = MyPageArgument(
+            intent = {},
+            event = viewModel.eventFlow
+        )
 
         val data: MyPageData = let {
             val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()

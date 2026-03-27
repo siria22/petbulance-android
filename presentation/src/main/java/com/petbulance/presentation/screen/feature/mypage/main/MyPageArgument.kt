@@ -6,24 +6,10 @@ import kotlinx.coroutines.flow.SharedFlow
 
 data class MyPageArgument(
     val intent: (MyPageIntent) -> Unit,
-    val dataState: MyPageDataState,
-    val screenState: MyPageScreenState,
     val event: SharedFlow<MyPageEvent>
 )
 
-sealed class MyPageDataState {
-    data object Init : MyPageDataState()
-    data object OnProgress : MyPageDataState()
-}
-
-sealed class MyPageScreenState {
-    data object Init : MyPageScreenState()
-}
-
-sealed class MyPageIntent {
-    data class SomeIntentWithParams(val param: String) : MyPageIntent()
-    data object SomeIntentWithoutParams : MyPageIntent()
-}
+sealed class MyPageIntent
 
 sealed class MyPageEvent {
     sealed class DataFetch : MyPageEvent() {
