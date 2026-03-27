@@ -432,7 +432,6 @@ private fun MyPageAccountScreenPreview() {
             argument = MyPageAccountArgument(
                 intent = { },
                 dataState = MyPageAccountDataState.Init,
-                screenState = MyPageAccountScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = MyPageAccountData.empty

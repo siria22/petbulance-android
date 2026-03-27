@@ -18,11 +18,9 @@ fun NavGraphBuilder.myPageAccountDestination(navController: NavController) {
 
         val argument: MyPageAccountArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
             MyPageAccountArgument(
                 dataState = dataState,
-                screenState = screenState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )

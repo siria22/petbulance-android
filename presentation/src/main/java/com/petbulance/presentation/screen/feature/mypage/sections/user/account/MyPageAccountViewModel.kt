@@ -1,7 +1,7 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.user.account
 
 import MyPageAccountData
-import androidx.lifecycle.SavedStateHandle
+import com.petbulance.domain.model.type.LoginProviderType
 import com.petbulance.domain.usecase.feature.user.auth.GetAutoLoginEnabledUseCase
 import com.petbulance.domain.usecase.feature.user.auth.SetAutoLoginEnabledUseCase
 import com.petbulance.domain.usecase.feature.user.user.ConnectSocialAccountUseCase
@@ -19,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyPageAccountViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val getMyInfoUseCase: GetMyInfoUseCase,
     private val getAutoLoginEnabledUseCase: GetAutoLoginEnabledUseCase,
     private val setAutoLoginEnabledUseCase: SetAutoLoginEnabledUseCase,
@@ -30,14 +29,9 @@ class MyPageAccountViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<MyPageAccountDataState>(MyPageAccountDataState.Init)
     val dataState: StateFlow<MyPageAccountDataState> = _dataState.asStateFlow()
 
-    private val _screenState =
-        MutableStateFlow<MyPageAccountScreenState>(MyPageAccountScreenState.Init)
-    val screenState: StateFlow<MyPageAccountScreenState> = _screenState.asStateFlow()
-
     private val _eventFlow = MutableSharedFlow<MyPageAccountEvent>()
     val eventFlow: SharedFlow<MyPageAccountEvent> = _eventFlow
 
-    // UI Data State
     private val _uiState = MutableStateFlow(MyPageAccountData.empty)
     val uiState: StateFlow<MyPageAccountData> = _uiState.asStateFlow()
 
@@ -46,12 +40,8 @@ class MyPageAccountViewModel @Inject constructor(
 
         when (intent) {
             is MyPageAccountIntent.ToggleAutoLogin -> toggleAutoLogin(intent.isEnabled)
-            is MyPageAccountIntent.ConnectSocial -> connectSocial(
-                intent.provider.name,
-                intent.token
-            )
-
-            is MyPageAccountIntent.DisconnectSocial -> disconnectSocial(intent.provider.name)
+            is MyPageAccountIntent.ConnectSocial -> connectSocial(intent.provider, intent.token)
+            is MyPageAccountIntent.DisconnectSocial -> disconnectSocial(intent.provider)
         }
     }
 
@@ -72,10 +62,10 @@ class MyPageAccountViewModel @Inject constructor(
         val userResult = getMyInfoUseCase()
         val autoLoginResult = getAutoLoginEnabledUseCase()
 
-        if (userResult.isSuccess) {
+        userResult.onSuccess { userInfo ->
             _uiState.update {
                 it.copy(
-                    userInfo = userResult.getOrThrow(),
+                    userInfo = userInfo,
                     isAutoLoginEnabled = autoLoginResult.getOrElse { true }
                 )
             }
@@ -91,10 +81,10 @@ class MyPageAccountViewModel @Inject constructor(
         }
     }
 
-    private fun connectSocial(provider: String, token: String) {
+    private fun connectSocial(provider: LoginProviderType, token: String) {
         launch {
             _dataState.value = MyPageAccountDataState.OnProgress
-            connectSocialAccountUseCase(provider, token)
+            connectSocialAccountUseCase(provider.name, token)
                 .onSuccess {
                     loadAccountData()
                 }
@@ -105,17 +95,16 @@ class MyPageAccountViewModel @Inject constructor(
         }
     }
 
-    private fun disconnectSocial(provider: String) {
+    private fun disconnectSocial(provider: LoginProviderType) {
         val currentInfo = _uiState.value.userInfo ?: return
         val socials = currentInfo.connectedSocials
 
         val isTargetConnected = when (provider) {
-            "KAKAO" -> socials.kakao != null
-            "GOOGLE" -> socials.google != null
-            "NAVER" -> socials.naver != null
-            else -> false
+            LoginProviderType.KAKAO -> socials.kakao != null
+            LoginProviderType.GOOGLE -> socials.google != null
+            LoginProviderType.NAVER -> socials.naver != null
         }
-        if (!isTargetConnected) return // 이미 해제된 상태면 무시
+        if (!isTargetConnected) return
 
         val connectedCount = listOfNotNull(socials.kakao, socials.google, socials.naver).count()
 
@@ -126,7 +115,7 @@ class MyPageAccountViewModel @Inject constructor(
 
         launch {
             _dataState.value = MyPageAccountDataState.OnProgress
-            disconnectSocialAccountUseCase(provider)
+            disconnectSocialAccountUseCase(provider.name)
                 .onSuccess {
                     loadAccountData()
                 }

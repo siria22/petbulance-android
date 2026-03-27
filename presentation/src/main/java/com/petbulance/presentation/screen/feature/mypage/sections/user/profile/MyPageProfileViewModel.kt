@@ -1,16 +1,13 @@
 package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
 
-import android.content.Context
 import android.net.Uri
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.user.user.UserInfo
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.domain.usecase.feature.user.user.UpdateProfileUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,17 +16,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyPageProfileViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    @ApplicationContext private val context: Context,
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val updateProfileUseCase: UpdateProfileUseCase
+    private val updateProfileUseCase: UpdateProfileUseCase,
+    private val contentFileReader: ContentFileReader
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<MyPageProfileDataState>(MyPageProfileDataState.Init)
     val dataState: StateFlow<MyPageProfileDataState> = _dataState
-
-    private val _screenState = MutableStateFlow<MyPageProfileScreenState>(MyPageProfileScreenState.Init)
-    val screenState: StateFlow<MyPageProfileScreenState> = _screenState
 
     private val _eventFlow = MutableSharedFlow<MyPageProfileEvent>()
     val eventFlow: SharedFlow<MyPageProfileEvent> = _eventFlow
@@ -46,11 +39,8 @@ class MyPageProfileViewModel @Inject constructor(
             is MyPageProfileIntent.SelectImage -> _selectedImageUri.value = intent.uri
             is MyPageProfileIntent.SaveProfile -> saveProfile(
                 newNickname = intent.newNickname,
-                imageBytes = intent.imageBytes,
-                imageFilename = intent.imageFilename,
-                imageMimeType = intent.imageMimeType
+                imageUriString = intent.imageUriString
             )
-            is MyPageProfileIntent.UpdateNickname -> { /* 닉네임 입력 상태는 Screen에서 관리 */ }
         }
     }
 
@@ -72,22 +62,19 @@ class MyPageProfileViewModel @Inject constructor(
         }
     }
 
-    private fun saveProfile(
-        newNickname: String,
-        imageBytes: ByteArray?,
-        imageFilename: String?,
-        imageMimeType: String?
-    ) {
+    private fun saveProfile(newNickname: String, imageUriString: String?) {
         launch {
             _dataState.value = MyPageProfileDataState.OnProgress
 
-            Log.d("siria22", "imageBytes = ${imageBytes?.size}, imageFileName = ${imageFilename}, imageMimeType = ${imageMimeType}")
+            val imageData = imageUriString?.let { contentFileReader.readBytes(it) }
+            val ext = imageData?.mimeType?.substringAfter("/", "jpg") ?: "jpg"
+
             updateProfileUseCase(
                 currentNickname = _userInfo.value?.nickname ?: "",
                 newNickname = newNickname,
-                imageBytes = imageBytes,
-                imageFilename = imageFilename,
-                imageMimeType = imageMimeType
+                imageBytes = imageData?.bytes,
+                imageFilename = if (imageData != null) "profile_${System.currentTimeMillis()}.$ext" else null,
+                imageMimeType = imageData?.mimeType
             ).onSuccess {
                 _dataState.value = MyPageProfileDataState.Init
                 _eventFlow.emit(MyPageProfileEvent.SaveSuccess)

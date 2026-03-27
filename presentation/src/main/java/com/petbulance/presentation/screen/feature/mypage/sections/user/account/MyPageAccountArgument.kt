@@ -8,17 +8,12 @@ import kotlinx.coroutines.flow.SharedFlow
 data class MyPageAccountArgument(
     val intent: (MyPageAccountIntent) -> Unit,
     val dataState: MyPageAccountDataState,
-    val screenState: MyPageAccountScreenState,
     val event: SharedFlow<MyPageAccountEvent>
 )
 
 sealed class MyPageAccountDataState {
     data object Init : MyPageAccountDataState()
     data object OnProgress : MyPageAccountDataState()
-}
-
-sealed class MyPageAccountScreenState {
-    data object Init : MyPageAccountScreenState()
 }
 
 sealed interface MyPageAccountIntent {

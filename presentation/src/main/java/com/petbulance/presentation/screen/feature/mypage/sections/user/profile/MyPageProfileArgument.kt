@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.SharedFlow
 data class MyPageProfileArgument(
     val intent: (MyPageProfileIntent) -> Unit,
     val dataState: MyPageProfileDataState,
-    val screenState: MyPageProfileScreenState,
     val event: SharedFlow<MyPageProfileEvent>
 )
 
@@ -17,19 +16,12 @@ sealed class MyPageProfileDataState {
     data object OnProgress : MyPageProfileDataState()
 }
 
-sealed class MyPageProfileScreenState {
-    data object Init : MyPageProfileScreenState()
-}
-
 sealed class MyPageProfileIntent {
     data object LoadUserInfo : MyPageProfileIntent()
-    data class UpdateNickname(val nickname: String) : MyPageProfileIntent()
     data class SelectImage(val uri: Uri) : MyPageProfileIntent()
     data class SaveProfile(
         val newNickname: String,
-        val imageBytes: ByteArray?,
-        val imageFilename: String?,
-        val imageMimeType: String?
+        val imageUriString: String?
     ) : MyPageProfileIntent()
 }
 

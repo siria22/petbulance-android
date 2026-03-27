@@ -38,14 +38,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,11 +69,8 @@ import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.hooks.PhotoPickerMediaType
 import com.petbulance.presentation.utils.hooks.rememberPhotoPickerLauncher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
 @Composable
@@ -84,9 +79,6 @@ fun MyPageProfileScreen(
     argument: MyPageProfileArgument,
     data: MyPageProfileData
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-
     val currentNickname = data.userInfo?.nickname ?: ""
     var nickname by remember(currentNickname) { mutableStateOf(currentNickname) }
     val nicknameValidation = validateNickname(nickname, currentNickname)
@@ -113,7 +105,7 @@ fun MyPageProfileScreen(
     LaunchedEffect(argument.event) {
         argument.event.collect { event ->
             if (event is MyPageProfileEvent.SaveSuccess) {
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
         }
     }
@@ -126,7 +118,7 @@ fun MyPageProfileScreen(
                 topBarInfo = TopBarInfo(
                     text = "프로필 수정",
                     isLeadingIconAvailable = true,
-                    onLeadingIconClicked = { navController.popBackStack() },
+                    onLeadingIconClicked = { navController.safePopBackStack() },
                     leadingIconResource = IconResource.Vector(Icons.AutoMirrored.Filled.KeyboardArrowLeft),
                 )
             )
@@ -150,40 +142,12 @@ fun MyPageProfileScreen(
                 isOnProgress = isOnProgress,
                 onImageClicked = { launchPhotoPicker() },
                 onSaveClicked = {
-                    coroutineScope.launch {
-                        val uri = data.selectedImageUri
-                        android.util.Log.d("siria22", "Selected URI: $uri")
-                        
-                        val imageBytes = if (uri != null) {
-                            withContext(Dispatchers.IO) {
-                                try {
-                                    val bytes = context.contentResolver.openInputStream(uri)
-                                        ?.use { it.readBytes() }
-                                    android.util.Log.d("siria22", "Image bytes read: ${bytes?.size}")
-                                    bytes
-                                } catch (e: Exception) {
-                                    android.util.Log.e("siria22", "Failed to read image bytes: ${e.message}", e)
-                                    null
-                                }
-                            }
-                        } else null
-
-                        val filename = uri?.lastPathSegment ?: uri?.toString()?.substringAfterLast("/") ?: "profile_image"
-                        val mimeType = if (uri != null) {
-                            context.contentResolver.getType(uri) ?: "image/jpeg"
-                        } else null
-
-                        android.util.Log.d("siria22", "Sending to ViewModel - bytes: ${imageBytes?.size}, filename: $filename, mimeType: $mimeType")
-
-                        argument.intent(
-                            MyPageProfileIntent.SaveProfile(
-                                newNickname = nickname,
-                                imageBytes = imageBytes,
-                                imageFilename = filename,
-                                imageMimeType = mimeType
-                            )
+                    argument.intent(
+                        MyPageProfileIntent.SaveProfile(
+                            newNickname = nickname,
+                            imageUriString = data.selectedImageUri?.toString()
                         )
-                    }
+                    )
                 }
             )
         }
@@ -410,7 +374,6 @@ private fun MyPageProfileScreenPreview() {
             argument = MyPageProfileArgument(
                 intent = { },
                 dataState = MyPageProfileDataState.Init,
-                screenState = MyPageProfileScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = MyPageProfileData.stub()
