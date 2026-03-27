@@ -43,15 +43,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.petbulance.domain.model.feature.community.post.PostDetail
+import com.petbulance.domain.model.feature.community.post.PostSummary
 import com.petbulance.domain.model.feature.home.HomeBanner
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.PostCategory
 import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
+import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.Space16
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
@@ -73,6 +75,7 @@ import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
 import com.petbulance.presentation.component.ui.spacingXS
+import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXXS
 import com.petbulance.presentation.screen.feature.home.composables.HomeScreenEmptyStateUi
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
@@ -159,7 +162,10 @@ fun HomeScreen(
                     navController.safeNavigate(ScreenDestinations.Search.createRoute(animalCategory))
                 },
                 onNavigateToReview = { navController.safeNavigate(ScreenDestinations.Review.route) },
-                onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
+                onNavigateToCommunity = { navController.safeNavigate(ScreenDestinations.Community.route) },
+                onPostClick = { postId ->
+                    navController.safeNavigate(ScreenDestinations.Community.PostDetail.createRoute(postId))
+                },
                 onBannerClick = { noticeId ->
                     navController.safeNavigate(
                         ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(
@@ -209,6 +215,7 @@ private fun HomeScreenContents(
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     onNavigateToReview: () -> Unit,
     onNavigateToCommunity: () -> Unit,
+    onPostClick: (Long) -> Unit,
     onBannerClick: (Long) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -250,7 +257,8 @@ private fun HomeScreenContents(
                 posts = data.hotArticles,
                 hotArticleState = argument.hotArticleState,
                 onRetryHotArticles = { argument.intent(HomeIntent.RetryHotArticles) },
-                onClicked = onNavigateToCommunity
+                onClicked = onNavigateToCommunity,
+                onPostClick = onPostClick
             )
         }
     }
@@ -536,17 +544,18 @@ private fun RecentReviewSliderItem(
 
 @Composable
 private fun HotArticlesShortcut(
-    posts: List<PostDetail>?,
+    posts: List<PostSummary>,
     hotArticleState: SectionLoadState,
     onRetryHotArticles: () -> Unit,
-    onClicked: () -> Unit
+    onClicked: () -> Unit,
+    onPostClick: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CommonHeader(
-            headerText = "인기 게시글",
-            onClicked = { /* TODO: 커뮤니티 페이지 이동 */ }
+            headerText = "커뮤니티 인기 게시글",
+            onClicked = onClicked
         )
 
         when (hotArticleState) {
@@ -562,6 +571,24 @@ private fun HotArticlesShortcut(
                 )
             }
 
+            is SectionLoadState.Success -> {
+                if (posts.isEmpty()) {
+                    ComingSoonPlaceholder()
+                } else {
+                    Column {
+                        posts.forEachIndexed { index, post ->
+                            HotArticleItem(
+                                post = post,
+                                onClick = { onPostClick(post.id) }
+                            )
+                            if (index < posts.lastIndex) {
+                                CommonDivider()
+                            }
+                        }
+                    }
+                }
+            }
+
             else -> {
                 ComingSoonPlaceholder()
             }
@@ -570,98 +597,45 @@ private fun HotArticlesShortcut(
 }
 
 @Composable
-private fun HotArticlesItem(post: PostDetail) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacingMedium, vertical = spacingXXS)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = colorScheme.bg.frame.subtle,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .padding(
-                    horizontal = spacingMedium,
-                    vertical = spacingSmall
-                )
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = post.postInfo.title,
-                    style = MaterialTheme.typography.bodySmall.emp(),
-                    color = colorScheme.text.primary,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacingMedium),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = post.boardInfo.name,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                        Dot()
-                        Text(
-                            text = post.boardInfo.category,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = post.postInfo.createdAt,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                        Dot()
-                        Text(
-                            text = "조회 ${post.postInfo.stats.viewCount}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                    }
-                }
+private fun HotArticleItem(
+    post: PostSummary,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val animalKorean = AnimalCategory.entries.find { it.name == post.type }?.korean ?: post.type
+    val topicKorean = PostCategory.entries.find { it.name == post.topic }?.korean ?: post.topic
 
-            }
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(
-                        color = colorScheme.bg.frame.default,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .size(48.dp)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = post.postInfo.stats.commentCount.toString(),
-                        style = MaterialTheme.typography.bodyMedium.emp(),
-                        color = colorScheme.status.success.default,
-                    )
-                    Text(
-                        text = "댓글",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.text.caption,
-                    )
-                }
-            }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = spacingXL, vertical = spacingSmall),
+        verticalArrangement = Arrangement.spacedBy(spacingXXS)
+    ) {
+        Text(
+            text = post.title,
+            style = MaterialTheme.typography.bodyMedium.emp(),
+            color = colorScheme.text.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = animalKorean, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(text = topicKorean, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(text = post.createdAt, style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "좋아요 ${post.likeCount}", style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(text = "댓글 ${post.commentCount}", style = MaterialTheme.typography.labelLarge, color = colorScheme.text.caption)
         }
     }
 }

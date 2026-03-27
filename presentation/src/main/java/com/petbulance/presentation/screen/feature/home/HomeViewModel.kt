@@ -1,8 +1,7 @@
 package com.petbulance.presentation.screen.feature.home
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
-import com.petbulance.domain.model.feature.community.post.PostDetail
+import com.petbulance.domain.model.feature.community.post.PostSummary
 import com.petbulance.domain.model.feature.home.HomeBanner
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.usecase.feature.community.GetHotArticleUseCase
@@ -47,8 +46,8 @@ class HomeViewModel @Inject constructor(
     private val _recentReviews = MutableStateFlow<List<HomeScreenReview>>(emptyList())
     val recentReviews: StateFlow<List<HomeScreenReview>> = _recentReviews
 
-    private val _hotArticles = MutableStateFlow<List<PostDetail>?>(null)
-    val hotArticles: StateFlow<List<PostDetail>?> = _hotArticles
+    private val _hotArticles = MutableStateFlow<List<PostSummary>>(emptyList())
+    val hotArticles: StateFlow<List<PostSummary>> = _hotArticles
 
     private val _homeBanners = MutableStateFlow<List<HomeBanner>>(emptyList())
     val homeBanners: StateFlow<List<HomeBanner>> = _homeBanners

@@ -49,7 +49,7 @@ private fun HomeScreenErrorPreview() {
             ),
             data = HomeData(
                 recentReviews = emptyList(),
-                hotArticles = null,
+                hotArticles = emptyList(),
                 homeBanners = emptyList()
             ),
             checkTermsInitialState = false,
