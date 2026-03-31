@@ -86,6 +86,7 @@ private fun ChipFilter(
                 color = colorScheme.border.verySubtle,
                 shape = RoundedCornerShape(1000.dp)
             )
+            .clickable { onButtonClicked() }
             .padding(vertical = spacingXXS, horizontal = spacingSmall)
     ) {
         Text(
@@ -98,9 +99,6 @@ private fun ChipFilter(
             iconResource = IconResource.Vector(Icons.Filled.KeyboardArrowDown),
             contentDescription = "Icon",
             size = iconSizeMS,
-            modifier = Modifier.clickable {
-                onButtonClicked()
-            }
         )
     }
 }

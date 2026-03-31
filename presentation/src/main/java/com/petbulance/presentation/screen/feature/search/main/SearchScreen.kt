@@ -22,7 +22,6 @@ import com.petbulance.presentation.screen.feature.search.main.views.map.MapView
 import com.petbulance.presentation.screen.feature.search.main.views.result.ResultView
 import com.petbulance.presentation.screen.feature.search.main.views.result.SelectSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchView
-import com.petbulance.presentation.utils.error.collectCustomErrors
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -209,13 +208,6 @@ fun SearchScreen(
         }
     }
 
-    LaunchedEffect(commonSearchArgument.event) {
-        commonSearchArgument.event.collectCustomErrors { event ->
-            when (event) {
-                is SearchEvent.DataFetch.Error -> {}
-            }
-        }
-    }
 
     // --- Content ---
     when (screenState) {
@@ -297,7 +289,6 @@ private fun SearchScreenPreview() {
             commonSearchArgument = CommonSearchArgument(
                 intent = {},
                 screenState = SearchScreenState.OnSearch.SearchView,
-                event = MutableSharedFlow()
             ),
             locationData = UserLocationData.empty,
             hospitalSearchData = HospitalSearchData.empty,

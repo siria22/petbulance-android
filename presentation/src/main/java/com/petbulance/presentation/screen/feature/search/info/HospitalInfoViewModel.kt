@@ -41,11 +41,8 @@ class HospitalInfoViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<HospitalInfoDataState>(HospitalInfoDataState.Init)
     val dataState: StateFlow<HospitalInfoDataState> = _dataState
 
-    private val _hospitalUiData = MutableStateFlow(HospitalUiData())
-    val hospitalUiData: StateFlow<HospitalUiData> = _hospitalUiData
-
-    private val _reviewUiData = MutableStateFlow(ReviewUiData())
-    val reviewUiData: StateFlow<ReviewUiData> = _reviewUiData
+    private val _infoData = MutableStateFlow(HospitalInfoData.init)
+    val infoData: StateFlow<HospitalInfoData> = _infoData
 
     private val _eventFlow = MutableSharedFlow<HospitalInfoEvent>()
     val eventFlow: SharedFlow<HospitalInfoEvent> = _eventFlow
@@ -81,14 +78,14 @@ class HospitalInfoViewModel @Inject constructor(
             }
 
             is HospitalInfoIntent.ChangeReviewSort -> {
-                if (_reviewUiData.value.sortBy != intent.sortType) {
-                    _reviewUiData.update { it.copy(sortBy = intent.sortType) }
+                if (_infoData.value.reviewUiData.sortBy != intent.sortType) {
+                    _infoData.update { it.copy(reviewUiData = it.reviewUiData.copy(sortBy = intent.sortType)) }
                     checkCacheAndLoad()
                 }
             }
 
             is HospitalInfoIntent.ToggleImageOnly -> {
-                _reviewUiData.update { it.copy(onlyImage = intent.isChecked) }
+                _infoData.update { it.copy(reviewUiData = it.reviewUiData.copy(onlyImage = intent.isChecked)) }
                 checkCacheAndLoad()
             }
         }
@@ -119,8 +116,8 @@ class HospitalInfoViewModel @Inject constructor(
                         hospital
                     }
 
-                _hospitalUiData.update {
-                    it.copy(hospital = patchedHospital, hospitalDetail = detail)
+                _infoData.update {
+                    it.copy(hospitalUiData = HospitalUiData(hospital = patchedHospital, hospitalDetail = detail))
                 }
 
                 applyReviewData(reviewPaging, isAppend = false)
@@ -136,16 +133,7 @@ class HospitalInfoViewModel @Inject constructor(
 
     private fun calculateCurrentOpenHours(openHours: List<OpenHour>, isOpenNow: Boolean): String? {
         val today = java.time.LocalDate.now()
-        val dayKey = when (today.dayOfWeek) {
-            java.time.DayOfWeek.MONDAY -> "MON"
-            java.time.DayOfWeek.TUESDAY -> "TUE"
-            java.time.DayOfWeek.WEDNESDAY -> "WED"
-            java.time.DayOfWeek.THURSDAY -> "THU"
-            java.time.DayOfWeek.FRIDAY -> "FRI"
-            java.time.DayOfWeek.SATURDAY -> "SAT"
-            java.time.DayOfWeek.SUNDAY -> "SUN"
-            else -> return null
-        }
+        val dayKey = DAY_OF_WEEK_MAP[today.dayOfWeek] ?: return null
 
         val todaySchedule = openHours.find { it.day == dayKey } ?: return null
         val hoursStr = if (todaySchedule.hours == "CLOSED") "휴무" else todaySchedule.hours
@@ -183,11 +171,11 @@ class HospitalInfoViewModel @Inject constructor(
 
         getHospitalReviewsUseCase(
             hospitalId = hospitalId,
-            onlyImageReview = _reviewUiData.value.onlyImage,
+            onlyImageReview = _infoData.value.reviewUiData.onlyImage,
             cursorId = null,
             cursorRating = null,
             cursorLikeCount = null,
-            sortBy = _reviewUiData.value.sortBy
+            sortBy = _infoData.value.reviewUiData.sortBy
         ).onSuccess { reviewPaging ->
             updateCache(reviewPaging)
             applyReviewData(reviewPaging, isAppend = false)
@@ -213,11 +201,11 @@ class HospitalInfoViewModel @Inject constructor(
 
         getHospitalReviewsUseCase(
             hospitalId = hospitalId,
-            onlyImageReview = _reviewUiData.value.onlyImage,
+            onlyImageReview = _infoData.value.reviewUiData.onlyImage,
             cursorId = currentCursorId,
             cursorRating = currentCursorRating,
             cursorLikeCount = currentCursorLikeCount,
-            sortBy = _reviewUiData.value.sortBy
+            sortBy = _infoData.value.reviewUiData.sortBy
         ).onSuccess { pagingResult ->
             applyReviewData(pagingResult, isAppend = true)
         }.onFailure { exception ->
@@ -238,9 +226,12 @@ class HospitalInfoViewModel @Inject constructor(
             currentCursorLikeCount = lastItem.likeCount.toLong()
         }
 
-        _reviewUiData.update {
+        _infoData.update {
+            val currentReviews = it.reviewUiData.reviews
             it.copy(
-                reviews = if (isAppend) it.reviews + reviewPaging.items else reviewPaging.items
+                reviewUiData = it.reviewUiData.copy(
+                    reviews = if (isAppend) currentReviews + reviewPaging.items else reviewPaging.items
+                )
             )
         }
     }
@@ -250,7 +241,7 @@ class HospitalInfoViewModel @Inject constructor(
     }
 
     private fun getCurrentCacheKey() =
-        Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
+        Pair(_infoData.value.reviewUiData.sortBy, _infoData.value.reviewUiData.onlyImage)
 
     private fun resetPagingState() {
         currentCursorId = null
@@ -280,14 +271,23 @@ class HospitalInfoViewModel @Inject constructor(
 
     private suspend fun fetchInitialReviews() = getHospitalReviewsUseCase(
         hospitalId = hospitalId,
-        onlyImageReview = _reviewUiData.value.onlyImage,
+        onlyImageReview = _infoData.value.reviewUiData.onlyImage,
         cursorId = null,
         cursorRating = null,
         cursorLikeCount = null,
-        sortBy = _reviewUiData.value.sortBy
+        sortBy = _infoData.value.reviewUiData.sortBy
     ).getOrThrow()
 
     companion object {
         private const val INVALID_ID = -1L
+        private val DAY_OF_WEEK_MAP = mapOf(
+            java.time.DayOfWeek.MONDAY to "MON",
+            java.time.DayOfWeek.TUESDAY to "TUE",
+            java.time.DayOfWeek.WEDNESDAY to "WED",
+            java.time.DayOfWeek.THURSDAY to "THU",
+            java.time.DayOfWeek.FRIDAY to "FRI",
+            java.time.DayOfWeek.SATURDAY to "SAT",
+            java.time.DayOfWeek.SUNDAY to "SUN"
+        )
     }
 }

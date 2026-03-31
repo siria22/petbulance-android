@@ -47,7 +47,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
             val category = AnimalCategory.entries.find { it.name == animalName }
 
             if (category != null) {
-                val currentQuery = hospitalSearchViewModel.hospitalSearchQuery.value
+                val currentQuery = hospitalSearchViewModel.searchData.value.hospitalSearchQuery
                 hospitalSearchViewModel.onIntent(
                     HospitalSearchIntent.UpdateSearchQuery(
                         currentQuery.copy(animalCategories = listOf(category))
@@ -64,7 +64,6 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val screenState by commonSearchViewModel.screenState.collectAsStateWithLifecycle()
         val commonSearchArgument = CommonSearchArgument(
             screenState = screenState,
-            event = commonSearchViewModel.eventFlow,
             intent = commonSearchViewModel::onIntent
         )
 
@@ -89,17 +88,7 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         )
 
         // HospitalSearchData
-        val hospitalSearchQuery by hospitalSearchViewModel.hospitalSearchQuery.collectAsStateWithLifecycle()
-        val hospitalList by hospitalSearchViewModel.hospitalList.collectAsStateWithLifecycle()
-        val recentSearchKeywords by hospitalSearchViewModel.recentSearchKeywords.collectAsStateWithLifecycle()
-        val viewedHospitals by hospitalSearchViewModel.viewedHospitals.collectAsStateWithLifecycle()
-
-        val hospitalData = HospitalSearchData(
-            hospitalSearchQuery = hospitalSearchQuery,
-            hospitalList = hospitalList,
-            recentSearchKeywords = recentSearchKeywords,
-            viewedHospitals = viewedHospitals
-        )
+        val hospitalData by hospitalSearchViewModel.searchData.collectAsStateWithLifecycle()
 
         val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
         // Error State

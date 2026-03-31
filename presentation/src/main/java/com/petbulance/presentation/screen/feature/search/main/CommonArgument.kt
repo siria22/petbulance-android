@@ -3,11 +3,9 @@ package com.petbulance.presentation.screen.feature.search.main
 import android.location.Location
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.error.ErrorEvent
-import kotlinx.coroutines.flow.SharedFlow
 
 data class CommonSearchArgument(
     val screenState: SearchScreenState,
-    val event: SharedFlow<SearchEvent>,
     val intent: (SearchIntent) -> Unit
 )
 

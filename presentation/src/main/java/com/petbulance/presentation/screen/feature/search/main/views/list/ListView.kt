@@ -126,7 +126,10 @@ fun ListView(
                             )
                         }
                     } else {
-                        itemsIndexed(searchUiState.filteredHospitalList) { index, hospital ->
+                        itemsIndexed(
+                            items = searchUiState.filteredHospitalList,
+                            key = { _, hospital -> hospital.hospitalId }
+                        ) { index, hospital ->
                             if (index == searchUiState.filteredHospitalList.lastIndex) {
                                 LaunchedEffect(Unit) {
                                     onEvent(SearchUiEvent.OnLoadMore)

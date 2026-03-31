@@ -65,12 +65,7 @@ fun NavGraphBuilder.hospitalInfoDestination(navController: NavController) {
             }
         }
 
-        val reviewUiData by viewModel.reviewUiData.collectAsStateWithLifecycle()
-        val hospitalUiData by viewModel.hospitalUiData.collectAsStateWithLifecycle()
-        val data = HospitalInfoData(
-            reviewUiData = reviewUiData,
-            hospitalUiData = hospitalUiData
-        )
+        val data by viewModel.infoData.collectAsStateWithLifecycle()
 
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
         val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()

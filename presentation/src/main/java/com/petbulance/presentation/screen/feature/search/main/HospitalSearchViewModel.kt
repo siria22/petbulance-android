@@ -47,18 +47,8 @@ class HospitalSearchViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<SearchEvent>()
     val eventFlow: SharedFlow<SearchEvent> = _eventFlow
 
-    private val _hospitalSearchQuery = MutableStateFlow(HospitalSearchQueryUiModel.empty)
-    val hospitalSearchQuery: StateFlow<HospitalSearchQueryUiModel> = _hospitalSearchQuery
-
-    private val _hospitalList = MutableStateFlow<List<Hospital>>(emptyList())
-    val hospitalList: StateFlow<List<Hospital>> = _hospitalList
-
-    private val _recentSearchKeywords = MutableStateFlow<List<RecentSearchKeyword>>(emptyList())
-    val recentSearchKeywords: StateFlow<List<RecentSearchKeyword>> = _recentSearchKeywords
-
-    private val _viewedHospitals =
-        MutableStateFlow(ViewedHospitalList.stub().copy(items = emptyList(), totalCount = 0))
-    val viewedHospitals: StateFlow<ViewedHospitalList> = _viewedHospitals
+    private val _searchData = MutableStateFlow(HospitalSearchData.empty)
+    val searchData: StateFlow<HospitalSearchData> = _searchData
 
     // --- Cursor Pagination State ---
     private var currentCursorId: Long? = null
@@ -77,11 +67,11 @@ class HospitalSearchViewModel @Inject constructor(
     fun onIntent(intent: HospitalSearchIntent) {
         when (intent) {
             is HospitalSearchIntent.UpdateSearchQuery -> {
-                _hospitalSearchQuery.value = intent.query
+                _searchData.value = _searchData.value.copy(hospitalSearchQuery = intent.query)
             }
 
             is HospitalSearchIntent.SearchHospitalWithCurrentParams -> {
-                _hospitalSearchQuery.value = intent.query
+                _searchData.value = _searchData.value.copy(hospitalSearchQuery = intent.query)
                 launch {
                     val boundsToUse = if (intent.keepPreviousBounds) lastBounds else null
 
@@ -150,10 +140,8 @@ class HospitalSearchViewModel @Inject constructor(
         launch {
             runCatching {
                 syncSearchHistoryUseCase()
-            }.onFailure {
-                // 동기화 실패 시 로컬 데이터 사용
-                it.printStackTrace()
             }
+            // 동기화 실패 시 로컬 데이터 사용 — 에러 무시
         }
     }
 
@@ -170,7 +158,7 @@ class HospitalSearchViewModel @Inject constructor(
 
         if (isNewSearch) {
             resetCursors()
-            _hospitalList.value = emptyList()
+            _searchData.value = _searchData.value.copy(hospitalList = emptyList())
         }
 
         // Cache params
@@ -225,11 +213,10 @@ class HospitalSearchViewModel @Inject constructor(
                 hospital.copy(distanceMeters = distance)
             }
 
-            if (isNewSearch) {
-                _hospitalList.value = newItems
-            } else {
-                _hospitalList.value += newItems
-            }
+            val currentList = _searchData.value.hospitalList
+            _searchData.value = _searchData.value.copy(
+                hospitalList = if (isNewSearch) newItems else currentList + newItems
+            )
 
             hasNextPage = result.hasNext
             currentCursorId = result.cursorId
@@ -265,7 +252,7 @@ class HospitalSearchViewModel @Inject constructor(
                 _dataState.value = HospitalSearchDataState.Init
             }
             .collect {
-                _recentSearchKeywords.value = it
+                _searchData.value = _searchData.value.copy(recentSearchKeywords = it)
                 _dataState.value = HospitalSearchDataState.Init
             }
     }
@@ -276,8 +263,9 @@ class HospitalSearchViewModel @Inject constructor(
                 _eventFlow.emit(SearchEvent.DataFetch.Error("최근 본 병원 조회 실패", ex.message))
             }
             .collect {
-                _viewedHospitals.value =
-                    ViewedHospitalList(items = it, totalCount = it.size.toLong())
+                _searchData.value = _searchData.value.copy(
+                    viewedHospitals = ViewedHospitalList(items = it, totalCount = it.size.toLong())
+                )
             }
     }
 

@@ -21,6 +21,7 @@ import com.petbulance.data.repository.feature.user.user.UserRepositoryImpl
 import com.petbulance.data.repository.nonfeature.app.AppInfoRepositoryImpl
 import com.petbulance.data.repository.nonfeature.app.ContentFileReaderImpl
 import com.petbulance.data.repository.nonfeature.device.DeviceRepositoryImpl
+import com.petbulance.data.repository.nonfeature.device.FusedLocationProviderImpl
 import com.petbulance.data.repository.nonfeature.preference.PreferenceRepositoryImpl
 import com.petbulance.domain.repository.feature.community.BoardRepository
 import com.petbulance.domain.repository.feature.community.CommentRepository
@@ -41,6 +42,7 @@ import com.petbulance.domain.repository.feature.user.UserRepository
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
 import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.domain.repository.nonfeature.device.DeviceRepository
+import com.petbulance.domain.repository.nonfeature.device.LocationProvider
 import com.petbulance.domain.repository.nonfeature.preference.PreferenceRepository
 import dagger.Binds
 import dagger.Module
@@ -182,6 +184,12 @@ abstract class RepositoryModule {
 //        mock: MockBannerRepository,
         impl: BannerRepositoryImpl
     ): BannerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationProvider(
+        impl: FusedLocationProviderImpl
+    ): LocationProvider
 
     @Binds
     @Singleton

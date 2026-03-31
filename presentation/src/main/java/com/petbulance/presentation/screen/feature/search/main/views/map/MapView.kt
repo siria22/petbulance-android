@@ -77,6 +77,8 @@ import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 
+private const val MAP_BOUNDS_DELAY_MS = 200L
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapView(
@@ -190,7 +192,7 @@ fun MapView(
             userLocationArgument.locationState is UserLocationState.Success &&
             !hasInitialSearchTriggered
         ) {
-            delay(200)
+            delay(MAP_BOUNDS_DELAY_MS)
 
             val bounds = naverMap?.contentBounds
             if (bounds != null) {
@@ -203,8 +205,7 @@ fun MapView(
                 onEvent(SearchUiEvent.OnSearchNearby(mapBounds))
                 hasInitialSearchTriggered = true
             } else {
-                // 200ms 후에도 bounds가 null이면 재시도
-                delay(200)
+                delay(MAP_BOUNDS_DELAY_MS)
                 val retryBounds = naverMap?.contentBounds
                 if (retryBounds != null) {
                     val mapBounds = MapBounds(
@@ -518,7 +519,6 @@ private fun MapViewPreview() {
                 hospitalList = listOf(
                     Hospital.stub()
                 ),
-//                hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
             ),
             onEvent = {},

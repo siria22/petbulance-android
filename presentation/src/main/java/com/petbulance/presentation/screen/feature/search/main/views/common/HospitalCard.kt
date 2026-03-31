@@ -204,11 +204,12 @@ fun HospitalCard(
                 }
             }
 
-            if (!hospital.phone.isNullOrBlank()) {
+            val phone = hospital.phone
+            if (!phone.isNullOrBlank()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.clickable { onCopyPhoneClick(hospital.phone!!) }
+                    modifier = Modifier.clickable { onCopyPhoneClick(phone) }
                 ) {
                     BasicIcon(
                         iconResource = IconResource.Vector(Icons.Default.Call),
@@ -217,14 +218,13 @@ fun HospitalCard(
                         tint = colorScheme.tag.blue.medium,
                         modifier = Modifier.clickable {
                             val intent = Intent(Intent.ACTION_DIAL).apply {
-                                data = "tel:${hospital.phone!!}".toUri()
+                                data = "tel:$phone".toUri()
                             }
-                            // 3. Activity 시작
                             context.startActivity(intent)
                         }
                     )
                     Text(
-                        text = hospital.phone!!,
+                        text = phone,
                         style = typography.labelLarge.emp(),
                         color = colorScheme.tag.blue.medium
                     )
@@ -235,7 +235,7 @@ fun HospitalCard(
                         tint = colorScheme.icon.light,
                         modifier = Modifier.clickable {
                             scope.launch {
-                                val clipData = ClipData.newPlainText("Phone", hospital.phone!!)
+                                val clipData = ClipData.newPlainText("Phone", phone)
                                 val clipEntry = ClipEntry(clipData)
                                 clipboardManager.setClipEntry(clipEntry)
                             }
@@ -250,9 +250,9 @@ fun HospitalCard(
                 val orderedTags = tags.sortedWith(
                     compareBy { tag ->
                         when (tag.type) {
-                            "WORKTYPE" -> 0
-                            "ANIMALTYPE" -> 1
-                            "LOCATIONTYPE" -> 2
+                            TAG_TYPE_WORK -> 0
+                            TAG_TYPE_ANIMAL -> 1
+                            TAG_TYPE_LOCATION -> 2
                             else -> 3
                         }
                     }
@@ -276,9 +276,9 @@ fun HospitalCard(
                 ) {
                     orderedTags.forEach { tag ->
                         val bgColor = when (tag.type) {
-                            "WORKTYPE" -> colorScheme.tag.red.verysubtle
-                            "ANIMALTYPE" -> colorScheme.tag.yellow.subtle
-                            "LOCATIONTYPE" -> colorScheme.tag.trust.bg
+                            TAG_TYPE_WORK -> colorScheme.tag.red.verysubtle
+                            TAG_TYPE_ANIMAL -> colorScheme.tag.yellow.subtle
+                            TAG_TYPE_LOCATION -> colorScheme.tag.trust.bg
                             else -> colorScheme.tag.yellow.subtle
                         }
 
@@ -292,6 +292,10 @@ fun HospitalCard(
         }
     }
 }
+
+private const val TAG_TYPE_WORK = "WORKTYPE"
+private const val TAG_TYPE_ANIMAL = "ANIMALTYPE"
+private const val TAG_TYPE_LOCATION = "LOCATIONTYPE"
 
 @Preview
 @Composable

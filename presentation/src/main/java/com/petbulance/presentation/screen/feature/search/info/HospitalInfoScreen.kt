@@ -21,6 +21,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +31,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +69,8 @@ import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 
+private const val HOSPITAL_SHARE_URL_PREFIX = "https://petbulance.com/hospital/"
+
 @Composable
 fun HospitalInfoScreen(
     navController: NavController,
@@ -74,6 +80,8 @@ fun HospitalInfoScreen(
     isLoggedIn: Boolean
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val hospitalData = data.hospitalUiData
     val reviewData = data.reviewUiData
 
@@ -86,6 +94,7 @@ fun HospitalInfoScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AppTopBar(
                 topBarInfo = TopBarInfo(
@@ -102,7 +111,7 @@ fun HospitalInfoScreen(
                                     val shareText = buildString {
                                         append("${hospital.name}\n")
                                         hospitalData.hospitalDetail?.address?.let { append("주소: $it\n") }
-                                        append("https://petbulance.com/hospital/${hospital.hospitalId}")
+                                        append("$HOSPITAL_SHARE_URL_PREFIX${hospital.hospitalId}")
                                     }
                                     val sendIntent = Intent().apply {
                                         action = Intent.ACTION_SEND
@@ -112,11 +121,9 @@ fun HospitalInfoScreen(
                                     val shareIntent = Intent.createChooser(sendIntent, null)
                                     context.startActivity(shareIntent)
                                 } catch (e: Exception) {
-                                    android.widget.Toast.makeText(
-                                        context,
-                                        "공유하기 기능을 사용할 수 없습니다",
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("공유하기 기능을 사용할 수 없습니다")
+                                    }
                                 }
                             }
                         }
@@ -141,6 +148,7 @@ fun HospitalInfoScreen(
                 reviewUiData = reviewData,
                 currentLocation = currentLocation,
                 onIntent = argument.intent,
+                snackbarHostState = snackbarHostState,
                 onNavigateButtonClicked = {
                     hospitalData.hospital?.let { hospital ->
                         navController.safePopBackStack()
@@ -171,6 +179,7 @@ private fun HospitalInfoScreenContents(
     reviewUiData: ReviewUiData,
     onIntent: (HospitalInfoIntent) -> Unit,
     currentLocation: Location?,
+    snackbarHostState: SnackbarHostState,
     onNavigateButtonClicked: () -> Unit,
     onReviewClicked: (Long) -> Unit,
     isLoggedIn: Boolean
@@ -178,6 +187,7 @@ private fun HospitalInfoScreenContents(
     var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val commonPadding = 16.dp
 
     // 무한 스크롤 트리거
@@ -266,11 +276,9 @@ private fun HospitalInfoScreenContents(
                 if (selectedTab == TabType.DETAILS) {
                     val phone = hospital?.phone
                     if (phone.isNullOrBlank()) {
-                        android.widget.Toast.makeText(
-                            context,
-                            "전화번호 정보가 없습니다",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
+                        scope.launch {
+                            snackbarHostState.showSnackbar("전화번호 정보가 없습니다")
+                        }
                     } else {
                         val intent = Intent(Intent.ACTION_DIAL).apply {
                             data = Uri.parse("tel:$phone")

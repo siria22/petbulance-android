@@ -121,7 +121,10 @@ private fun ResultViewContents(
         }
 
         if (searchUiState.filteredHospitalList.isNotEmpty()) {
-            items(searchUiState.filteredHospitalList) { hospital ->
+            items(
+                items = searchUiState.filteredHospitalList,
+                key = { it.hospitalId }
+            ) { hospital ->
                 HospitalCard(hospital = hospital)
                 Spacer(modifier = Modifier.height(spacingMedium))
             }
