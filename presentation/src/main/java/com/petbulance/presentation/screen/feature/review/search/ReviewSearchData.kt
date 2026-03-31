@@ -14,4 +14,17 @@ data class ReviewSearchData(
     val selectedSort: ReviewSortType = ReviewSortType.LATEST,
     val isReceiptVerified: Boolean = false,
     val isPhotoReview: Boolean = false
-)
+) {
+    companion object {
+        val empty = ReviewSearchData(
+            searchQueryModel = HospitalSearchQueryUiModel.empty,
+            recentKeywords = emptyList(),
+            searchResults = emptyList(),
+            isSearchResultMode = false,
+            isLoadingNextPage = false,
+            selectedSort = ReviewSortType.LATEST,
+            isReceiptVerified = false,
+            isPhotoReview = false
+        )
+    }
+}

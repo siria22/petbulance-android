@@ -1,7 +1,6 @@
 package com.petbulance.presentation.screen.feature.community
 
 import androidx.lifecycle.SavedStateHandle
-import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.model.feature.community.post.PostSummary
 import com.petbulance.domain.usecase.feature.community.post.GetPostListUseCase
 import com.petbulance.presentation.utils.BaseViewModel
@@ -29,26 +28,10 @@ class CommunityViewModel @Inject constructor(
     private val _eventFlow = MutableSharedFlow<CommunityEvent>(extraBufferCapacity = 1)
     val eventFlow: SharedFlow<CommunityEvent> = _eventFlow
 
-    private val _noticeBanner = MutableStateFlow<NoticeBanner?>(null)
-    val noticeBanner: StateFlow<NoticeBanner?> = _noticeBanner
-
-    private val _posts = MutableStateFlow<List<PostSummary>>(emptyList())
-    val posts: StateFlow<List<PostSummary>> = _posts
-
-    private val _hasNext = MutableStateFlow(false)
-    val hasNext: StateFlow<Boolean> = _hasNext
-
-    private val _currentType = MutableStateFlow<String?>(null)
-    val currentType: StateFlow<String?> = _currentType
-
-    private val _currentTopic = MutableStateFlow<String?>(null)
-    val currentTopic: StateFlow<String?> = _currentTopic
-
-    private val _currentSort = MutableStateFlow("latest")
-    val currentSort: StateFlow<String> = _currentSort
+    private val _communityData = MutableStateFlow(CommunityData.empty)
+    val communityData: StateFlow<CommunityData> = _communityData
 
     private var currentPageCount = 0
-    private val maxNonLoginPages = 3
 
     fun onIntent(intent: CommunityIntent) {
         when (intent) {
@@ -76,42 +59,29 @@ class CommunityViewModel @Inject constructor(
 
     private fun loadInitialPosts() {
         if (_dataState.value == CommunityDataState.Loading) return
+        val data = _communityData.value
 
         launch {
             _dataState.update { CommunityDataState.Loading }
             currentPageCount = 0
 
-            runCatching {
-                getPostListUseCase(
-                    type = _currentType.value,
-                    topic = _currentTopic.value,
-                    sort = _currentSort.value,
-                    lastPostId = null,
-                    pageSize = 10
-                )
-            }.onSuccess { result ->
-                result.onSuccess { pagingPostList ->
-                    _noticeBanner.update { pagingPostList.noticeBanner }
-                    _posts.update { pagingPostList.items }
-                    _hasNext.update { pagingPostList.hasNext }
-                    currentPageCount = 1
-                }.onFailure { exception ->
-                    _eventFlow.tryEmit(
-                        CommunityEvent.DataFetch.Error(
-                            displayType = ErrorDisplayType.Common,
-                            userMessage = "게시글을 불러올 수 없습니다",
-                            exceptionMessage = exception.message
-                        )
+            getPostListUseCase(
+                type = data.currentType,
+                topic = data.currentTopic,
+                sort = data.currentSort,
+                lastPostId = null,
+                pageSize = PAGE_SIZE
+            ).onSuccess { pagingPostList ->
+                _communityData.update {
+                    it.copy(
+                        noticeBanner = pagingPostList.noticeBanner,
+                        posts = pagingPostList.items,
+                        hasNext = pagingPostList.hasNext
                     )
                 }
+                currentPageCount = 1
             }.onFailure { exception ->
-                _eventFlow.tryEmit(
-                    CommunityEvent.DataFetch.Error(
-                        displayType = ErrorDisplayType.Common,
-                        userMessage = "게시글을 불러올 수 없습니다",
-                        exceptionMessage = exception.message
-                    )
-                )
+                emitError(exception)
             }
 
             _dataState.update { CommunityDataState.Init }
@@ -120,49 +90,33 @@ class CommunityViewModel @Inject constructor(
 
     private fun loadMorePosts() {
         if (_dataState.value == CommunityDataState.LoadingMore) return
-        if (!_hasNext.value) return
-        
+        val data = _communityData.value
+        if (!data.hasNext) return
+
         // TODO: [정책 확인 필요] 비로그인 사용자 페이징 제한 - PM과 논의 후 최종 결정
-        if (currentPageCount >= maxNonLoginPages) {
-            // 로그인 유도 로직 추가 가능
-            return
-        }
+        if (currentPageCount >= MAX_NON_LOGIN_PAGES) return
 
         launch {
             _dataState.update { CommunityDataState.LoadingMore }
 
-            val lastPostId = _posts.value.lastOrNull()?.id
+            val lastPostId = data.posts.lastOrNull()?.id
 
-            runCatching {
-                getPostListUseCase(
-                    type = _currentType.value,
-                    topic = _currentTopic.value,
-                    sort = _currentSort.value,
-                    lastPostId = lastPostId,
-                    pageSize = 10
-                )
-            }.onSuccess { result ->
-                result.onSuccess { pagingPostList ->
-                    _posts.update { currentPosts -> currentPosts + pagingPostList.items }
-                    _hasNext.update { pagingPostList.hasNext }
-                    currentPageCount++
-                }.onFailure { exception ->
-                    _eventFlow.tryEmit(
-                        CommunityEvent.DataFetch.Error(
-                            displayType = ErrorDisplayType.Common,
-                            userMessage = "게시글을 불러올 수 없습니다",
-                            exceptionMessage = exception.message
-                        )
+            getPostListUseCase(
+                type = data.currentType,
+                topic = data.currentTopic,
+                sort = data.currentSort,
+                lastPostId = lastPostId,
+                pageSize = PAGE_SIZE
+            ).onSuccess { pagingPostList ->
+                _communityData.update {
+                    it.copy(
+                        posts = it.posts + pagingPostList.items,
+                        hasNext = pagingPostList.hasNext
                     )
                 }
+                currentPageCount++
             }.onFailure { exception ->
-                _eventFlow.tryEmit(
-                    CommunityEvent.DataFetch.Error(
-                        displayType = ErrorDisplayType.Common,
-                        userMessage = "게시글을 불러올 수 없습니다",
-                        exceptionMessage = exception.message
-                    )
-                )
+                emitError(exception)
             }
 
             _dataState.update { CommunityDataState.Init }
@@ -170,91 +124,81 @@ class CommunityViewModel @Inject constructor(
     }
 
     private fun refreshPosts() {
-        _posts.update { emptyList() }
-        _hasNext.update { false }
+        _communityData.update { it.copy(posts = emptyList(), hasNext = false) }
         loadInitialPosts()
     }
 
     private fun silentRefresh() {
         launch {
-            val currentPostCount = _posts.value.size
+            val data = _communityData.value
+            val currentPostCount = data.posts.size
             if (currentPostCount == 0) {
                 loadInitialPosts()
                 return@launch
             }
 
-            val pagesToLoad = (currentPostCount / 10) + 1
-            val allPosts = mutableListOf<com.petbulance.domain.model.feature.community.post.PostSummary>()
+            val pagesToLoad = (currentPostCount / PAGE_SIZE) + 1
+            val allPosts = mutableListOf<PostSummary>()
             var lastPostId: Long? = null
             var hasMorePages = true
 
             for (page in 1..pagesToLoad) {
                 if (!hasMorePages) break
 
-                runCatching {
-                    getPostListUseCase(
-                        type = _currentType.value,
-                        topic = _currentTopic.value,
-                        sort = _currentSort.value,
-                        lastPostId = lastPostId,
-                        pageSize = 10
-                    )
-                }.onSuccess { result ->
-                    result.onSuccess { pagingPostList ->
-                        if (page == 1) {
-                            _noticeBanner.update { pagingPostList.noticeBanner }
-                        }
-                        allPosts.addAll(pagingPostList.items)
-                        lastPostId = pagingPostList.items.lastOrNull()?.id
-                        hasMorePages = pagingPostList.hasNext
-                    }.onFailure {
-                        hasMorePages = false
+                getPostListUseCase(
+                    type = data.currentType,
+                    topic = data.currentTopic,
+                    sort = data.currentSort,
+                    lastPostId = lastPostId,
+                    pageSize = PAGE_SIZE
+                ).onSuccess { pagingPostList ->
+                    if (page == 1) {
+                        _communityData.update { it.copy(noticeBanner = pagingPostList.noticeBanner) }
                     }
+                    allPosts.addAll(pagingPostList.items)
+                    lastPostId = pagingPostList.items.lastOrNull()?.id
+                    hasMorePages = pagingPostList.hasNext
                 }.onFailure {
                     hasMorePages = false
                 }
             }
 
             if (allPosts.isNotEmpty()) {
-                _posts.update { allPosts }
-                _hasNext.update { hasMorePages }
+                _communityData.update {
+                    it.copy(posts = allPosts, hasNext = hasMorePages)
+                }
             }
         }
     }
 
     private fun filterByType(type: String?) {
-        _currentType.update { type }
+        _communityData.update { it.copy(currentType = type) }
         refreshPosts()
     }
 
     private fun filterByTopic(topic: String?) {
-        _currentTopic.update { topic }
+        _communityData.update { it.copy(currentTopic = topic) }
         refreshPosts()
     }
 
     private fun changeSort(sort: String) {
-        _currentSort.update { sort }
+        _communityData.update { it.copy(currentSort = sort) }
         refreshPosts()
     }
 
     private fun navigateToPostDetail(postId: Long) {
-        launch {
-            _eventFlow.tryEmit(CommunityEvent.NavigateToPostDetail(postId))
-        }
+        _eventFlow.tryEmit(CommunityEvent.NavigateToPostDetail(postId))
     }
 
     private fun navigateToNotice(noticeId: Long) {
-        launch {
-            _eventFlow.tryEmit(CommunityEvent.NavigateToNotice(noticeId))
-        }
+        _eventFlow.tryEmit(CommunityEvent.NavigateToNotice(noticeId))
     }
 
     private fun toggleLike(postId: Long) {
         // TODO: [구현 필요] 좋아요 토글 로직 - LikePostUseCase 필요
-        launch {
-            // 임시로 로컬 상태만 업데이트
-            _posts.update { currentPosts ->
-                currentPosts.map { post ->
+        _communityData.update { data ->
+            data.copy(
+                posts = data.posts.map { post ->
                     if (post.id == postId) {
                         post.copy(
                             isLiked = !post.isLiked,
@@ -264,7 +208,7 @@ class CommunityViewModel @Inject constructor(
                         post
                     }
                 }
-            }
+            )
         }
     }
 
@@ -277,14 +221,25 @@ class CommunityViewModel @Inject constructor(
     }
 
     private fun navigateToCreatePost() {
-        launch {
-            _eventFlow.tryEmit(CommunityEvent.NavigateToWritePost)
-        }
+        _eventFlow.tryEmit(CommunityEvent.NavigateToWritePost)
     }
 
     private fun showComingSoon(feature: String) {
-        launch {
-            _eventFlow.tryEmit(CommunityEvent.ShowComingSoonMessage(feature))
-        }
+        _eventFlow.tryEmit(CommunityEvent.ShowComingSoonMessage(feature))
+    }
+
+    private fun emitError(exception: Throwable) {
+        _eventFlow.tryEmit(
+            CommunityEvent.DataFetch.Error(
+                displayType = ErrorDisplayType.Common,
+                userMessage = "게시글을 불러올 수 없습니다",
+                exceptionMessage = exception.message
+            )
+        )
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 10
+        private const val MAX_NON_LOGIN_PAGES = 3
     }
 }

@@ -12,33 +12,18 @@ fun NavGraphBuilder.reviewSearchDestination(navController: NavController) {
     composable(route = ScreenDestinations.Review.Search.route) {
         val viewModel: ReviewSearchViewModel = hiltViewModel()
 
-        val searchQueryModel by viewModel.searchQueryModel.collectAsStateWithLifecycle()
-        val recentKeywords by viewModel.recentKeywords.collectAsStateWithLifecycle()
-        val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
-        val isSearchResultMode by viewModel.isSearchResultMode.collectAsStateWithLifecycle()
-
-        val selectedSort by viewModel.selectedSort.collectAsStateWithLifecycle()
-        val isReceiptVerified by viewModel.isReceiptVerified.collectAsStateWithLifecycle()
-        val isPhotoReview by viewModel.isPhotoReview.collectAsStateWithLifecycle()
-
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val searchDataBase by viewModel.searchData.collectAsStateWithLifecycle()
+        val recentKeywords by viewModel.recentKeywords.collectAsStateWithLifecycle()
 
-        val searchData = ReviewSearchData(
-            searchQueryModel = searchQueryModel,
-            recentKeywords = recentKeywords,
-            searchResults = searchResults,
-            isSearchResultMode = isSearchResultMode,
-            isLoadingNextPage = false,
-            selectedSort = selectedSort,
-            isReceiptVerified = isReceiptVerified,
-            isPhotoReview = isPhotoReview
-        )
+        val searchData = searchDataBase.copy(recentKeywords = recentKeywords)
 
         val argument = ReviewSearchArgument(
             state = state,
             intent = viewModel::onIntent,
             event = viewModel.eventFlow
         )
+
         ReviewSearchScreen(
             navController = navController,
             argument = argument,

@@ -32,10 +32,6 @@ class ReviewDetailViewModel @Inject constructor(
     private val _dataState = MutableStateFlow<ReviewDetailDataState>(ReviewDetailDataState.Init)
     val dataState: StateFlow<ReviewDetailDataState> = _dataState.asStateFlow()
 
-    private val _screenState =
-        MutableStateFlow<ReviewDetailScreenState>(ReviewDetailScreenState.Init)
-    val screenState: StateFlow<ReviewDetailScreenState> = _screenState.asStateFlow()
-
     private val _eventFlow = MutableSharedFlow<ReviewDetailEvent>()
     val eventFlow: SharedFlow<ReviewDetailEvent> = _eventFlow
 
@@ -166,7 +162,7 @@ class ReviewDetailViewModel @Inject constructor(
             if (reviewId == 0L) return@launch
 
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastLikeToggleTime < 200) {
+            if (currentTime - lastLikeToggleTime < LIKE_DEBOUNCE_MILLIS) {
                 return@launch
             }
             lastLikeToggleTime = currentTime
@@ -205,5 +201,9 @@ class ReviewDetailViewModel @Inject constructor(
 
             isLikeProcessing = false
         }
+    }
+
+    companion object {
+        private const val LIKE_DEBOUNCE_MILLIS = 200L
     }
 }

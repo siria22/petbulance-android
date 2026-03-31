@@ -175,14 +175,16 @@ class ReviewRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
-        val userInfo = safeApiCall<MeResponseDto>(path = "/users/me") {
+        val userInfoResult = safeApiCall<MeResponseDto>(path = "/users/me") {
             userApi.getMyInfo()
-        }.map { it.toDomain() }.getOrThrow()
+        }.map { it.toDomain() }
+
+        val currentNickname = userInfoResult.getOrNull()?.nickname ?: ""
 
         return safeApiCall<ReviewDetailResDto>(path = "/receipts/detail/$reviewId") {
             reviewApi.getReviewDetail(reviewId)
         }.map { dto ->
-            dto.toDomain(userInfo.nickname)
+            dto.toDomain(currentNickname)
         }
     }
 

@@ -1,7 +1,5 @@
 package com.petbulance.presentation.screen.feature.review.create
 
-import android.content.Context
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
@@ -9,10 +7,10 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.usecase.feature.hospital.review.CreateReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.FindHospitalIdByNameUseCase
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,9 +27,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewCreateViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val createReviewUseCase: CreateReviewUseCase,
     private val findHospitalIdByNameUseCase: FindHospitalIdByNameUseCase,
+    private val contentFileReader: ContentFileReader,
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
@@ -331,7 +329,6 @@ class ReviewCreateViewModel @Inject constructor(
                     }
 
             } catch (e: Exception) {
-                e.printStackTrace()
                 emitEvent(ReviewCreateEvent.ShowToast("처리 중 오류가 발생했습니다."))
             } finally {
                 _state.update { it.copy(isLoading = false) }
@@ -339,24 +336,16 @@ class ReviewCreateViewModel @Inject constructor(
         }
     }
 
-    private fun uriToByteArray(uriString: String): ByteArray? {
-        return try {
-            val uri = uriString.toUri()
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.readBytes()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    private suspend fun uriToByteArray(uriString: String): ByteArray? {
+        return contentFileReader.readBytes(uriString)?.bytes
     }
 
     private fun fetchHospitalCandidates(query: String) {
-        if (query.length < 1) return
+        if (query.length < MIN_SEARCH_QUERY_LENGTH) return
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay(300L)
+            delay(SEARCH_DEBOUNCE_MILLIS)
 
             findHospitalIdByNameUseCase(query)
                 .onSuccess { hospitals ->
@@ -380,5 +369,10 @@ class ReviewCreateViewModel @Inject constructor(
         viewModelScope.launch {
             _eventFlow.emit(event)
         }
+    }
+
+    companion object {
+        private const val MIN_SEARCH_QUERY_LENGTH = 1
+        private const val SEARCH_DEBOUNCE_MILLIS = 300L
     }
 }

@@ -1,6 +1,5 @@
 package com.petbulance.presentation.screen.feature.review.search
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +54,7 @@ import com.petbulance.presentation.screen.feature.search.main.views.search.Hospi
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchBar
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
+import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,9 +82,8 @@ fun ReviewSearchScreen(
             SearchBar(
                 queryString = data.searchQueryModel.query ?: "",
                 onQueryStringChanged = { argument.intent(ReviewSearchIntent.UpdateQuery(it)) },
-                onMoveBackIconClicked = { navController.popBackStack() },
+                onMoveBackIconClicked = { navController.safePopBackStack() },
                 onSearchButtonClicked = { value ->
-                    Log.d("siria22", "Query string : ${value}")
                     argument.intent(ReviewSearchIntent.UpdateQuery(value))
                     argument.intent(ReviewSearchIntent.Search)
                 }

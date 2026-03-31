@@ -25,11 +25,9 @@ fun NavGraphBuilder.reviewDetailDestination(navController: NavController) {
 
         val argument: ReviewDetailArgument = let {
             val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
             ReviewDetailArgument(
                 dataState = dataState,
-                screenState = screenState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )

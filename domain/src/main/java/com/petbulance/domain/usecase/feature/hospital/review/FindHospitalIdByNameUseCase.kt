@@ -7,7 +7,7 @@ import javax.inject.Inject
 class FindHospitalIdByNameUseCase @Inject constructor(
     private val repository: ReviewRepository
 ) {
-    suspend operator fun invoke(hospitalName: String): Result<List<HospitalInfoForReview>> = runCatching {
+    suspend operator fun invoke(hospitalName: String): Result<List<HospitalInfoForReview>> {
         return repository.findHospital(hospitalName)
     }
 }

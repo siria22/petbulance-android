@@ -33,4 +33,5 @@ sealed class ReviewSearchIntent {
 
 sealed class ReviewSearchEvent {
     data class Error(val message: String) : ReviewSearchEvent()
+    data object ReportSuccess : ReviewSearchEvent()
 }

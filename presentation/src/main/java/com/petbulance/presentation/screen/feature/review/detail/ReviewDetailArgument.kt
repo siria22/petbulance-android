@@ -7,17 +7,12 @@ import kotlinx.coroutines.flow.SharedFlow
 data class ReviewDetailArgument(
     val intent: (ReviewDetailIntent) -> Unit,
     val dataState: ReviewDetailDataState,
-    val screenState: ReviewDetailScreenState,
     val event: SharedFlow<ReviewDetailEvent>
 )
 
 sealed class ReviewDetailDataState {
     data object Init : ReviewDetailDataState()
     data object OnProgress : ReviewDetailDataState()
-}
-
-sealed class ReviewDetailScreenState {
-    data object Init : ReviewDetailScreenState()
 }
 
 sealed class ReviewDetailIntent {

@@ -71,6 +71,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 
+// TODO: 비로그인 사용자가 이 화면에 접근하면 로그인 페이지로 이동시키거나 LoginRequiredDialog를 표시해야 함
+//  - CheckLoginStatusUseCase로 로그인 여부 확인 후 처리
+//  - 또는 Destination 단에서 진입 전 로그인 체크
 @Composable
 fun ReviewDetailScreen(
     navController: NavController,
@@ -449,7 +452,6 @@ private fun ReviewDetailScreenPreview() {
             argument = ReviewDetailArgument(
                 intent = { },
                 dataState = ReviewDetailDataState.Init,
-                screenState = ReviewDetailScreenState.Init,
                 event = MutableSharedFlow()
             ),
             data = ReviewDetailData.empty

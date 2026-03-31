@@ -28,21 +28,8 @@ fun NavGraphBuilder.communityDestination(navController: NavController) {
             event = communityViewModel.eventFlow
         )
 
-        // CommunityData
-        val noticeBanner by communityViewModel.noticeBanner.collectAsStateWithLifecycle()
-        val posts by communityViewModel.posts.collectAsStateWithLifecycle()
-        val hasNext by communityViewModel.hasNext.collectAsStateWithLifecycle()
-        val currentType by communityViewModel.currentType.collectAsStateWithLifecycle()
-        val currentTopic by communityViewModel.currentTopic.collectAsStateWithLifecycle()
-        val currentSort by communityViewModel.currentSort.collectAsStateWithLifecycle()
-        val data = CommunityData(
-            noticeBanner = noticeBanner,
-            posts = posts,
-            hasNext = hasNext,
-            currentType = currentType,
-            currentTopic = currentTopic,
-            currentSort = currentSort
-        )
+        // CommunityData (단일 StateFlow)
+        val data by communityViewModel.communityData.collectAsStateWithLifecycle()
 
         // CommunitySearchArgument
         val searchDataState by searchViewModel.dataState.collectAsStateWithLifecycle()

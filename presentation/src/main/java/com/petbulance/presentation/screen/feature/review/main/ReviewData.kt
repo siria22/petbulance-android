@@ -14,4 +14,17 @@ data class ReviewData(
     val isReceiptVerified: Boolean,
     val isPhotoReview: Boolean,
     val isLoadingNextPage: Boolean
-)
+) {
+    companion object {
+        val empty = ReviewData(
+            reviews = emptyList(),
+            selectedRegion = null,
+            selectedDistrict = null,
+            selectedAnimalType = null,
+            selectedSort = ReviewSortType.LATEST,
+            isReceiptVerified = false,
+            isPhotoReview = false,
+            isLoadingNextPage = false
+        )
+    }
+}
