@@ -1,5 +1,7 @@
 package com.petbulance.presentation.screen.feature.community.detail
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -11,6 +13,7 @@ import androidx.navigation.navArgument
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
+@RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
 fun NavGraphBuilder.postDetailDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Community.PostDetail.route,
