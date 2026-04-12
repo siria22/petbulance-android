@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.feature.community
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.community.post.PostSummary
 import com.petbulance.domain.usecase.feature.community.post.GetPostListUseCase
+import com.petbulance.domain.usecase.feature.community.post.TogglePostLikeUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CommunityViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getPostListUseCase: GetPostListUseCase
+    private val getPostListUseCase: GetPostListUseCase,
+    private val togglePostLikeUseCase: TogglePostLikeUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<CommunityDataState>(CommunityDataState.Init)
@@ -195,7 +197,9 @@ class CommunityViewModel @Inject constructor(
     }
 
     private fun toggleLike(postId: Long) {
-        // TODO: [구현 필요] 좋아요 토글 로직 - LikePostUseCase 필요
+        val currentPost = _communityData.value.posts.find { it.id == postId } ?: return
+
+        // 낙관적 UI 업데이트
         _communityData.update { data ->
             data.copy(
                 posts = data.posts.map { post ->
@@ -209,6 +213,44 @@ class CommunityViewModel @Inject constructor(
                     }
                 }
             )
+        }
+
+        launch {
+            togglePostLikeUseCase(postId, currentPost.isLiked)
+                .onSuccess { postLike ->
+                    // 서버 응답으로 정확한 값 반영
+                    _communityData.update { data ->
+                        data.copy(
+                            posts = data.posts.map { post ->
+                                if (post.id == postId) {
+                                    post.copy(
+                                        isLiked = postLike.isLiked,
+                                        likeCount = postLike.currentLikeCount.toInt()
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+                        )
+                    }
+                }
+                .onFailure {
+                    // 실패 시 원래 상태로 롤백
+                    _communityData.update { data ->
+                        data.copy(
+                            posts = data.posts.map { post ->
+                                if (post.id == postId) {
+                                    post.copy(
+                                        isLiked = currentPost.isLiked,
+                                        likeCount = currentPost.likeCount
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+                        )
+                    }
+                }
         }
     }
 
