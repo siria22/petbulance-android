@@ -29,9 +29,11 @@ sealed class ReviewSearchIntent {
     data object TogglePhotoReview : ReviewSearchIntent()
     data object Refresh : ReviewSearchIntent()
     data class ReportReview(val reviewId: Long, val reason: String) : ReviewSearchIntent()
+    data class DeleteReview(val reviewId: Long) : ReviewSearchIntent()
 }
 
 sealed class ReviewSearchEvent {
     data class Error(val message: String) : ReviewSearchEvent()
     data object ReportSuccess : ReviewSearchEvent()
+    data object DeleteSuccess : ReviewSearchEvent()
 }

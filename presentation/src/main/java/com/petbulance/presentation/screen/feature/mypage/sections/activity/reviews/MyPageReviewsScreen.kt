@@ -71,8 +71,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun MyPageReviewsScreen(
     navController: NavController,
-    argument: MyPageReviewsArgument,
-    data: MyPageReviewsData
+    argument: MyPageReviewsArgument
 ) {
     val dataState = argument.dataState
     val screenState = argument.screenState
@@ -455,9 +454,6 @@ private fun MyPageReviewsScreenPreview() {
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPageReviewsData(
-                data = ""
-            )
         )
     }
 }

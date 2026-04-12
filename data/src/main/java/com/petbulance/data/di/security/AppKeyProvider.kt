@@ -57,9 +57,4 @@ class AppKeyProvider @Inject constructor(
         return decryptedData
     }
 
-    // --- 생체 인증이 필요한 민감 데이터 암호화 ---
-
-    // TODO: 생체 인증이 필요한 데이터(예: 결제 PIN)를 위한 encrypt, decrypt 메서드를 위와 같은 형식으로 추가하세요.
-    // fun encryptSensitiveData(...)
-    // fun decryptSensitiveDataWithBiometrics(...)
 }

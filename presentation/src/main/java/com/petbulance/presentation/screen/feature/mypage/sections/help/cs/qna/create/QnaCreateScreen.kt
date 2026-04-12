@@ -79,7 +79,6 @@ fun QnaCreateScreen(
     }
 
     BackHandler(enabled = !isOnProgress) {
-        // TODO: 수정 모드일 때 변경사항이 있으면 확인 다이얼로그 표시
         if (data.mode == QnaCreateMode.EDIT) {
             // 수정 모드: 변경사항 있으면 경고
             showExitDialog = true

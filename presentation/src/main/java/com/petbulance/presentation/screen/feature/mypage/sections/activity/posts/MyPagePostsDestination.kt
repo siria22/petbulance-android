@@ -27,9 +27,6 @@ fun NavGraphBuilder.myPagePostsDestination(navController: NavController) {
             )
         }
 
-        // TODO : 실제 data로 변경
-        val data: MyPagePostsData = MyPagePostsData.empty
-
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
 
         CommonScreenWrapper(
@@ -38,8 +35,7 @@ fun NavGraphBuilder.myPagePostsDestination(navController: NavController) {
         ) {
             MyPagePostsScreen(
                 navController = navController,
-                argument = argument,
-                data = data
+                argument = argument
             )
         }
     }

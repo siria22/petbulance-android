@@ -21,7 +21,8 @@ fun PostSearchSummary.toPostSummary(): PostSummary {
         commentCount = commentCount,
         likeCount = likeCount,
         createdAt = createdAt,
-        isLiked = isLiked
+        isLiked = isLiked,
+        nickname = writerNickname
     )
 }
 

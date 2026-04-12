@@ -154,7 +154,8 @@ fun PostListResDto.toDomain() = PostSummary(
     commentCount = commentCount.toInt(),
     likeCount = likeCount.toInt(),
     createdAt = createdAt,
-    isLiked = likedByUser
+    isLiked = likedByUser,
+    nickname = nickname
 )
 
 fun PostSearchListResDto.toDomain() = PostSearchSummary(

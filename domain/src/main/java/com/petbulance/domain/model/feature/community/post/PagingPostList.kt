@@ -18,5 +18,6 @@ data class PostSummary(
     val commentCount: Int,
     val likeCount: Int,
     val createdAt: String,
-    val isLiked: Boolean
+    val isLiked: Boolean,
+    val nickname: String? = null
 )

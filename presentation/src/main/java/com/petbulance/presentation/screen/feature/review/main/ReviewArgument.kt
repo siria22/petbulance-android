@@ -36,9 +36,14 @@ sealed interface ReviewIntent {
 
     // 신고
     data class ReportReview(val reviewId: Long, val reason: String) : ReviewIntent
+
+    // 삭제
+    data class DeleteReview(val reviewId: Long) : ReviewIntent
 }
 
 sealed interface ReviewEvent {
+
+    data object DeleteSuccess : ReviewEvent
 
     sealed class DataFetch : ReviewEvent {
         data object Success: DataFetch()

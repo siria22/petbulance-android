@@ -27,8 +27,6 @@ fun NavGraphBuilder.myPageReviewsDestination(navController: NavController) {
             )
         }
 
-        val data: MyPageReviewsData = MyPageReviewsData.empty
-
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
 
         CommonScreenWrapper(
@@ -37,8 +35,7 @@ fun NavGraphBuilder.myPageReviewsDestination(navController: NavController) {
         ) {
             MyPageReviewsScreen(
                 navController = navController,
-                argument = argument,
-                data = data
+                argument = argument
             )
         }
     }

@@ -23,5 +23,6 @@ data class PostListResDto(
     val likeCount: Long,
     val commentCount: Long,
     val viewCount: Long,
-    val likedByUser: Boolean
+    val likedByUser: Boolean,
+    val nickname: String? = null
 )
