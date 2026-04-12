@@ -5,6 +5,7 @@ import com.petbulance.domain.model.feature.support.report.ReportParam
 import com.petbulance.domain.model.type.ReportType
 import com.petbulance.domain.usecase.feature.hospital.review.DeleteReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetReviewDetailUseCase
+import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.LikeReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.UnlikeReviewUseCase
 import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
@@ -26,7 +27,8 @@ class ReviewDetailViewModel @Inject constructor(
     private val deleteReviewUseCase: DeleteReviewUseCase,
     private val createReportUseCase: CreateReportUseCase,
     private val likeReviewUseCase: LikeReviewUseCase,
-    private val unlikeReviewUseCase: UnlikeReviewUseCase
+    private val unlikeReviewUseCase: UnlikeReviewUseCase,
+    private val checkLoginStatusUseCase: CheckLoginStatusUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<ReviewDetailDataState>(ReviewDetailDataState.Init)
@@ -46,7 +48,18 @@ class ReviewDetailViewModel @Inject constructor(
 
     init {
         observeErrorEvent(eventFlow)
-        fetchReviewDetail()
+        checkLoginAndFetch()
+    }
+
+    private fun checkLoginAndFetch() {
+        launch {
+            val isLoggedIn = checkLoginStatusUseCase().getOrNull() ?: false
+            if (!isLoggedIn) {
+                _eventFlow.emit(ReviewDetailEvent.LoginRequired)
+                return@launch
+            }
+            fetchReviewDetail()
+        }
     }
 
     fun onIntent(intent: ReviewDetailIntent) {

@@ -65,15 +65,14 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewReportReas
 import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
 import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.utils.error.ErrorDisplayType
+import com.petbulance.presentation.screen.feature.mypage.main.LoginRequiredDialog
 import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 
-// TODO: 비로그인 사용자가 이 화면에 접근하면 로그인 페이지로 이동시키거나 LoginRequiredDialog를 표시해야 함
-//  - CheckLoginStatusUseCase로 로그인 여부 확인 후 처리
-//  - 또는 Destination 단에서 진입 전 로그인 체크
 @Composable
 fun ReviewDetailScreen(
     navController: NavController,
@@ -87,6 +86,7 @@ fun ReviewDetailScreen(
     var showReportReasonDialog by remember { mutableStateOf(false) }
 
     var showReportSuccessToast by remember { mutableStateOf(false) }
+    var showLoginRequiredDialog by remember { mutableStateOf(false) }
 
     var selectedReason by remember { mutableStateOf("") }
 
@@ -107,6 +107,10 @@ fun ReviewDetailScreen(
                 is ReviewDetailEvent.ReportSuccess -> {
                     showReportReasonDialog = false
                     showReportSuccessToast = true
+                }
+
+                is ReviewDetailEvent.LoginRequired -> {
+                    showLoginRequiredDialog = true
                 }
             }
         }
@@ -211,6 +215,19 @@ fun ReviewDetailScreen(
                 onDismissRequest = { showMoreOption = false }
             )
         }
+    }
+
+    if (showLoginRequiredDialog) {
+        LoginRequiredDialog(
+            onDismiss = {
+                showLoginRequiredDialog = false
+                navController.safePopBackStack()
+            },
+            onLoginButtonClicked = {
+                showLoginRequiredDialog = false
+                navController.safeNavigate(ScreenDestinations.Login.route)
+            }
+        )
     }
 
     if (showDeleteConfirmDialog) {

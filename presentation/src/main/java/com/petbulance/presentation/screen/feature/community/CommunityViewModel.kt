@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.community.post.PostSummary
 import com.petbulance.domain.usecase.feature.community.post.GetPostListUseCase
 import com.petbulance.domain.usecase.feature.community.post.TogglePostLikeUseCase
+import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class CommunityViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getPostListUseCase: GetPostListUseCase,
-    private val togglePostLikeUseCase: TogglePostLikeUseCase
+    private val togglePostLikeUseCase: TogglePostLikeUseCase,
+    private val checkLoginStatusUseCase: CheckLoginStatusUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<CommunityDataState>(CommunityDataState.Init)
@@ -34,6 +36,7 @@ class CommunityViewModel @Inject constructor(
     val communityData: StateFlow<CommunityData> = _communityData
 
     private var currentPageCount = 0
+    private var isLoggedIn = false
 
     fun onIntent(intent: CommunityIntent) {
         when (intent) {
@@ -56,7 +59,14 @@ class CommunityViewModel @Inject constructor(
 
     init {
         observeErrorEvent(eventFlow)
+        checkLoginStatus()
         loadInitialPosts()
+    }
+
+    private fun checkLoginStatus() {
+        launch {
+            isLoggedIn = checkLoginStatusUseCase().getOrNull() ?: false
+        }
     }
 
     private fun loadInitialPosts() {
@@ -95,8 +105,7 @@ class CommunityViewModel @Inject constructor(
         val data = _communityData.value
         if (!data.hasNext) return
 
-        // TODO: [정책 확인 필요] 비로그인 사용자 페이징 제한 - PM과 논의 후 최종 결정
-        if (currentPageCount >= MAX_NON_LOGIN_PAGES) return
+        if (!isLoggedIn && currentPageCount >= MAX_NON_LOGIN_PAGES) return
 
         launch {
             _dataState.update { CommunityDataState.LoadingMore }
