@@ -20,8 +20,6 @@ class HospitalApi @Inject constructor(
         return client.get(baseUrl) {
             request.q?.let { parameter("q", it) }
             request.region?.let { parameter("region", it) }
-            request.lat?.let { parameter("lat", it) }
-            request.lng?.let { parameter("lng", it) }
             request.bounds?.let { parameter("bounds", it) }
             request.animal?.let { parameter("animal", it) }
             request.openNow?.let { parameter("openNow", it) }
@@ -34,20 +32,14 @@ class HospitalApi @Inject constructor(
         }
     }
 
-    suspend fun searchHospitalDetail(
-        hospitalId: Long
-    ): HttpResponse {
+    suspend fun searchHospitalDetail(hospitalId: Long): HttpResponse {
         return client.get("$baseUrl/$hospitalId")
     }
 
-    suspend fun searchHospitalCard(
-        hospitalId: Long,
-        lat: Double,
-        lng: Double
-    ): HttpResponse {
+    suspend fun searchHospitalCard(hospitalId: Long): HttpResponse {
         return client.get("$baseUrl/card/$hospitalId") {
-            parameter("lat", lat)
-            parameter("lng", lng)
+            parameter("lat", 0.0)
+            parameter("lng", 0.0)
         }
     }
 }

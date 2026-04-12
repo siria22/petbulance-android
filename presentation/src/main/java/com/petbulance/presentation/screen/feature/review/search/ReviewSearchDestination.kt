@@ -12,34 +12,14 @@ fun NavGraphBuilder.reviewSearchDestination(navController: NavController) {
     composable(route = ScreenDestinations.Review.Search.route) {
         val viewModel: ReviewSearchViewModel = hiltViewModel()
 
-        val query by viewModel.query.collectAsStateWithLifecycle()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val searchDataBase by viewModel.searchData.collectAsStateWithLifecycle()
         val recentKeywords by viewModel.recentKeywords.collectAsStateWithLifecycle()
-        val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
-        val isSearchResultMode by viewModel.isSearchResultMode.collectAsStateWithLifecycle()
 
-        val selectedRegion by viewModel.selectedRegion.collectAsStateWithLifecycle()
-        val selectedDistrict by viewModel.selectedDistrict.collectAsStateWithLifecycle()
-        val selectedAnimalType by viewModel.selectedAnimalType.collectAsStateWithLifecycle()
-        val selectedSort by viewModel.selectedSort.collectAsStateWithLifecycle()
-        val isReceiptVerified by viewModel.isReceiptVerified.collectAsStateWithLifecycle()
-        val isPhotoReview by viewModel.isPhotoReview.collectAsStateWithLifecycle()
-
-        val searchData = ReviewSearchData(
-            query = query,
-            recentKeywords = recentKeywords,
-            searchResults = searchResults,
-            isSearchResultMode = isSearchResultMode,
-            isLoadingNextPage = false,
-            selectedRegion = selectedRegion,
-            selectedDistrict = selectedDistrict,
-            selectedAnimalType = selectedAnimalType,
-            selectedSort = selectedSort,
-            isReceiptVerified = isReceiptVerified,
-            isPhotoReview = isPhotoReview
-        )
+        val searchData = searchDataBase.copy(recentKeywords = recentKeywords)
 
         val argument = ReviewSearchArgument(
-            state = ReviewSearchState.Init,
+            state = state,
             intent = viewModel::onIntent,
             event = viewModel.eventFlow
         )

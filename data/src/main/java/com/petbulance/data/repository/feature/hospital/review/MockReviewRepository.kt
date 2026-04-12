@@ -80,7 +80,7 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
                 hospitalName = "행복동물병원",
                 isReceiptVerified = true,
                 treatment = "예방접종",
-                animalType = AnimalCategory.fromString("BIRD"),
+                animalType = AnimalCategory.fromString("AVIAN"),
                 detailAnimalType = AnimalSpecies.fromString("PARROT"),
                 content = "휴! 행복해지네요 ㅎㅎ",
                 rating = 4.2,
@@ -121,7 +121,11 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         return Result.success(SaveReviewResult(reviewId = 1, uploadUrls = emptyList()))
     }
 
-    override suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String> {
+    override suspend fun checkReviewImageSave(
+        reviewId: Long,
+        keys: List<String>,
+        type: String
+    ): Result<String> {
         return Result.success("Success")
     }
 
@@ -129,10 +133,7 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         size: Int,
         cursorId: Long?
     ): Result<PagingReviewList<MyReview>> {
-        val myReviews = listOf(
-            MyReview(1, "행복 동물병원", "내 강아지가 좋아해요", "2023-11-20", 4.5, "url1"),
-            MyReview(2, "튼튼 동물병원", "고양이 전문 병원!", "2023-11-19", 5.0, null)
-        )
+        val myReviews = MyReview.stubs()
         return Result.success(
             PagingReviewList(
                 items = myReviews,
@@ -170,14 +171,15 @@ class MockReviewRepository @Inject constructor() : ReviewRepository {
         )
     }
 
-    override suspend fun uploadImage(
-        url: String,
-        imageBytes: ByteArray
-    ): Result<Unit> {
-        return Result.success(Unit)
-    }
-
     override suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail> {
         return Result.success(ReviewDetail.stub())
+    }
+
+    override suspend fun likeReview(reviewId: Long): Result<String> {
+        return Result.success("Like success")
+    }
+
+    override suspend fun unlikeReview(reviewId: Long): Result<String> {
+        return Result.success("Unlike success")
     }
 }

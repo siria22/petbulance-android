@@ -1,28 +1,22 @@
 package com.petbulance.presentation.screen.feature.home
 
+import com.petbulance.presentation.utils.SectionLoadState
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.error.ErrorEvent
 import kotlinx.coroutines.flow.SharedFlow
 
 data class HomeArgument(
     val intent: (HomeIntent) -> Unit,
-    val dataState: HomeDataState,
-    val screenState: HomeScreenState,
+    val reviewState: SectionLoadState,
+    val bannerState: SectionLoadState,
+    val hotArticleState: SectionLoadState,
     val event: SharedFlow<HomeEvent>
 )
 
-sealed class HomeDataState {
-    data object Init : HomeDataState()
-    data object OnProgress : HomeDataState()
-}
-
-sealed class HomeScreenState {
-    data object Init: HomeScreenState()
-}
-
 sealed class HomeIntent {
-    data class SomeIntentWithParams(val param: String) : HomeIntent()
-    data object SomeIntentWithoutParams : HomeIntent()
+    data object RetryReviews : HomeIntent()
+    data object RetryBanners : HomeIntent()
+    data object RetryHotArticles : HomeIntent()
 }
 
 sealed class HomeEvent {

@@ -30,7 +30,7 @@ data class UserReviewSearchDto(
     val hospitalName: String,
     val treatmentService: String,
     val animalType: String,
-    val detailAnimalType: String,
+    val detailAnimalType: String?,
     val reviewContent: String,
     val totalRating: Double,
     val createDate: String,
@@ -50,7 +50,7 @@ data class FilterResDto(
     val hospitalName: String,
     val treatmentService: String,
     val animalType: String,
-    val detailAnimalType: String,
+    val detailAnimalType: String?,
     val reviewContent: String,
     val totalRating: Double,
     val createDate: String,
@@ -75,7 +75,7 @@ data class SearchResDto(
     val isReceiptVerified: Boolean,
     val treatment: String,
     val animalType: String,
-    val detailAnimalType: String,
+    val detailAnimalType: String?,
     val content: String,
     val rating: Double,
     val date: String,
@@ -123,5 +123,10 @@ data class MyReviewGetDto(
 
 @Serializable
 data class ReviewDeleteResDto(
+    val message: String
+)
+
+@Serializable
+data class ReviewLikeResDto(
     val message: String
 )

@@ -17,7 +17,8 @@ data class HospitalDetail(
     val description: String,
     val rating: Double,
     val reviewCount: Int,
-    val thumbnailUrl: String?
+    val thumbnailUrl: String?,
+    val tags: List<HospitalTag>? = null
 ) {
     companion object {
         fun stub() = HospitalDetail(

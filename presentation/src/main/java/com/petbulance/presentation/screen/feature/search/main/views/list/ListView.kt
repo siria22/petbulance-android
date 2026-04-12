@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -93,7 +92,9 @@ fun ListView(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(spacingXXS),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(spacingMedium)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(spacingMedium)
                 ) {
                     RowChipFilters(
                         uiModel = searchUiState.currentQuery,
@@ -118,14 +119,17 @@ fun ListView(
                     verticalArrangement = Arrangement.spacedBy(spacingMedium),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if(searchUiState.filteredHospitalList.isEmpty()) {
-                        item{
+                    if (searchUiState.filteredHospitalList.isEmpty()) {
+                        item {
                             HospitalCard(
                                 hospital = null
                             )
                         }
                     } else {
-                        itemsIndexed(searchUiState.filteredHospitalList) { index, hospital ->
+                        itemsIndexed(
+                            items = searchUiState.filteredHospitalList,
+                            key = { _, hospital -> hospital.hospitalId }
+                        ) { index, hospital ->
                             if (index == searchUiState.filteredHospitalList.lastIndex) {
                                 LaunchedEffect(Unit) {
                                     onEvent(SearchUiEvent.OnLoadMore)
@@ -169,23 +173,9 @@ private fun ListViewPreview() {
         ListView(
             navController = rememberNavController(),
             searchUiState = SearchUiState(
-                hospitalList = listOf(
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("강아지", "고양이"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    )
-                ),
+                hospitalList = Hospital.stubs(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
+                isGuest = false
             ),
             onEvent = {}
         )

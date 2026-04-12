@@ -211,6 +211,7 @@ private fun SearchViewPreview() {
             searchUiState = SearchUiState(
                 hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
+                isGuest = false
             ),
             recentSearchKeywords = listOf(
                 RecentSearchKeyword(1, "도마뱀", "2023-10-27"),

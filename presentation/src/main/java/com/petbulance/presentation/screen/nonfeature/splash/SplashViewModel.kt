@@ -1,25 +1,25 @@
 package com.petbulance.presentation.screen.nonfeature.splash
 
-import android.util.Log
-import androidx.lifecycle.viewModelScope
+import com.petbulance.domain.repository.feature.user.AuthRepository
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
+import com.petbulance.domain.usecase.feature.user.terms.GetTermsListUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermsStatusUseCase
 import com.petbulance.domain.usecase.nonfeature.app.CheckAppVersionUseCase
-import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val checkAppVersionUseCase: CheckAppVersionUseCase,
     private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
-    private val getTermsStatusUseCase: GetTermsStatusUseCase
+    private val getTermsStatusUseCase: GetTermsStatusUseCase,
+    private val getTermsListUseCase: GetTermsListUseCase,
+    private val authRepository: AuthRepository
 ) : BaseViewModel() {
 
     private val _event = MutableSharedFlow<SplashEvent>()
@@ -31,19 +31,18 @@ class SplashViewModel @Inject constructor(
     }
 
     private fun checkAppStatus() {
-        viewModelScope.launch {
+        launch {
             checkAppVersionUseCase()
                 .onSuccess { isUpdateNeeded ->
                     if (isUpdateNeeded) {
                         // TODO: 업데이트 필요 시 처리 (강제 업데이트 다이얼로그 등)
                     }
-                    Log.d(LOGGER_TAG, "App version check success: $isUpdateNeeded")
                     checkLoginAndMove()
                 }
                 .onFailure { e ->
                     _event.emit(
                         SplashEvent.DataFetch.Error(
-                            userMessage = "서버 연결에 실패했습니다.\n네트워크 상태를 확인해주세요.",
+                            userMessage = "네트워크 연결을 확인해주세요",
                             exceptionMessage = e.message,
                             displayType = ErrorDisplayType.Common
                         )
@@ -53,38 +52,55 @@ class SplashViewModel @Inject constructor(
     }
 
     private suspend fun checkLoginAndMove() {
-        val isLoggedIn = checkLoginStatusUseCase().getOrElse { false }
+        val isAutoLoginEnabled = authRepository.isAutoLoginEnabled().getOrElse { true }
+        val hasTokens = checkLoginStatusUseCase().getOrElse { false }
 
-        if (!isLoggedIn) {
-            Log.d(LOGGER_TAG, "User is not logged in")
+        if (!isAutoLoginEnabled || !hasTokens) {
+            if (!isAutoLoginEnabled && hasTokens) {
+                authRepository.clearTokens()
+            }
             _event.emit(SplashEvent.NavigateToLogin)
             return
         }
 
-        Log.d(LOGGER_TAG, "User is logged in")
+        // 약관 목록과 동의 상태를 함께 확인
+        val termsListResult = getTermsListUseCase()
+        val termsStatusResult = getTermsStatusUseCase()
 
-        getTermsStatusUseCase()
-            .onSuccess { status ->
-                val isAllRequiredAgreed = status.service && status.privacy && status.location
-                Log.d(LOGGER_TAG, "Is All Required terms Agreed: $isAllRequiredAgreed")
-                if (isAllRequiredAgreed) {
-                    Log.d(LOGGER_TAG, "Navigate to home")
-                    _event.emit(SplashEvent.NavigateToHome)
-                } else {
-                    Log.d(LOGGER_TAG, "Navigate to Home with Terms check")
-                    _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
-                }
-            }
-            .onFailure { ex ->
-                Log.d(LOGGER_TAG, "Failed to get Terms status: ${ex.stackTrace}")
-                _event.emit(
-                    SplashEvent.DataFetch.Error(
-                        userMessage = "서버와의 통신이 원활하지 않습니다.",
-                        exceptionMessage = ex.message,
-                        displayType = ErrorDisplayType.Custom
-                    )
+        if (termsListResult.isFailure || termsStatusResult.isFailure) {
+            _event.emit(
+                SplashEvent.DataFetch.Error(
+                    userMessage = "서버와의 통신이 원활하지 않습니다.",
+                    exceptionMessage = termsListResult.exceptionOrNull()?.message 
+                        ?: termsStatusResult.exceptionOrNull()?.message,
+                    displayType = ErrorDisplayType.Custom
                 )
+            )
+            return
+        }
+
+        val termsList = termsListResult.getOrNull() ?: emptyList()
+        val termsStatus = termsStatusResult.getOrNull() ?: return
+
+        // 필수 약관 목록 추출
+        val requiredTerms = termsList.filter { it.required }
+        
+        // 각 필수 약관이 동의되었는지 확인
+        val isAllRequiredAgreed = requiredTerms.all { term ->
+            when (term.termsType?.name) {
+                "SERVICE" -> termsStatus.service
+                "PRIVACY" -> termsStatus.privacy
+                "LOCATION" -> termsStatus.location
+                "MARKETING" -> termsStatus.marketing
+                else -> false
             }
+        }
+
+        if (isAllRequiredAgreed) {
+            _event.emit(SplashEvent.NavigateToHome)
+        } else {
+            _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
+        }
     }
 
     fun onIntent(intent: SplashIntent) {

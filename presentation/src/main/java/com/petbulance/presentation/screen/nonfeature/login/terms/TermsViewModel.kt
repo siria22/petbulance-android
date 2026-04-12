@@ -3,6 +3,7 @@ package com.petbulance.presentation.screen.nonfeature.login.terms
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.user.terms.Term
+import com.petbulance.domain.usecase.feature.user.auth.LogoutUseCase
 import com.petbulance.domain.usecase.feature.user.nickname.GetUserTempNickNameUseCase
 import com.petbulance.domain.usecase.feature.user.terms.AgreeTermsUseCase
 import com.petbulance.domain.usecase.feature.user.terms.GetTermDetailUseCase
@@ -27,7 +28,8 @@ class TermsViewModel @Inject constructor(
     private val getTermsListUseCase: GetTermsListUseCase,
     private val agreeTermsUseCase: AgreeTermsUseCase,
     private val getTermDetailUseCase: GetTermDetailUseCase,
-    private val getUserTempNickNameUseCase: GetUserTempNickNameUseCase
+    private val getUserTempNickNameUseCase: GetUserTempNickNameUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<TermsDataState>(TermsDataState.Init)
@@ -68,6 +70,7 @@ class TermsViewModel @Inject constructor(
             is TermsIntent.OnAgreeClick -> agreeTerms()
             is TermsIntent.OnToggleTerm -> toggleTermConsent(intent.term.id)
             is TermsIntent.OnToggleAll -> toggleAllConsent()
+            is TermsIntent.OnUseOtherAccount -> logout()
 
             is TermsIntent.OnDetailClick -> loadTermDetail(intent.term.termsType?.name ?: "UNKNOWN")
             is TermsIntent.OnCloseDetail -> closeTermDetail()
@@ -82,7 +85,12 @@ class TermsViewModel @Inject constructor(
                 _dataState.value = TermsDataState.Init
             }.onFailure { e ->
                 _dataState.value = TermsDataState.Init
-                _event.emit(TermsEvent.DataFetch.Error(exceptionMessage = e.message))
+                _event.emit(
+                    TermsEvent.DataFetch.Error(
+                        userMessage = "약관을 불러올 수 없습니다.",
+                        exceptionMessage = e.message
+                    )
+                )
             }
         }
     }
@@ -149,6 +157,13 @@ class TermsViewModel @Inject constructor(
                     )
                     _userTempName.value = "따뜻한햄스터07"
                 }
+        }
+    }
+
+    private fun logout() {
+        launch {
+            logoutUseCase()
+            _event.emit(TermsEvent.NavigateToLogin)
         }
     }
 }

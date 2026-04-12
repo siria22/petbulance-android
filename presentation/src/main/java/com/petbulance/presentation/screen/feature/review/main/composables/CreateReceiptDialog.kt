@@ -50,30 +50,29 @@ fun CreateReceiptDialog(
                     text = "카드 및 현금으로 결제한 영수증만\n인증 가능합니다.",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    color = PetbulanceTheme.colorScheme.text.secondary
+                    color = PetbulanceTheme.colorScheme.text.caption
                 )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    BasicButton(
-                        modifier = Modifier.weight(5f),
-                        text = "인증 없이 작성",
-                        size = BasicButtonSize.L,
-                        buttonType = BasicButtonType.SECONDARY,
-                        radius = 28.dp,
-                        onClicked = onConfirm
-                    )
-                    BasicButton(
-                        modifier = Modifier.weight(3f),
-                        text = "네",
-                        size = BasicButtonSize.L,
-                        buttonType = BasicButtonType.PRIMARY,
-                        radius = 28.dp,
-                        onClicked = onConfirmWithoutReceipt
-                    )
-                }
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BasicButton(
+                    modifier = Modifier.weight(5f),
+                    text = "인증 없이 작성",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.SECONDARY,
+                    radius = 28.dp,
+                    onClicked = onConfirm
+                )
+                BasicButton(
+                    modifier = Modifier.weight(3f),
+                    text = "네",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.PRIMARY,
+                    radius = 28.dp,
+                    onClicked = onConfirmWithoutReceipt
+                )
             }
         }
     }

@@ -64,15 +64,14 @@ class UserApi @Inject constructor(
     }
 
     suspend fun checkProfileImageUpdate(request: CheckProfileImageReqDto): HttpResponse {
-        // GET 요청이지만 Body를 포함 (서버 스펙 준수)
-        return client.get("$baseUrl/profile/success") {
+        return client.post("$baseUrl/profile/success") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
     }
 
     suspend fun getMyInfo(): HttpResponse {
-        return client.get("$baseUrl/me")
+        return client.get("$BASE_URL/users/me")
     }
 
     suspend fun updateNotificationSettings(request: NotificationSettingReqDto): HttpResponse {

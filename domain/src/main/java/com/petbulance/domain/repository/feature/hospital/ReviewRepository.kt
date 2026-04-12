@@ -42,7 +42,7 @@ interface ReviewRepository {
 
     suspend fun saveReview(param: SaveReviewParam): Result<SaveReviewResult>
 
-    suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>): Result<String>
+    suspend fun checkReviewImageSave(reviewId: Long, keys: List<String>, type: String): Result<String>
 
     suspend fun getMyReviews(
         size: Int = 10,
@@ -55,7 +55,9 @@ interface ReviewRepository {
 
     suspend fun analyzeReceipt(imageBytes: ByteArray, fileName: String): Result<ReceiptAnalysisResult>
 
-    suspend fun uploadImage(url: String, imageBytes: ByteArray): Result<Unit>
-
     suspend fun getReviewDetail(reviewId: Long): Result<ReviewDetail>
+
+    suspend fun likeReview(reviewId: Long): Result<String>
+
+    suspend fun unlikeReview(reviewId: Long): Result<String>
 }

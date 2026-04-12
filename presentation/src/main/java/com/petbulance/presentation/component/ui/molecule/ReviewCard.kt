@@ -1,7 +1,7 @@
 package com.petbulance.presentation.component.ui.molecule
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -42,15 +41,21 @@ import com.petbulance.presentation.component.ui.spacingLarge
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.utils.formatReviewDate
 import java.util.Locale
 
 @Composable
-fun ReviewCard(review: HospitalReview) {
+fun ReviewCard(
+    review: HospitalReview,
+    onReviewClicked: () -> Unit,
+    onMoreClicked: () -> Unit = {}
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXS),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = spacingLarge, horizontal = spacingMedium)
+            .clickable { onReviewClicked() }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -66,13 +71,13 @@ fun ReviewCard(review: HospitalReview) {
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = "review.author",
+                    text = review.author,
                     color = colorScheme.text.caption,
                     style = typography.labelMedium
                 )
                 Dot(dotColor = PetbulancePrimitives.Gray.p300)
                 Text(
-                    text = "review.date",
+                    text = review.date.formatReviewDate(),
                     color = colorScheme.text.caption,
                     style = typography.bodySmall
                 )
@@ -81,8 +86,8 @@ fun ReviewCard(review: HospitalReview) {
                 iconResource = IconResource.Vector(Icons.Default.MoreVert),
                 size = iconSizeMedium,
                 contentDescription = "More",
-                tint = colorScheme.icon.light
-                //TODO : More 버튼 클릭 시
+                tint = colorScheme.icon.light,
+                modifier = Modifier.clickable { onMoreClicked() }
             )
         }
 
@@ -90,28 +95,29 @@ fun ReviewCard(review: HospitalReview) {
             horizontalArrangement = Arrangement.spacedBy(spacingXS),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Box(contentAlignment = Alignment.TopStart) {
-                BasicImageBox(
-                    size = 90.dp,
-                    uri = review.imageUrls.firstOrNull()?.toUri(),
-                    errorImageResource = R.drawable.img_checker,
-                    placeholderImageResource = R.drawable.img_checker,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                )
-
-                if (review.imageUrls.size > 1) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(topStart = 8.dp, bottomEnd = 8.dp))
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = review.imageUrls.size.toString(),
-                            color = Color.White,
-                            style = typography.labelMedium
-                        )
+            if (!review.imageUrls.isEmpty()) {
+                Box(contentAlignment = Alignment.TopStart) {
+                    BasicImageBox(
+                        size = 90.dp,
+                        uri = review.imageUrls.firstOrNull()?.toUri(),
+                        errorImageResource = R.drawable.img_checker,
+                        placeholderImageResource = R.drawable.img_checker,
+                        modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                    )
+                    if (review.imageUrls.size > 1) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(topStart = 8.dp, bottomEnd = 8.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = review.imageUrls.size.toString(),
+                                color = Color.White,
+                                style = typography.labelMedium
+                            )
+                        }
                     }
                 }
             }
@@ -152,29 +158,7 @@ fun ReviewCard(review: HospitalReview) {
             modifier = Modifier.fillMaxWidth()
         ) {
             if (review.isReceiptVerified) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = colorScheme.text.caption,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = "영수증인증 완료",
-                        color = colorScheme.tag.trust.medium,
-                        style = typography.labelSmall
-                    )
-                    BasicIcon(
-                        iconResource = IconResource.Vector(Icons.Default.CheckCircle),
-                        contentDescription = "verified",
-                        size = 12.dp,
-                        tint = colorScheme.tag.trust.medium,
-                    )
-                }
+                ReceiptVerifiedBadge()
             } else {
                 Spacer(modifier = Modifier.size(4.dp))
             }
@@ -218,6 +202,6 @@ fun ReviewCard(review: HospitalReview) {
 @Composable
 private fun ReviewCardPreview() {
     PetbulanceTheme {
-        ReviewCard(HospitalReview.stub())
+        ReviewCard(HospitalReview.stub(), {})
     }
 }

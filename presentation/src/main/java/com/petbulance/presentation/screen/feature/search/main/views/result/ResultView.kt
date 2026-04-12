@@ -121,20 +121,29 @@ private fun ResultViewContents(
         }
 
         if (searchUiState.filteredHospitalList.isNotEmpty()) {
-            items(searchUiState.filteredHospitalList) { hospital ->
+            items(
+                items = searchUiState.filteredHospitalList,
+                key = { it.hospitalId }
+            ) { hospital ->
                 HospitalCard(hospital = hospital)
                 Spacer(modifier = Modifier.height(spacingMedium))
             }
         } else {
             item {
-                NoResult(keywordName = searchUiState.currentQuery.query)
+                NoResult(
+                    keywordName = searchUiState.currentQuery.query,
+                    onNavigateToMapView = { onEvent(SearchUiEvent.OnNavigateToMapView) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun NoResult(keywordName: String?) {
+private fun NoResult(
+    keywordName: String?,
+    onNavigateToMapView: () -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingSmall),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -174,19 +183,7 @@ private fun NoResult(keywordName: String?) {
             size = BasicButtonSize.M,
             buttonType = BasicButtonType.SECONDARY,
             radius = 12.dp,
-            onClicked = {
-                /* TODO : 지도 페이지로 이동 */
-            }
-        )
-        BasicButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = "커뮤니티에 질문하기",
-            size = BasicButtonSize.M,
-            buttonType = BasicButtonType.SECONDARY,
-            radius = 12.dp,
-            onClicked = {
-                /* TODO : 지도 페이지로 이동 */
-            }
+            onClicked = { onNavigateToMapView() }
         )
         BasicButton(
             modifier = Modifier.fillMaxWidth(),
@@ -195,7 +192,7 @@ private fun NoResult(keywordName: String?) {
             buttonType = BasicButtonType.SECONDARY,
             radius = 12.dp,
             onClicked = {
-                /* TODO : 지도 페이지로 이동 */
+                /* TODO : 제보 기능 구현 후 연결 */
             }
         )
     }
@@ -208,37 +205,9 @@ private fun ResultViewPreview() {
         ResultView(
             navController = rememberNavController(),
             searchUiState = SearchUiState(
-                hospitalList = listOf(
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("댕댕이", "킹갓냥이"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    ),
-                    Hospital(
-                        hospitalId = 1,
-                        name = "행복 ^o^ 동물병원",
-                        lat = 37.5,
-                        lng = 127.0,
-                        distanceMeters = 500.0,
-                        phone = "02-123-4567",
-                        types = listOf("멍멍", "야옹야옹"),
-                        isOpenNow = true,
-                        openHours = "20:00 종료",
-                        thumbnailUrl = null,
-                        rating = 4.5,
-                        reviewCount = 100
-                    )
-                ),
+                hospitalList = Hospital.stubs(),
                 currentQuery = HospitalSearchQueryUiModel.empty.copy(query = "동물병원"),
+                isGuest = false
             ),
             onEvent = {}
         )

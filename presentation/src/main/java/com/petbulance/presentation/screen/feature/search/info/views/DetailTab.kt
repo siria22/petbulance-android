@@ -31,18 +31,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.naver.maps.map.NaverMap
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalDetail
 import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
+import com.petbulance.domain.utils.dowInKorean
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
+import com.petbulance.presentation.component.ui.ThickDivider
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.utils.NaverMapView
-import com.naver.maps.map.NaverMap
 
 @Composable
 fun DetailTab(
@@ -118,15 +120,49 @@ fun DetailTab(
         )
     }
 
-    HorizontalDivider(thickness = 12.dp, color = colorScheme.bg.frame.subtle)
+    CommonDivider(color = colorScheme.border.subtle)
 
     OpenInfo(hospitalDetail?.openHours)
 
-    HorizontalDivider(thickness = 12.dp, color = colorScheme.bg.frame.subtle)
+    CommonDivider(color = colorScheme.border.subtle)
+
+    HospitalDescription(hospitalDetail?.description)
+
+    ThickDivider(color = colorScheme.bg.frame.subtle)
 
     ProposeModificationsCard()
 
     CommonDivider(color = colorScheme.border.subtle)
+}
+
+@Composable
+private fun HospitalDescription(description: String?) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "병원 소개",
+            color = colorScheme.text.secondary,
+            style = typography.titleSmall.emp()
+        )
+        if (description.isNullOrEmpty()) {
+            Text(
+                text = "병원 정보가 없습니다.",
+                color = colorScheme.text.caption,
+                style = typography.bodySmall,
+            )
+            return
+        } else {
+            Text(
+                text = description,
+                color = colorScheme.text.secondary,
+                style = typography.bodySmall,
+            )
+        }
+    }
 }
 
 @Composable
@@ -184,7 +220,7 @@ private fun OpenInfo(data: List<OpenHour>?) {
     ) {
         Text(
             text = "영업 정보",
-            color = colorScheme.text.primary,
+            color = colorScheme.text.secondary,
             style = typography.titleSmall.emp()
         )
         if (data.isNullOrEmpty()) {
@@ -221,25 +257,28 @@ private fun OpenInfo(data: List<OpenHour>?) {
 
 @Composable
 private fun HourInfoItem(day: String, hours: String, modifier: Modifier = Modifier) {
-    val dayColor = when (day) {
-        "토" -> colorScheme.tag.blue.strong
-        "일", "공휴일" -> colorScheme.tag.red.strong
+
+    val dayInKorean = dowInKorean(day)
+    val dayColor = when (dayInKorean) {
+        "토요일" -> colorScheme.tag.blue.strong
+        "일요일", "공휴일" -> colorScheme.tag.red.strong
         else -> colorScheme.text.caption
     }
+    val hoursText = if (hours.trim() == "CLOSED") "휴무" else hours
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier
     ) {
         Text(
-            text = if (day === "공휴일") day else day + "요일",
+            text = dayInKorean,
             color = dayColor,
             style = typography.bodyMedium.emp(),
             modifier = Modifier.weight(0.3f),
             textAlign = TextAlign.Start
         )
         Text(
-            text = hours,
+            text = hoursText,
             color = colorScheme.text.secondary,
             style = typography.bodyMedium.emp(),
             modifier = Modifier.weight(0.7f),

@@ -1,9 +1,9 @@
 package com.petbulance.data.mapper.feature.community
 
+import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.CommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.DelCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.MyCommentListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PagingMyCommentListResDto
-import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PostCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.SearchPostCommentListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.SearchPostCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.UpdatePostCommentReqDto
@@ -16,7 +16,7 @@ import com.petbulance.domain.model.feature.community.comment.SearchPostCommentRe
 import com.petbulance.domain.model.feature.community.comment.UpdatePostCommentReq
 
 
-fun PostCommentResDto.toDomain(): PostComment = PostComment(
+fun CommentResDto.toDomain(): PostComment = PostComment(
     commentId = commentId,
     content = content,
     parentId = parentId,
@@ -53,7 +53,7 @@ fun SearchPostCommentResDto.toDomain(): SearchPostCommentRes = SearchPostComment
 )
 
 fun PagingMyCommentListResDto.toDomain(): MyCommentList = MyCommentList(
-    content = content.map { it.toDomain() },
+    items = content.map { it.toDomain() },
     hasNext = hasNext
 )
 
@@ -63,5 +63,6 @@ fun MyCommentListResDto.toDomain(): MyCommentListRes = MyCommentListRes(
     postId = postId,
     postTitle = postTitle,
     commentContent = commentContent,
+    createdAt = createdAt,
     hidden = hidden
 )

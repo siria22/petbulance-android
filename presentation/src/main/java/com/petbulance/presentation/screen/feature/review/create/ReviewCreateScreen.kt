@@ -33,7 +33,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
-import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
@@ -47,13 +46,15 @@ import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.screen.feature.review.common.ExitDialog
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.screen.feature.review.create.composables.ReceiptVerifiedCard
 import com.petbulance.presentation.screen.feature.review.create.composables.ReviewProgressBar
 import com.petbulance.presentation.screen.feature.review.create.composables.ReviewSubmitCompleteDialog
 import com.petbulance.presentation.screen.feature.review.create.views.Step1HospitalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step2AnimalContent
 import com.petbulance.presentation.screen.feature.review.create.views.Step3ReviewContent
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -72,6 +73,8 @@ fun ReviewCreateScreen(
     var isVerifiedCardVisible by remember { mutableStateOf(argument.state.step1.isReceiptVerified) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showSubmitCompleteDialog by remember { mutableStateOf(false) }
+    var showDetailAnimalBottomSheet by remember { mutableStateOf(false) }
+    var submittedReviewId by remember { mutableStateOf<Long?>(null) }
 
     BackHandler {
         when (argument.state.currentStep) {
@@ -138,6 +141,11 @@ fun ReviewCreateScreen(
                     navController.safePopBackStack()
                 }
 
+                is ReviewCreateEvent.OnSubmitSuccess -> {
+                    submittedReviewId = event.reviewId
+                    showSubmitCompleteDialog = true
+                }
+
                 is ReviewCreateEvent.ShowExitDialog -> showExitDialog = true
                 is ReviewCreateEvent.ShowToast -> {
                     Toast.makeText(navController.context, event.message, Toast.LENGTH_SHORT).show()
@@ -178,7 +186,8 @@ fun ReviewCreateScreen(
                     ReviewCreateStep.HOSPITAL_AND_COST -> {
                         Step1HospitalContent(
                             state = argument.state.step1,
-                            intent = argument.intent
+                            intent = argument.intent,
+                            onDetailAnimalInputClicked = { showDetailAnimalBottomSheet = true }
                         )
                     }
 
@@ -247,7 +256,9 @@ fun ReviewCreateScreen(
     }
 
     if (showExitDialog) {
-        ExitDialog(
+        WarningDialog(
+            title = "후기 작성을 중단하고 나가시겠어요?",
+            content = "지금 작성한 후기는 저장되지 않아요.",
             onDismissRequest = { showExitDialog = false },
             onExitButtonClicked = {
                 showExitDialog = false
@@ -256,15 +267,36 @@ fun ReviewCreateScreen(
         )
     }
 
+    if (isVerified) {
+        ReceiptVerifiedCard()
+    }
+
     if (showSubmitCompleteDialog) {
         ReviewSubmitCompleteDialog(
-            onDismissRequest = { navController.safePopBackStack() },
-            onNavigateToReview = { /* TODO : 작성한 리뷰로 바로 이동. Response Body의 reviewId 이용. */ }
+            onDismissRequest = {
+                showSubmitCompleteDialog = false
+                navController.safePopBackStack()
+            },
+            onNavigateToReview = {
+                showSubmitCompleteDialog = false
+                submittedReviewId?.let { id ->
+                    navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(id)) {
+                        popUpTo(ScreenDestinations.Review.Create.route) { inclusive = true }
+                    }
+                }
+            }
         )
     }
 
-    if (isVerified) {
-        ReceiptVerifiedCard()
+    if (showDetailAnimalBottomSheet) {
+        ReviewDetailAnimalSpeciesSelectBottomSheet(
+            category = argument.state.step1.animalType,
+            selectedDetail = argument.state.step1.detailAnimalType,
+            onDismissRequest = { showDetailAnimalBottomSheet = false },
+            onDetailSelected = {
+                argument.intent(ReviewCreateIntent.OnDetailAnimalTypeChanged(it.name))
+            }
+        )
     }
 }
 

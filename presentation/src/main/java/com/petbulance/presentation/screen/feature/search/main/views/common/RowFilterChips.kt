@@ -51,7 +51,12 @@ fun RowChipFilters(
                 }
 
                 FilterBottomSheetTab.SPECIES -> {
-                    uiModel.species?.korean ?: AnimalCategory.ALL.korean
+                    val categories = uiModel.animalCategories
+                    when {
+                        categories.isEmpty() -> AnimalCategory.ALL.korean
+                        categories.size == 1 -> categories.first().korean
+                        else -> "${categories.first().korean} 외 ${categories.size - 1}종"
+                    }
                 }
             }
 
@@ -81,6 +86,7 @@ private fun ChipFilter(
                 color = colorScheme.border.verySubtle,
                 shape = RoundedCornerShape(1000.dp)
             )
+            .clickable { onButtonClicked() }
             .padding(vertical = spacingXXS, horizontal = spacingSmall)
     ) {
         Text(
@@ -93,9 +99,6 @@ private fun ChipFilter(
             iconResource = IconResource.Vector(Icons.Filled.KeyboardArrowDown),
             contentDescription = "Icon",
             size = iconSizeMS,
-            modifier = Modifier.clickable {
-                onButtonClicked()
-            }
         )
     }
 }

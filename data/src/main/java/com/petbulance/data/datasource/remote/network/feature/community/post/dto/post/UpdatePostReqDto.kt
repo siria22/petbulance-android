@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdatePostReqDto(
-    val category: String,
+    val topic: String,
     val title: String,
     val content: String,
     val imagesToKeepOrAdd: List<ImageUpdateDto> = emptyList(),

@@ -5,8 +5,8 @@ package com.petbulance.domain.model.type
  */
 enum class AnimalCategory(val korean: String) {
     ALL("전체"),
-    SMALL_MAMMAL("소형 포유류"),
-    BIRD("조류"),
+    SMALLMAMMALS("소형 포유류"),
+    AVIAN("조류"),
     REPTILE("파충류"),
     AMPHIBIAN("양서류"),
     FISH("어류");

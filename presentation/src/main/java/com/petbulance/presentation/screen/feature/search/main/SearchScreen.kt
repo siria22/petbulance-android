@@ -8,9 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.domain.model.type.HospitalSortType
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheet
@@ -20,20 +22,27 @@ import com.petbulance.presentation.screen.feature.search.main.views.map.MapView
 import com.petbulance.presentation.screen.feature.search.main.views.result.ResultView
 import com.petbulance.presentation.screen.feature.search.main.views.result.SelectSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchView
-import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.LocalAnalyticsTracker
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavController,
+    isGuest: Boolean,
     commonSearchArgument: CommonSearchArgument,
     userLocationArgument: UserLocationArgument,
     hospitalSearchArgument: HospitalSearchArgument,
     locationData: UserLocationData,
-    hospitalSearchData: HospitalSearchData
+    hospitalSearchData: HospitalSearchData,
+    locationTerm: Term?,
+    onTermsClick: () -> Unit,
+    initialHospitalId: Long? = null
 ) {
+    val analyticsTracker = LocalAnalyticsTracker.current
     val screenState = commonSearchArgument.screenState
+    val context = LocalContext.current
 
     // --- Hoisted State ---
     var isFilterBottomSheetVisible by remember { mutableStateOf(false) }
@@ -49,6 +58,7 @@ fun SearchScreen(
 
     // --- UI State ---
     val searchUiState = SearchUiState(
+        isGuest = isGuest,
         hospitalList = hospitalSearchData.hospitalList,
         currentQuery = currentDraftQuery,
         selectedSortType = selectedSortType,
@@ -76,6 +86,15 @@ fun SearchScreen(
             is SearchUiEvent.OnSortTypeSelected -> {
                 selectedSortType = event.sortType
                 isSelectSortTypeDialogVisible = false
+
+                hospitalSearchArgument.intent(
+                    HospitalSearchIntent.SearchHospitalWithCurrentParams(
+                        query = currentDraftQuery,
+                        currentUserLocation = locationData.currentUserLocation,
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
+                    )
+                )
             }
 
             is SearchUiEvent.OnDismissFilterBottomSheet -> isFilterBottomSheetVisible = false
@@ -91,16 +110,43 @@ fun SearchScreen(
 
             is SearchUiEvent.OnResetFilterClicked -> {
                 currentDraftQuery =
-                    currentDraftQuery.copy(region = null, district = null, species = null)
+                    currentDraftQuery.copy(region = null, district = null, animalCategories = emptyList())
             }
 
             // Search Intents
             is SearchUiEvent.OnSearchButtonClicked -> {
+                // GA4: apply_search_filter (필터가 있을 때)
+                val hasRegionFilter = currentDraftQuery.region != null
+                val hasAnimalFilter = currentDraftQuery.animalCategories.isNotEmpty()
+                val hasOpenNowFilter = currentDraftQuery.openNowOnly == true
+                if (hasRegionFilter || hasAnimalFilter || hasOpenNowFilter) {
+                    val filterTypes = buildList {
+                        if (hasRegionFilter) add("지역")
+                        if (hasAnimalFilter) add("동물종")
+                        if (hasOpenNowFilter) add("진료중")
+                    }
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvents.APPLY_SEARCH_FILTER,
+                        mapOf(
+                            AnalyticsEvents.Params.FILTER_TYPE to filterTypes.joinToString(","),
+                            AnalyticsEvents.Params.FILTER_VALUE to buildString {
+                                currentDraftQuery.region?.let { append(it.displayName) }
+                                if (hasAnimalFilter) {
+                                    if (isNotEmpty()) append("/")
+                                    append(currentDraftQuery.animalCategories.joinToString(",") { it.korean })
+                                }
+                            },
+                            AnalyticsEvents.Params.FROM_SCREEN to "병원검색"
+                        )
+                    )
+                }
+
                 hospitalSearchArgument.intent(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery,
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
                     )
                 )
                 isFilterBottomSheetVisible = false
@@ -108,6 +154,11 @@ fun SearchScreen(
             }
 
             is SearchUiEvent.OnSearchNearby -> {
+                // GA4: search_map_current_location
+                analyticsTracker.trackEvent(
+                    AnalyticsEvents.SEARCH_MAP_CURRENT_LOCATION,
+                    mapOf(AnalyticsEvents.Params.IS_FIRST_SEARCH to hospitalSearchData.hospitalList.isEmpty())
+                )
                 hospitalSearchArgument.intent(
                     HospitalSearchIntent.SearchNearByHospitals(
                         bounds = event.bounds,
@@ -124,7 +175,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.keyword),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -136,7 +188,8 @@ fun SearchScreen(
                     HospitalSearchIntent.SearchHospitalWithCurrentParams(
                         query = currentDraftQuery.copy(query = event.hospitalName),
                         currentUserLocation = locationData.currentUserLocation,
-                        sortType = selectedSortType // 추가됨
+                        sortType = selectedSortType,
+                        keepPreviousBounds = false
                     )
                 )
                 commonSearchArgument.intent(SearchIntent.ChangeScreenState(SearchScreenState.OnSearch.ResultView))
@@ -155,11 +208,18 @@ fun SearchScreen(
                 userLocationArgument.intent(UserLocationIntent.RequestLocation)
             }
 
-            is SearchUiEvent.OnListViewClicked -> commonSearchArgument.intent(
-                SearchIntent.ChangeScreenState(
-                    SearchScreenState.Hospitals.ListView
+            is SearchUiEvent.OnListViewClicked -> {
+                // GA4: switch_to_list_view
+                analyticsTracker.trackEvent(
+                    AnalyticsEvents.SWITCH_TO_LIST_VIEW,
+                    mapOf(AnalyticsEvents.Params.FROM_VIEW to "지도")
                 )
-            )
+                commonSearchArgument.intent(
+                    SearchIntent.ChangeScreenState(
+                        SearchScreenState.Hospitals.ListView
+                    )
+                )
+            }
 
             is SearchUiEvent.OnSearchViewClicked -> commonSearchArgument.intent(
                 SearchIntent.ChangeScreenState(
@@ -189,13 +249,6 @@ fun SearchScreen(
         }
     }
 
-    LaunchedEffect(commonSearchArgument.event) {
-        commonSearchArgument.event.collectCustomErrors { event ->
-            when (event) {
-                is SearchEvent.DataFetch.Error -> {}
-            }
-        }
-    }
 
     // --- Content ---
     when (screenState) {
@@ -204,7 +257,10 @@ fun SearchScreen(
                 navController = navController,
                 userLocationArgument = userLocationArgument,
                 searchUiState = searchUiState,
-                onEvent = onEvent
+                onEvent = onEvent,
+                locationTerm = locationTerm,
+                onTermsClick = onTermsClick,
+                initialHospitalId = initialHospitalId
             )
         }
 
@@ -274,10 +330,12 @@ private fun SearchScreenPreview() {
             commonSearchArgument = CommonSearchArgument(
                 intent = {},
                 screenState = SearchScreenState.OnSearch.SearchView,
-                event = MutableSharedFlow()
             ),
             locationData = UserLocationData.empty,
             hospitalSearchData = HospitalSearchData.empty,
+            isGuest = false,
+            locationTerm = null,
+            onTermsClick = {}
         )
     }
 }

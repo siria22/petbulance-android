@@ -1,7 +1,6 @@
 package com.petbulance.data.datasource.remote.network.feature.hospital.review.dto
 
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 @Serializable
 data class ReviewSaveReqDto(
@@ -13,7 +12,7 @@ data class ReviewSaveReqDto(
     val animalType: String,
     val detailAnimalType: String,
     val receiptItems: List<ReceiptItemDto>,
-    val visitDate: String = LocalDate.now().toString(),
+    val visitDate: String? = null,
     val reviewComment: String,
     val receiptChecked: Boolean,
     val images: List<ReviewImageDto>? = null
@@ -33,6 +32,7 @@ data class ReviewImageDto(
 
 @Serializable
 data class ReviewImageCheckReqDto(
+    val type: String, // "NEW" or "UPDATE"
     val reviewId: Long,
-    val saveIds: List<String>
+    val keys: List<String>
 )

@@ -2,9 +2,7 @@ package com.petbulance.presentation.screen.feature.search.main
 
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
@@ -15,9 +13,6 @@ class CommonSearchViewModel @Inject constructor() : BaseViewModel() {
         MutableStateFlow<SearchScreenState>(SearchScreenState.Hospitals.MapView)
     val screenState: StateFlow<SearchScreenState> = _screenState
 
-    private val _eventFlow = MutableSharedFlow<SearchEvent>()
-    val eventFlow: SharedFlow<SearchEvent> = _eventFlow
-
     fun onIntent(intent: SearchIntent) {
         when (intent) {
             is SearchIntent.ChangeScreenState -> {
@@ -25,13 +20,4 @@ class CommonSearchViewModel @Inject constructor() : BaseViewModel() {
             }
         }
     }
-
-    init {
-        observeErrorEvent(eventFlow)
-
-        launch {
-
-        }
-    }
-
 }

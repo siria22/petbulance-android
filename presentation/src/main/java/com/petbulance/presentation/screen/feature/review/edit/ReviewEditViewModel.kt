@@ -1,17 +1,15 @@
 package com.petbulance.presentation.screen.feature.review.edit
 
-import android.content.Context
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.hospital.review.ModifyReviewParam
 import com.petbulance.domain.model.feature.hospital.review.ReviewImageParam
 import com.petbulance.domain.model.feature.hospital.review.ReviewRating
 import com.petbulance.domain.usecase.feature.hospital.review.GetReviewDetailUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.ModifyReviewUseCase
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +22,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewEditViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val savedStateHandle: SavedStateHandle,
     private val getReviewDetailUseCase: GetReviewDetailUseCase,
-    private val modifyReviewUseCase: ModifyReviewUseCase
+    private val modifyReviewUseCase: ModifyReviewUseCase,
+    private val contentFileReader: ContentFileReader
 ) : BaseViewModel() {
 
     private val reviewId: Long =
@@ -147,7 +145,7 @@ class ReviewEditViewModel @Inject constructor(
 
                 modifyReviewUseCase(param, imageBytes)
                     .onSuccess {
-                        emitEvent(ReviewEditEvent.ShowToast("리뷰가 수정되었습니다."))
+                        emitEvent(ReviewEditEvent.EditSuccess)
                         emitEvent(ReviewEditEvent.NavigateBack)
                     }
                     .onFailure { e ->
@@ -155,7 +153,6 @@ class ReviewEditViewModel @Inject constructor(
                     }
 
             } catch (e: Exception) {
-                e.printStackTrace()
                 emitEvent(ReviewEditEvent.ShowToast("오류가 발생했습니다."))
             } finally {
                 _state.update { it.copy(isLoading = false) }
@@ -163,16 +160,8 @@ class ReviewEditViewModel @Inject constructor(
         }
     }
 
-    private fun uriToByteArray(uriString: String): ByteArray? {
-        return try {
-            val uri = uriString.toUri()
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.readBytes()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    private suspend fun uriToByteArray(uriString: String): ByteArray? {
+        return contentFileReader.readBytes(uriString)?.bytes
     }
 
     private fun removeImage(index: Int) {

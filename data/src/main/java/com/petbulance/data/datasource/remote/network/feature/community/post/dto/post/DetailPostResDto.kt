@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DetailPostResDto(
-    val board: BoardInfo,
     val post: PostInfo
 )
 
@@ -18,6 +17,8 @@ data class BoardInfo(
 @Serializable
 data class PostInfo(
     val postId: Long,
+    val type: String,
+    val topic: String,
     val title: String,
     val writerNickname: String?,
     val writerProfileUrl: String?,

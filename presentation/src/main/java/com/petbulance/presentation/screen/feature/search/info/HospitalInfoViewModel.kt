@@ -3,15 +3,20 @@ package com.petbulance.presentation.screen.feature.search.info
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
+import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
 import com.petbulance.domain.model.feature.hospital.review.HospitalReview
 import com.petbulance.domain.model.feature.hospital.review.PagingReviewList
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.usecase.feature.hospital.hospital.GetHospitalCardUseCase
 import com.petbulance.domain.usecase.feature.hospital.hospital.GetHospitalDetailUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetHospitalReviewsUseCase
+import com.petbulance.domain.utils.LocationUtils
 import com.petbulance.domain.utils.zip
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.AnalyticsTracker
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
+import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,19 +33,19 @@ class HospitalInfoViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getHospitalCardUseCase: GetHospitalCardUseCase,
     private val getHospitalDetailUseCase: GetHospitalDetailUseCase,
-    private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase
+    private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase,
+    private val analyticsTracker: AnalyticsTracker
 ) : BaseViewModel() {
 
-    private val hospitalId: Long = savedStateHandle.get<Long>("hospitalId") ?: INVALID_ID
+    private val hospitalId: Long =
+        savedStateHandle.get<Long>(ScreenDestinations.Search.HospitalInfo.ARG_ID)
+            ?: INVALID_ID
 
     private val _dataState = MutableStateFlow<HospitalInfoDataState>(HospitalInfoDataState.Init)
     val dataState: StateFlow<HospitalInfoDataState> = _dataState
 
-    private val _hospitalUiData = MutableStateFlow(HospitalUiData())
-    val hospitalUiData: StateFlow<HospitalUiData> = _hospitalUiData
-
-    private val _reviewUiData = MutableStateFlow(ReviewUiData())
-    val reviewUiData: StateFlow<ReviewUiData> = _reviewUiData
+    private val _infoData = MutableStateFlow(HospitalInfoData.init)
+    val infoData: StateFlow<HospitalInfoData> = _infoData
 
     private val _eventFlow = MutableSharedFlow<HospitalInfoEvent>()
     val eventFlow: SharedFlow<HospitalInfoEvent> = _eventFlow
@@ -74,14 +79,16 @@ class HospitalInfoViewModel @Inject constructor(
             is HospitalInfoIntent.LoadMoreReviews -> {
                 launch { loadMoreReviews() }
             }
+
             is HospitalInfoIntent.ChangeReviewSort -> {
-                if (_reviewUiData.value.sortBy != intent.sortType) {
-                    _reviewUiData.update { it.copy(sortBy = intent.sortType) }
+                if (_infoData.value.reviewUiData.sortBy != intent.sortType) {
+                    _infoData.update { it.copy(reviewUiData = it.reviewUiData.copy(sortBy = intent.sortType)) }
                     checkCacheAndLoad()
                 }
             }
+
             is HospitalInfoIntent.ToggleImageOnly -> {
-                _reviewUiData.update { it.copy(onlyImage = intent.isChecked) }
+                _infoData.update { it.copy(reviewUiData = it.reviewUiData.copy(onlyImage = intent.isChecked)) }
                 checkCacheAndLoad()
             }
         }
@@ -99,18 +106,65 @@ class HospitalInfoViewModel @Inject constructor(
                     { fetchInitialReviews() }
                 )
             }.onSuccess { (hospital, detail, reviewPaging) ->
-                _hospitalUiData.update {
-                    it.copy(hospital = hospital, hospitalDetail = detail)
+                val patchedHospital =
+                    if (hospital.openHours == "(정보 없음)" || hospital.openHours == null) {
+                        val calculatedHours =
+                            calculateCurrentOpenHours(detail.openHours, hospital.isOpenNow)
+                        if (calculatedHours != null) {
+                            hospital.copy(openHours = calculatedHours)
+                        } else {
+                            hospital
+                        }
+                    } else {
+                        hospital
+                    }
+
+                _infoData.update {
+                    it.copy(hospitalUiData = HospitalUiData(hospital = patchedHospital, hospitalDetail = detail))
                 }
 
                 applyReviewData(reviewPaging, isAppend = false)
                 updateCache(reviewPaging)
+
+                // GA4: view_hospital_detail
+                analyticsTracker.trackEvent(
+                    AnalyticsEvents.VIEW_HOSPITAL_DETAIL,
+                    buildMap {
+                        put(AnalyticsEvents.Params.HOSPITAL_ID, patchedHospital.hospitalId.toString())
+                        put(AnalyticsEvents.Params.HOSPITAL_NAME, patchedHospital.name)
+                        put(AnalyticsEvents.Params.HAS_REVIEW, reviewPaging.items.isNotEmpty())
+                        put(AnalyticsEvents.Params.IS_OPERATING_NOW, patchedHospital.isOpenNow)
+                    }
+                )
 
                 _dataState.value = HospitalInfoDataState.Init
             }.onFailure { exception ->
                 emitError(exception)
                 _dataState.value = HospitalInfoDataState.Init
             }
+        }
+    }
+
+    private fun calculateCurrentOpenHours(openHours: List<OpenHour>, isOpenNow: Boolean): String? {
+        val today = java.time.LocalDate.now()
+        val dayKey = DAY_OF_WEEK_MAP[today.dayOfWeek] ?: return null
+
+        val todaySchedule = openHours.find { it.day == dayKey } ?: return null
+        val hoursStr = if (todaySchedule.hours == "CLOSED") "휴무" else todaySchedule.hours
+
+        return if (isOpenNow) {
+            if (hoursStr.contains("-")) {
+                val parts = hoursStr.split("-")
+                if (parts.size == 2) {
+                    "${parts[1]}에 영업 종료"
+                } else {
+                    hoursStr
+                }
+            } else {
+                hoursStr
+            }
+        } else {
+            hoursStr
         }
     }
 
@@ -131,11 +185,11 @@ class HospitalInfoViewModel @Inject constructor(
 
         getHospitalReviewsUseCase(
             hospitalId = hospitalId,
-            onlyImageReview = _reviewUiData.value.onlyImage,
+            onlyImageReview = _infoData.value.reviewUiData.onlyImage,
             cursorId = null,
             cursorRating = null,
             cursorLikeCount = null,
-            sortBy = _reviewUiData.value.sortBy
+            sortBy = _infoData.value.reviewUiData.sortBy
         ).onSuccess { reviewPaging ->
             updateCache(reviewPaging)
             applyReviewData(reviewPaging, isAppend = false)
@@ -161,11 +215,11 @@ class HospitalInfoViewModel @Inject constructor(
 
         getHospitalReviewsUseCase(
             hospitalId = hospitalId,
-            onlyImageReview = _reviewUiData.value.onlyImage,
+            onlyImageReview = _infoData.value.reviewUiData.onlyImage,
             cursorId = currentCursorId,
             cursorRating = currentCursorRating,
             cursorLikeCount = currentCursorLikeCount,
-            sortBy = _reviewUiData.value.sortBy
+            sortBy = _infoData.value.reviewUiData.sortBy
         ).onSuccess { pagingResult ->
             applyReviewData(pagingResult, isAppend = true)
         }.onFailure { exception ->
@@ -186,9 +240,12 @@ class HospitalInfoViewModel @Inject constructor(
             currentCursorLikeCount = lastItem.likeCount.toLong()
         }
 
-        _reviewUiData.update {
+        _infoData.update {
+            val currentReviews = it.reviewUiData.reviews
             it.copy(
-                reviews = if (isAppend) it.reviews + reviewPaging.items else reviewPaging.items
+                reviewUiData = it.reviewUiData.copy(
+                    reviews = if (isAppend) currentReviews + reviewPaging.items else reviewPaging.items
+                )
             )
         }
     }
@@ -197,7 +254,8 @@ class HospitalInfoViewModel @Inject constructor(
         reviewCache[getCurrentCacheKey()] = data
     }
 
-    private fun getCurrentCacheKey() = Pair(_reviewUiData.value.sortBy, _reviewUiData.value.onlyImage)
+    private fun getCurrentCacheKey() =
+        Pair(_infoData.value.reviewUiData.sortBy, _infoData.value.reviewUiData.onlyImage)
 
     private fun resetPagingState() {
         currentCursorId = null
@@ -218,26 +276,32 @@ class HospitalInfoViewModel @Inject constructor(
     }
 
     private suspend fun fetchHospital(lat: Double?, lng: Double?): Hospital {
-        val card = getHospitalCardUseCase(
-            hospitalId = hospitalId,
-            userLat = lat ?: 0.0,
-            userLng = lng ?: 0.0
-        )
-        return card.toHospital()
+        val card = getHospitalCardUseCase(hospitalId = hospitalId)
+        val distance = LocationUtils.calculateDistance(lat, lng, card.lat, card.lng)
+        return card.toHospital().copy(distanceMeters = distance)
     }
 
     private suspend fun fetchHospitalDetail() = getHospitalDetailUseCase(hospitalId = hospitalId)
 
     private suspend fun fetchInitialReviews() = getHospitalReviewsUseCase(
         hospitalId = hospitalId,
-        onlyImageReview = _reviewUiData.value.onlyImage,
+        onlyImageReview = _infoData.value.reviewUiData.onlyImage,
         cursorId = null,
         cursorRating = null,
         cursorLikeCount = null,
-        sortBy = _reviewUiData.value.sortBy
+        sortBy = _infoData.value.reviewUiData.sortBy
     ).getOrThrow()
 
     companion object {
         private const val INVALID_ID = -1L
+        private val DAY_OF_WEEK_MAP = mapOf(
+            java.time.DayOfWeek.MONDAY to "MON",
+            java.time.DayOfWeek.TUESDAY to "TUE",
+            java.time.DayOfWeek.WEDNESDAY to "WED",
+            java.time.DayOfWeek.THURSDAY to "THU",
+            java.time.DayOfWeek.FRIDAY to "FRI",
+            java.time.DayOfWeek.SATURDAY to "SAT",
+            java.time.DayOfWeek.SUNDAY to "SUN"
+        )
     }
 }

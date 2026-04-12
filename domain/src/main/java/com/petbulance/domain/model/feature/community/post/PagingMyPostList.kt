@@ -7,10 +7,11 @@ data class PagingMyPostList(
 
 data class MyPostSummary(
     val postId: Long,
-    val boardId: Long,
     val title: String,
     val content: String,
     val createdAt: String,
     val viewCount: Long,
+    val likeCount: Long?,
+    val thumbnailUrl: String?,
     val hidden: Boolean
 )

@@ -6,16 +6,14 @@ import kotlinx.serialization.Serializable
 data class PagingPostSearchListResDto(
     val content: List<PostSearchListResDto>,
     val hasNext: Boolean,
-    val totalPostCount: Long
+    val lastPostId: Long
 )
 
 @Serializable
 data class PostSearchListResDto(
     val postId: Long,
-    val boardId: Long,
-    val boardName: String,
-    val category: List<String>,
-    val writerProfileUrl: String? = null,
+    val type: String,
+    val topic: String,
     val writerNickname: String,
     val createdAt: String,
     val thumbnailUrl: String? = null,

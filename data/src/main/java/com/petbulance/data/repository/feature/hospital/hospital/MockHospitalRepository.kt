@@ -11,27 +11,12 @@ import javax.inject.Inject
 
 class MockHospitalRepository @Inject constructor() : HospitalRepository {
     private val mockHospitals = List(20) { i ->
-        Hospital(
-            hospitalId = (i + 1L),
-            name = "행복 동물병원 ${i + 1}호점 (Mock)",
-            lat = 37.5665 + (i * 0.001),
-            lng = 126.9780 + (i * 0.001),
-            distanceMeters = 1234.5 + (i * 100),
-            phone = "02-1234-5678",
-            types = if (i % 2 == 0) listOf("DOG", "CAT") else listOf("DOG"),
-            isOpenNow = i % 3 != 0,
-            openHours = "09:00 - 18:00",
-            thumbnailUrl = "https://picsum.photos/seed/${i + 1}/200/300",
-            rating = 4.5 - (i * 0.1),
-            reviewCount = 120 - (i * 5)
-        )
+        Hospital.stub()
     }
 
     override suspend fun searchHospitals(
         q: String?,
         region: String?,
-        lat: Double?,
-        lng: Double?,
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
@@ -68,7 +53,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     lat = hospital.lat,
                     lng = hospital.lng,
                     phone = hospital.phone ?: "02-0000-0000",
-                    acceptedAnimals = listOf("DOG", "CAT", "HAMSTER", "BIRD"),
+                    acceptedAnimals = listOf("DOG", "CAT", "HAMSTER", "AVIAN"),
                     openHours = listOf(
                         OpenHour("월-금", "09:00-19:00"),
                         OpenHour("토", "10:00-16:00"),
@@ -87,11 +72,7 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         }
     }
 
-    override suspend fun getHospitalCard(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
-    ): Result<HospitalCard> {
+    override suspend fun getHospitalCard(hospitalId: Long): Result<HospitalCard> {
         delay(300)
         val hospital = mockHospitals.find { it.hospitalId == hospitalId }
 
@@ -109,7 +90,8 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
                     nextOpenHours = if (!hospital.isOpenNow) "내일 오전 9시" else "오후 6시까지",
                     thumbnailUrl = hospital.thumbnailUrl ?: "",
                     rating = hospital.rating ?: 0.0,
-                    reviewCount = (hospital.reviewCount ?: 0).toLong()
+                    reviewCount = (hospital.reviewCount ?: 0).toLong(),
+                    image = ""
                 )
             )
         } else {

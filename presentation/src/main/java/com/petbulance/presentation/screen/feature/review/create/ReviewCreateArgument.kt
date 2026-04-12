@@ -36,7 +36,7 @@ data class Step1State(
     val hospitalCandidates: List<HospitalInfoForReview> = emptyList(),
     val hospitalInfoForReview: HospitalInfoForReview? = null,
     val totalPrice: String = "",
-    val animalType: AnimalCategory = AnimalCategory.BIRD,
+    val animalType: AnimalCategory = AnimalCategory.AVIAN,
     val detailAnimalType: String = "",
     val isReceiptVerified: Boolean = false
 )
@@ -84,4 +84,5 @@ sealed interface ReviewCreateEvent {
     data class ShowToast(val message: String) : ReviewCreateEvent
     data object NavigateBack : ReviewCreateEvent
     data object NavigateToHome : ReviewCreateEvent
+    data class OnSubmitSuccess(val reviewId: Long) : ReviewCreateEvent
 }

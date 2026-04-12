@@ -10,7 +10,8 @@ data class GetPresignReqDto(
 @Serializable
 data class NoticeFileReqDto(
     val filename: String,
-    val contentType: String
+    val contentType: String,
+    val usage: String = "COMMENT"
 )
 
 @Serializable

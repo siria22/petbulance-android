@@ -66,11 +66,15 @@ class AuthRepositoryImpl @Inject constructor(
             return safeApiCall<RefreshResponseDto>("auth/refresh") {
                 authApi.refresh(refreshToken)
             }.map { dto ->
-                Pair(dto.accessToken, dto.refreshToken)
+                val cleanAccessToken = dto.accessToken?.removePrefix("Bearer ")
+                Pair(cleanAccessToken, dto.refreshToken)
             }
         }
 
-    override suspend fun socialLogin(provider: LoginProviderType, authCode: String): Result<SocialLoginResult> {
+    override suspend fun socialLogin(
+        provider: LoginProviderType,
+        authCode: String
+    ): Result<SocialLoginResult> {
         return safeApiCall<SocialLoginResponseDto>("auth/social/login") {
             authApi.socialLogin(SocialLoginRequestDto(provider.name, authCode))
         }.map { dto ->
@@ -78,7 +82,7 @@ class AuthRepositoryImpl @Inject constructor(
                 isNewUser = dto.isNewUser,
                 signUpToken = dto.signUpToken,
                 firebaseCustomToken = dto.firebaseCustomToken,
-                accessToken = dto.accessToken,
+                accessToken = dto.accessToken?.removePrefix("Bearer "),
                 refreshToken = dto.refreshToken
             )
         }
@@ -106,4 +110,12 @@ class AuthRepositoryImpl @Inject constructor(
                 null
             }
         }
+
+    override suspend fun setAutoLoginEnabled(isEnabled: Boolean): Result<Unit> = runCatching {
+        preferenceProvider.updateAutoLoginEnabled(isEnabled)
+    }
+
+    override suspend fun isAutoLoginEnabled(): Result<Boolean> = runCatching {
+        preferenceProvider.observeAutoLoginEnabled().first()
+    }
 }

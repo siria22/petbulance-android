@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DeletePostResDto(
     val postId: Long,
-    val boardId: Long,
+    val boardId: Long? = null,
     val deleted: Boolean,
     val hidden: Boolean,
     val deletedAt: String? = null

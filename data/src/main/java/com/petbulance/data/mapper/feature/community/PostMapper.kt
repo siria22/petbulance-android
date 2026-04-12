@@ -11,6 +11,7 @@ import com.petbulance.data.datasource.remote.network.feature.community.post.dto.
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.DetailPostResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.ImageUpdateDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.MyPostListResDto
+import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.NoticeBannerInfoDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingMyPostListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingPostListResDto
 import com.petbulance.data.datasource.remote.network.feature.community.post.dto.post.PagingPostSearchListResDto
@@ -22,6 +23,7 @@ import com.petbulance.domain.model.feature.community.post.BoardInfo
 import com.petbulance.domain.model.feature.community.post.Comment
 import com.petbulance.domain.model.feature.community.post.DeletedPost
 import com.petbulance.domain.model.feature.community.post.MyPostSummary
+import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.model.feature.community.post.PagingCommentList
 import com.petbulance.domain.model.feature.community.post.PagingMyPostList
 import com.petbulance.domain.model.feature.community.post.PagingPostList
@@ -44,8 +46,8 @@ import com.petbulance.domain.model.feature.community.post.param.UpdatePostParam
 import java.time.LocalDateTime
 
 fun CreatePostParam.toDto() = CreatePostReqDto(
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls
@@ -53,8 +55,8 @@ fun CreatePostParam.toDto() = CreatePostReqDto(
 
 fun CreatePostResDto.toDomain() = Post(
     postId = postId,
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls,
@@ -63,9 +65,9 @@ fun CreatePostResDto.toDomain() = Post(
 
 fun DetailPostResDto.toDomain() = PostDetail(
     boardInfo = BoardInfo(
-        id = board.boardId,
-        name = board.boardName,
-        category = board.category
+        id = 0L,
+        name = post.type,
+        category = post.topic
     ),
     postInfo = PostDetailInfo(
         id = post.postId,
@@ -97,8 +99,8 @@ fun DetailPostResDto.toDomain() = PostDetail(
 
 fun UpdatePostResDto.toDomain() = Post(
     postId = postId,
-    boardId = boardId,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     imageUrls = imageUrls,
@@ -106,7 +108,7 @@ fun UpdatePostResDto.toDomain() = Post(
 )
 
 fun UpdatePostParam.toDto() = UpdatePostReqDto(
-    category = category,
+    topic = topic,
     title = title,
     content = content,
     imagesToKeepOrAdd = imagesToKeepOrAdd.map { it.toImageUpdateDto() },
@@ -121,38 +123,44 @@ fun ImageUpdateParam.toImageUpdateDto() = ImageUpdateDto(
 
 fun DeletePostResDto.toDomain() = DeletedPost(
     postId = postId,
-    boardId = boardId,
+    boardId = null,
     deleted = deleted,
     hidden = hidden,
     deletedAt = deletedAt
 )
 
 fun PagingPostListResDto.toDomain() = PagingPostList(
+    noticeBanner = noticeBanner?.toDomain(),
     items = content.map { it.toDomain() },
     hasNext = hasNext
 )
 
+fun NoticeBannerInfoDto.toDomain() = NoticeBanner(
+    noticeId = noticeId,
+    noticeStatus = noticeStatus,
+    title = title,
+    content = content
+)
+
 fun PostListResDto.toDomain() = PostSummary(
     id = postId,
-    boardId = boardId,
-    boardName = boardName,
-    category = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     thumbnailUrl = thumbnailUrl,
-    imageCount = imageCount,
-    viewCount = viewCount,
-    commentCount = commentCount,
-    likeCount = likeCount,
+    imageCount = imageCount.toInt(),
+    viewCount = viewCount.toInt(),
+    commentCount = commentCount.toInt(),
+    likeCount = likeCount.toInt(),
     createdAt = createdAt,
     isLiked = likedByUser
 )
 
 fun PostSearchListResDto.toDomain() = PostSearchSummary(
     id = postId,
-    boardId = boardId,
-    boardName = boardName,
-    categories = category,
+    type = type,
+    topic = topic,
     title = title,
     content = content,
     thumbnailUrl = thumbnailUrl,
@@ -162,14 +170,13 @@ fun PostSearchListResDto.toDomain() = PostSearchSummary(
     likeCount = likeCount,
     createdAt = createdAt,
     writerNickname = writerNickname,
-    writerProfileUrl = writerProfileUrl,
-    isLiked = likedByUser
+    isLiked = likedByUser,
 )
 
 fun PagingPostSearchListResDto.toDomain() = PagingPostSearchList(
     items = content.map { it.toDomain() },
     hasNext = hasNext,
-    totalPostCount = totalPostCount
+    totalPostCount = lastPostId
 )
 
 fun PagingMyPostListResDto.toDomain() = PagingMyPostList(
@@ -179,11 +186,12 @@ fun PagingMyPostListResDto.toDomain() = PagingMyPostList(
 
 fun MyPostListResDto.toDomain() = MyPostSummary(
     postId = postId,
-    boardId = boardId,
     title = title,
     content = content,
     createdAt = createdAt,
     viewCount = viewCount,
+    likeCount = likeCount,
+    thumbnailUrl = thumbnailUrl,
     hidden = hidden
 )
 

@@ -16,10 +16,6 @@ sealed class HospitalInfoDataState {
     data object OnProgress : HospitalInfoDataState()
 }
 
-sealed class HospitalInfoScreenState {
-    data object Init : HospitalInfoScreenState()
-}
-
 sealed class HospitalInfoIntent {
     data class LoadData(val lat: Double?, val lng: Double?) : HospitalInfoIntent()
     data object LoadMoreReviews : HospitalInfoIntent()

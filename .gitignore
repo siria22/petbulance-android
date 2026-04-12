@@ -1,5 +1,6 @@
 *.iml
 .gradle
+.vscode
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -10,6 +11,7 @@
 /.idea/appinsightsSettings.xml
 .DS_Store
 /build
+**/bin
 /captures
 .externalNativeBuild
 .cxx
@@ -20,3 +22,11 @@ local.properties
 
 # Windsurf Instructions
 /_windsurf
+.windsurf
+
+pol
+.claude
+
+AGENTS.md
+.idea/deploymentTargetSelector.xml
+.idea/shelf/Uncommitted_changes_before_Update_at_2026-03-30__10_04__Changes_.xml

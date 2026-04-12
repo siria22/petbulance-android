@@ -17,6 +17,7 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.ReceiptItem
 import com.petbulance.domain.model.feature.hospital.review.ReviewDetail
 import com.petbulance.domain.model.feature.hospital.review.ReviewSearchItem
+import com.petbulance.domain.model.feature.hospital.review.ReviewStatus
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.AnimalSpecies
@@ -81,8 +82,11 @@ fun MyReviewGetDto.toDomain() = MyReview(
     hospitalName = hospitalName,
     content = comment,
     date = reviewDate,
-    rating = 0.0,
-    representativeImage = hospitalImageUrl
+    rating = 0.0, // TODO : 미제공 여부 다시 확인
+    representativeImage = hospitalImageUrl,
+    likeCount = likeCount,
+    isReceiptVerified = receiptChecked,
+    status = ReviewStatus.REGISTERED // TODO : 정책상 임시 고정
 )
 
 fun SaveReviewParam.toDto() = ReviewSaveReqDto(
@@ -97,8 +101,16 @@ fun SaveReviewParam.toDto() = ReviewSaveReqDto(
     receiptItems = receiptItems.map {
         ReceiptItemDto(name = it.name, price = it.price)
     },
-    visitDate = visitDate,
-    reviewComment = comment
+    visitDate = visitDate?.ifBlank { null },
+    reviewComment = comment,
+    images = if (imageCount > 0) {
+        (1..imageCount).map { index ->
+            ReviewImageDto(
+                filename = "review_image_$index",
+                contentType = "image/jpeg"
+            )
+        }
+    } else null
 )
 
 fun ReceiptAnalysisResDto.toDomain() = ReceiptAnalysisResult(
@@ -148,7 +160,7 @@ fun ModifyReviewParam.toDto() = ReviewModifyReqDto(
     }
 )
 
-fun ReviewDetailResDto.toDomain() = ReviewDetail(
+fun ReviewDetailResDto.toDomain(currentUserName: String) = ReviewDetail(
     userNickname = userNickname ?: "알 수 없음",
     receiptCheck = receiptCheck,
     id = id,
@@ -157,10 +169,7 @@ fun ReviewDetailResDto.toDomain() = ReviewDetail(
     hospitalName = hospitalName,
     treatmentService = treatmentService,
     animalType = AnimalCategory.fromString(animalType),
-    detailAnimalType = AnimalSpecies.fromString(
-        detailAnimalType ?: "PARROT"
-        // TODO: (01.28) 서버에서 null 내려오는 detailAnimalType을 일괄 정책으로 정리 필요
-    ),
+    detailAnimalType = AnimalSpecies.fromString(detailAnimalType ?: "PARROT"),
     reviewContent = reviewContent,
     facilityRating = facilityRating,
     expertiseRating = expertiseRating,
@@ -169,6 +178,9 @@ fun ReviewDetailResDto.toDomain() = ReviewDetail(
     totalPrice = totalPrice,
     likeCount = likeCount,
     liked = liked,
-    visitDate = visitDate,
-    images = images
+    visitDate = visitDate ?: "",
+    images = images ?: emptyList(),
+    userProfileImage = userProfileImage,
+    viewCount = viewCount,
+    isAuthor = (currentUserName == userNickname)
 )

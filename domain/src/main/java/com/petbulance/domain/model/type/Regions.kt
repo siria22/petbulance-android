@@ -2,11 +2,15 @@ package com.petbulance.domain.model.type
 
 enum class District(val displayName: String)
 
-/* TODO : 도메인 검증 필요 */
 enum class Region(
     val displayName: String,
     val districts: List<String>
 ) {
+    ALL(
+        displayName = "전체",
+        districts = listOf("전체")
+    ),
+
     SEOUL(
         displayName = "서울시",
         districts = listOf(

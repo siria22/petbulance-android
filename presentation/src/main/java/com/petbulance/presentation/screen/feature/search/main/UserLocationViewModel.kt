@@ -1,26 +1,19 @@
 package com.petbulance.presentation.screen.feature.search.main
 
-import android.annotation.SuppressLint
-import android.os.Looper
+import android.location.Location
+import com.petbulance.domain.repository.nonfeature.device.LocationProvider
 import com.petbulance.presentation.utils.BaseViewModel
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import javax.inject.Inject
 
 @HiltViewModel
 class UserLocationViewModel @Inject constructor(
-    private val fusedLocationClient: FusedLocationProviderClient
+    private val locationProvider: LocationProvider
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<UserLocationState>(UserLocationState.Init)
@@ -34,8 +27,6 @@ class UserLocationViewModel @Inject constructor(
     fun onIntent(intent: UserLocationIntent) {
         when (intent) {
             is UserLocationIntent.RequestLocation -> {
-                // UI에서 권한 체크 후 없으면 PermissionRequired 상태로, 있으면 수집 시작
-                // 여기서는 일단 수집 시도 (권한 없으면 에러 발생 -> catch)
                 startLocationUpdates(forceMove = true)
             }
 
@@ -49,13 +40,12 @@ class UserLocationViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun startLocationUpdates(forceMove: Boolean = false) {
         launch {
             var shouldMoveCamera = forceMove
             _state.value = UserLocationState.Finding
 
-            getLocationFlow()
+            locationProvider.getLocationUpdates()
                 .catch { ex ->
                     _state.value = UserLocationState.PermissionRequired
                     _eventFlow.emit(
@@ -64,42 +54,18 @@ class UserLocationViewModel @Inject constructor(
                         )
                     )
                 }
-                .collect { location ->
+                .collect { deviceLocation ->
+                    val location = Location("fused").apply {
+                        latitude = deviceLocation.latitude
+                        longitude = deviceLocation.longitude
+                    }
                     _state.value = UserLocationState.Success(location)
-                    // shouldMoveCamera 플래그 확인
                     if (shouldMoveCamera || !isInitialLocationSent) {
                         _eventFlow.emit(SearchEvent.UserLocation.MoveCamera(location))
                         isInitialLocationSent = true
-                        shouldMoveCamera = false // 한 번 이동 후에는 자동 이동 비활성화
+                        shouldMoveCamera = false
                     }
                 }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getLocationFlow() = callbackFlow {
-        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L)
-            .setMinUpdateIntervalMillis(5000L)
-            .build()
-
-        val callback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let { location ->
-                    trySend(location)
-                }
-            }
-        }
-        try {
-            fusedLocationClient.requestLocationUpdates(request, callback, Looper.getMainLooper())
-                .addOnFailureListener { e ->
-                    close(e)
-                }
-        } catch (e: SecurityException) {
-            close(e)
-        }
-
-        awaitClose {
-            fusedLocationClient.removeLocationUpdates(callback)
         }
     }
 }

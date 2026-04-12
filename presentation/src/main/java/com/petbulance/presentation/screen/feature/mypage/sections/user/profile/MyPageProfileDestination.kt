@@ -1,0 +1,54 @@
+package com.petbulance.presentation.screen.feature.mypage.sections.user.profile
+
+import android.os.Build
+import androidx.annotation.RequiresExtension
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import com.petbulance.presentation.utils.CommonScreenWrapper
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+
+@RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
+fun NavGraphBuilder.myPageProfileDestination(navController: NavController) {
+    composable(
+        route = ScreenDestinations.MyPage.User.Profile.route,
+    ) {
+        val viewModel: MyPageProfileViewModel = hiltViewModel()
+
+        val argument: MyPageProfileArgument = let {
+            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
+
+            MyPageProfileArgument(
+                dataState = dataState,
+                intent = viewModel::onIntent,
+                event = viewModel.eventFlow
+            )
+        }
+
+        val data: MyPageProfileData = let {
+            val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
+            val selectedImageUri by viewModel.selectedImageUri.collectAsStateWithLifecycle()
+
+            MyPageProfileData(
+                userInfo = userInfo,
+                selectedImageUri = selectedImageUri
+            )
+        }
+
+        val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()
+
+        CommonScreenWrapper(
+            errorState = errorState,
+            dismissErrorDialog = viewModel::dismissErrorDialog,
+        ) {
+            MyPageProfileScreen(
+                navController = navController,
+                argument = argument,
+                data = data
+            )
+        }
+    }
+}

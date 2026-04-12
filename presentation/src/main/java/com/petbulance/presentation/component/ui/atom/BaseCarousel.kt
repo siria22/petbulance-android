@@ -1,7 +1,10 @@
 package com.petbulance.presentation.component.ui.atom
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,14 +20,21 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.component.theme.PetbulancePrimitives
+import kotlinx.coroutines.delay
 
 /**
  * 공통 캐러셀 컴포저블
@@ -43,12 +53,31 @@ import com.petbulance.presentation.component.theme.PetbulancePrimitives
 fun <T> BaseCarousel(
     modifier: Modifier = Modifier,
     items: List<T>,
-    state: PagerState = rememberPagerState { items.size },
+    state: PagerState = rememberPagerState { items.size.coerceAtLeast(1) },
     contentPadding: PaddingValues = PaddingValues(0.dp),
     itemSpacing: Dp = 0.dp,
     isIndicatorVisible: Boolean = false,
+    autoScroll: Boolean = false,
+    autoScrollInterval: Long = 3000L,
     itemContent: @Composable (page: Int, item: T) -> Unit
 ) {
+    if (items.isEmpty()) return
+
+    var isPaused by remember { mutableStateOf(false) }
+
+    // autoScroll, isPaused, items가 변경될 때만 재시작 (state.currentPage 제거)
+    LaunchedEffect(autoScroll, isPaused, items) {
+        if (autoScroll && !isPaused && items.size > 1) {
+            while (true) { // 무한 루프로 지속적인 롤링 보장
+                delay(autoScrollInterval)
+                val nextPage = (state.currentPage + 1) % items.size
+                state.animateScrollToPage(
+                    page = nextPage,
+                    animationSpec = tween(durationMillis = 800)
+                )
+            }
+        }
+    }
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -57,6 +86,19 @@ fun <T> BaseCarousel(
             state = state,
             contentPadding = contentPadding,
             pageSpacing = itemSpacing,
+            modifier = if (autoScroll) {
+                Modifier.pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            // 이벤트를 소비하지 않고(requireUnconsumed = false) 터치 감지
+                            awaitFirstDown(requireUnconsumed = false)
+                            isPaused = true
+                            waitForUpOrCancellation()
+                            isPaused = false
+                        }
+                    }
+                }
+            } else Modifier
         ) { page ->
             itemContent(page, items[page])
         }

@@ -25,6 +25,10 @@ class AppInfoRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) : AppInfoRepository {
 
+    companion object {
+        private const val TAG = "AppInfoRepository"
+    }
+
     override suspend fun checkHealth(): Result<HealthCheckResult> {
         return safeApiCall<TestResponseDto>(path = "/app/health") {
             api.healthCheck()
@@ -40,9 +44,13 @@ class AppInfoRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getVersion(): Result<String> {
-        return safeApiCall<String>(path = "/app/version") {
-            api.getVersion()
-        }
+        // TODO: 서버 /app/version 엔드포인트 구현 후 아래 주석 해제하고 더미 데이터 제거
+        // return safeApiCall<String>(path = "/app/version") {
+        //     api.getVersion()
+        // }
+
+        // 임시 더미 데이터 반환
+        return Result.success("v1.01")
     }
 
     // 실제 앱 버전 조회 구현
@@ -77,7 +85,7 @@ class AppInfoRepositoryImpl @Inject constructor(
 
     override suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>> {
         val reqDto = GetPresignReqDto(
-            files = files.map { NoticeFileReqDto(it.filename, it.contentType) }
+            files = files.map { NoticeFileReqDto(it.filename, it.contentType, it.usage) }
         )
 
         return safeApiCall<GetPresignResDto>("app/image/presign") {
@@ -89,6 +97,24 @@ class AppInfoRepositoryImpl @Inject constructor(
                     imageUrl = it.imageUrl
                 )
             }
+        }
+    }
+
+    override suspend fun uploadImage(
+        url: String,
+        imageBytes: ByteArray,
+        mimeType: String
+    ): Result<Unit> {
+        return try {
+            val response = api.uploadImage(url, imageBytes, mimeType)
+
+            if (response.status.value in 200..299) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("S3 upload failed: ${response.status.value}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

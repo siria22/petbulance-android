@@ -1,9 +1,9 @@
 package com.petbulance.data.repository.feature.community.comment
 
 import com.petbulance.data.datasource.remote.network.feature.community.comment.CommentApi
+import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.CommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.DelCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PagingMyCommentListResDto
-import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.PostCommentResDto
 import com.petbulance.data.datasource.remote.network.feature.community.comment.dto.SearchPostCommentListResDto
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.mapper.feature.community.toDomain
@@ -24,7 +24,7 @@ class CommentRepositoryImpl @Inject constructor(
         commentId: Long,
         request: UpdatePostCommentReq
     ): Result<PostComment> {
-        return safeApiCall<PostCommentResDto>(path = "/comments/$commentId") {
+        return safeApiCall<CommentResDto>(path = "/comments/$commentId") {
             api.updatePostComment(commentId, request.toDto())
         }.map { it.toDomain() }
     }
@@ -38,32 +38,32 @@ class CommentRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchPostCommentList(
-        keyword: String,
+        searchKeyword: String,
         searchScope: String,
         lastCommentId: Long?,
         pageSize: Int,
-        category: List<String>?,
-        boardId: Long?
+        topic: String?,
+        type: String?
     ): Result<SearchPostCommentListRes> {
         return safeApiCall<SearchPostCommentListResDto>(path = "/comments/search") {
             api.searchPostCommentList(
-                keyword,
+                searchKeyword,
                 searchScope,
                 lastCommentId,
                 pageSize,
-                category,
-                boardId
+                topic,
+                type
             )
         }.map { it.toDomain() }
     }
 
     override suspend fun getMyCommentList(
-        keyword: String?,
+        searchKeyword: String?,
         lastCommentId: Long?,
         pageSize: Int
     ): Result<MyCommentList> {
         return safeApiCall<PagingMyCommentListResDto>(path = "/comments/me") {
-            api.getMyCommentList(keyword, lastCommentId, pageSize)
+            api.getMyCommentList(searchKeyword, lastCommentId, pageSize)
         }.map { it.toDomain() }
     }
 }

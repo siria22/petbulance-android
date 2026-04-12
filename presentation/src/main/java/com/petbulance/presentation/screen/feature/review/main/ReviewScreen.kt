@@ -37,6 +37,9 @@ import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
+import com.petbulance.presentation.screen.feature.review.common.ReviewReportReasonDialog
+import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
+import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.screen.feature.review.main.composables.CreateReceiptDialog
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
@@ -63,10 +66,29 @@ fun ReviewScreen(
 
     var showReceiptDialog by remember { mutableStateOf(false) }
 
+    var showMoreOption by remember { mutableStateOf(false) }
+    var selectedReviewId by remember { mutableStateOf<Long?>(null) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedReason by remember { mutableStateOf("") }
+
     val context = LocalContext.current
 
     // 1. 카메라 권한 상태 관리
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+
+    // 2. 화면 재진입 감지 및 데이터 리프레시
+    val currentBackStackEntry = navController.currentBackStackEntry
+    val savedStateHandle = currentBackStackEntry?.savedStateHandle
+
+    LaunchedEffect(savedStateHandle) {
+        savedStateHandle?.getStateFlow("refresh", false)?.collectLatest { shouldRefresh ->
+            if (shouldRefresh) {
+                argument.intent(ReviewIntent.Refresh)
+                savedStateHandle["refresh"] = false
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -112,6 +134,15 @@ fun ReviewScreen(
                 onSortClick = { showSortingDialog = true },
                 onReceiptToggle = { argument.intent(ReviewIntent.ToggleReceipt) },
                 onPhotoToggle = { argument.intent(ReviewIntent.TogglePhotoReview) },
+                onReviewClick = {
+                    navController.safeNavigate(
+                        ScreenDestinations.Review.Detail.createRoute(it)
+                    )
+                },
+                onMoreClick = { reviewId ->
+                    selectedReviewId = reviewId
+                    showMoreOption = true
+                },
             )
         }
     }
@@ -121,7 +152,7 @@ fun ReviewScreen(
             currentQuery = HospitalSearchQueryUiModel.empty.copy(
                 region = data.selectedRegion,
                 district = data.selectedDistrict,
-                species = data.selectedAnimalType
+                animalCategories = data.selectedAnimalType?.let { listOf(it) } ?: emptyList()
             ),
             startTab = startTab,
             showBottomSheet = showBottomSheet,
@@ -131,8 +162,8 @@ fun ReviewScreen(
                 query.region?.let {
                     argument.intent(ReviewIntent.ChangeRegion(it, query.district ?: ""))
                 }
-                query.species?.let {
-                    argument.intent(ReviewIntent.ChangeAnimalType(it))
+                if (query.animalCategories.isNotEmpty()) {
+                    argument.intent(ReviewIntent.ChangeAnimalType(query.animalCategories.first()))
                 }
                 showBottomSheet = false
             },
@@ -181,12 +212,76 @@ fun ReviewScreen(
         )
     }
 
+    if (showMoreOption) {
+        val selectedReview = selectedReviewId?.let { id ->
+            data.reviews.find { it.id == id }
+        }
+        
+        if (selectedReview?.isAuthor == true) {
+            DeleteOrEdit(
+                onDeleteOptionClicked = {
+                    showMoreOption = false
+                    showDeleteConfirmDialog = true
+                },
+                onEditOptionClicked = {
+                    showMoreOption = false
+                    selectedReviewId?.let { reviewId ->
+                        navController.safeNavigate(
+                            ScreenDestinations.Review.Edit.createRoute(reviewId)
+                        )
+                    }
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        } else {
+            ReportOptionDialog(
+                onReportOptionClicked = {
+                    showMoreOption = false
+                    showReportReasonDialog = true
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        }
+    }
+
+    if (showDeleteConfirmDialog) {
+        // TODO: 삭제 확인 다이얼로그 추가 필요
+        // WarningDialog 또는 유사한 컴포넌트 사용
+        showDeleteConfirmDialog = false
+        selectedReviewId?.let { reviewId ->
+            // argument.intent(ReviewIntent.DeleteReview(reviewId))
+        }
+        selectedReviewId = null
+    }
+
+    if (showReportReasonDialog) {
+        ReviewReportReasonDialog(
+            selectedReason = selectedReason,
+            onReasonClicked = { reason ->
+                selectedReason = reason
+            },
+            onSubmitClicked = {
+                showReportReasonDialog = false
+                selectedReviewId?.let { reviewId ->
+                    argument.intent(ReviewIntent.ReportReview(reviewId, selectedReason))
+                    Toast.makeText(context, "신고가 접수되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+                selectedReviewId = null
+                selectedReason = ""
+            },
+            onDismissRequest = {
+                showReportReasonDialog = false
+                selectedReviewId = null
+                selectedReason = ""
+            }
+        )
+    }
+
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
             when (event) {
-                is ReviewEvent.ShowErrorToast -> {
 
-                }
+                else -> {}
             }
         }
     }

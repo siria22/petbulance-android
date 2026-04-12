@@ -22,7 +22,10 @@ data class ReviewDetail(
     val likeCount: Int,
     val liked: Boolean,
     val visitDate: String,
-    val images: List<String>
+    val images: List<String>,
+    val userProfileImage: String? = null,
+    val viewCount: Int = 0,
+    val isAuthor: Boolean = false,
 ) {
     companion object {
         fun stub() = ReviewDetail(
@@ -33,7 +36,7 @@ data class ReviewDetail(
             hospitalId = 1L,
             hospitalName = "hospital",
             treatmentService = "treatment",
-            animalType = AnimalCategory.fromString("BIRD"),
+            animalType = AnimalCategory.fromString("AVIAN"),
             detailAnimalType = AnimalSpecies.fromString("PARROT"),
             reviewContent = "review",
             facilityRating = 3.0,

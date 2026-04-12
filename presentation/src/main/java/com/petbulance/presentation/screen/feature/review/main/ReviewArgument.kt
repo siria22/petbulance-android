@@ -3,6 +3,8 @@ package com.petbulance.presentation.screen.feature.review.main
 import com.petbulance.domain.model.type.AnimalCategory
 import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
+import com.petbulance.presentation.utils.error.ErrorDisplayType
+import com.petbulance.presentation.utils.error.ErrorEvent
 import kotlinx.coroutines.flow.SharedFlow
 
 data class ReviewArgument(
@@ -31,8 +33,19 @@ sealed interface ReviewIntent {
 
     // 초기화 및 기타
     data object Refresh : ReviewIntent
+
+    // 신고
+    data class ReportReview(val reviewId: Long, val reason: String) : ReviewIntent
 }
 
 sealed interface ReviewEvent {
-    data class ShowErrorToast(val message: String) : ReviewEvent
+
+    sealed class DataFetch : ReviewEvent {
+        data object Success: DataFetch()
+        data class Error(
+            override val userMessage: String,
+            override val exceptionMessage: String?,
+            override val displayType: ErrorDisplayType = ErrorDisplayType.Common
+        ) : DataFetch(), ErrorEvent
+    }
 }

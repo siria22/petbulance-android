@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpdatePostResDto(
     val postId: Long,
-    val boardId: Long,
-    val category: String,
+    val type: String,
+    val topic: String,
     val title: String,
     val content: String,
     val imageUrls: List<String>,

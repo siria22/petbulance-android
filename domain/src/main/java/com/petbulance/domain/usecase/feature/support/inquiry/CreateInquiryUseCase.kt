@@ -7,7 +7,7 @@ import javax.inject.Inject
 class CreateInquiryUseCase @Inject constructor(
     private val repository: InquiryRepository
 ) {
-    suspend operator fun invoke(inquiry: InquiryRequest): String {
-        return repository.createInquiry(request = inquiry).getOrThrow()
+    suspend operator fun invoke(inquiry: InquiryRequest): Result<String> {
+        return repository.createInquiry(request = inquiry)
     }
 }

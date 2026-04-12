@@ -1,10 +1,10 @@
-package com.petbulance.data.repository.feature.hospital.search
+package com.petbulance.data.repository.feature.hospital.history
 
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.petbulance.data.datasource.local.database.dao.SearchDao
 import com.petbulance.data.datasource.local.database.dao.ViewedHospitalDao
 import com.petbulance.data.datasource.local.database.entity.SearchHistoryEntity
@@ -12,15 +12,15 @@ import com.petbulance.data.datasource.local.database.entity.ViewedHospitalEntity
 import com.petbulance.data.datasource.remote.network.common.safeApiCall
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.HistoryApi
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.RecentHospitalResDto
-import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.RecentHospitalSaveResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.ViewedHospitalResDto
 import com.petbulance.data.datasource.remote.network.feature.hospital.history.dto.ViewedHospitalSaveResDto
-import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
-import com.petbulance.domain.repository.feature.hospital.SearchRepository
 import com.petbulance.data.worker.SyncSearchWorker
+import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospital
+import com.petbulance.domain.repository.feature.hospital.SearchRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -49,6 +49,9 @@ class SearchRepositoryImpl @Inject constructor(
         safeApiCall<List<RecentHospitalResDto>>(path = "/recents/hospitals") {
             historyApi.getRecentKeywords()
         }.onSuccess { remoteList ->
+            val localItems = searchDao.getAllSearchHistory()
+            val remoteKeywords = remoteList.map { it.keyword }.toSet()
+
             val entities = remoteList.map { dto ->
                 SearchHistoryEntity(
                     serverId = dto.keywordId,
@@ -58,23 +61,39 @@ class SearchRepositoryImpl @Inject constructor(
                 )
             }
             searchDao.insertAll(entities)
+
+            localItems
+                .filter { !remoteKeywords.contains(it.keyword) && !it.isSynced }
+                .forEach { entity ->
+                    uploadSearchKeywordToServer(entity.keyword)
+                }
         }.onFailure {
             it.printStackTrace()
         }
     }
 
     override suspend fun addSearchKeyword(keyword: String) {
+        val existingEntity = searchDao.findByKeyword(keyword)
+        if (existingEntity != null) {
+            searchDao.deleteByKeyword(keyword)
+        }
+
         val entity = SearchHistoryEntity(
             keyword = keyword,
             timestamp = System.currentTimeMillis(),
             isSynced = false
         )
         searchDao.insertOrUpdate(entity)
+        uploadSearchKeywordToServer(keyword)
+    }
 
-        safeApiCall<RecentHospitalSaveResDto>(path = "/recents/hospitals") {
+    private suspend fun uploadSearchKeywordToServer(keyword: String) {
+        safeApiCall<Unit>(path = "/recents/hospitals") {
             historyApi.saveRecentKeyword(keyword)
         }.onSuccess {
-            searchDao.markAsSynced(keyword, it.keywordId)
+            searchDao.findByKeyword(keyword)?.let { entity ->
+                searchDao.insertOrUpdate(entity.copy(isSynced = true))
+            }
         }.onFailure {
             enqueueSyncWorker()
         }
@@ -97,17 +116,18 @@ class SearchRepositoryImpl @Inject constructor(
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        val syncRequest = OneTimeWorkRequestBuilder<SyncSearchWorker>().build()
+        val syncRequest = OneTimeWorkRequestBuilder<SyncSearchWorker>()
+            .setConstraints(constraints)
+            .build()
         workManager.enqueueUniqueWork("SyncSearchWork", ExistingWorkPolicy.KEEP, syncRequest)
     }
 
     private fun convertTimestampToString(timestamp: Long): String {
         return LocalDateTime.ofInstant(
-            java.time.Instant.ofEpochMilli(timestamp),
+            Instant.ofEpochMilli(timestamp),
             ZoneId.systemDefault()
         ).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
-
 
     override fun getViewedHospitalsStream(): Flow<List<ViewedHospital>> {
         return viewedHospitalDao.getViewedHospitalStream().map { entities ->
@@ -129,7 +149,7 @@ class SearchRepositoryImpl @Inject constructor(
                 ViewedHospitalEntity(
                     hospitalId = dto.hospitalId,
                     hospitalName = dto.name,
-                    timestamp = System.currentTimeMillis(), // 서버 Timestamp가 없다면 현재 시간 사용
+                    timestamp = System.currentTimeMillis(),
                     isSynced = true
                 )
             }
@@ -153,7 +173,7 @@ class SearchRepositoryImpl @Inject constructor(
         }.onSuccess {
             viewedHospitalDao.markAsSynced(hospitalId)
         }.onFailure {
-            // enqueueSyncWorker() // TODO: ViewedHospital용 SyncWorker 필요 시 구현
+            // ViewedHospital은 별도 Worker 없이 다음 syncViewedHospitals() 호출 시 처리
         }
     }
 
@@ -165,5 +185,4 @@ class SearchRepositoryImpl @Inject constructor(
             it.printStackTrace()
         }
     }
-
 }

@@ -11,15 +11,22 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.TermsType
+import com.petbulance.presentation.screen.nonfeature.auth.AuthViewModel
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsViewModel
 import com.petbulance.presentation.utils.CommonScreenWrapper
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
 fun NavGraphBuilder.searchDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Search.route,
-        // [Add] 아규먼트 정의
         arguments = listOf(
             navArgument(ScreenDestinations.Search.ARG_ANIMAL) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            },
+            navArgument(ScreenDestinations.Search.ARG_INITIAL_HOSPITAL_ID) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
@@ -29,18 +36,27 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val commonSearchViewModel: CommonSearchViewModel = hiltViewModel()
         val hospitalSearchViewModel: HospitalSearchViewModel = hiltViewModel()
         val userLocationViewModel: UserLocationViewModel = hiltViewModel()
+        val authViewModel : AuthViewModel = hiltViewModel()
+        val termsViewModel: TermsViewModel = hiltViewModel()
+
+        val initialHospitalIdString = entry.arguments?.getString(ScreenDestinations.Search.ARG_INITIAL_HOSPITAL_ID)
+        val initialHospitalId = initialHospitalIdString?.toLongOrNull()
 
         LaunchedEffect(Unit) {
             val animalName = entry.arguments?.getString(ScreenDestinations.Search.ARG_ANIMAL)
             val category = AnimalCategory.entries.find { it.name == animalName }
 
             if (category != null) {
-                val currentQuery = hospitalSearchViewModel.hospitalSearchQuery.value
+                val currentQuery = hospitalSearchViewModel.searchData.value.hospitalSearchQuery
                 hospitalSearchViewModel.onIntent(
                     HospitalSearchIntent.UpdateSearchQuery(
-                        currentQuery.copy(species = category)
+                        currentQuery.copy(animalCategories = listOf(category))
                     )
                 )
+            }
+
+            if (initialHospitalId != null) {
+                commonSearchViewModel.onIntent(SearchIntent.ChangeScreenState(SearchScreenState.Hospitals.MapView))
             }
         }
 
@@ -48,7 +64,6 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         val screenState by commonSearchViewModel.screenState.collectAsStateWithLifecycle()
         val commonSearchArgument = CommonSearchArgument(
             screenState = screenState,
-            event = commonSearchViewModel.eventFlow,
             intent = commonSearchViewModel::onIntent
         )
 
@@ -73,20 +88,14 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         )
 
         // HospitalSearchData
-        val hospitalSearchQuery by hospitalSearchViewModel.hospitalSearchQuery.collectAsStateWithLifecycle()
-        val hospitalList by hospitalSearchViewModel.hospitalList.collectAsStateWithLifecycle()
-        val recentSearchKeywords by hospitalSearchViewModel.recentSearchKeywords.collectAsStateWithLifecycle()
-        val viewedHospitals by hospitalSearchViewModel.viewedHospitals.collectAsStateWithLifecycle()
+        val hospitalData by hospitalSearchViewModel.searchData.collectAsStateWithLifecycle()
 
-        val hospitalData = HospitalSearchData(
-            hospitalSearchQuery = hospitalSearchQuery,
-            hospitalList = hospitalList,
-            recentSearchKeywords = recentSearchKeywords,
-            viewedHospitals = viewedHospitals
-        )
-
+        val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
         // Error State
         val errorState by hospitalSearchViewModel.errorDialogState.collectAsStateWithLifecycle()
+
+        // Terms Data
+        val locationTerm by termsViewModel.currentTerm.collectAsStateWithLifecycle()
 
         CommonScreenWrapper(
             errorState = errorState,
@@ -94,11 +103,15 @@ fun NavGraphBuilder.searchDestination(navController: NavController) {
         ) {
             SearchScreen(
                 navController = navController,
+                isGuest = (isLoggedIn == false),
                 userLocationArgument = userLocationArgument,
                 hospitalSearchArgument = hospitalSearchArgument,
                 commonSearchArgument = commonSearchArgument,
                 locationData = locationData,
-                hospitalSearchData = hospitalData
+                hospitalSearchData = hospitalData,
+                locationTerm = locationTerm,
+                onTermsClick = { termsViewModel.loadTermDetail(TermsType.LOCATION.name) },
+                initialHospitalId = initialHospitalId
             )
         }
     }

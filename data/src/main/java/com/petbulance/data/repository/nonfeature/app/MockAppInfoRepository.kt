@@ -1,4 +1,4 @@
-package com.petbulance.data.repository.nonfeature.app
+﻿package com.petbulance.data.repository.nonfeature.app
 
 import com.petbulance.domain.model.nonfeature.app.HealthCheckResult
 import com.petbulance.domain.model.nonfeature.app.MetadataResponse
@@ -6,6 +6,7 @@ import com.petbulance.domain.model.nonfeature.app.PresignFileRequest
 import com.petbulance.domain.model.nonfeature.app.PresignedUrl
 import com.petbulance.domain.model.nonfeature.app.RegionsResponse
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
+import com.petbulance.domain.utils.LOGGER_TAG
 import jakarta.inject.Inject
 
 class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
@@ -46,6 +47,14 @@ class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
             )
         )
         return Result.success(mockPresignedUrlList)
+    }
+
+    override suspend fun uploadImage(
+        url: String,
+        imageBytes: ByteArray,
+        mimeType: String
+    ): Result<Unit> {
+        return Result.success(Unit)
     }
 }
 

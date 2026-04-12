@@ -36,7 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
-import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.feature.hospital.hospital.HospitalTag
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
@@ -175,13 +176,11 @@ fun HospitalCard(
 
                 Dot()
 
-                hospital.openHours?.let { hours ->
-                    Text(
-                        text = hours,
-                        style = typography.labelLarge,
-                        color = colorScheme.text.secondary
-                    )
-                }
+                Text(
+                    text = hospital.openHours ?: "정보 없음",
+                    style = typography.labelLarge,
+                    color = colorScheme.text.secondary
+                )
 
                 Dot()
 
@@ -196,14 +195,21 @@ fun HospitalCard(
                         style = typography.labelLarge,
                         color = colorScheme.text.caption
                     )
+                } ?: run {
+                    Text(
+                        text = "-",
+                        style = typography.labelLarge,
+                        color = colorScheme.text.caption
+                    )
                 }
             }
 
-            if (!hospital.phone.isNullOrBlank()) {
+            val phone = hospital.phone
+            if (!phone.isNullOrBlank()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.clickable { onCopyPhoneClick(hospital.phone!!) }
+                    modifier = Modifier.clickable { onCopyPhoneClick(phone) }
                 ) {
                     BasicIcon(
                         iconResource = IconResource.Vector(Icons.Default.Call),
@@ -212,14 +218,13 @@ fun HospitalCard(
                         tint = colorScheme.tag.blue.medium,
                         modifier = Modifier.clickable {
                             val intent = Intent(Intent.ACTION_DIAL).apply {
-                                data = "tel:${hospital.phone!!}".toUri()
+                                data = "tel:$phone".toUri()
                             }
-                            // 3. Activity 시작
                             context.startActivity(intent)
                         }
                     )
                     Text(
-                        text = hospital.phone!!,
+                        text = phone,
                         style = typography.labelLarge.emp(),
                         color = colorScheme.tag.blue.medium
                     )
@@ -230,7 +235,7 @@ fun HospitalCard(
                         tint = colorScheme.icon.light,
                         modifier = Modifier.clickable {
                             scope.launch {
-                                val clipData = ClipData.newPlainText("Phone", hospital.phone!!)
+                                val clipData = ClipData.newPlainText("Phone", phone)
                                 val clipEntry = ClipEntry(clipData)
                                 clipboardManager.setClipEntry(clipEntry)
                             }
@@ -239,11 +244,24 @@ fun HospitalCard(
                 }
             }
 
-            if (hospital.types.isNotEmpty()) {
+            val tags = hospital.tags.orEmpty()
+
+            if (tags.isNotEmpty()) {
+                val orderedTags = tags.sortedWith(
+                    compareBy { tag ->
+                        when (tag.type) {
+                            TAG_TYPE_WORK -> 0
+                            TAG_TYPE_ANIMAL -> 1
+                            TAG_TYPE_LOCATION -> 2
+                            else -> 3
+                        }
+                    }
+                )
+
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    maxLines = 1, // TODO : Deprecated FlowRowOverflow
+                    maxLines = 1,
                     overflow = FlowRowOverflow.expandOrCollapseIndicator(
                         expandIndicator = {
                             Text(
@@ -256,19 +274,28 @@ fun HospitalCard(
                         collapseIndicator = { }
                     )
                 ) {
-                    hospital.types.forEach { type ->
-                        val text = try {
-                            AnimalCategory.fromString(type).korean
-                        } catch (e: IllegalArgumentException) {
-                            type
+                    orderedTags.forEach { tag ->
+                        val bgColor = when (tag.type) {
+                            TAG_TYPE_WORK -> colorScheme.tag.red.verysubtle
+                            TAG_TYPE_ANIMAL -> colorScheme.tag.yellow.subtle
+                            TAG_TYPE_LOCATION -> colorScheme.tag.trust.bg
+                            else -> colorScheme.tag.yellow.subtle
                         }
-                        BasicChip(text = text)
+
+                        BasicChip(
+                            text = tag.value,
+                            backgroundColor = bgColor
+                        )
                     }
                 }
             }
         }
     }
 }
+
+private const val TAG_TYPE_WORK = "WORKTYPE"
+private const val TAG_TYPE_ANIMAL = "ANIMALTYPE"
+private const val TAG_TYPE_LOCATION = "LOCATIONTYPE"
 
 @Preview
 @Composable

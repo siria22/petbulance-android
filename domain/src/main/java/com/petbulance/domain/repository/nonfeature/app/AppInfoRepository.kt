@@ -1,4 +1,4 @@
-package com.petbulance.domain.repository.nonfeature.app
+﻿package com.petbulance.domain.repository.nonfeature.app
 
 import com.petbulance.domain.model.nonfeature.app.HealthCheckResult
 import com.petbulance.domain.model.nonfeature.app.MetadataResponse
@@ -16,6 +16,6 @@ interface AppInfoRepository {
         communityCategory: String
     ): Result<MetadataResponse>
 
-    // [ADD] Presigned URL 발급 메서드 추가
     suspend fun getPresignedUrl(files: List<PresignFileRequest>): Result<List<PresignedUrl>>
+    suspend fun uploadImage(url: String, imageBytes: ByteArray, mimeType: String): Result<Unit>
 }

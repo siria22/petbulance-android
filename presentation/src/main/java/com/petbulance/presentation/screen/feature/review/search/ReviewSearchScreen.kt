@@ -43,12 +43,18 @@ import com.petbulance.presentation.component.ui.molecule.FilterBottomSheetTab
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXXS
+import com.petbulance.presentation.screen.feature.review.common.ReviewReportReasonDialog
+import com.petbulance.presentation.screen.feature.review.detail.composables.DeleteOrEdit
+import com.petbulance.presentation.screen.feature.review.detail.composables.ReportOptionDialog
 import com.petbulance.presentation.screen.feature.review.main.ReviewData
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewEmptyView
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewListContent
 import com.petbulance.presentation.screen.feature.review.main.composables.ReviewSortTypeDialog
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.screen.feature.search.main.views.search.SearchBar
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
+import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,46 +68,74 @@ fun ReviewSearchScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var startTab by remember { mutableStateOf(FilterBottomSheetTab.REGION) }
     var showSortingDialog by remember { mutableStateOf(false) }
+    
+    var showMoreOption by remember { mutableStateOf(false) }
+    var selectedReviewId by remember { mutableStateOf<Long?>(null) }
+    var showReportReasonDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var selectedReason by remember { mutableStateOf("") }
+    
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
             SearchBar(
-                queryString = data.query,
+                queryString = data.searchQueryModel.query ?: "",
                 onQueryStringChanged = { argument.intent(ReviewSearchIntent.UpdateQuery(it)) },
-                onMoveBackIconClicked = { navController.popBackStack() },
-                onSearchButtonClicked = { argument.intent(ReviewSearchIntent.Search) }
+                onMoveBackIconClicked = { navController.safePopBackStack() },
+                onSearchButtonClicked = { value ->
+                    argument.intent(ReviewSearchIntent.UpdateQuery(value))
+                    argument.intent(ReviewSearchIntent.Search)
+                }
             )
         },
         containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             if (data.isSearchResultMode) {
-                ReviewListContent(
-                    data = ReviewData(
-                        reviews = data.searchResults,
-                        selectedRegion = null,
-                        selectedDistrict = null,
-                        selectedAnimalType = null,
-                        isLoadingNextPage = data.isLoadingNextPage,
-                        selectedSort = ReviewSortType.LATEST,
-                        isReceiptVerified = false,
-                        isPhotoReview = false
-                    ),
-                    onLoadMore = { argument.intent(ReviewSearchIntent.LoadMore) },
-                    onFilterClick = { tab ->
-                        startTab = tab
-                        showBottomSheet = true
-                    },
-                    onSortClick = { showSortingDialog = true },
-                    onReceiptToggle = { argument.intent(ReviewSearchIntent.ToggleReceipt) },
-                    onPhotoToggle = { argument.intent(ReviewSearchIntent.TogglePhotoReview) },
-                    emptyView = {
-                        ReviewEmptyView(
-                            title = "'${data.query}'에 대한 결과가 없어요.",
-                            description = "오타가 있는지 확인하거나 다른 검색어를 입력해보세요."
+                if (argument.state is ReviewSearchState.Loading && data.searchResults.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = colorScheme.action.primary.default
                         )
                     }
-                )
+                } else {
+                    ReviewListContent(
+                        data = ReviewData(
+                            reviews = data.searchResults,
+                            selectedRegion = data.searchQueryModel.region,
+                            selectedDistrict = data.searchQueryModel.district,
+                            selectedAnimalType = data.searchQueryModel.animalCategories.firstOrNull(),
+                            isLoadingNextPage = data.isLoadingNextPage,
+                            selectedSort = ReviewSortType.LATEST,
+                            isReceiptVerified = false,
+                            isPhotoReview = false
+                        ),
+                        onLoadMore = { argument.intent(ReviewSearchIntent.LoadMore) },
+                        onFilterClick = { tab ->
+                            startTab = tab
+                            showBottomSheet = true
+                        },
+                        onSortClick = { showSortingDialog = true },
+                        onReceiptToggle = { argument.intent(ReviewSearchIntent.ToggleReceipt) },
+                        onPhotoToggle = { argument.intent(ReviewSearchIntent.TogglePhotoReview) },
+                        emptyView = {
+                            ReviewEmptyView(
+                                title = "'${data.searchQueryModel.query}'에 대한 결과가 없어요.",
+                                description = "오타가 있는지 확인하거나 다른 검색어를 입력해보세요."
+                            )
+                        },
+                        onReviewClick = {
+                            navController.safeNavigate(
+                                ScreenDestinations.Review.Detail.createRoute(it)
+                            )
+                        },
+                        onMoreClick = { reviewId ->
+                            selectedReviewId = reviewId
+                            showMoreOption = true
+                        }
+                    )
+                }
             } else {
                 RecentSearchList(
                     keywords = data.recentKeywords,
@@ -117,34 +151,23 @@ fun ReviewSearchScreen(
         }
     }
 
-    if (showBottomSheet) {
-        FilterBottomSheet(
-            currentQuery = HospitalSearchQueryUiModel.empty.copy(
-                region = data.selectedRegion,
-                district = data.selectedDistrict,
-                species = data.selectedAnimalType
-            ),
-            startTab = startTab,
-            showBottomSheet = showBottomSheet,
-            sheetState = sheetState,
-            onDismissRequest = { showBottomSheet = false },
-            onQuerySet = { query ->
-                query.region?.let {
-                    argument.intent(ReviewSearchIntent.ChangeRegion(it, query.district ?: ""))
-                }
-                query.species?.let {
-                    argument.intent(ReviewSearchIntent.ChangeAnimalType(it))
-                }
-                showBottomSheet = false
-            },
-            onResetFilterClicked = {
-                argument.intent(ReviewSearchIntent.Refresh)
-            },
-            onSearchButtonClicked = {
-                showBottomSheet = false
-            }
-        )
-    }
+    FilterBottomSheet(
+        currentQuery = data.searchQueryModel,
+        startTab = startTab,
+        showBottomSheet = showBottomSheet,
+        sheetState = sheetState,
+        onDismissRequest = { showBottomSheet = false },
+        onQuerySet = { query ->
+            argument.intent(ReviewSearchIntent.UpdateFilter(query))
+            showBottomSheet = false
+        },
+        onResetFilterClicked = {
+            argument.intent(ReviewSearchIntent.Refresh)
+        },
+        onSearchButtonClicked = {
+            showBottomSheet = false
+        }
+    )
 
     if (showSortingDialog) {
         ReviewSortTypeDialog(
@@ -153,6 +176,70 @@ fun ReviewSearchScreen(
             onSortTypeSelected = { sortType ->
                 argument.intent(ReviewSearchIntent.ChangeSort(sortType))
                 showSortingDialog = false
+            }
+        )
+    }
+    
+    if (showMoreOption) {
+        val selectedReview = selectedReviewId?.let { id ->
+            data.searchResults.find { it.id == id }
+        }
+        
+        if (selectedReview?.isAuthor == true) {
+            DeleteOrEdit(
+                onDeleteOptionClicked = {
+                    showMoreOption = false
+                    showDeleteConfirmDialog = true
+                },
+                onEditOptionClicked = {
+                    showMoreOption = false
+                    selectedReviewId?.let { reviewId ->
+                        navController.safeNavigate(
+                            ScreenDestinations.Review.Edit.createRoute(reviewId)
+                        )
+                    }
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        } else {
+            ReportOptionDialog(
+                onReportOptionClicked = {
+                    showMoreOption = false
+                    showReportReasonDialog = true
+                },
+                onDismissRequest = { showMoreOption = false }
+            )
+        }
+    }
+    
+    if (showDeleteConfirmDialog) {
+        // TODO: 삭제 확인 다이얼로그 추가 필요
+        showDeleteConfirmDialog = false
+        selectedReviewId?.let { reviewId ->
+            // argument.intent(ReviewSearchIntent.DeleteReview(reviewId))
+        }
+        selectedReviewId = null
+    }
+    
+    if (showReportReasonDialog) {
+        ReviewReportReasonDialog(
+            selectedReason = selectedReason,
+            onReasonClicked = { reason ->
+                selectedReason = reason
+            },
+            onSubmitClicked = {
+                showReportReasonDialog = false
+                selectedReviewId?.let { reviewId ->
+                    argument.intent(ReviewSearchIntent.ReportReview(reviewId, selectedReason))
+                    android.widget.Toast.makeText(context, "신고가 접수되었습니다.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                selectedReviewId = null
+                selectedReason = ""
+            },
+            onDismissRequest = {
+                showReportReasonDialog = false
+                selectedReviewId = null
+                selectedReason = ""
             }
         )
     }
@@ -265,7 +352,7 @@ private fun ReviewSearchScreenPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewSearchData(
-                query = "햄스터",
+                searchQueryModel = HospitalSearchQueryUiModel.empty.copy(query = "햄스터"),
                 recentKeywords = listOf(
                     RecentSearchKeyword(1, "강남 동물병원", "2024.01.01"),
                     RecentSearchKeyword(2, "골절", "2024.01.02")
@@ -290,14 +377,14 @@ private fun ReviewSearchResultPreview() {
                 event = MutableSharedFlow()
             ),
             data = ReviewSearchData(
-                query = "강남",
+                searchQueryModel = HospitalSearchQueryUiModel.empty.copy(query = "강남"),
                 recentKeywords = emptyList(),
                 searchResults = listOf(
                     HospitalReview(
                         id = 1,
                         isReceiptVerified = true,
                         treatment = "슬개골 탈구 수술",
-                        animalType = AnimalCategory.fromString("BIRD"),
+                        animalType = AnimalCategory.fromString("AVIAN"),
                         detailAnimalType = AnimalSpecies.fromString("PARROT"),
                         content = "친절하고 꼼꼼하게 봐주셔서 좋았습니다. 수술 경과도 매우 좋아요!",
                         rating = 4.5,
@@ -313,7 +400,7 @@ private fun ReviewSearchResultPreview() {
                         id = 2,
                         isReceiptVerified = false,
                         treatment = "종합 백신 접종",
-                        animalType = AnimalCategory.fromString("BIRD"),
+                        animalType = AnimalCategory.fromString("AVIAN"),
                         detailAnimalType = AnimalSpecies.fromString("PARROT"),
                         content = "대기 시간이 좀 길었지만 선생님은 친절하셨어요.",
                         rating = 3.5,
@@ -328,9 +415,6 @@ private fun ReviewSearchResultPreview() {
                 ),
                 isSearchResultMode = true,
                 isLoadingNextPage = false,
-                selectedRegion = null,
-                selectedDistrict = null,
-                selectedAnimalType = null,
                 selectedSort = ReviewSortType.LATEST,
                 isReceiptVerified = false,
                 isPhotoReview = false

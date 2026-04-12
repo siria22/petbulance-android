@@ -12,6 +12,7 @@ import com.naver.maps.map.NaverMap
  * 검색 화면 전체에서 공유하는 UI 상태
  */
 data class SearchUiState(
+    val isGuest: Boolean,
     val hospitalList: List<Hospital>,
     val currentQuery: HospitalSearchQueryUiModel,
     val selectedSortType: HospitalSortType = HospitalSortType.DISTANCE,
@@ -21,18 +22,17 @@ data class SearchUiState(
     val isSelectSortTypeDialogVisible: Boolean = false,
     val currentUserLocation: Location = Location("Default").apply { latitude = 37.57; longitude = 126.98 }
 ) {
-    val filteredHospitalList: List<Hospital>
-        get() = hospitalList
-            .asSequence()
-            .filter { if (isOpenNowOnly) it.isOpenNow else true }
-            .sortedByDescending {
-                when (selectedSortType) {
-                    HospitalSortType.DISTANCE -> it.distanceMeters
-                    HospitalSortType.REVIEW -> it.reviewCount?.toDouble()
-                    HospitalSortType.RATING -> it.rating
-                }
+    val filteredHospitalList: List<Hospital> = hospitalList
+        .asSequence()
+        .filter { if (isOpenNowOnly) it.isOpenNow else true }
+        .let { sequence ->
+            when (selectedSortType) {
+                HospitalSortType.DISTANCE -> sequence.sortedBy { it.distanceMeters }
+                HospitalSortType.REVIEW -> sequence.sortedByDescending { it.reviewCount }
+                HospitalSortType.RATING -> sequence.sortedByDescending { it.rating }
             }
-            .toList()
+        }
+        .toList()
 }
 
 /**

@@ -12,7 +12,6 @@ import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -131,9 +130,11 @@ class ReviewApi @Inject constructor(
         }
     }
 
-    suspend fun uploadImage(url: String, imageBytes: ByteArray): HttpResponse {
-        return client.put(url) {
-            setBody(imageBytes)
-        }
+    suspend fun likeReview(reviewId: Long): HttpResponse {
+        return client.post("$baseUrl/$reviewId/like")
+    }
+
+    suspend fun unlikeReview(reviewId: Long): HttpResponse {
+        return client.delete("$baseUrl/$reviewId/like")
     }
 }

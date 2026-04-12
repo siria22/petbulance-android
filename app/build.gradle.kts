@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services") version "4.4.4" apply false
+    id("com.google.gms.google-services") version "4.4.4"
     alias(libs.plugins.firebase.crashlytics)
 
     alias(libs.plugins.devtoolsKsp)
@@ -28,7 +28,7 @@ android {
         applicationId = "com.petbulance.petbulance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = 9
         versionName = "v1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

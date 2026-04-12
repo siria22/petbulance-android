@@ -64,7 +64,7 @@ data class PostDetailInfo(
 )
 
 data class WriterInfo(
-    val nickname: String,
+    val nickname: String?,
     val profileUrl: String?
 )
 

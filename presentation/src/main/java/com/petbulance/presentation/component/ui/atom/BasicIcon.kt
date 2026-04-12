@@ -15,6 +15,7 @@ import com.petbulance.presentation.component.theme.PetbulanceTheme
 sealed interface IconResource {
     data class Vector(val imageVector: ImageVector) : IconResource
     data class Drawable(@DrawableRes val resId: Int) : IconResource
+    data class Text(val text: @Composable () -> Unit) : IconResource
 }
 
 @Composable
@@ -42,6 +43,10 @@ fun BasicIcon(
                 tint = tint,
                 modifier = modifier.size(size)
             )
+        }
+
+        is IconResource.Text -> {
+            iconResource.text()
         }
     }
 }

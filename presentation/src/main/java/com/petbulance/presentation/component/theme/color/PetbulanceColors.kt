@@ -230,6 +230,7 @@ data class IconColors private constructor(
     val disabled: Color,
     val dark: Color,
     val light: Color,
+    val veryLight: Color,
     val medium: Color,
     val rating: Color
 ) {
@@ -241,10 +242,11 @@ data class IconColors private constructor(
             disabled: Color,
             dark: Color,
             light: Color,
+            veryLight: Color,
             medium: Color,
             rating: Color
         ): IconColors {
-            return IconColors(gnb, basic, inverse, disabled, dark, light, medium, rating)
+            return IconColors(gnb, basic, inverse, disabled, dark, light, veryLight, medium, rating)
         }
     }
 }

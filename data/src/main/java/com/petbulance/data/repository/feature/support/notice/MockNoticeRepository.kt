@@ -1,9 +1,10 @@
 package com.petbulance.data.repository.feature.support.notice
 
 import com.petbulance.domain.model.feature.support.notice.NoticeDetail
+import com.petbulance.domain.model.type.NoticeStatusType
 import com.petbulance.domain.model.feature.support.notice.PagingNoticeList
 import com.petbulance.domain.repository.feature.support.NoticeRepository
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class MockNoticeRepository @Inject constructor() : NoticeRepository {
     override suspend fun getNoticeList(
@@ -28,7 +29,7 @@ class MockNoticeRepository @Inject constructor() : NoticeRepository {
                 attachments = emptyList(),
                 previousNotice = null,
                 nextNotice = null,
-                isImportant = false
+                noticeStatus = NoticeStatusType.NOTICE
             )
         )
     }

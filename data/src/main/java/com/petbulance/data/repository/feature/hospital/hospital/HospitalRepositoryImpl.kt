@@ -22,8 +22,6 @@ class HospitalRepositoryImpl @Inject constructor(
     override suspend fun searchHospitals(
         q: String?,
         region: String?,
-        lat: Double?,
-        lng: Double?,
         bounds: String?,
         animal: String?,
         openNow: Boolean?,
@@ -41,8 +39,6 @@ class HospitalRepositoryImpl @Inject constructor(
                 HospitalSearchReqDto(
                     q = q,
                     region = region,
-                    lat = lat,
-                    lng = lng,
                     bounds = bounds,
                     animal = animal,
                     openNow = openNow,
@@ -66,21 +62,21 @@ class HospitalRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
-        return safeApiCall<HospitalDetailResDto>(path = "/hospitals/$hospitalId") {
+    override suspend fun getHospitalDetail(
+        hospitalId: Long
+    ): Result<HospitalDetail> {
+        return safeApiCall<HospitalDetailResDto>(
+            path = "/hospitals/$hospitalId"
+        ) {
             api.searchHospitalDetail(hospitalId)
-        }.map {
-            it.toDomain()
-        }
+        }.map { it.toDomain() }
     }
 
     override suspend fun getHospitalCard(
-        hospitalId: Long,
-        userLat: Double,
-        userLng: Double
+        hospitalId: Long
     ): Result<HospitalCard> {
         return safeApiCall<HospitalCardResDto>(path = "/hospitals/card/$hospitalId") {
-            api.searchHospitalCard(hospitalId, userLat, userLng)
+            api.searchHospitalCard(hospitalId)
         }.map { it.toDomain() }
     }
 

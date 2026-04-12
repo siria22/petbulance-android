@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,14 +43,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.petbulance.domain.model.feature.community.post.PostDetail
+import com.petbulance.domain.model.feature.community.post.PostSummary
+import com.petbulance.domain.model.feature.home.HomeBanner
 import com.petbulance.domain.model.feature.home.HomeScreenReview
 import com.petbulance.domain.model.type.AnimalCategory
+import com.petbulance.domain.model.type.PostCategory
 import com.petbulance.domain.utils.LOGGER_TAG
 import com.petbulance.presentation.R
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
+import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.Space16
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
@@ -61,19 +63,29 @@ import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeMedium
+import com.petbulance.presentation.component.ui.molecule.ComingSoonPlaceholder
+import com.petbulance.presentation.component.ui.molecule.SectionErrorView
+import com.petbulance.presentation.component.ui.molecule.SectionLoadingPlaceholder
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
+import com.petbulance.presentation.component.ui.organism.PullToRefreshContainer
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.component.ui.spacingXXS
+import com.petbulance.presentation.screen.feature.home.composables.HomeScreenEmptyStateUi
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsData
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
+import com.petbulance.presentation.utils.SectionLoadState
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.LocalAnalyticsTracker
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -100,9 +112,8 @@ fun HomeScreen(
                 is TermsEvent.NavigateToNext -> {
                     showTermsSheet = false
                 }
-                is TermsEvent.DataFetch.Error -> {
 
-                }
+                else -> {}
             }
         }
     }
@@ -143,19 +154,36 @@ fun HomeScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             HomeScreenContents(
+                argument = argument,
                 data = data,
+                navigateToReviewDetail = { reviewId ->
+                    navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(reviewId))
+                },
                 onNavigateToSearch = { navController.safeNavigate(ScreenDestinations.Search.route) },
                 navigateToHospitalSearchPageWithAnimalType = { animalCategory ->
                     navController.safeNavigate(ScreenDestinations.Search.createRoute(animalCategory))
                 },
-                onNavigateToReview = { /* TODO: navController.navigate(...) */ },
-                onNavigateToCommunity = { /* TODO: navController.navigate(...) */ },
+                onNavigateToReview = { navController.safeNavigate(ScreenDestinations.Review.route) },
+                onNavigateToCommunity = { navController.safeNavigate(ScreenDestinations.Community.route) },
+                onPostClick = { postId ->
+                    navController.safeNavigate(
+                        ScreenDestinations.Community.PostDetail.createRoute(
+                            postId
+                        )
+                    )
+                },
+                onBannerClick = { noticeId ->
+                    navController.safeNavigate(
+                        ScreenDestinations.MyPage.Help.Notice.Detail.createRoute(
+                            noticeId
+                        )
+                    )
+                }
             )
         }
     }
 
     val onDismissRequest = {
-        // TODO: 정책 확정 시 추가 처리
         Log.d("$LOGGER_TAG - HomeScreen", "Terms sheet dismissed without full agreement")
         showTermsSheet = false
     }
@@ -173,38 +201,73 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
+        if (termsData.currentTerm != null) {
+            TermsDetailOverlay(
+                termsData.currentTerm,
+                onDismissRequest = { termsIntent(TermsIntent.OnCloseDetail) }
+            )
+        }
     }
 }
 
 @Composable
 private fun HomeScreenContents(
+    argument: HomeArgument,
     data: HomeData,
     onNavigateToSearch: () -> Unit,
+    navigateToReviewDetail: (Long) -> Unit,
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
     onNavigateToReview: () -> Unit,
-    onNavigateToCommunity: () -> Unit
+    onNavigateToCommunity: () -> Unit,
+    onPostClick: (Long) -> Unit,
+    onBannerClick: (Long) -> Unit
 ) {
-    Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceAround
+    val scrollState = rememberScrollState()
+
+    PullToRefreshContainer(
+        scrollState = scrollState,
+        onRefresh = {
+            argument.intent(HomeIntent.RetryReviews)
+            argument.intent(HomeIntent.RetryBanners)
+            argument.intent(HomeIntent.RetryHotArticles)
+        }
     ) {
-        HospitalShortcut(
-            onClicked = onNavigateToSearch,
-            navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
-        )
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
+            HospitalShortcut(
+                onClicked = onNavigateToSearch,
+                banners = data.homeBanners,
+                bannerState = argument.bannerState,
+                onRetryBanners = { argument.intent(HomeIntent.RetryBanners) },
+                navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType,
+                onBannerClick = onBannerClick
+            )
 
-        HospitalReviewShortcut(
-            reviews = data.recentReviews,
-            onClicked = onNavigateToReview
-        )
+            HospitalReviewShortcut(
+                reviews = data.recentReviews,
+                reviewState = argument.reviewState,
+                onRetryReviews = { argument.intent(HomeIntent.RetryReviews) },
+                onClicked = onNavigateToReview,
+                onReviewItemClicked = { reviewId ->
+                    navigateToReviewDetail(reviewId)
+                }
+            )
 
-        HotArticlesShortcut(
-            posts = data.hotArticles,
-            onClicked = onNavigateToCommunity
-        )
+            HotArticlesShortcut(
+                posts = data.hotArticles,
+                hotArticleState = argument.hotArticleState,
+                onRetryHotArticles = { argument.intent(HomeIntent.RetryHotArticles) },
+                onClicked = onNavigateToCommunity,
+                onPostClick = onPostClick
+            )
+        }
     }
 }
-
 
 @Composable
 private fun CommonHeader(
@@ -216,6 +279,7 @@ private fun CommonHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClicked)
             .padding(
                 top = spacingXS,
                 bottom = spacingXS,
@@ -226,14 +290,13 @@ private fun CommonHeader(
         Text(
             text = headerText,
             color = colorScheme.text.primary,
-            style = MaterialTheme.typography.bodyLarge.emp(),
+            style = typography.bodyLarge.emp(),
         )
         BasicIcon(
             iconResource = IconResource.Vector(Icons.Default.ChevronRight),
             contentDescription = "Move to Hospital Search Page",
             size = iconSizeMedium,
-            tint = colorScheme.icon.dark,
-            modifier = Modifier.clickable { onClicked() }
+            tint = colorScheme.icon.dark
         )
     }
 }
@@ -241,7 +304,11 @@ private fun CommonHeader(
 @Composable
 private fun HospitalShortcut(
     onClicked: () -> Unit,
-    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
+    navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit,
+    banners: List<HomeBanner>,
+    bannerState: SectionLoadState,
+    onRetryBanners: () -> Unit,
+    onBannerClick: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -253,7 +320,23 @@ private fun HospitalShortcut(
         HospitalShortcutAnimalRow(
             navigateToHospitalSearchPageWithAnimalType = navigateToHospitalSearchPageWithAnimalType
         )
-        HospitalNoticeSlider()
+        when (bannerState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 180.dp)
+            }
+
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = bannerState.message,
+                    onRetry = onRetryBanners,
+                    height = 180.dp
+                )
+            }
+
+            else -> {
+                HospitalNoticeSlider(banners, onBannerClick)
+            }
+        }
     }
 }
 
@@ -261,6 +344,7 @@ private fun HospitalShortcut(
 private fun HospitalShortcutAnimalRow(
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
 ) {
+    val analyticsTracker = LocalAnalyticsTracker.current
     val images = listOf(
         painterResource(R.drawable.img_all),
         painterResource(R.drawable.img_small_mammals),
@@ -286,6 +370,10 @@ private fun HospitalShortcutAnimalRow(
                 verticalArrangement = Arrangement.spacedBy(spacingXXS),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvents.SELECT_PET_CATEGORY_HOME,
+                        mapOf(AnalyticsEvents.Params.PET_TYPE to category[idx].korean)
+                    )
                     navigateToHospitalSearchPageWithAnimalType(category[idx])
                 }
             ) {
@@ -293,7 +381,7 @@ private fun HospitalShortcutAnimalRow(
                 Text(
                     text = category[idx].korean,
                     color = colorScheme.text.primary,
-                    style = MaterialTheme.typography.bodySmall.emp(),
+                    style = typography.bodySmall.emp(),
                 )
             }
         }
@@ -322,33 +410,38 @@ private fun AnimalCategoryCircle(resourceId: Painter) {
 }
 
 @Composable
-private fun HospitalNoticeSlider() {
-    /* Mocked ads items */
-    val items = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
+private fun HospitalNoticeSlider(
+    banners: List<HomeBanner>,
+    onBannerClick: (Long) -> Unit
+) {
+    if (banners.isEmpty()) return
 
     BaseCarousel(
-        items = items,
+        items = banners,
         contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingSmall),
         itemSpacing = 16.dp,
-        isIndicatorVisible = true
+        isIndicatorVisible = true,
+        autoScroll = true,
+        autoScrollInterval = 3000L
     ) { _, item ->
-        Box(
+        BasicImageBox(
+            uri = item.imageUrl.toUri(),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
-                .background(Color.LightGray, RoundedCornerShape(4.dp))
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = item)
-        }
+                .heightIn(max = 180.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onBannerClick(item.noticeId) },
+        )
     }
 }
 
 @Composable
 private fun HospitalReviewShortcut(
     reviews: List<HomeScreenReview>,
-    onClicked: () -> Unit
+    reviewState: SectionLoadState,
+    onRetryReviews: () -> Unit,
+    onClicked: () -> Unit,
+    onReviewItemClicked: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -357,36 +450,54 @@ private fun HospitalReviewShortcut(
             headerText = "최신 영수증 후기",
             onClicked = onClicked
         )
-        RecentReviewSlider(reviews)
-    }
-}
+        when (reviewState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 150.dp)
+            }
 
-@Composable
-private fun RecentReviewSlider(reviews: List<HomeScreenReview>) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (reviews.isEmpty()) {
-            Text(
-                text = "내용이 없습니다.",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall.emp()
-            )
-        } else {
-            BaseCarousel(
-                items = reviews.take(3),
-                contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingXS),
-                itemSpacing = spacingXS
-            ) { _, item ->
-                RecentReviewSliderItem(item)
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = reviewState.message,
+                    onRetry = onRetryReviews,
+                    height = 150.dp
+                )
+            }
+
+            else -> {
+                RecentReviewSlider(reviews, onReviewItemClicked)
             }
         }
     }
 }
 
 @Composable
-private fun RecentReviewSliderItem(item: HomeScreenReview) {
+private fun RecentReviewSlider(
+    reviews: List<HomeScreenReview>,
+    onReviewItemClicked: (Long) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (reviews.isEmpty()) {
+            HomeScreenEmptyStateUi()
+        } else {
+            BaseCarousel(
+                items = reviews.take(3),
+                contentPadding = PaddingValues(horizontal = spacingMedium, vertical = spacingXS),
+                itemSpacing = spacingXS
+            ) { _, item ->
+                RecentReviewSliderItem(item, onReviewItemClicked)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentReviewSliderItem(
+    item: HomeScreenReview,
+    onReviewItemClicked: (Long) -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(spacingSmall),
         modifier = Modifier
@@ -394,6 +505,7 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
                 color = colorScheme.bg.frame.subtle,
                 shape = RoundedCornerShape(16.dp)
             )
+            .clickable { onReviewItemClicked(item.id) }
             .padding(vertical = spacingMedium, horizontal = spacingSmall)
     ) {
         if (item.image != null) {
@@ -409,7 +521,7 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
         ) {
             Text(
                 text = item.hospitalName,
-                style = MaterialTheme.typography.bodyMedium.emp(),
+                style = typography.bodyMedium.emp(),
                 color = colorScheme.text.primary,
             )
             Row(
@@ -420,18 +532,18 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
                 StarRatingView(rating = item.rating)
                 Text(
                     text = "(${item.rating})",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = typography.labelMedium,
                     color = colorScheme.text.tertiary,
                 )
                 Text(
                     text = "${item.reviewCount}",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = typography.labelMedium,
                     color = colorScheme.text.tertiary,
                 )
             }
             Text(
                 text = item.content,
-                style = MaterialTheme.typography.labelSmall,
+                style = typography.labelSmall,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
                 color = colorScheme.text.primary,
@@ -442,125 +554,118 @@ private fun RecentReviewSliderItem(item: HomeScreenReview) {
 
 @Composable
 private fun HotArticlesShortcut(
-    posts: List<PostDetail>?,
-    onClicked: () -> Unit
+    posts: List<PostSummary>,
+    hotArticleState: SectionLoadState,
+    onRetryHotArticles: () -> Unit,
+    onClicked: () -> Unit,
+    onPostClick: (Long) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CommonHeader(
-            headerText = "인기 게시글",
+            headerText = "커뮤니티 인기 게시글",
             onClicked = onClicked
         )
 
-        if (posts.isNullOrEmpty()) {
-            Text(
-                modifier = Modifier.padding(vertical = spacingSmall),
-                text = "내용이 없습니다.",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall.emp()
-            )
-        } else {
-            posts.forEach { post ->
-                HotArticlesItem(post = post)
+        when (hotArticleState) {
+            is SectionLoadState.Loading -> {
+                SectionLoadingPlaceholder(height = 200.dp)
+            }
+
+            is SectionLoadState.Error -> {
+                SectionErrorView(
+                    message = hotArticleState.message,
+                    onRetry = onRetryHotArticles,
+                    height = 200.dp
+                )
+            }
+
+            is SectionLoadState.Success -> {
+                if (posts.isEmpty()) {
+                    ComingSoonPlaceholder()
+                } else {
+                    Column {
+                        posts.forEachIndexed { index, post ->
+                            HotArticleItem(
+                                post = post,
+                                onClick = { onPostClick(post.id) }
+                            )
+                            if (index < posts.lastIndex) {
+                                CommonDivider()
+                            }
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                ComingSoonPlaceholder()
             }
         }
     }
 }
 
 @Composable
-private fun HotArticlesItem(post: PostDetail) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacingMedium, vertical = spacingXXS)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = colorScheme.bg.frame.subtle,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .padding(
-                    horizontal = spacingMedium,
-                    vertical = spacingSmall
-                )
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = post.postInfo.title,
-                    style = MaterialTheme.typography.bodySmall.emp(),
-                    color = colorScheme.text.primary,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacingMedium),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = post.boardInfo.name,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                        Dot()
-                        Text(
-                            text = post.boardInfo.category,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = post.postInfo.createdAt,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                        Dot()
-                        Text(
-                            text = "조회 ${post.postInfo.stats.viewCount}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.text.caption,
-                        )
-                    }
-                }
+private fun HotArticleItem(
+    post: PostSummary,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val animalKorean = AnimalCategory.entries.find { it.name == post.type }?.korean ?: post.type
+    val topicKorean = PostCategory.entries.find { it.name == post.topic }?.korean ?: post.topic
 
-            }
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(
-                        color = colorScheme.bg.frame.default,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .size(48.dp)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = post.postInfo.stats.commentCount.toString(),
-                        style = MaterialTheme.typography.bodyMedium.emp(),
-                        color = colorScheme.status.success.default,
-                    )
-                    Text(
-                        text = "댓글",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.text.caption,
-                    )
-                }
-            }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = spacingXL, vertical = spacingSmall),
+        verticalArrangement = Arrangement.spacedBy(spacingXXS)
+    ) {
+        Text(
+            text = post.title,
+            style = typography.bodyMedium.emp(),
+            color = colorScheme.text.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = animalKorean,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(
+                text = topicKorean,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(
+                text = post.createdAt,
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacingXXS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "좋아요 ${post.likeCount}",
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
+            Dot(dotColor = colorScheme.icon.veryLight)
+            Text(
+                text = "댓글 ${post.commentCount}",
+                style = typography.labelLarge,
+                color = colorScheme.text.caption
+            )
         }
     }
 }
@@ -573,14 +678,15 @@ private fun HomeScreenPreview() {
             navController = rememberNavController(),
             argument = HomeArgument(
                 intent = { },
-                dataState = HomeDataState.Init,
-                screenState = HomeScreenState.Init,
+                reviewState = SectionLoadState.Success,
+                bannerState = SectionLoadState.Success,
+                hotArticleState = SectionLoadState.Success,
                 event = MutableSharedFlow()
             ),
             data = HomeData.stub,
             checkTermsInitialState = false,
             termsData = TermsData.stub(),
-            termsIntent = {  },
+            termsIntent = { },
             termsEvent = MutableSharedFlow()
         )
     }

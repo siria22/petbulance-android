@@ -1,6 +1,7 @@
 package com.petbulance.presentation.screen.feature.search.main.views.map
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,9 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.naver.maps.geometry.LatLng
@@ -41,12 +43,13 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.MapBounds
+import com.petbulance.domain.model.feature.user.terms.Term
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.atom.BaseCarousel
-import com.petbulance.presentation.component.ui.atom.CustomGreenLoader
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.molecule.LocationPermissionDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
@@ -63,12 +66,18 @@ import com.petbulance.presentation.screen.feature.search.main.UserLocationArgume
 import com.petbulance.presentation.screen.feature.search.main.UserLocationIntent
 import com.petbulance.presentation.screen.feature.search.main.UserLocationState
 import com.petbulance.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.petbulance.presentation.screen.feature.search.main.views.common.NavigateToLoginDialog
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowChipFilters
 import com.petbulance.presentation.screen.feature.search.main.views.common.RowResultControlChips
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
 import com.petbulance.presentation.utils.NaverMapView
 import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+
+private const val MAP_BOUNDS_DELAY_MS = 200L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,13 +85,19 @@ fun MapView(
     navController: NavController,
     userLocationArgument: UserLocationArgument,
     searchUiState: SearchUiState,
-    onEvent: (SearchUiEvent) -> Unit
+    onEvent: (SearchUiEvent) -> Unit,
+    locationTerm: Term?,
+    onTermsClick: () -> Unit,
+    initialHospitalId: Long? = null
 ) {
-    var naverMap by remember { mutableStateOf<NaverMap?>(null) }
-    var selectedHospitalId by remember { mutableStateOf<Long?>(null) }
+    val context = LocalContext.current
 
-    var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
+    var naverMap by remember { mutableStateOf<NaverMap?>(null) }
+    var selectedHospitalId by remember(initialHospitalId) { mutableStateOf(initialHospitalId) }
+    var hasInitialSearchTriggered by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+    var locationPermissionState by remember { mutableStateOf(LocationPermissionState.NO_PERMISSION) }
+    var showTermsDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -116,6 +131,24 @@ fun MapView(
     }
 
     LaunchedEffect(Unit) {
+        val fineGranted = ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted = ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        locationPermissionState = when {
+            fineGranted -> LocationPermissionState.FINE
+            coarseGranted -> LocationPermissionState.COARSE
+            else -> LocationPermissionState.NO_PERMISSION
+        }
+    }
+
+    LaunchedEffect(userLocationArgument.event) {
         userLocationArgument.event.collect { event ->
             if (event is SearchEvent.UserLocation.MoveCamera) {
                 val cameraUpdate = CameraUpdate.scrollTo(
@@ -137,6 +170,53 @@ fun MapView(
                 naverMap?.moveCamera(cameraUpdate)
             } else if (event is SearchEvent.UserLocation.CheckPermission.Error) {
                 showPermissionDialog = true
+            }
+        }
+    }
+
+    LaunchedEffect(naverMap, initialHospitalId, searchUiState.hospitalList) {
+        if (naverMap != null && initialHospitalId != null && searchUiState.hospitalList.isNotEmpty()) {
+            val targetHospital =
+                searchUiState.hospitalList.find { it.hospitalId == initialHospitalId }
+            if (targetHospital != null) {
+                val cameraUpdate = CameraUpdate.scrollTo(
+                    LatLng(targetHospital.lat, targetHospital.lng)
+                ).animate(CameraAnimation.Easing)
+                naverMap?.moveCamera(cameraUpdate)
+            }
+        }
+    }
+
+    LaunchedEffect(naverMap, userLocationArgument.locationState) {
+        if (naverMap != null &&
+            userLocationArgument.locationState is UserLocationState.Success &&
+            !hasInitialSearchTriggered
+        ) {
+            delay(MAP_BOUNDS_DELAY_MS)
+
+            val bounds = naverMap?.contentBounds
+            if (bounds != null) {
+                val mapBounds = MapBounds(
+                    minLat = bounds.southWest.latitude,
+                    minLng = bounds.southWest.longitude,
+                    maxLat = bounds.northEast.latitude,
+                    maxLng = bounds.northEast.longitude
+                )
+                onEvent(SearchUiEvent.OnSearchNearby(mapBounds))
+                hasInitialSearchTriggered = true
+            } else {
+                delay(MAP_BOUNDS_DELAY_MS)
+                val retryBounds = naverMap?.contentBounds
+                if (retryBounds != null) {
+                    val mapBounds = MapBounds(
+                        minLat = retryBounds.southWest.latitude,
+                        minLng = retryBounds.southWest.longitude,
+                        maxLat = retryBounds.northEast.latitude,
+                        maxLng = retryBounds.northEast.longitude
+                    )
+                    onEvent(SearchUiEvent.OnSearchNearby(mapBounds))
+                    hasInitialSearchTriggered = true
+                }
             }
         }
     }
@@ -180,7 +260,7 @@ fun MapView(
                     onHospitalSelected = {},
                     onMapReady = { naverMap = it }
                 )
-                Ready()
+                OnContentLoadingUi(text = "지도를 로딩중입니다...")
             } else {
                 MapLayer(
                     state = searchUiState,
@@ -197,6 +277,7 @@ fun MapView(
                     }
                 )
                 MapUiLayer(
+                    navController = navController,
                     state = searchUiState,
                     onEvent = onEvent,
                     locationPermissionState = locationPermissionState,
@@ -247,29 +328,24 @@ fun MapView(
                 )
                 showPermissionDialog = false
             },
-            onTermsClick = {
-                /* TODO : 약관 보여주는 어쩌고 */
-            }
+            onTermsClick = onTermsClick
         )
     }
-}
 
-@Composable
-private fun Ready() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.3f))
-    ) {
-        CustomGreenLoader(size = 48.dp)
+    // 약관 상세 조회 결과 처리
+    LaunchedEffect(locationTerm) {
+        if (locationTerm != null) {
+            showTermsDialog = true
+        }
+    }
 
-        Text(
-            text = "지도를 불러오고 있어요...",
-            color = colorScheme.text.inverse,
-            style = typography.titleSmall,
-            modifier = Modifier.padding(top = 16.dp)
+    // 약관 상세 다이얼로그
+    if (showTermsDialog && locationTerm != null) {
+        TermsDetailOverlay(
+            term = locationTerm,
+            onDismissRequest = {
+                showTermsDialog = false
+            }
         )
     }
 }
@@ -295,12 +371,20 @@ private fun MapLayer(
 
 @Composable
 private fun MapUiLayer(
+    navController: NavController,
     state: SearchUiState,
     onEvent: (SearchUiEvent) -> Unit,
     locationPermissionState: LocationPermissionState,
     onRecenterClick: () -> Unit,
     onHospitalClick: (Hospital) -> Unit
 ) {
+    var showLoginDialog by remember { mutableStateOf(false) }
+
+    fun requireLogin(action: () -> Unit) {
+        if (!state.isGuest) action()
+        else showLoginDialog = true
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // TOP Controls
         Column(
@@ -320,14 +404,18 @@ private fun MapUiLayer(
                 RowChipFilters(
                     uiModel = state.currentQuery,
                     onFilterButtonClicked = {
-                        onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                        requireLogin {
+                            onEvent(SearchUiEvent.OnFilterButtonClicked(it))
+                        }
                     }
                 )
                 RowResultControlChips(
                     selectedSortType = state.selectedSortType,
                     isOpenNowOnly = state.isOpenNowOnly,
-                    onSortTypeClicked = { onEvent(SearchUiEvent.OnSortTypeClicked(true)) },
-                    onOpenNowOnlyClicked = { onEvent(SearchUiEvent.OnOpenNowOnlyClicked) }
+                    onSortTypeClicked = {
+                        requireLogin { onEvent(SearchUiEvent.OnSortTypeClicked(true)) }
+                    },
+                    onOpenNowOnlyClicked = { requireLogin { onEvent(SearchUiEvent.OnOpenNowOnlyClicked) } }
                 )
             }
             RecenterSearchButton(onClick = onRecenterClick)
@@ -367,7 +455,7 @@ private fun MapUiLayer(
                 Spacer(modifier = Modifier.width(40.dp))
                 MapViewToggleButton(
                     isToggleToListView = true,
-                    onClicked = { onEvent(SearchUiEvent.OnListViewClicked) })
+                    onClicked = { requireLogin { onEvent(SearchUiEvent.OnListViewClicked) } })
 
                 if (locationPermissionState != LocationPermissionState.NO_PERMISSION) {
                     CurrentLocationFab(onClicked = { onEvent(SearchUiEvent.OnCurrentLocationClicked) })
@@ -395,10 +483,17 @@ private fun MapUiLayer(
                     HospitalCard(
                         hospital = item,
                         isShadowed = true,
-                        onCardClick = { onHospitalClick(item) }
+                        onCardClick = { requireLogin { onHospitalClick(item) } }
                     )
                 }
             }
+        }
+
+        if (showLoginDialog) {
+            NavigateToLoginDialog(
+                onConfirm = { navController.safeNavigate(ScreenDestinations.Login.route) },
+                onDismissRequest = { showLoginDialog = false }
+            )
         }
     }
 }
@@ -420,13 +515,15 @@ private fun MapViewPreview() {
                 event = MutableSharedFlow()
             ),
             searchUiState = SearchUiState(
+                isGuest = false,
                 hospitalList = listOf(
                     Hospital.stub()
                 ),
-//                hospitalList = emptyList(),
                 currentQuery = HospitalSearchQueryUiModel.empty,
             ),
-            onEvent = {}
+            onEvent = {},
+            locationTerm = null,
+            onTermsClick = {}
         )
     }
 }

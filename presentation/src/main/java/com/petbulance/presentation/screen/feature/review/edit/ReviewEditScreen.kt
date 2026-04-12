@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,19 +30,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
+import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.ui.atom.BasicButton
 import com.petbulance.presentation.component.ui.atom.BasicButtonSize
 import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXXL
-import com.petbulance.presentation.screen.feature.review.common.ExitDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewAnimalTypeInput
 import com.petbulance.presentation.screen.feature.review.common.ReviewContentInput
 import com.petbulance.presentation.screen.feature.review.common.ReviewDetailAnimalTypeInput
@@ -50,10 +52,13 @@ import com.petbulance.presentation.screen.feature.review.common.ReviewImageSecti
 import com.petbulance.presentation.screen.feature.review.common.ReviewInfoDialog
 import com.petbulance.presentation.screen.feature.review.common.ReviewRatingsSection
 import com.petbulance.presentation.screen.feature.review.common.ReviewTotalCostInput
+import com.petbulance.presentation.screen.feature.review.create.ReviewDetailAnimalSpeciesSelectBottomSheet
+import com.petbulance.presentation.screen.feature.review.edit.composables.ReviewEditSuccessDialog
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.collections.plus
 
 @Composable
 fun ReviewEditScreen(
@@ -63,6 +68,11 @@ fun ReviewEditScreen(
     val context = LocalContext.current
     var showExitDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    var showDetailAnimalBottomSheet by remember { mutableStateOf(false) }
+
+    var currentReviewId by remember { mutableLongStateOf(argument.state.reviewId) }
 
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
@@ -72,10 +82,13 @@ fun ReviewEditScreen(
                 is ReviewEditEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
+
+                is ReviewEditEvent.EditSuccess -> {
+                    showSuccessDialog = true
+                }
             }
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -100,7 +113,8 @@ fun ReviewEditScreen(
             ReviewEditScreenContents(
                 context = context,
                 state = argument.state,
-                intent = argument.intent
+                intent = argument.intent,
+                onDetailAnimalInputClicked = { showDetailAnimalBottomSheet = true }
             )
         }
     }
@@ -110,7 +124,9 @@ fun ReviewEditScreen(
     }
 
     if (showExitDialog) {
-        ExitDialog(
+        WarningDialog(
+            title = "후기 수정을 중단하고 나가시겠어요?",
+            content = "수정된 후기는 저장되지 않아요.",
             onDismissRequest = { showExitDialog = false },
             onExitButtonClicked = {
                 showExitDialog = false
@@ -124,13 +140,42 @@ fun ReviewEditScreen(
             onDismissRequest = { showInfoDialog = false }
         )
     }
+
+    if (showSuccessDialog) {
+        ReviewEditSuccessDialog(
+            onConfirmClick = {
+                showSuccessDialog = false
+                navController.safeNavigate(
+                    ScreenDestinations.Review.Detail.createRoute(
+                        currentReviewId
+                    )
+                )
+            },
+            onDismissRequest = {
+                showSuccessDialog = false
+                navController.safeNavigate(ScreenDestinations.Review.route)
+            }
+        )
+    }
+
+    if (showDetailAnimalBottomSheet) {
+        ReviewDetailAnimalSpeciesSelectBottomSheet(
+            category = argument.state.animalType,
+            selectedDetail = argument.state.detailAnimalType,
+            onDismissRequest = { showDetailAnimalBottomSheet = false },
+            onDetailSelected = {
+                argument.intent(ReviewEditIntent.OnDetailAnimalTypeChanged(it.name))
+            }
+        )
+    }
 }
 
 @Composable
 private fun ReviewEditScreenContents(
     context: Context,
     state: ReviewEditState,
-    intent: (ReviewEditIntent) -> Unit
+    intent: (ReviewEditIntent) -> Unit,
+    onDetailAnimalInputClicked: () -> Unit
 ) {
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -191,9 +236,15 @@ private fun ReviewEditScreenContents(
             )
 
             // 4. 세부 동물명
+            val displayDetailAnimalType = if (state.detailAnimalType.isNotBlank()) {
+                AnimalSpecies.fromString(state.detailAnimalType).korean
+            } else {
+                ""
+            }
+
             ReviewDetailAnimalTypeInput(
-                detailAnimalType = state.detailAnimalType,
-                onDetailAnimalTypeChanged = { intent(ReviewEditIntent.OnDetailAnimalTypeChanged(it)) }
+                detailAnimalType = displayDetailAnimalType,
+                onInputClicked = onDetailAnimalInputClicked
             )
 
             // 5. 별점
@@ -208,7 +259,8 @@ private fun ReviewEditScreenContents(
                 onImageAddClicked = {
                     val currentCount = state.existingImages.size + state.newImages.size
                     if (currentCount >= 10) {
-                        Toast.makeText(context, "이미지는 최대 10장까지 첨부 가능합니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "이미지는 최대 10장까지 첨부 가능합니다.", Toast.LENGTH_SHORT)
+                            .show()
                     } else {
                         // 권한 체크 로직이 있다면 여기에 추가
                         photoPickerLauncher.launch(

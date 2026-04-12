@@ -58,12 +58,6 @@ fun ReviewInfoDialog(onDismissRequest: () -> Unit) {
 
             ReviewInfoDialogItem(
                 index = 2,
-                title = "포인트 지급",
-                desc = "(펫뷸런스 포인트 정책)"
-            )
-
-            ReviewInfoDialogItem(
-                index = 3,
                 title = "리뷰 등록 완료"
             )
 

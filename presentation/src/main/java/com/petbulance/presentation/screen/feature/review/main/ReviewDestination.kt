@@ -8,8 +8,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 
-// ... imports
-
 fun NavGraphBuilder.reviewDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Review.route
@@ -25,27 +23,7 @@ fun NavGraphBuilder.reviewDestination(navController: NavController) {
             )
         }
 
-        val data = let {
-            val reviews by viewModel.reviews.collectAsStateWithLifecycle()
-            val region by viewModel.selectedRegion.collectAsStateWithLifecycle()
-            val district by viewModel.selectedDistrict.collectAsStateWithLifecycle()
-            val animal by viewModel.selectedAnimalType.collectAsStateWithLifecycle()
-            val sort by viewModel.selectedSort.collectAsStateWithLifecycle()
-            val isReceipt by viewModel.isReceiptVerified.collectAsStateWithLifecycle()
-            val isPhoto by viewModel.isPhotoReview.collectAsStateWithLifecycle()
-            val loadingNext by viewModel.isLoadingNextPage.collectAsStateWithLifecycle()
-
-            ReviewData(
-                reviews = reviews,
-                selectedRegion = region,
-                selectedDistrict = district,
-                selectedAnimalType = animal,
-                selectedSort = sort,
-                isReceiptVerified = isReceipt,
-                isPhotoReview = isPhoto,
-                isLoadingNextPage = loadingNext
-            )
-        }
+        val data by viewModel.reviewData.collectAsStateWithLifecycle()
 
         ReviewScreen(
             navController = navController,

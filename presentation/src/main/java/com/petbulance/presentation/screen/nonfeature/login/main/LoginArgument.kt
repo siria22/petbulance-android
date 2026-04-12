@@ -17,9 +17,9 @@ sealed class LoginDataState {
     data object Loading : LoginDataState()
 }
 
-sealed class LoginScreenState {
-    data object Init : LoginScreenState()
-}
+data class LoginScreenState(
+    val lastLoginPlatform: LoginProviderType? = null
+)
 
 sealed class LoginIntent {
     data class OnSocialLogin(

@@ -22,7 +22,7 @@ fun String.toLocalDateTime(): LocalDateTime? {
     return try {
         LocalDateTime.parse(this, formatter)
     } catch (e: DateTimeParseException) {
-        // TODO: 예외 상황 로그 기록 또는 처리
+        println("Failed to parse LocalDateTime: $this - ${e.message}")
         null
     }
 }

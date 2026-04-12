@@ -77,10 +77,28 @@ fun FilterBottomSheet(
         }
     }
 
-    var selectedRegion by remember { mutableStateOf(currentQuery.region ?: Region.SEOUL) }
-    var selectedDistrict by remember { mutableStateOf(Region.SEOUL.districts.first()) }
+    var selectedRegion by remember {
+        mutableStateOf(currentQuery.region ?: Region.ALL)
+    }
+    var selectedDistrict by remember {
+        mutableStateOf(
+            if (currentQuery.region == null) "전체" else currentQuery.district
+        )
+    }
+    var selectedAnimalCategory by remember { mutableStateOf(currentQuery.animalCategories) }
 
-    var selectedAnimalCategory by remember { mutableStateOf(AnimalCategory.SMALL_MAMMAL) }
+    LaunchedEffect(showBottomSheet, currentQuery) {
+        if (showBottomSheet) {
+            val region = currentQuery.region ?: Region.ALL
+            selectedRegion = region
+
+            selectedDistrict =
+                if (region == Region.ALL) "전체"
+                else currentQuery.district
+
+            selectedAnimalCategory = currentQuery.animalCategories
+        }
+    }
 
     BasicBottomSheet(
         showBottomSheet = showBottomSheet,
@@ -109,7 +127,20 @@ fun FilterBottomSheet(
 
                 CommonDivider()
 
-                ResetFilterRow(onResetFilterClicked = onResetFilterClicked)
+                ResetFilterRow(
+                    onResetFilterClicked = {
+                        selectedRegion = Region.ALL
+                        selectedDistrict = "전체"
+                        selectedAnimalCategory = emptyList()
+                        onQuerySet(
+                            currentQuery.copy(
+                                region = Region.ALL,
+                                district = "전체",
+                                animalCategories = emptyList()
+                            )
+                        )
+                    }
+                )
 
                 CommonDivider()
 
@@ -120,14 +151,14 @@ fun FilterBottomSheet(
                                 modifier = Modifier.fillMaxSize(),
                                 selectedRegion = selectedRegion,
                                 selectedDistrict = selectedDistrict,
-                                onRegionSelected = { selectedRegion = it },
+                                onRegionSelected = { selectedRegion = it ?: Region.ALL },
                                 onDistrictSelected = { selectedDistrict = it },
                                 onQuerySet = {
                                     onQuerySet(
                                         currentQuery.copy(
                                             region = selectedRegion,
                                             district = selectedDistrict,
-                                            species = selectedAnimalCategory
+                                            animalCategories = selectedAnimalCategory
                                         )
                                     )
                                 },
@@ -136,13 +167,11 @@ fun FilterBottomSheet(
 
                         FilterBottomSheetTab.SPECIES -> {
                             SpeciesSelectColumn(
-                                onChipClicked = { newCategory ->
-                                    selectedAnimalCategory = newCategory
-                                    onQuerySet(
-                                        currentQuery.copy(species = newCategory)
-                                    )
-                                },
-                                selectedAnimalCategory = selectedAnimalCategory,
+                                selectedAnimalCategories = selectedAnimalCategory,
+                                onCategoriesChanged = { newCategories ->
+                                    selectedAnimalCategory = newCategories
+                                    onQuerySet(currentQuery.copy(animalCategories = newCategories))
+                                }
                             )
                         }
                     }
@@ -246,10 +275,10 @@ private fun ResetFilterRow(onResetFilterClicked: () -> Unit) {
 @Composable
 private fun RegionSelectColumn(
     modifier: Modifier = Modifier,
-    selectedRegion: Region,
-    selectedDistrict: String,
-    onRegionSelected: (Region) -> Unit,
-    onDistrictSelected: (String) -> Unit,
+    selectedRegion: Region?,
+    selectedDistrict: String?,
+    onRegionSelected: (Region?) -> Unit,
+    onDistrictSelected: (String?) -> Unit,
     onQuerySet: (String) -> Unit
 ) {
     Row(
@@ -279,16 +308,18 @@ private fun RegionSelectColumn(
                 .fillMaxHeight()
                 .background(colorScheme.bg.frame.default)
         ) {
-            val wholeOption = selectedRegion.districts.first()
-            val isWholeSelected = selectedDistrict == wholeOption
+            val districts = selectedRegion?.districts.orEmpty()
 
-            items(selectedRegion.districts) { district ->
+            val wholeOption = districts.firstOrNull()
+            val isWholeSelected = wholeOption != null && selectedDistrict == wholeOption
+
+            items(districts) { district ->
                 RegionDetailItem(
                     districtName = district,
                     isSelected = if (isWholeSelected) true else (selectedDistrict == district),
                     onClick = {
                         onDistrictSelected(district)
-                        onQuerySet("$selectedRegion, $selectedDistrict")
+                        onQuerySet("${selectedRegion?.displayName ?: "전체"}, ${selectedDistrict ?: ""}")
                     }
                 )
             }
@@ -346,8 +377,8 @@ private fun RegionDetailItem(
 
 @Composable
 private fun SpeciesSelectColumn(
-    selectedAnimalCategory: AnimalCategory,
-    onChipClicked: (AnimalCategory) -> Unit,
+    selectedAnimalCategories: List<AnimalCategory>,
+    onCategoriesChanged: (List<AnimalCategory>) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(spacingXL),
@@ -355,19 +386,32 @@ private fun SpeciesSelectColumn(
         modifier = Modifier.padding(vertical = spacingXXL, horizontal = spacingXL)
     ) {
         AnimalCategory.entries.forEach { animalCategory ->
+            val isSelected = selectedAnimalCategories.contains(animalCategory)
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { onChipClicked(animalCategory) })
+                    .clickable(onClick = {
+                        val newList = if (animalCategory == AnimalCategory.ALL) {
+                            emptyList()
+                        } else {
+                            if (isSelected) {
+                                selectedAnimalCategories - animalCategory
+                            } else {
+                                selectedAnimalCategories + animalCategory
+                            }
+                        }
+                        onCategoriesChanged(newList)
+                    })
             ) {
                 Text(
                     text = animalCategory.korean,
                     style = MaterialTheme.typography.bodyLarge.emp(),
                     color = colorScheme.text.secondary,
                 )
-                if (selectedAnimalCategory == animalCategory) {
+                if (isSelected) {
                     BasicIcon(
                         iconResource = IconResource.Drawable(R.drawable.ic_bottomsheet_checked),
                         contentDescription = "Selected animal category",

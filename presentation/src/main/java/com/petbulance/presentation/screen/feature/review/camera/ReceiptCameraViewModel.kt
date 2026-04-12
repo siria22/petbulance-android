@@ -58,16 +58,15 @@ class ReceiptCameraViewModel @Inject constructor(
                 val originalBitmap = imageProxy.toBitmap()
 
                 // 2. 리사이징 (가로 1024px 기준)
-                val resizedBitmap = resizeBitmap(originalBitmap, 1024)
+                val resizedBitmap = resizeBitmap(originalBitmap, IMAGE_TARGET_WIDTH)
 
                 // 3. 압축
                 val stream = ByteArrayOutputStream()
-                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, stream)
                 val imageBytes = stream.toByteArray()
 
                 analyzeReceipt(imageBytes)
             } catch (e: Exception) {
-                e.printStackTrace()
                 _event.emit(ReceiptCameraEvent.ShowError("이미지 처리에 실패했습니다."))
             } finally {
                 imageProxy.close()
@@ -89,7 +88,6 @@ class ReceiptCameraViewModel @Inject constructor(
                     _event.emit(ReceiptCameraEvent.ShowError("이미지를 불러올 수 없습니다."))
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 _event.emit(ReceiptCameraEvent.ShowError("이미지 처리에 실패했습니다."))
             } finally {
                 _state.update { it.copy(isAnalyzing = false) }
@@ -126,5 +124,10 @@ class ReceiptCameraViewModel @Inject constructor(
         val targetHeight = (targetWidth * aspectRatio).toInt()
 
         return bitmap.scale(targetWidth, targetHeight)
+    }
+
+    companion object {
+        private const val IMAGE_TARGET_WIDTH = 1024
+        private const val JPEG_COMPRESSION_QUALITY = 80
     }
 }

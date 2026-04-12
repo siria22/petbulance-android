@@ -2,11 +2,13 @@ package com.petbulance.presentation.screen.feature.search.info
 
 import android.content.Intent
 import android.location.Location
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +21,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +31,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
@@ -58,18 +63,27 @@ import com.petbulance.presentation.screen.feature.search.info.views.DetailTab
 import com.petbulance.presentation.screen.feature.search.info.views.EmptyReviewView
 import com.petbulance.presentation.screen.feature.search.info.views.ReviewHeader
 import com.petbulance.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.LocalAnalyticsTracker
 import com.petbulance.presentation.utils.error.collectCustomErrors
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
 import kotlinx.coroutines.flow.MutableSharedFlow
+
+private const val HOSPITAL_SHARE_URL_PREFIX = "https://petbulance.com/hospital/"
 
 @Composable
 fun HospitalInfoScreen(
     navController: NavController,
     argument: HospitalInfoArgument,
     data: HospitalInfoData,
-    currentLocation: Location?
+    currentLocation: Location?,
+    isLoggedIn: Boolean
 ) {
-
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val hospitalData = data.hospitalUiData
     val reviewData = data.reviewUiData
 
@@ -82,6 +96,7 @@ fun HospitalInfoScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AppTopBar(
                 topBarInfo = TopBarInfo(
@@ -93,7 +108,26 @@ fun HospitalInfoScreen(
                     isTrailingIconAvailable = true,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Outlined.Share)) {
-                            /* TODO : 공유 어떻게?? */
+                            hospitalData.hospital?.let { hospital ->
+                                try {
+                                    val shareText = buildString {
+                                        append("${hospital.name}\n")
+                                        hospitalData.hospitalDetail?.address?.let { append("주소: $it\n") }
+                                        append("$HOSPITAL_SHARE_URL_PREFIX${hospital.hospitalId}")
+                                    }
+                                    val sendIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                    context.startActivity(shareIntent)
+                                } catch (e: Exception) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("공유하기 기능을 사용할 수 없습니다")
+                                    }
+                                }
+                            }
                         }
                     ),
                     isShadowed = true
@@ -110,12 +144,25 @@ fun HospitalInfoScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             HospitalInfoScreenContents(
+                navController = navController,
                 hospital = hospitalData.hospital,
                 hospitalDetail = hospitalData.hospitalDetail,
                 reviewUiData = reviewData,
                 currentLocation = currentLocation,
                 onIntent = argument.intent,
-                onNavigateButtonClicked = { /* TODO : 병원 길 찾기 버튼*/ }
+                snackbarHostState = snackbarHostState,
+                onNavigateButtonClicked = {
+                    hospitalData.hospital?.let { hospital ->
+                        navController.safePopBackStack()
+                        navController.safeNavigate(
+                            ScreenDestinations.Search.createRoute(initialHospitalId = hospital.hospitalId)
+                        )
+                    }
+                },
+                onReviewClicked = { reviewId ->
+                    navController.safeNavigate(ScreenDestinations.Review.Detail.createRoute(reviewId))
+                },
+                isLoggedIn = isLoggedIn
             )
         }
     }
@@ -128,16 +175,22 @@ private enum class TabType(val title: String) {
 
 @Composable
 private fun HospitalInfoScreenContents(
+    navController: NavController,
     hospital: Hospital?,
     hospitalDetail: HospitalDetail?,
     reviewUiData: ReviewUiData,
     onIntent: (HospitalInfoIntent) -> Unit,
     currentLocation: Location?,
+    snackbarHostState: SnackbarHostState,
     onNavigateButtonClicked: () -> Unit,
+    onReviewClicked: (Long) -> Unit,
+    isLoggedIn: Boolean
 ) {
-    var selectedTab by remember { mutableStateOf(TabType.REVIEWS) }
+    val analyticsTracker = LocalAnalyticsTracker.current
+    var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val commonPadding = 16.dp
 
     // 무한 스크롤 트리거
@@ -161,7 +214,7 @@ private fun HospitalInfoScreenContents(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp)
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             item {
                 HospitalCard(
@@ -211,7 +264,10 @@ private fun HospitalInfoScreenContents(
                         key = { it.id }
                     ) { review ->
                         CommonDivider(colorScheme.border.subtle)
-                        ReviewCard(review = review)
+                        ReviewCard(
+                            review = review,
+                            onReviewClicked = { onReviewClicked(review.id) }
+                        )
                     }
                 }
             }
@@ -221,14 +277,34 @@ private fun HospitalInfoScreenContents(
             text = if (selectedTab == TabType.DETAILS) "전화 문의하기" else "병원 후기 작성하기",
             onClicked = {
                 if (selectedTab == TabType.DETAILS) {
-                    hospital?.phone?.let { phone ->
+                    val phone = hospital?.phone
+                    if (phone.isNullOrBlank()) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("전화번호 정보가 없습니다")
+                        }
+                    } else {
+                        // GA4: click_call_hospital (최중요 전환 지표)
+                        analyticsTracker.trackEvent(
+                            AnalyticsEvents.CLICK_CALL_HOSPITAL,
+                            buildMap {
+                                hospital?.let {
+                                    put(AnalyticsEvents.Params.HOSPITAL_ID, it.hospitalId.toString())
+                                }
+                                put(AnalyticsEvents.Params.FROM_SCREEN, "detail_cta")
+                                put(AnalyticsEvents.Params.CALL_TYPE, "직접전화")
+                            }
+                        )
                         val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = "tel:$phone".toUri()
+                            data = Uri.parse("tel:$phone")
                         }
                         context.startActivity(intent)
                     }
                 } else {
-                    // TODO: 병원 후기 작성하기 화면 이동
+                    if (isLoggedIn) {
+                        navController.safeNavigate(ScreenDestinations.Review.route)
+                    } else {
+                        navController.safeNavigate(ScreenDestinations.Login.route)
+                    }
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -291,9 +367,10 @@ private fun BottomActionButton(
         BasicButton(
             text = text,
             buttonType = BasicButtonType.PRIMARY,
-            size = BasicButtonSize.M,
+            size = BasicButtonSize.XL,
             onClicked = onClicked,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            radius = 16.dp
         )
     }
 }
@@ -311,6 +388,7 @@ private fun HospitalInfoScreenPreview() {
             ),
             data = HospitalInfoData.stub(),
             currentLocation = null,
+            isLoggedIn = true
         )
     }
 }

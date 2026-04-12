@@ -35,6 +35,13 @@ fun CommonDivider(
     )
 }
 
+@Composable
+fun ThickDivider(
+    color: Color = colorScheme.border.verySubtle
+) {
+    HorizontalDivider(thickness = 12.dp, color = color)
+}
+
 // RoundedCornerShape
 val SmallRoundedCorner = RoundedCornerShape(4.dp)
 val DefaultRoundedCorner = RoundedCornerShape(12.dp)
@@ -62,8 +69,14 @@ val iconSizeMS = 20.dp
 val iconSizeMedium = 24.dp
 val iconSizeLarge = 28.dp
 
+// Pull-to-Refresh
+val pullToRefreshThreshold = 150.dp
+const val pullToRefreshMaxOffsetMultiplier = 1.5f
+const val pullToRefreshTextThresholdMultiplier = 0.5f
+const val pullToRefreshDelayMs = 1000L
+
 @Composable
-fun Dot(dotColor: Color = colorScheme.text.caption, size: Dp = 4.dp ) {
+fun Dot(dotColor: Color = colorScheme.text.caption, size: Dp = 4.dp) {
     Box(
         modifier = Modifier
             .size(size)

@@ -19,7 +19,7 @@ data class ReviewEditState(
     val hospitalId: Long = 0L,
     val hospitalName: String = "",
     val totalCost: String = "",
-    val animalType: AnimalCategory = AnimalCategory.BIRD,
+    val animalType: AnimalCategory = AnimalCategory.AVIAN,
     val detailAnimalType: String = "",
     val ratings: ReviewRating = ReviewRating(0.0, 0.0, 0.0),
     val existingImages: List<String> = emptyList(),
@@ -50,4 +50,6 @@ sealed interface ReviewEditEvent {
     data object ShowExitDialog : ReviewEditEvent
     data class ShowToast(val message: String) : ReviewEditEvent
     data object NavigateBack : ReviewEditEvent
+
+    data object EditSuccess : ReviewEditEvent
 }

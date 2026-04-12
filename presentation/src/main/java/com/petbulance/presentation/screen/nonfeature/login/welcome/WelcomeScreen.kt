@@ -1,10 +1,23 @@
 package com.petbulance.presentation.screen.nonfeature.login.welcome
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.runtime.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -16,12 +29,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.usecase.feature.user.auth.LogoutUseCase
 import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
-import com.petbulance.presentation.component.ui.atom.*
+import com.petbulance.presentation.component.ui.atom.BasicBottomSheet
+import com.petbulance.presentation.component.ui.atom.BasicButton
+import com.petbulance.presentation.component.ui.atom.BasicButtonSize
+import com.petbulance.presentation.component.ui.atom.BasicButtonType
 import com.petbulance.presentation.component.ui.spacingMedium
-import com.petbulance.presentation.screen.nonfeature.login.terms.*
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsContent
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsData
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOverlay
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
+import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,13 +56,25 @@ fun WelcomeScreen(
     intent: (TermsIntent) -> Unit,
     event: SharedFlow<TermsEvent>
 ) {
-    var showSheet by rememberSaveable { mutableStateOf(true) }
+    var showTermsSheet by rememberSaveable { mutableStateOf(true) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     LaunchedEffect(event) {
-        event.collect { evt ->
-            if (evt is TermsEvent.NavigateToNext) {
-                showSheet = false
+        event.collect { e ->
+            when (e) {
+                is TermsEvent.NavigateToNext -> {
+                    showTermsSheet = false
+                }
+
+                is TermsEvent.DataFetch.Error -> {
+                    // no-op
+                }
+
+                is TermsEvent.NavigateToLogin -> {
+                    navController.safeNavigate(ScreenDestinations.Login.route) {
+                        popUpTo(ScreenDestinations.Login.route) { inclusive = true }
+                    }
+                }
             }
         }
     }
@@ -49,20 +82,54 @@ fun WelcomeScreen(
     Scaffold(
         containerColor = colorScheme.bg.frame.default,
         bottomBar = {
-            BasicButton(
-                text = "시작하기",
-                size = BasicButtonSize.L,
-                buttonType = BasicButtonType.PRIMARY,
-                onClicked = {
-                    navController.safeNavigate(ScreenDestinations.Home.route) {
-                        popUpTo(ScreenDestinations.Login.route) { inclusive = true }
-                    }
-                },
-                radius = 16.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = spacingMedium, vertical = 56.dp)
-            )
+            if (!data.isAllRequiredAgreed) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BasicButton(
+                        text = "약관보기",
+                        size = BasicButtonSize.L,
+                        buttonType = BasicButtonType.PRIMARY,
+                        onClicked = {
+                            showTermsSheet = true
+                        },
+                        radius = 16.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = spacingMedium, vertical = 56.dp)
+                    )
+                    Text(
+                        text = "다른 소셜로그인 선택",
+                        style= typography.bodyLarge,
+                        color = colorScheme.text.caption,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = spacingMedium, vertical = 4.dp)
+                            .clickable(
+                                onClick = {
+                                    intent(TermsIntent.OnUseOtherAccount)
+                                }
+                            )
+                    )
+                }
+            } else {
+                BasicButton(
+                    text = "시작하기",
+                    size = BasicButtonSize.L,
+                    buttonType = BasicButtonType.PRIMARY,
+                    onClicked = {
+                        navController.safeNavigate(ScreenDestinations.Home.route) {
+                            popUpTo(ScreenDestinations.Login.route) { inclusive = true }
+                        }
+                    },
+                    radius = 16.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = spacingMedium, vertical = 56.dp)
+                )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -74,24 +141,30 @@ fun WelcomeScreen(
         }
     }
 
-    // 약관 동의 바텀시트
-    if (showSheet) {
+    val onDismissRequest = {
+        showTermsSheet = false
+    }
+
+    if (showTermsSheet) {
         BasicBottomSheet(
             showBottomSheet = true,
             sheetState = sheetState,
-            onDismissRequest = {
-                // TODO : 정책: 약관 동의 없이는 진입 불가하므로, 닫기 시 특별한 동작 없음(화면에 머무름)
-                // 혹은 showSheet = false 처리하여 "시작하기" 버튼을 노출시킬지 결정 필요
-                showSheet = false
-            }
+            onDismissRequest = onDismissRequest
         ) {
             TermsContent(
                 data = data,
                 onIntent = intent,
-                onCancel = { showSheet = false },
-                modifier = Modifier.fillMaxSize()
+                onCancel = onDismissRequest,
+                modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+
+    if (data.currentTerm != null) {
+        TermsDetailOverlay(
+            term = data.currentTerm,
+            onDismissRequest = { intent(TermsIntent.OnCloseDetail) }
+        )
     }
 }
 
@@ -104,7 +177,6 @@ private fun WelcomeScreenContent(tempUserName: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacingMedium, Alignment.CenterVertically)
     ) {
-        // TODO: 디자인에 맞는 폭죽 이미지 리소스로 교체 필요 (R.drawable.img_welcome 등)
         Text(text = "🎉", fontSize = 80.sp)
 
         Text(

@@ -1,7 +1,5 @@
 package com.petbulance.presentation.screen.feature.review.create
 
-import android.content.Context
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.petbulance.domain.model.feature.hospital.review.HospitalInfoForReview
@@ -9,10 +7,12 @@ import com.petbulance.domain.model.feature.hospital.review.ReceiptAnalysisResult
 import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.usecase.feature.hospital.review.CreateReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.FindHospitalIdByNameUseCase
+import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.AnalyticsTracker
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,10 +29,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewCreateViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val createReviewUseCase: CreateReviewUseCase,
     private val findHospitalIdByNameUseCase: FindHospitalIdByNameUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val contentFileReader: ContentFileReader,
+    private val savedStateHandle: SavedStateHandle,
+    private val analyticsTracker: AnalyticsTracker
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(ReviewCreateState())
@@ -99,7 +100,14 @@ class ReviewCreateViewModel @Inject constructor(
 
             // Step 2: Animal & Rating
             is ReviewCreateIntent.OnAnimalTypeChanged -> {
-                _state.update { it.copy(step1 = it.step1.copy(animalType = intent.value)) }
+                _state.update {
+                    it.copy(
+                        step1 = it.step1.copy(
+                            animalType = intent.value,
+                            detailAnimalType = ""
+                        )
+                    )
+                }
             }
 
             is ReviewCreateIntent.OnDetailAnimalTypeChanged -> {
@@ -242,7 +250,10 @@ class ReviewCreateViewModel @Inject constructor(
     }
 
     private fun validateStep2(step2: Step2State): Boolean {
-        return step2.ratings.expertise > 0 &&
+        return step2.ratings.expertise in 0.0..5.0 &&
+                step2.ratings.kindness in 0.0..5.0 &&
+                step2.ratings.facility in 0.0..5.0 &&
+                step2.ratings.expertise > 0 &&
                 step2.ratings.kindness > 0 &&
                 step2.ratings.facility > 0
     }
@@ -299,21 +310,40 @@ class ReviewCreateViewModel @Inject constructor(
                     receiptItems = currentState.step2.receiptItems,
                     visitDate = currentState.step2.visitDate,
                     comment = currentState.step3.content,
-                    isReceipt = currentState.step1.isReceiptVerified
+                    isReceipt = currentState.step1.isReceiptVerified,
+                    imageCount = imageBytesList.size
                 )
 
-                // 4. UseCase 호출
                 createReviewUseCase(param, imageBytesList)
-                    .onSuccess {
-                        emitEvent(ReviewCreateEvent.ShowToast("리뷰가 성공적으로 등록되었습니다."))
-                        emitEvent(ReviewCreateEvent.NavigateToHome)
+                    .onSuccess { response ->
+                        // GA4: submit_review
+                        val avgRating = (param.rating.expertise + param.rating.kindness + param.rating.facility) / 3.0
+                        analyticsTracker.trackEvent(
+                            AnalyticsEvents.SUBMIT_REVIEW,
+                            mapOf(
+                                AnalyticsEvents.Params.HOSPITAL_ID to param.hospitalId.toString(),
+                                AnalyticsEvents.Params.RATING to avgRating,
+                                AnalyticsEvents.Params.HAS_PHOTO to imageBytesList.isNotEmpty(),
+                                AnalyticsEvents.Params.HAS_RECEIPT to param.isReceipt,
+                                AnalyticsEvents.Params.REVIEW_LENGTH to param.comment.length
+                            )
+                        )
+                        emitEvent(ReviewCreateEvent.OnSubmitSuccess(response.reviewId))
                     }
                     .onFailure { e ->
-                        emitEvent(ReviewCreateEvent.ShowToast("리뷰 등록 실패: ${e.message}"))
+                        val errorMessage = when {
+                            e.message?.contains("duplicate", ignoreCase = true) == true ||
+                            e.message?.contains("중복", ignoreCase = true) == true -> 
+                                "동일 병원에 대해 1일 1회까지만 후기를 작성할 수 있습니다."
+                            e.message?.contains("rate limit", ignoreCase = true) == true ||
+                            e.message?.contains("제한", ignoreCase = true) == true -> 
+                                "단기간 내 연속 작성이 제한되었습니다. 잠시 후 다시 시도해주세요."
+                            else -> "리뷰 등록 실패: ${e.message}"
+                        }
+                        emitEvent(ReviewCreateEvent.ShowToast(errorMessage))
                     }
 
             } catch (e: Exception) {
-                e.printStackTrace()
                 emitEvent(ReviewCreateEvent.ShowToast("처리 중 오류가 발생했습니다."))
             } finally {
                 _state.update { it.copy(isLoading = false) }
@@ -321,24 +351,16 @@ class ReviewCreateViewModel @Inject constructor(
         }
     }
 
-    private fun uriToByteArray(uriString: String): ByteArray? {
-        return try {
-            val uri = uriString.toUri()
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.readBytes()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    private suspend fun uriToByteArray(uriString: String): ByteArray? {
+        return contentFileReader.readBytes(uriString)?.bytes
     }
 
     private fun fetchHospitalCandidates(query: String) {
-        if (query.length < 2) return
+        if (query.length < MIN_SEARCH_QUERY_LENGTH) return
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay(300L)
+            delay(SEARCH_DEBOUNCE_MILLIS)
 
             findHospitalIdByNameUseCase(query)
                 .onSuccess { hospitals ->
@@ -362,5 +384,10 @@ class ReviewCreateViewModel @Inject constructor(
         viewModelScope.launch {
             _eventFlow.emit(event)
         }
+    }
+
+    companion object {
+        private const val MIN_SEARCH_QUERY_LENGTH = 1
+        private const val SEARCH_DEBOUNCE_MILLIS = 300L
     }
 }

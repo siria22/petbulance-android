@@ -16,7 +16,6 @@ import com.petbulance.presentation.utils.nav.ScreenDestinations
 fun NavGraphBuilder.homeDestination(navController: NavController) {
     composable(
         route = ScreenDestinations.Home.route,
-        // argument 정의 추가 필요 (navArgument)
         arguments = listOf(
             navArgument(ScreenDestinations.Home.ARG_CHECK_TERMS) {
                 defaultValue = false
@@ -46,12 +45,14 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val checkTerms = entry.arguments?.getBoolean(ScreenDestinations.Home.ARG_CHECK_TERMS) ?: false
 
         val argument: HomeArgument = let {
-            val dataState by viewModel.dataState.collectAsStateWithLifecycle()
-            val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+            val reviewState by viewModel.reviewState.collectAsStateWithLifecycle()
+            val bannerState by viewModel.bannerState.collectAsStateWithLifecycle()
+            val hotArticleState by viewModel.hotArticleState.collectAsStateWithLifecycle()
 
             HomeArgument(
-                dataState = dataState,
-                screenState = screenState,
+                reviewState = reviewState,
+                bannerState = bannerState,
+                hotArticleState = hotArticleState,
                 intent = viewModel::onIntent,
                 event = viewModel.eventFlow
             )
@@ -60,10 +61,12 @@ fun NavGraphBuilder.homeDestination(navController: NavController) {
         val data: HomeData = let {
             val recentReviews by viewModel.recentReviews.collectAsStateWithLifecycle()
             val hotArticle by viewModel.hotArticles.collectAsStateWithLifecycle()
+            val homeBanners by viewModel.homeBanners.collectAsStateWithLifecycle()
 
             HomeData(
                 recentReviews = recentReviews,
-                hotArticles = hotArticle
+                hotArticles = hotArticle,
+                homeBanners = homeBanners
             )
         }
 

@@ -26,6 +26,8 @@ fun ReviewInputTextField(
     onQueryStringChanged: (String) -> Unit,
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     BasicTextField(
@@ -47,6 +49,8 @@ fun ReviewInputTextField(
         singleLine = singleLine,
         cursorBrush = SolidColor(colorScheme.text.primary),
         keyboardOptions = keyboardOptions,
+        readOnly = readOnly,
+        enabled = enabled,
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth(),

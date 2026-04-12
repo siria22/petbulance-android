@@ -15,5 +15,13 @@ data class HospitalsResDto(
     val openHours: String?,
     val thumbnailUrl: String?,
     val rating: Double?,
-    val reviewCount: Int?
+    val reviewCount: Int?,
+    val image: String? = null,
+    val tags: List<TagResDto>? = null
+)
+
+@Serializable
+data class TagResDto(
+    val type: String?,
+    val value: String
 )

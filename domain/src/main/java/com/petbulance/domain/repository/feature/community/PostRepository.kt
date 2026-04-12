@@ -27,20 +27,20 @@ interface PostRepository {
     suspend fun deletePost(postId: Long): Result<DeletedPost>
 
     suspend fun getPostList(
-        boardId: Long? = null,
-        category: String? = null,
-        sort: String = "popular",
+        type: String? = null,
+        topic: String? = null,
+        sort: String = "latest",
         lastPostId: Long? = null,
         pageSize: Int = 10
     ): Result<PagingPostList>
 
     suspend fun getPostSearchList(
-        boardId: Long? = null,
-        categories: List<String>? = null,
-        sort: String = "popular",
+        type: String? = null,
+        topic: String? = null,
+        sort: String = "latest",
         lastPostId: Long? = null,
-        pageSize: Int = 10,
-        searchKeyword: String? = null,
+        pageSize: Int = 20,
+        searchKeyword: String,
         searchScope: String = "title_content"
     ): Result<PagingPostSearchList>
 

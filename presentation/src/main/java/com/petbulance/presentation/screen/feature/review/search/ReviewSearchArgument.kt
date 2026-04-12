@@ -1,8 +1,7 @@
 package com.petbulance.presentation.screen.feature.review.search
 
-import com.petbulance.domain.model.type.AnimalCategory
-import com.petbulance.domain.model.type.Region
 import com.petbulance.domain.model.type.ReviewSortType
+import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import kotlinx.coroutines.flow.SharedFlow
 
 data class ReviewSearchArgument(
@@ -23,14 +22,16 @@ sealed class ReviewSearchIntent {
     data object ClearAllRecentKeywords : ReviewSearchIntent()
     data object LoadMore : ReviewSearchIntent()
 
-    data class ChangeRegion(val region: Region, val district: String) : ReviewSearchIntent()
-    data class ChangeAnimalType(val animalType: AnimalCategory) : ReviewSearchIntent()
+    data class UpdateFilter(val queryModel: HospitalSearchQueryUiModel) : ReviewSearchIntent()
+
     data class ChangeSort(val sortType: ReviewSortType) : ReviewSearchIntent()
     data object ToggleReceipt : ReviewSearchIntent()
     data object TogglePhotoReview : ReviewSearchIntent()
     data object Refresh : ReviewSearchIntent()
+    data class ReportReview(val reviewId: Long, val reason: String) : ReviewSearchIntent()
 }
 
 sealed class ReviewSearchEvent {
     data class Error(val message: String) : ReviewSearchEvent()
+    data object ReportSuccess : ReviewSearchEvent()
 }
