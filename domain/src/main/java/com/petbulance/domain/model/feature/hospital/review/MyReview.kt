@@ -5,7 +5,6 @@ data class MyReview(
     val hospitalName: String,
     val content: String,
     val date: String,
-    val rating: Double,
     val representativeImage: String?,
     val likeCount: Int,
     val isReceiptVerified: Boolean,
@@ -17,7 +16,6 @@ data class MyReview(
             hospitalName = "행복 동물병원",
             content = "휴! 행복해지네요 ㅎ",
             date = "2026-02-05",
-            rating = 0.0,
             representativeImage = null,
             likeCount = 10,
             isReceiptVerified = true,
@@ -30,7 +28,6 @@ data class MyReview(
                 "행복 동물병원",
                 "선생님이 정말 친절하셔서 마음이 놓였어요.",
                 "2026-02-01",
-                0.0,
                 null,
                 10,
                 true,
@@ -41,7 +38,6 @@ data class MyReview(
                 "튼튼 아프리카 동물병원",
                 "시설이 깔끔하고 대기 시간이 짧아서 좋았습니다.",
                 "2026-02-02",
-                0.0,
                 null,
                 10,
                 true,
@@ -52,11 +48,10 @@ data class MyReview(
                 "튼튼 아프리카 동물병원",
                 "시설이 깔끔하고 대기 시간이 짧아서 좋았습니다.",
                 "2026-02-02",
-                0.0,
                 null,
                 10,
                 true,
-                ReviewStatus.HIDDEN
+                ReviewStatus.UNDER_REVIEW
             ),
         )
     }

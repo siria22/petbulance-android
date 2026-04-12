@@ -57,7 +57,7 @@ fun ReviewSubmitCompleteDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 BasicButton(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(2f),
                     text = "닫기",
                     size = BasicButtonSize.L,
                     buttonType = BasicButtonType.SECONDARY,
@@ -65,7 +65,7 @@ fun ReviewSubmitCompleteDialog(
                     onClicked = onDismissRequest
                 )
                 BasicButton(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(3f),
                     text = "작성한 후기 보기",
                     size = BasicButtonSize.L,
                     buttonType = BasicButtonType.PRIMARY,

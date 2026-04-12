@@ -100,7 +100,6 @@ fun ReviewDetailScreen(
                 }
 
                 is ReviewDetailEvent.DeleteSuccess -> {
-                    // TODO : Delete Success
                     navController.previousBackStackEntry?.savedStateHandle?.set("refresh", true)
                     navController.safePopBackStack()
                 }

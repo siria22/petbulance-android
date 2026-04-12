@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.hospital.review.MyReview
@@ -45,7 +44,6 @@ import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.Dot
 import com.petbulance.presentation.component.ui.atom.BasicCheckBox
 import com.petbulance.presentation.component.ui.atom.BasicIcon
-import com.petbulance.presentation.component.ui.atom.BasicImageBox
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
 import com.petbulance.presentation.component.ui.iconSizeSmall
@@ -402,22 +400,11 @@ private fun MyPageReviewsItem(
             }
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(spacingXS),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            review.representativeImage?.let { imageUrl ->
-                BasicImageBox(
-                    size = 72.dp,
-                    uri = imageUrl.toUri(),
-                )
-            }
-            Text(
-                text = review.content,
-                style = typography.labelLarge,
-                color = colorScheme.text.secondary
-            )
-        }
+        Text(
+            text = review.content,
+            style = typography.labelLarge,
+            color = colorScheme.text.secondary
+        )
     }
 }
 
@@ -425,7 +412,6 @@ private fun MyPageReviewsItem(
 private fun ReviewStatusChip(status: ReviewStatus) {
     val contentColor = when (status) {
         ReviewStatus.REGISTERED -> colorScheme.tag.trust.medium
-        ReviewStatus.HIDDEN -> colorScheme.tag.red.strong
         ReviewStatus.UNDER_REVIEW -> colorScheme.text.caption
     }
 

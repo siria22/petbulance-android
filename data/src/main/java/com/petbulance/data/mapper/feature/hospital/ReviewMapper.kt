@@ -82,11 +82,10 @@ fun MyReviewGetDto.toDomain() = MyReview(
     hospitalName = hospitalName,
     content = comment,
     date = reviewDate,
-    rating = 0.0, // TODO : 미제공 여부 다시 확인
     representativeImage = hospitalImageUrl,
     likeCount = likeCount,
     isReceiptVerified = receiptChecked,
-    status = ReviewStatus.REGISTERED // TODO : 정책상 임시 고정
+    status = ReviewStatus.REGISTERED
 )
 
 fun SaveReviewParam.toDto() = ReviewSaveReqDto(
