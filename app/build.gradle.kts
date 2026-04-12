@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services") version "4.4.4" apply false
+    id("com.google.gms.google-services") version "4.4.4"
     alias(libs.plugins.firebase.crashlytics)
 
     alias(libs.plugins.devtoolsKsp)

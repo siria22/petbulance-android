@@ -8,6 +8,8 @@ import com.petbulance.domain.model.feature.hospital.review.SaveReviewParam
 import com.petbulance.domain.usecase.feature.hospital.review.CreateReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.FindHospitalIdByNameUseCase
 import com.petbulance.domain.repository.nonfeature.app.ContentFileReader
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.AnalyticsTracker
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +32,8 @@ class ReviewCreateViewModel @Inject constructor(
     private val createReviewUseCase: CreateReviewUseCase,
     private val findHospitalIdByNameUseCase: FindHospitalIdByNameUseCase,
     private val contentFileReader: ContentFileReader,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val analyticsTracker: AnalyticsTracker
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(ReviewCreateState())
@@ -313,6 +316,18 @@ class ReviewCreateViewModel @Inject constructor(
 
                 createReviewUseCase(param, imageBytesList)
                     .onSuccess { response ->
+                        // GA4: submit_review
+                        val avgRating = (param.rating.expertise + param.rating.kindness + param.rating.facility) / 3.0
+                        analyticsTracker.trackEvent(
+                            AnalyticsEvents.SUBMIT_REVIEW,
+                            mapOf(
+                                AnalyticsEvents.Params.HOSPITAL_ID to param.hospitalId.toString(),
+                                AnalyticsEvents.Params.RATING to avgRating,
+                                AnalyticsEvents.Params.HAS_PHOTO to imageBytesList.isNotEmpty(),
+                                AnalyticsEvents.Params.HAS_RECEIPT to param.isReceipt,
+                                AnalyticsEvents.Params.REVIEW_LENGTH to param.comment.length
+                            )
+                        )
                         emitEvent(ReviewCreateEvent.OnSubmitSuccess(response.reviewId))
                     }
                     .onFailure { e ->

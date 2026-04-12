@@ -84,6 +84,8 @@ import com.petbulance.presentation.screen.nonfeature.login.terms.TermsDetailOver
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsEvent
 import com.petbulance.presentation.screen.nonfeature.login.terms.TermsIntent
 import com.petbulance.presentation.utils.SectionLoadState
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.LocalAnalyticsTracker
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -342,6 +344,7 @@ private fun HospitalShortcut(
 private fun HospitalShortcutAnimalRow(
     navigateToHospitalSearchPageWithAnimalType: (AnimalCategory) -> Unit
 ) {
+    val analyticsTracker = LocalAnalyticsTracker.current
     val images = listOf(
         painterResource(R.drawable.img_all),
         painterResource(R.drawable.img_small_mammals),
@@ -367,6 +370,10 @@ private fun HospitalShortcutAnimalRow(
                 verticalArrangement = Arrangement.spacedBy(spacingXXS),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable {
+                    analyticsTracker.trackEvent(
+                        AnalyticsEvents.SELECT_PET_CATEGORY_HOME,
+                        mapOf(AnalyticsEvents.Params.PET_TYPE to category[idx].korean)
+                    )
                     navigateToHospitalSearchPageWithAnimalType(category[idx])
                 }
             ) {

@@ -18,6 +18,8 @@ import com.petbulance.domain.usecase.feature.hospital.recent.GetRecentSearchKeyw
 import com.petbulance.domain.usecase.feature.hospital.recent.GetViewedHospitalsUseCase
 import com.petbulance.domain.usecase.feature.hospital.recent.SyncSearchHistoryUseCase
 import com.petbulance.domain.utils.LocationUtils
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.AnalyticsTracker
 import com.petbulance.presentation.screen.feature.search.main.views.search.HospitalSearchQueryUiModel
 import com.petbulance.presentation.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +40,8 @@ class HospitalSearchViewModel @Inject constructor(
     private val getViewedHospitalsUseCase: GetViewedHospitalsUseCase,
     private val addViewedHospitalUseCase: AddViewedHospitalUseCase,
     private val deleteViewedHospitalUseCase: DeleteViewedHospitalUseCase,
-    private val syncSearchHistoryUseCase: SyncSearchHistoryUseCase
+    private val syncSearchHistoryUseCase: SyncSearchHistoryUseCase,
+    private val analyticsTracker: AnalyticsTracker
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<HospitalSearchDataState>(HospitalSearchDataState.Init)
@@ -159,6 +162,22 @@ class HospitalSearchViewModel @Inject constructor(
         if (isNewSearch) {
             resetCursors()
             _searchData.value = _searchData.value.copy(hospitalList = emptyList())
+
+            // GA4: search_hospital_start
+            val searchMethod = when {
+                bounds != null -> "지도"
+                queryModel.query?.isNotBlank() == true -> "검색창"
+                else -> "목록"
+            }
+            analyticsTracker.trackEvent(
+                AnalyticsEvents.SEARCH_HOSPITAL_START,
+                buildMap {
+                    put(AnalyticsEvents.Params.SEARCH_METHOD, searchMethod)
+                    put(AnalyticsEvents.Params.PET_TYPE, queryModel.animalCategories.firstOrNull()?.korean ?: "전체")
+                    queryModel.region?.let { put(AnalyticsEvents.Params.REGION, it.displayName) }
+                    put(AnalyticsEvents.Params.FILTER_OPERATING, queryModel.openNowOnly == true)
+                }
+            )
         }
 
         // Cache params
@@ -223,6 +242,23 @@ class HospitalSearchViewModel @Inject constructor(
             currentCursorDistance = result.cursorDistance
             currentCursorRating = result.cursorRating
             currentCursorReviewCount = result.cursorReviewCount
+
+            // GA4: view_search_results (새 검색일 때만)
+            if (isNewSearch) {
+                val searchMethod = when {
+                    bounds != null -> "지도"
+                    queryModel.query?.isNotBlank() == true -> "검색창"
+                    else -> "목록"
+                }
+                analyticsTracker.trackEvent(
+                    AnalyticsEvents.VIEW_SEARCH_RESULTS,
+                    mapOf(
+                        AnalyticsEvents.Params.RESULT_COUNT to newItems.size,
+                        AnalyticsEvents.Params.SEARCH_METHOD to searchMethod,
+                        AnalyticsEvents.Params.HAS_FILTER to (queryModel.animalCategories.isNotEmpty() || queryModel.openNowOnly == true || queryModel.region != null)
+                    )
+                )
+            }
         }.onFailure { ex ->
             _eventFlow.emit(
                 SearchEvent.DataFetch.Error(

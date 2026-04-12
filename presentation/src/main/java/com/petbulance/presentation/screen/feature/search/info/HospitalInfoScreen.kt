@@ -63,6 +63,8 @@ import com.petbulance.presentation.screen.feature.search.info.views.DetailTab
 import com.petbulance.presentation.screen.feature.search.info.views.EmptyReviewView
 import com.petbulance.presentation.screen.feature.search.info.views.ReviewHeader
 import com.petbulance.presentation.screen.feature.search.main.views.common.HospitalCard
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.LocalAnalyticsTracker
 import com.petbulance.presentation.utils.error.collectCustomErrors
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
@@ -184,6 +186,7 @@ private fun HospitalInfoScreenContents(
     onReviewClicked: (Long) -> Unit,
     isLoggedIn: Boolean
 ) {
+    val analyticsTracker = LocalAnalyticsTracker.current
     var selectedTab by remember { mutableStateOf(TabType.DETAILS) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
@@ -280,6 +283,17 @@ private fun HospitalInfoScreenContents(
                             snackbarHostState.showSnackbar("전화번호 정보가 없습니다")
                         }
                     } else {
+                        // GA4: click_call_hospital (최중요 전환 지표)
+                        analyticsTracker.trackEvent(
+                            AnalyticsEvents.CLICK_CALL_HOSPITAL,
+                            buildMap {
+                                hospital?.let {
+                                    put(AnalyticsEvents.Params.HOSPITAL_ID, it.hospitalId.toString())
+                                }
+                                put(AnalyticsEvents.Params.FROM_SCREEN, "detail_cta")
+                                put(AnalyticsEvents.Params.CALL_TYPE, "직접전화")
+                            }
+                        )
                         val intent = Intent(Intent.ACTION_DIAL).apply {
                             data = Uri.parse("tel:$phone")
                         }

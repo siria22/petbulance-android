@@ -12,6 +12,8 @@ import com.petbulance.domain.usecase.feature.hospital.hospital.GetHospitalDetail
 import com.petbulance.domain.usecase.feature.hospital.review.GetHospitalReviewsUseCase
 import com.petbulance.domain.utils.LocationUtils
 import com.petbulance.domain.utils.zip
+import com.petbulance.presentation.analytics.AnalyticsEvents
+import com.petbulance.presentation.analytics.AnalyticsTracker
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -31,7 +33,8 @@ class HospitalInfoViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getHospitalCardUseCase: GetHospitalCardUseCase,
     private val getHospitalDetailUseCase: GetHospitalDetailUseCase,
-    private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase
+    private val getHospitalReviewsUseCase: GetHospitalReviewsUseCase,
+    private val analyticsTracker: AnalyticsTracker
 ) : BaseViewModel() {
 
     private val hospitalId: Long =
@@ -122,6 +125,17 @@ class HospitalInfoViewModel @Inject constructor(
 
                 applyReviewData(reviewPaging, isAppend = false)
                 updateCache(reviewPaging)
+
+                // GA4: view_hospital_detail
+                analyticsTracker.trackEvent(
+                    AnalyticsEvents.VIEW_HOSPITAL_DETAIL,
+                    buildMap {
+                        put(AnalyticsEvents.Params.HOSPITAL_ID, patchedHospital.hospitalId.toString())
+                        put(AnalyticsEvents.Params.HOSPITAL_NAME, patchedHospital.name)
+                        put(AnalyticsEvents.Params.HAS_REVIEW, reviewPaging.items.isNotEmpty())
+                        put(AnalyticsEvents.Params.IS_OPERATING_NOW, patchedHospital.isOpenNow)
+                    }
+                )
 
                 _dataState.value = HospitalInfoDataState.Init
             }.onFailure { exception ->
