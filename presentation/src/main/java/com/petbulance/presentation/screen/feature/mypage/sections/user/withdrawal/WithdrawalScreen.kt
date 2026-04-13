@@ -13,6 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.petbulance.presentation.component.theme.PetbulanceTheme
+import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -110,6 +114,37 @@ fun WithdrawalScreen(
                 showConfirmDialog = false
                 argument.intent(WithdrawalIntent.ConfirmWithdrawal)
             }
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+private fun WithdrawalScreenPreview() {
+    PetbulanceTheme {
+        WithdrawalScreen(
+            navController = rememberNavController(),
+            argument = WithdrawalArgument(
+                intent = {},
+                dataState = WithdrawalDataState.Init,
+                event = MutableSharedFlow()
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+private fun WithdrawalScreenWithDialogPreview() {
+    PetbulanceTheme {
+        // Dialog는 상태로 제어되므로 별도로 미리보기
+        WarningDialog(
+            title = "정말 탈퇴하시겠습니까?",
+            content = "탈퇴하기 버튼을 누르면 즉시 탈퇴 처리 됩니다.",
+            cancelText = "돌아가기",
+            confirmText = "탈퇴하기",
+            onDismissRequest = {},
+            onExitButtonClicked = {}
         )
     }
 }

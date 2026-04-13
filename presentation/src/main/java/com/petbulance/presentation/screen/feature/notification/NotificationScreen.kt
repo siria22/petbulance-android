@@ -1,5 +1,6 @@
 package com.petbulance.presentation.screen.feature.notification
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,8 +35,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.petbulance.domain.model.feature.notification.NotificationItem
 import com.petbulance.domain.model.feature.support.notice.NoticeListItem
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
@@ -56,6 +60,9 @@ import com.petbulance.presentation.screen.feature.notification.composables.Notif
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
+import com.petbulance.domain.model.type.NoticeStatusType
+import com.petbulance.presentation.component.theme.PetbulanceTheme
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -331,3 +338,141 @@ private fun ActivityTabContent(
         }
     }
 }
+
+// region Previews
+
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+private fun NotificationScreenNoticeTabPreview() {
+    PetbulanceTheme {
+        NotificationScreen(
+            navController = rememberNavController(),
+            argument = NotificationArgument(
+                intent = {},
+                dataState = NotificationDataState.Init,
+                event = MutableSharedFlow()
+            ),
+            data = NotificationData(
+                selectedTab = NotificationTab.NOTICE,
+                notices = listOf(
+                    NoticeListItem(
+                        noticeId = 1,
+                        noticeStatus = NoticeStatusType.EVENT,
+                        title = "펫뷸런스 오픈 기념 리뷰 작성 이벤트",
+                        content = null,
+                        createdAt = "2025-11-30"
+                    ),
+                    NoticeListItem(
+                        noticeId = 2,
+                        noticeStatus = NoticeStatusType.NOTICE,
+                        title = "시스템 점검 안내 (11/13 01:00-06:00)",
+                        content = null,
+                        createdAt = "2025-11-12"
+                    ),
+                    NoticeListItem(
+                        noticeId = 3,
+                        noticeStatus = NoticeStatusType.ADVERTISING,
+                        title = "조류전문 응급 24시 동물병원을 찾으시나요?",
+                        content = null,
+                        createdAt = "2025-11-10"
+                    ),
+                    NoticeListItem(
+                        noticeId = 4,
+                        noticeStatus = NoticeStatusType.NOTICE,
+                        title = "개인정보 처리방침 개정 안내",
+                        content = null,
+                        createdAt = "2025-11-07"
+                    ),
+                    NoticeListItem(
+                        noticeId = 5,
+                        noticeStatus = NoticeStatusType.NOTICE,
+                        title = "앱 업데이트 안내 (v1.2.0)",
+                        content = null,
+                        createdAt = "2025-10-12"
+                    ),
+                )
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+private fun NotificationScreenActivityTabPreview() {
+    PetbulanceTheme {
+        NotificationScreen(
+            navController = rememberNavController(),
+            argument = NotificationArgument(
+                intent = {},
+                dataState = NotificationDataState.Init,
+                event = MutableSharedFlow()
+            ),
+            data = NotificationData(
+                selectedTab = NotificationTab.ACTIVITY,
+                notifications = listOf(
+                    NotificationItem(
+                        notificationId = 1,
+                        type = "POST_COMMENT",
+                        topic = "소형포유류 · 일상/자랑",
+                        createdAt = "2일 전",
+                        message = "\"햄스터 케이지 추천해주세요\" 글에 베테랑님이 댓글을 달았어요.",
+                        isRead = false,
+                        targetType = "COMMENT",
+                        targetId = 100
+                    ),
+                    NotificationItem(
+                        notificationId = 2,
+                        type = "COMMENT_REPLY",
+                        topic = "소형포유류 · 일상/자랑",
+                        createdAt = "2일 전",
+                        message = "\"햄스터 케이지 추천해주세요\" 글의 내 댓글에 햄스터최오님이 댓글을 달았어요.",
+                        isRead = false,
+                        targetType = "COMMENT",
+                        targetId = 101
+                    ),
+                    NotificationItem(
+                        notificationId = 3,
+                        type = "POST_COMMENT",
+                        topic = "소형포유류 · 건강/질병",
+                        createdAt = "5일 전",
+                        message = "\"햄스터 계속 설사하는데 왜 이러는건가요\" 글에 갓오브햄수타님이 댓글을 달았어요.",
+                        isRead = true,
+                        targetType = "COMMENT",
+                        targetId = 102
+                    ),
+                    NotificationItem(
+                        notificationId = 4,
+                        type = "POST_LIKE",
+                        topic = "조류 · 건강/질병",
+                        createdAt = "9일 전",
+                        message = "\"앵무새가 자꾸 소리를 지르는데 왜 이러죠?\" 글에 무새님이 댓글을 달았어요.",
+                        isRead = true,
+                        targetType = "POST",
+                        targetId = 200
+                    ),
+                )
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+private fun NotificationScreenEmptyActivityPreview() {
+    PetbulanceTheme {
+        NotificationScreen(
+            navController = rememberNavController(),
+            argument = NotificationArgument(
+                intent = {},
+                dataState = NotificationDataState.Init,
+                event = MutableSharedFlow()
+            ),
+            data = NotificationData(
+                selectedTab = NotificationTab.ACTIVITY,
+                notifications = emptyList()
+            )
+        )
+    }
+}
+
+// endregion
