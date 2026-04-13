@@ -5,6 +5,7 @@ import com.petbulance.domain.model.type.LoginProviderType
 import com.petbulance.domain.usecase.feature.user.auth.GetAutoLoginEnabledUseCase
 import com.petbulance.domain.usecase.feature.user.auth.SetAutoLoginEnabledUseCase
 import com.petbulance.domain.usecase.feature.user.user.ConnectSocialAccountUseCase
+import com.petbulance.domain.usecase.feature.user.auth.LogoutUseCase
 import com.petbulance.domain.usecase.feature.user.user.DisconnectSocialAccountUseCase
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.presentation.utils.BaseViewModel
@@ -24,6 +25,7 @@ class MyPageAccountViewModel @Inject constructor(
     private val setAutoLoginEnabledUseCase: SetAutoLoginEnabledUseCase,
     private val connectSocialAccountUseCase: ConnectSocialAccountUseCase,
     private val disconnectSocialAccountUseCase: DisconnectSocialAccountUseCase,
+    private val logoutUseCase: LogoutUseCase,
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<MyPageAccountDataState>(MyPageAccountDataState.Init)
@@ -42,6 +44,7 @@ class MyPageAccountViewModel @Inject constructor(
             is MyPageAccountIntent.ToggleAutoLogin -> toggleAutoLogin(intent.isEnabled)
             is MyPageAccountIntent.ConnectSocial -> connectSocial(intent.provider, intent.token)
             is MyPageAccountIntent.DisconnectSocial -> disconnectSocial(intent.provider)
+            is MyPageAccountIntent.Logout -> logout()
         }
     }
 
@@ -90,6 +93,25 @@ class MyPageAccountViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     _eventFlow.emit(MyPageAccountEvent.DataFetch.Error(exceptionMessage = e.message))
+                }
+            _dataState.value = MyPageAccountDataState.Init
+        }
+    }
+
+    private fun logout() {
+        launch {
+            _dataState.value = MyPageAccountDataState.OnProgress
+            logoutUseCase()
+                .onSuccess {
+                    _eventFlow.emit(MyPageAccountEvent.LogoutSuccess)
+                }
+                .onFailure { e ->
+                    _eventFlow.emit(
+                        MyPageAccountEvent.DataFetch.Error(
+                            userMessage = "로그아웃에 실패했습니다.",
+                            exceptionMessage = e.message
+                        )
+                    )
                 }
             _dataState.value = MyPageAccountDataState.Init
         }

@@ -108,6 +108,12 @@ fun MyPageAccountScreen(
                     showLastConnectedSocialAccountWarningDialog = true
                 }
 
+                is MyPageAccountEvent.LogoutSuccess -> {
+                    navController.navigate(ScreenDestinations.Login.route) {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
+
                 else -> {}
             }
         }
@@ -186,7 +192,7 @@ private fun MyPageAccountScreenContents(
         data.userInfo?.let { info ->
             CurrentAccountSection(
                 info = info,
-                onDisconnectRequest = { onIntent(MyPageAccountIntent.DisconnectSocial(it)) }
+                onLogout = { onIntent(MyPageAccountIntent.Logout) }
             )
         }
 
@@ -254,7 +260,7 @@ private fun AutoLoginSection(
 @Composable
 private fun CurrentAccountSection(
     info: UserInfo,
-    onDisconnectRequest: (LoginProviderType) -> Unit
+    onLogout: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -273,7 +279,7 @@ private fun CurrentAccountSection(
             provider = currentProvider,
             email = info.email,
             status = AccountStatus.LOGGED_IN,
-            onAction = { onDisconnectRequest(currentProvider) }
+            onAction = { onLogout() }
         )
 
         CommonDivider()

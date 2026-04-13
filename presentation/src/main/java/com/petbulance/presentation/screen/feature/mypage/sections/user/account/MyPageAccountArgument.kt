@@ -20,6 +20,7 @@ sealed interface MyPageAccountIntent {
     data class ToggleAutoLogin(val isEnabled: Boolean) : MyPageAccountIntent
     data class ConnectSocial(val provider: LoginProviderType, val token: String) : MyPageAccountIntent
     data class DisconnectSocial(val provider: LoginProviderType) : MyPageAccountIntent
+    data object Logout : MyPageAccountIntent
 }
 
 sealed class MyPageAccountEvent {
@@ -30,6 +31,8 @@ sealed class MyPageAccountEvent {
             override val displayType: ErrorDisplayType = ErrorDisplayType.Common
         ) : DataFetch(), ErrorEvent
     }
+
+    data object LogoutSuccess : MyPageAccountEvent()
 
     sealed class SocialLink: MyPageAccountEvent() {
         data object IsLast: SocialLink()
