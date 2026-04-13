@@ -30,7 +30,7 @@ fun LastConnectedSocialAccountWarningDialog(
         )
 
         Text(
-            text = "서비스 탈퇴를 원하시면 마이페이지>문의및고객센터>문의 작성에서 탈퇴 요청글을 작성해주세요.",
+            text = "서비스 탈퇴를 원하시면 아래 버튼을 눌러 탈퇴 페이지로 이동해주세요.",
             style = typography.bodySmall,
             color = colorScheme.text.caption
         )
@@ -49,7 +49,7 @@ fun LastConnectedSocialAccountWarningDialog(
             )
             BasicButton(
                 modifier = Modifier.weight(1f),
-                text = "탈퇴 문의 작성",
+                text = "탈퇴하기",
                 size = BasicButtonSize.L,
                 buttonType = BasicButtonType.SECONDARY,
                 radius = 28.dp,
