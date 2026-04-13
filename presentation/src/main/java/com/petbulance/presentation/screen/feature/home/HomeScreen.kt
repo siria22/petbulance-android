@@ -137,7 +137,7 @@ fun HomeScreen(
                     isLeadingIconAvailable = false,
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Filled.NotificationsNone)) {
-                            /* TODO : Notification page */
+                            navController.safeNavigate(ScreenDestinations.Notification.route)
                         }
                     ),
                     shouldEmphasized = true

@@ -19,6 +19,7 @@ import com.petbulance.presentation.screen.feature.community.communityDestination
 import com.petbulance.presentation.screen.feature.community.detail.postDetailDestination
 import com.petbulance.presentation.screen.feature.community.write.writePostDestination
 import com.petbulance.presentation.screen.feature.home.homeDestination
+import com.petbulance.presentation.screen.feature.notification.notificationDestination
 import com.petbulance.presentation.screen.feature.mypage.main.myPageDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.comments.myPageCommentsDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.activity.posts.myPagePostsDestination
@@ -97,6 +98,7 @@ fun AppNavGraph(
         welcomeDestination(navController = navController)
 
         homeDestination(navController = navController)
+        notificationDestination(navController = navController)
 
         searchDestination(navController = navController)
         hospitalInfoDestination(navController = navController)
