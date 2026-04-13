@@ -45,6 +45,8 @@ import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.composables.RequiredTermsWithdrawDialog
 import com.petbulance.presentation.utils.HtmlText
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 @Composable
@@ -111,8 +113,8 @@ fun TermsDetailScreen(
                     argument.intent(TermsDetailIntent.DismissRequiredTermsDialog)
                 },
                 onWithdrawConfirm = {
-                    // TODO: Navigate to account deletion screen
                     argument.intent(TermsDetailIntent.DismissRequiredTermsDialog)
+                    navController.safeNavigate(ScreenDestinations.MyPage.User.Withdrawal.route)
                 }
             )
         }

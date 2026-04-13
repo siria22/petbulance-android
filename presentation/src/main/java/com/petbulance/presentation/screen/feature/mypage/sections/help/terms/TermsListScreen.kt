@@ -108,8 +108,8 @@ fun TermsListScreen(
                     argument.intent(TermsListIntent.DismissRequiredTermsDialog)
                 },
                 onWithdrawConfirm = {
-                    // TODO: Navigate to account deletion screen
                     argument.intent(TermsListIntent.DismissRequiredTermsDialog)
+                    navController.safeNavigate(ScreenDestinations.MyPage.User.Withdrawal.route)
                 }
             )
         }

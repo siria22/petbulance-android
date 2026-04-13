@@ -34,6 +34,7 @@ import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.ter
 import com.petbulance.presentation.screen.feature.mypage.sections.help.terms.detail.termsDetailDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.account.myPageAccountDestination
 import com.petbulance.presentation.screen.feature.mypage.sections.user.profile.myPageProfileDestination
+import com.petbulance.presentation.screen.feature.mypage.sections.user.withdrawal.withdrawalDestination
 import com.petbulance.presentation.screen.feature.review.camera.receiptCameraDestination
 import com.petbulance.presentation.screen.feature.review.create.reviewCreateDestination
 import com.petbulance.presentation.screen.feature.review.detail.reviewDetailDestination
@@ -114,6 +115,7 @@ fun AppNavGraph(
         myPagePostsDestination(navController = navController)
         myPageCommentsDestination(navController = navController)
         myPageAccountDestination(navController = navController)
+        withdrawalDestination(navController = navController)
 
         myPageNoticeDestination(navController = navController)
         myPageNoticeDetailDestination(navController = navController)

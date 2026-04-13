@@ -57,7 +57,12 @@ import com.petbulance.presentation.screen.feature.mypage.sections.user.account.c
 import com.petbulance.presentation.utils.hooks.login.rememberGoogleLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberKakaoLoginManager
 import com.petbulance.presentation.utils.hooks.login.rememberNaverLoginManager
+import com.petbulance.presentation.component.ui.atom.IconResource
+import com.petbulance.presentation.utils.nav.ScreenDestinations
+import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 private enum class AccountStatus {
@@ -116,7 +121,11 @@ fun MyPageAccountScreen(
                     textAlignment = TopBarAlignment.START,
                     isLeadingIconAvailable = true,
                     onLeadingIconClicked = { navController.safePopBackStack() },
-                    isTrailingIconAvailable = false,
+                    trailingIcons = listOf(
+                        Pair(IconResource.Vector(Icons.Filled.Settings)) {
+                            navController.safeNavigate(ScreenDestinations.MyPage.User.Withdrawal.route)
+                        }
+                    )
                 )
             )
         },
@@ -152,7 +161,7 @@ fun MyPageAccountScreen(
             onDismissRequest = { showLastConnectedSocialAccountWarningDialog = false },
             onNavigateToSupport = {
                 showLastConnectedSocialAccountWarningDialog = false
-                //TODO : Navigate to 탈퇴page
+                navController.safeNavigate(ScreenDestinations.MyPage.User.Withdrawal.route)
             }
         )
     }

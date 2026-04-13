@@ -70,6 +70,10 @@ class UserApi @Inject constructor(
         }
     }
 
+    suspend fun deleteAccount(): HttpResponse {
+        return client.delete(baseUrl)
+    }
+
     suspend fun getMyInfo(): HttpResponse {
         return client.get("$BASE_URL/users/me")
     }

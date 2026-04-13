@@ -83,4 +83,7 @@ class MockUserRepository @Inject constructor() : UserRepository {
         return Result.success(settings)
     }
 
+    override suspend fun deleteAccount(): Result<Unit> {
+        return Result.success(Unit)
+    }
 }
