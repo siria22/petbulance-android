@@ -1,5 +1,9 @@
 package com.petbulance.presentation.screen.feature.notification
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +19,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -33,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
@@ -56,7 +61,9 @@ import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
 import com.petbulance.presentation.component.ui.spacingSmall
+import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
+import androidx.compose.ui.unit.dp
 import com.petbulance.presentation.screen.feature.mypage.sections.help.notice.composables.NoticeStatusChip
 import com.petbulance.presentation.screen.feature.notification.composables.NotificationItemCard
 import com.petbulance.presentation.utils.nav.ScreenDestinations
@@ -71,18 +78,24 @@ fun NotificationScreen(
     argument: NotificationArgument,
     data: NotificationData
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(argument.event) {
         argument.event.collectLatest { event ->
             when (event) {
                 is NotificationEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(event.message)
+                    toastMessage = event.message
                 }
-
                 else -> {}
             }
+        }
+    }
+
+    LaunchedEffect(toastMessage) {
+        if (toastMessage != null) {
+            kotlinx.coroutines.delay(3000)
+            toastMessage = null
         }
     }
 
@@ -102,13 +115,16 @@ fun NotificationScreen(
                 )
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = colorScheme.bg.frame.default
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             // Tab Row
             val tabs = NotificationTab.entries
@@ -178,6 +194,43 @@ fun NotificationScreen(
                         }
                     }
                 )
+            }
+        }
+
+            // Custom InfoToast
+            AnimatedVisibility(
+                visible = toastMessage != null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                toastMessage?.let { message ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = spacingXL, horizontal = spacingMedium)
+                            .background(
+                                Color(0xFF222222).copy(alpha = 0.9f),
+                                RoundedCornerShape(4.dp)
+                            )
+                            .padding(spacingSmall),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = message,
+                            style = typography.bodySmall,
+                            color = colorScheme.text.inverse
+                        )
+                        BasicIcon(
+                            iconResource = IconResource.Vector(Icons.Default.Close),
+                            contentDescription = "닫기",
+                            size = iconSizeSmall,
+                            tint = colorScheme.icon.inverse,
+                            modifier = Modifier.clickable { toastMessage = null }
+                        )
+                    }
+                }
             }
         }
     }
