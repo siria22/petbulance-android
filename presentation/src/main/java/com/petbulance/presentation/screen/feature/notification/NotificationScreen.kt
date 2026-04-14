@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -47,6 +48,7 @@ import com.petbulance.presentation.component.ui.CommonDivider
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.OnContentLoadingUi
+import com.petbulance.presentation.component.ui.iconSizeMS
 import com.petbulance.presentation.component.ui.iconSizeSmall
 import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
@@ -164,7 +166,17 @@ fun NotificationScreen(
                     onLoadMore = { argument.intent(NotificationIntent.LoadMoreNotifications) },
                     onReadAll = { argument.intent(NotificationIntent.ReadAllNotifications) },
                     onDeleteAll = { showDeleteDialog = true },
-                    onItemClick = { /* TODO: targetType 기반 네비게이션 */ }
+                    onItemClick = { item ->
+                        when (item.targetType) {
+                            "POST", "COMMENT" -> navController.safeNavigate(
+                                ScreenDestinations.Community.PostDetail.createRoute(item.targetId)
+                            )
+                            "REVIEW" -> navController.safeNavigate(
+                                ScreenDestinations.Review.Detail.createRoute(item.targetId)
+                            )
+                            else -> {} // SANCTION 등은 네비게이션 없음
+                        }
+                    }
                 )
             }
         }
@@ -261,13 +273,13 @@ private fun NoticeItem(
 
 @Composable
 private fun ActivityTabContent(
-    notifications: List<com.petbulance.domain.model.feature.notification.NotificationItem>,
+    notifications: List<NotificationItem>,
     isLoading: Boolean,
     isLoadingNextPage: Boolean,
     onLoadMore: () -> Unit,
     onReadAll: () -> Unit,
     onDeleteAll: () -> Unit,
-    onItemClick: (com.petbulance.domain.model.feature.notification.NotificationItem) -> Unit
+    onItemClick: (NotificationItem) -> Unit
 ) {
     if (isLoading) {
         OnContentLoadingUi("불러오는 중...")
@@ -279,21 +291,22 @@ private fun ActivityTabContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = spacingMedium, vertical = spacingXS),
+                .padding(horizontal = spacingMedium, vertical = spacingSmall),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             BasicIcon(
                 iconResource = IconResource.Drawable(R.drawable.ic_del),
                 contentDescription = "전체 삭제",
-                size = iconSizeSmall,
-                tint = colorScheme.icon.light,
+                size = iconSizeMS,
+                tint = colorScheme.icon.dark,
                 modifier = Modifier.clickable(onClick = onDeleteAll)
             )
             Text(
                 text = "전체읽음",
-                style = typography.bodyMedium.emp(),
+                style = typography.bodySmall,
                 color = colorScheme.text.primary,
+                fontWeight = FontWeight.W400,
                 modifier = Modifier.clickable(onClick = onReadAll)
             )
         }
