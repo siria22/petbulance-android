@@ -34,12 +34,14 @@ fun WarningDialog(
             style = MaterialTheme.typography.titleSmall,
             color = PetbulanceTheme.colorScheme.text.primary
         )
-        Text(
-            text = content,
-            style = MaterialTheme.typography.bodyMedium,
-            color = PetbulanceTheme.colorScheme.text.caption,
-            textAlign = TextAlign.Center
-        )
+        if (content.isNotBlank()) {
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodyMedium,
+                color = PetbulanceTheme.colorScheme.text.caption,
+                textAlign = TextAlign.Center
+            )
+        }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(spacingXS),

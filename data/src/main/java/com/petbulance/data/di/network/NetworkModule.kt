@@ -43,7 +43,7 @@ object NetworkModule {
     private const val TOLERABLE_TIME = 30_000L
     private const val LOG_TAG = "siria22 - NetworkModule"
 
-    private const val isLoggingOn = true
+    private const val isLoggingOn = false
 
     @Provides
     @Singleton
