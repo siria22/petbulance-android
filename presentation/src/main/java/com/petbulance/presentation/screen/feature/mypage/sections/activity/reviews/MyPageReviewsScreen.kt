@@ -395,7 +395,9 @@ private fun MyPageReviewsItem(
                         style = typography.bodySmall
                     )
                 }
-                ReceiptVerifiedBadge()
+                if (review.isReceiptVerified) {
+                    ReceiptVerifiedBadge()
+                }
             }
         }
 
