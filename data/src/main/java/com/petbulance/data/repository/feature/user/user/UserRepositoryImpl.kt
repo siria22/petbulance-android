@@ -99,6 +99,12 @@ class UserRepositoryImpl @Inject constructor(
         }.map { it.toDomain() }
     }
 
+    override suspend fun getNotificationSettings(): Result<NotificationSettings> {
+        return safeApiCall<NotificationSettingResDto>(path = "/users/settings/notification") {
+            api.getNotificationSettings()
+        }.map { it.toDomain() }
+    }
+
     override suspend fun updateNotificationSettings(
         settings: NotificationSettings
     ): Result<NotificationSettings> {

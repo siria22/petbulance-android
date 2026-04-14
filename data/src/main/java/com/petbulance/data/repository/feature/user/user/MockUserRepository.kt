@@ -78,6 +78,10 @@ class MockUserRepository @Inject constructor() : UserRepository {
         )
     }
 
+    override suspend fun getNotificationSettings(): Result<NotificationSettings> {
+        return Result.success(NotificationSettings(isAllEnabled = true, isEventEnabled = true, isMarketingEnabled = true))
+    }
+
     override suspend fun updateNotificationSettings(settings: NotificationSettings): Result<NotificationSettings> {
         // Simply return the settings that were passed in, simulating a successful update.
         return Result.success(settings)

@@ -94,7 +94,7 @@ fun NotificationScreen(
                     onLeadingIconClicked = { navController.safePopBackStack() },
                     trailingIcons = listOf(
                         Pair(IconResource.Vector(Icons.Filled.Settings)) {
-                            // TODO: 알림 설정 화면 네비게이션
+                            navController.safeNavigate(ScreenDestinations.MyPage.User.NotificationSettings.route)
                         }
                     )
                 )

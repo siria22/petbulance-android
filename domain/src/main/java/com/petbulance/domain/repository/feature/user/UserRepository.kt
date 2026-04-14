@@ -29,5 +29,6 @@ interface UserRepository {
 
     suspend fun getMyInfo(): Result<UserInfo>
 
+    suspend fun getNotificationSettings(): Result<NotificationSettings>
     suspend fun updateNotificationSettings(settings: NotificationSettings): Result<NotificationSettings>
 }

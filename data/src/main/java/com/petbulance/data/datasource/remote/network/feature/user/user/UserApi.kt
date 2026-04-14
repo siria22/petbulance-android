@@ -78,6 +78,10 @@ class UserApi @Inject constructor(
         return client.get("$BASE_URL/users/me")
     }
 
+    suspend fun getNotificationSettings(): HttpResponse {
+        return client.get("$baseUrl/settings/notification")
+    }
+
     suspend fun updateNotificationSettings(request: NotificationSettingReqDto): HttpResponse {
         return client.patch("$baseUrl/settings/notification") {
             contentType(ContentType.Application.Json)

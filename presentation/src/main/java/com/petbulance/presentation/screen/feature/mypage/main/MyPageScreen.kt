@@ -139,7 +139,7 @@ private fun MyPageScreenContents(
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_notification),
                     title = "알림 설정",
-                    onClicked = { requireLoginOr { /* TODO: 알림 설정 화면 이동 */ } }
+                    onClicked = { requireLoginOr { navController.safeNavigate(ScreenDestinations.MyPage.User.NotificationSettings.route) } }
                 ),
                 MyPageSectionItem(
                     iconResource = IconResource.Drawable(R.drawable.ic_logout),
