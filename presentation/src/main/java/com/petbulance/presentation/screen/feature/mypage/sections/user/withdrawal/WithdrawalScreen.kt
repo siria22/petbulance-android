@@ -32,6 +32,7 @@ import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
 import com.petbulance.presentation.component.ui.organism.TopBarAlignment
 import com.petbulance.presentation.component.ui.organism.TopBarInfo
 import com.petbulance.presentation.component.ui.spacingMedium
+import com.petbulance.presentation.component.ui.spacingXL
 import com.petbulance.presentation.component.ui.spacingXS
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safePopBackStack
@@ -84,18 +85,18 @@ fun WithdrawalScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = spacingMedium, vertical = spacingXS),
+                    .padding(horizontal = spacingMedium, vertical = spacingXL),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "펫뷸런스 서비스",
-                    style = typography.labelLarge.emp(),
+                    style = typography.bodyLarge,
                     color = colorScheme.text.primary
                 )
                 Text(
                     text = "탈퇴하기",
-                    style = typography.bodyMedium,
+                    style = typography.bodySmall.emp(),
                     color = colorScheme.text.caption,
                     modifier = Modifier.clickable { showConfirmDialog = true }
                 )

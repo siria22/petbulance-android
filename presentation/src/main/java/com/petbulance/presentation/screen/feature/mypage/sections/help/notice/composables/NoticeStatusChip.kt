@@ -19,7 +19,7 @@ import com.petbulance.presentation.component.ui.spacingXXXS
 fun NoticeStatusChip(status: NoticeStatusType) {
     val backgroundColor = when (status) {
         NoticeStatusType.EVENT -> colorScheme.tag.green.bg
-        NoticeStatusType.ADVERTISING -> colorScheme.tag.yellow.bg
+        NoticeStatusType.ADVERTISING -> colorScheme.tag.yellow.subtle
         NoticeStatusType.NOTICE -> colorScheme.tag.blue.bg
     }
 

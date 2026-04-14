@@ -27,7 +27,7 @@ fun NotificationItemCard(
     val bgColor = if (item.isRead) {
         colorScheme.bg.frame.default
     } else {
-        colorScheme.bg.frame.subtle
+        colorScheme.tag.red.bg
     }
 
     Column(
@@ -35,7 +35,8 @@ fun NotificationItemCard(
             .fillMaxWidth()
             .background(bgColor)
             .clickable(onClick = onClick)
-            .padding(horizontal = spacingMedium, vertical = spacingSmall)
+            .padding(spacingMedium),
+        verticalArrangement = Arrangement.spacedBy(spacingSmall)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

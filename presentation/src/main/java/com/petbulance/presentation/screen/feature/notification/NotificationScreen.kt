@@ -1,6 +1,5 @@
 package com.petbulance.presentation.screen.feature.notification
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
@@ -36,11 +34,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.petbulance.domain.model.feature.notification.NotificationItem
 import com.petbulance.domain.model.feature.support.notice.NoticeListItem
+import com.petbulance.domain.model.type.NoticeStatusType
+import com.petbulance.presentation.R
+import com.petbulance.presentation.component.theme.PetbulanceTheme
 import com.petbulance.presentation.component.theme.PetbulanceTheme.colorScheme
 import com.petbulance.presentation.component.theme.emp
 import com.petbulance.presentation.component.ui.CommonDivider
@@ -60,8 +60,6 @@ import com.petbulance.presentation.screen.feature.notification.composables.Notif
 import com.petbulance.presentation.utils.nav.ScreenDestinations
 import com.petbulance.presentation.utils.nav.safeNavigate
 import com.petbulance.presentation.utils.nav.safePopBackStack
-import com.petbulance.domain.model.type.NoticeStatusType
-import com.petbulance.presentation.component.theme.PetbulanceTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
@@ -80,6 +78,7 @@ fun NotificationScreen(
                 is NotificationEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
+
                 else -> {}
             }
         }
@@ -285,7 +284,7 @@ private fun ActivityTabContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             BasicIcon(
-                iconResource = IconResource.Vector(Icons.Filled.Delete),
+                iconResource = IconResource.Drawable(R.drawable.ic_del),
                 contentDescription = "전체 삭제",
                 size = iconSizeSmall,
                 tint = colorScheme.icon.light,
@@ -315,7 +314,8 @@ private fun ActivityTabContent(
             val listState = rememberLazyListState()
             val shouldLoadMore by remember {
                 derivedStateOf {
-                    val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    val lastVisibleItem =
+                        listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
                     lastVisibleItem >= listState.layoutInfo.totalItemsCount - 3
                 }
             }
