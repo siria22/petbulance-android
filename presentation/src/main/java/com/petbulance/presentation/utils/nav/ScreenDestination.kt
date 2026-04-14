@@ -88,6 +88,7 @@ sealed class ScreenDestinations(val route: String) {
             data object Account: ScreenDestinations("mypage/user/account")
             data object Withdrawal : ScreenDestinations("mypage/user/withdrawal")
             data object NotificationSettings : ScreenDestinations("mypage/user/notification-settings")
+            data object PermissionSettings : ScreenDestinations("mypage/user/permission-settings")
         }
 
         sealed class Help : ScreenDestinations("mypage/help") {
