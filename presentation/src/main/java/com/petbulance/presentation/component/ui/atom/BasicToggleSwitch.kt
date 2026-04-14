@@ -36,13 +36,13 @@ fun BasicToggleSwitch(
     val trackColor = if (checked) {
         PetbulanceTheme.colorScheme.action.primary.default
     } else {
-        PetbulanceTheme.colorScheme.bg.frame.default
+        PetbulanceTheme.colorScheme.bg.frame.medium
     }
 
     val borderColor = if (checked) {
         PetbulanceTheme.colorScheme.action.primary.default
     } else {
-        PetbulanceTheme.colorScheme.border.subtle
+        PetbulanceTheme.colorScheme.bg.frame.medium
     }
 
     val thumbColor = PetbulanceTheme.colorScheme.bg.frame.default
