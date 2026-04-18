@@ -41,9 +41,9 @@ annotation class DefaultHttpClient
 object NetworkModule {
 
     private const val TOLERABLE_TIME = 30_000L
-    private const val LOG_TAG = "siria22 - NetworkModule"
+    private const  val LOG_TAG = "siria22 - NetworkModule"
 
-    private const val isLoggingOn = false
+    private const val isLoggingOn = true
 
     @Provides
     @Singleton

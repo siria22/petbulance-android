@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.credential.manager)
     implementation(libs.credential.manager.google)
     implementation(libs.googleid)
+    implementation(libs.play.services.auth)
     implementation(libs.kotlinx.coroutines.play.services)
 
     // Login
