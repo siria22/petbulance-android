@@ -17,6 +17,7 @@ class MockAuthRepository @Inject constructor() : AuthRepository {
         Result.success(SocialLoginResult(isNewUser = false, accessToken = "mock_token", refreshToken = "mock_token"))
 
     override suspend fun logout(): Result<Unit> = Result.success(Unit)
+    override fun isLoggingOut(): Boolean = false
     override suspend fun saveLastLoginPlatform(platform: LoginProviderType): Result<Unit> = Result.success(Unit)
     override suspend fun getLastLoginPlatform(): Result<LoginProviderType?> = Result.success(LoginProviderType.KAKAO)
     override suspend fun setAutoLoginEnabled(isEnabled: Boolean): Result<Unit> {

@@ -2,8 +2,10 @@ package com.petbulance.presentation.screen.feature.community
 
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.community.post.PostSummary
+import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.usecase.feature.community.post.GetPostListUseCase
 import com.petbulance.domain.usecase.feature.community.post.TogglePostLikeUseCase
+import com.petbulance.domain.usecase.feature.support.notice.GetNoticeListUseCase
 import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
@@ -20,7 +22,8 @@ class CommunityViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getPostListUseCase: GetPostListUseCase,
     private val togglePostLikeUseCase: TogglePostLikeUseCase,
-    private val checkLoginStatusUseCase: CheckLoginStatusUseCase
+    private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
+    private val getNoticeListUseCase: GetNoticeListUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<CommunityDataState>(CommunityDataState.Init)
@@ -61,11 +64,33 @@ class CommunityViewModel @Inject constructor(
         observeErrorEvent(eventFlow)
         checkLoginStatus()
         loadInitialPosts()
+        loadNoticeBanner()
     }
 
     private fun checkLoginStatus() {
         launch {
             isLoggedIn = checkLoginStatusUseCase().getOrNull() ?: false
+        }
+    }
+
+    private fun loadNoticeBanner() {
+        launch {
+            getNoticeListUseCase(lastNoticeId = null, pageSize = 1)
+                .onSuccess { pagingResult ->
+                    val latestNotice = pagingResult.content.firstOrNull()
+                    _communityData.update {
+                        it.copy(
+                            noticeBanner = latestNotice?.let { notice ->
+                                NoticeBanner(
+                                    noticeId = notice.noticeId,
+                                    noticeStatus = notice.noticeStatus.name,
+                                    title = notice.title,
+                                    content = notice.content ?: ""
+                                )
+                            }
+                        )
+                    }
+                }
         }
     }
 
@@ -86,7 +111,6 @@ class CommunityViewModel @Inject constructor(
             ).onSuccess { pagingPostList ->
                 _communityData.update {
                     it.copy(
-                        noticeBanner = pagingPostList.noticeBanner,
                         posts = pagingPostList.items,
                         hasNext = pagingPostList.hasNext
                     )
@@ -163,9 +187,6 @@ class CommunityViewModel @Inject constructor(
                     lastPostId = lastPostId,
                     pageSize = PAGE_SIZE
                 ).onSuccess { pagingPostList ->
-                    if (page == 1) {
-                        _communityData.update { it.copy(noticeBanner = pagingPostList.noticeBanner) }
-                    }
                     allPosts.addAll(pagingPostList.items)
                     lastPostId = pagingPostList.items.lastOrNull()?.id
                     hasMorePages = pagingPostList.hasNext

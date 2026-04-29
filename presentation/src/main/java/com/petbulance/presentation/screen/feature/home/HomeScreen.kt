@@ -60,6 +60,10 @@ import com.petbulance.presentation.component.ui.atom.BaseCarousel
 import com.petbulance.presentation.component.ui.atom.BasicBottomSheet
 import com.petbulance.presentation.component.ui.atom.BasicIcon
 import com.petbulance.presentation.component.ui.atom.BasicImageBox
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.atom.StarRatingView
 import com.petbulance.presentation.component.ui.iconSizeMedium
@@ -424,11 +428,15 @@ private fun HospitalNoticeSlider(
         autoScroll = true,
         autoScrollInterval = 3000L
     ) { _, item ->
-        BasicImageBox(
-            uri = item.imageUrl.toUri(),
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(item.imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "배너 이미지",
+            contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 180.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { onBannerClick(item.noticeId) },
         )

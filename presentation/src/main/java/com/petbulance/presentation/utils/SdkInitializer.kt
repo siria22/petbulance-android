@@ -1,6 +1,8 @@
 package com.petbulance.presentation.utils
 
 import android.content.Context
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 import com.petbulance.presentation.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.kakao.sdk.common.KakaoSdk
@@ -24,5 +26,10 @@ class SdkInitializerImpl @Inject constructor() : SdkInitializer {
         )
 
         KakaoSdk.init(context, BuildConfig.KAKAO_NATIVE_APP_KEY)
+
+        FacebookSdk.setApplicationId(BuildConfig.FB_APP_ID)
+        FacebookSdk.setClientToken(BuildConfig.FB_CLIENT_TOKEN)
+        FacebookSdk.sdkInitialize(context)
+        AppEventsLogger.activateApp(context.applicationContext as android.app.Application)
     }
 }

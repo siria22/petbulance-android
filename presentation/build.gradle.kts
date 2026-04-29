@@ -63,6 +63,16 @@ android {
             "KAKAO_NATIVE_APP_KEY",
             "\"${(localProperties["KAKAO_NATIVE_APP_KEY"] as String? ?: "").lowercase()}\""
         )
+        buildConfigField(
+            "String",
+            "FB_APP_ID",
+            "\"${localProperties["FB_APP_ID"]}\""
+        )
+        buildConfigField(
+            "String",
+            "FB_CLIENT_TOKEN",
+            "\"${localProperties["FB_CLIENT_TOKEN"]}\""
+        )
     }
 
     buildTypes {
@@ -154,6 +164,9 @@ dependencies {
     implementation(libs.kakao.login)
     implementation(libs.naver.login)
     implementation(libs.googleid)
+
+    // Meta (Facebook) SDK
+    implementation(libs.facebook.sdk)
 
     // Naver Map
     implementation(libs.map.sdk)

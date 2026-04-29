@@ -63,44 +63,7 @@ class SplashViewModel @Inject constructor(
             return
         }
 
-        // 약관 목록과 동의 상태를 함께 확인
-        val termsListResult = getTermsListUseCase()
-        val termsStatusResult = getTermsStatusUseCase()
-
-        if (termsListResult.isFailure || termsStatusResult.isFailure) {
-            _event.emit(
-                SplashEvent.DataFetch.Error(
-                    userMessage = "서버와의 통신이 원활하지 않습니다.",
-                    exceptionMessage = termsListResult.exceptionOrNull()?.message 
-                        ?: termsStatusResult.exceptionOrNull()?.message,
-                    displayType = ErrorDisplayType.Custom
-                )
-            )
-            return
-        }
-
-        val termsList = termsListResult.getOrNull() ?: emptyList()
-        val termsStatus = termsStatusResult.getOrNull() ?: return
-
-        // 필수 약관 목록 추출
-        val requiredTerms = termsList.filter { it.required }
-        
-        // 각 필수 약관이 동의되었는지 확인
-        val isAllRequiredAgreed = requiredTerms.all { term ->
-            when (term.termsType?.name) {
-                "SERVICE" -> termsStatus.service
-                "PRIVACY" -> termsStatus.privacy
-                "LOCATION" -> termsStatus.location
-                "MARKETING" -> termsStatus.marketing
-                else -> false
-            }
-        }
-
-        if (isAllRequiredAgreed) {
-            _event.emit(SplashEvent.NavigateToHome)
-        } else {
-            _event.emit(SplashEvent.NavigateToHomeWithTermsCheck)
-        }
+        _event.emit(SplashEvent.NavigateToHome)
     }
 
     fun onIntent(intent: SplashIntent) {

@@ -17,6 +17,7 @@ data class BaseResponse<T>(
     val status: Int,
     val success: Boolean,
     val data: T? = null,
+    val error: T? = null,
     val message: String? = null
 )
 
@@ -25,9 +26,15 @@ data class BaseResponse<T>(
  */
 @Serializable
 data class ErrorResponse(
-    val className: String,
-    val message: String
-)
+    val className: String? = null,
+    val errorClassName: String? = null,
+    val message: String? = null
+) {
+    val resolvedClassName: String
+        get() = className ?: errorClassName ?: "UnknownError"
+    val resolvedMessage: String
+        get() = message ?: "No message provided"
+}
 
 /**
  * Common Spring Error response

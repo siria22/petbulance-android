@@ -43,7 +43,7 @@ object NetworkModule {
     private const val TOLERABLE_TIME = 30_000L
     private const  val LOG_TAG = "siria22 - NetworkModule"
 
-    private const val isLoggingOn = true
+    private const val isLoggingOn = false
 
     @Provides
     @Singleton
@@ -133,6 +133,12 @@ object NetworkModule {
                     refreshTokens {
                         Log.d(LOG_TAG, "Token expired. Refreshing tokens...")
                         val authRepository = authRepositoryProvider.get()
+
+                        if (authRepository.isLoggingOut()) {
+                            Log.d(LOG_TAG, "Logout in progress. Skipping token refresh.")
+                            return@refreshTokens null
+                        }
+
                         val refreshToken = authRepository.getRefreshToken().getOrNull()
 
                         if (refreshToken.isNullOrBlank()) {

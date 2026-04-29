@@ -73,6 +73,9 @@ firebaseCrashlyticsPlugin = "3.0.2"
 kakaoSdk = "2.23.0"
 naverSdk = "5.11.0"
 
+# Meta (Facebook) SDK
+facebookSdk = "18.0.3"
+
 # Naver Map SDK
 mapSdk = "3.21.0"
 foundation = "1.10.0"
@@ -197,6 +200,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 # Login
 kakao-login = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
 naver-login = { group = "com.navercorp.nid", name = "oauth-jdk8", version.ref = "naverSdk" }
+facebook-sdk = { group = "com.facebook.android", name = "facebook-android-sdk", version.ref = "facebookSdk" }
 
 ## Naver Map
 map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }

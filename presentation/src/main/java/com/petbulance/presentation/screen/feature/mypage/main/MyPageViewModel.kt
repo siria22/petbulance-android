@@ -5,7 +5,6 @@ import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
 import com.petbulance.domain.usecase.nonfeature.app.GetAppVersionUseCase
 import com.petbulance.presentation.utils.BaseViewModel
-import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,13 +46,9 @@ class MyPageViewModel @Inject constructor(
                 _userInfo.value = userInfo
             }
             .onFailure { exception ->
-                _eventFlow.emit(
-                    MyPageEvent.DataFetch.Error(
-                        displayType = ErrorDisplayType.Common,
-                        userMessage = "사용자 정보를 불러오는데 실패했습니다.",
-                        exceptionMessage = exception.message
-                    )
-                )
+                if (exception.message?.contains("ACCOUNT_SUSPENDED") == true) {
+                    _eventFlow.emit(MyPageEvent.AccountSuspended)
+                }
             }
     }
 
