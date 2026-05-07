@@ -29,6 +29,7 @@ class SdkInitializerImpl @Inject constructor() : SdkInitializer {
 
         FacebookSdk.setApplicationId(BuildConfig.FB_APP_ID)
         FacebookSdk.setClientToken(BuildConfig.FB_CLIENT_TOKEN)
+        FacebookSdk.setIsDebugEnabled(BuildConfig.DEBUG)
         FacebookSdk.sdkInitialize(context)
         AppEventsLogger.activateApp(context.applicationContext as android.app.Application)
     }
