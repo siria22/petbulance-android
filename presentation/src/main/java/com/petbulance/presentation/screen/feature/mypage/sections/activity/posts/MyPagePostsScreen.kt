@@ -81,8 +81,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun MyPagePostsScreen(
     navController: NavController,
-    argument: MyPagePostsArgument,
-    data: MyPagePostsData
+    argument: MyPagePostsArgument
 ) {
     val dataState = argument.dataState
     val screenState = argument.screenState
@@ -554,7 +553,6 @@ private fun MyPagePostsScreenPreview() {
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPagePostsData.stub()
         )
     }
 }
@@ -577,7 +575,6 @@ private fun MyPagePostsEmptyScreenPreview() {
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPagePostsData.stub()
         )
     }
 }

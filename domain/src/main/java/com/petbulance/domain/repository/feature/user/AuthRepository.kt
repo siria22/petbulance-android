@@ -13,6 +13,7 @@ interface AuthRepository {
 
     suspend fun socialLogin(provider: LoginProviderType, authCode: String): Result<SocialLoginResult>
     suspend fun logout(): Result<Unit>
+    fun isLoggingOut(): Boolean
 
     suspend fun saveLastLoginPlatform(platform: LoginProviderType): Result<Unit>
     suspend fun getLastLoginPlatform(): Result<LoginProviderType?>

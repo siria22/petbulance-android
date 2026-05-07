@@ -6,6 +6,8 @@ sealed class ScreenDestinations(val route: String) {
 
     data object Splash : ScreenDestinations("splash")
 
+    data object Notification : ScreenDestinations("notification")
+
     data object Login : ScreenDestinations("login")
     data object Welcome : ScreenDestinations("welcome")
 
@@ -84,6 +86,9 @@ sealed class ScreenDestinations(val route: String) {
         sealed class User : ScreenDestinations("mypage/user") {
             data object Profile : ScreenDestinations("mypage/user/profile")
             data object Account: ScreenDestinations("mypage/user/account")
+            data object Withdrawal : ScreenDestinations("mypage/user/withdrawal")
+            data object NotificationSettings : ScreenDestinations("mypage/user/notification-settings")
+            data object PermissionSettings : ScreenDestinations("mypage/user/permission-settings")
         }
 
         sealed class Help : ScreenDestinations("mypage/help") {

@@ -9,6 +9,7 @@ import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.usecase.feature.hospital.review.AddRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.DeleteRecentSearchKeywordUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.GetRecentSearchKeywordsUseCase
+import com.petbulance.domain.usecase.feature.hospital.review.DeleteReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.SearchReviewUseCase
 import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
@@ -31,7 +32,8 @@ class ReviewSearchViewModel @Inject constructor(
     private val addRecentKeywordUseCase: AddRecentSearchKeywordUseCase,
     private val deleteRecentKeywordUseCase: DeleteRecentSearchKeywordUseCase,
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val createReportUseCase: CreateReportUseCase
+    private val createReportUseCase: CreateReportUseCase,
+    private val deleteReviewUseCase: DeleteReviewUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<ReviewSearchState>(ReviewSearchState.Init)
@@ -115,6 +117,8 @@ class ReviewSearchViewModel @Inject constructor(
 
             is ReviewSearchIntent.ReportReview -> reportReview(intent.reviewId, intent.reason)
 
+            is ReviewSearchIntent.DeleteReview -> deleteReview(intent.reviewId)
+
             is ReviewSearchIntent.ChangeSort -> {
                 _searchData.update { it.copy(selectedSort = intent.sortType) }
                 performSearch()
@@ -164,6 +168,21 @@ class ReviewSearchViewModel @Inject constructor(
                 }
                 .onFailure {
                     _eventFlow.emit(ReviewSearchEvent.Error("신고 접수에 실패했습니다."))
+                }
+        }
+    }
+
+    private fun deleteReview(reviewId: Long) {
+        launch {
+            deleteReviewUseCase(reviewId)
+                .onSuccess {
+                    _searchData.update {
+                        it.copy(searchResults = it.searchResults.filter { review -> review.id != reviewId })
+                    }
+                    _eventFlow.emit(ReviewSearchEvent.DeleteSuccess)
+                }
+                .onFailure {
+                    _eventFlow.emit(ReviewSearchEvent.Error("리뷰 삭제에 실패했습니다."))
                 }
         }
     }

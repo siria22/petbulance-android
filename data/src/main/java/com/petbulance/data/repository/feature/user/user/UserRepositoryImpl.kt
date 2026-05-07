@@ -87,9 +87,21 @@ class UserRepositoryImpl @Inject constructor(
         }.map { it.toDomain() }
     }
 
+    override suspend fun deleteAccount(): Result<Unit> {
+        return safeApiCall<Map<String, String>>(path = "/users") {
+            api.deleteAccount()
+        }.map { }
+    }
+
     override suspend fun getMyInfo(): Result<UserInfo> {
         return safeApiCall<MeResponseDto>(path = "/users/me") {
             api.getMyInfo()
+        }.map { it.toDomain() }
+    }
+
+    override suspend fun getNotificationSettings(): Result<NotificationSettings> {
+        return safeApiCall<NotificationSettingResDto>(path = "/users/settings/notification") {
+            api.getNotificationSettings()
         }.map { it.toDomain() }
     }
 

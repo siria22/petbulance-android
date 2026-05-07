@@ -73,8 +73,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun MyPageCommentsScreen(
     navController: NavController,
-    argument: MyPageCommentsArgument,
-    data: MyPageCommentsData
+    argument: MyPageCommentsArgument
 ) {
     val dataState = argument.dataState
     val screenState = argument.screenState
@@ -489,7 +488,6 @@ private fun MyPageCommentsScreenPreview() {
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPageCommentsData.stub()
         )
     }
 }
@@ -512,7 +510,6 @@ private fun MyPageCommentsEmptyScreenPreview() {
                 ),
                 event = MutableSharedFlow()
             ),
-            data = MyPageCommentsData.stub()
         )
     }
 }

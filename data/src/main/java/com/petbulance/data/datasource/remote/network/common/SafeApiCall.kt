@@ -50,12 +50,13 @@ suspend inline fun <reified T> safeApiCall(
             in 400..599 -> {
                 try {
                     val errorBody = json.decodeFromString<BaseResponse<ErrorResponse>>(responseString)
+                    val errorData = errorBody.error ?: errorBody.data
                     return Result.failure(
                         mapToDomainException(
                             errorBody.status,
                             path,
-                            errorBody.data?.className ?: "UnknownError",
-                            errorBody.data?.message ?: "No message provided"
+                            errorData?.resolvedClassName ?: "UnknownError",
+                            errorData?.resolvedMessage ?: "No message provided"
                         )
                     )
                 } catch (e: Exception) {

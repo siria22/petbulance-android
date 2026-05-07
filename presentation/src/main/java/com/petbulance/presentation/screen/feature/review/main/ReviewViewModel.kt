@@ -7,6 +7,7 @@ import com.petbulance.domain.model.type.AnimalSpecies
 import com.petbulance.domain.model.type.ReviewSortType
 import com.petbulance.domain.model.feature.support.report.ReportParam
 import com.petbulance.domain.model.type.ReportType
+import com.petbulance.domain.usecase.feature.hospital.review.DeleteReviewUseCase
 import com.petbulance.domain.usecase.feature.hospital.review.FilterReviewUseCase
 import com.petbulance.domain.usecase.feature.support.report.CreateReportUseCase
 import com.petbulance.domain.usecase.feature.user.user.GetMyInfoUseCase
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class ReviewViewModel @Inject constructor(
     private val filterReviewUseCase: FilterReviewUseCase,
     private val getMyInfoUseCase: GetMyInfoUseCase,
-    private val createReportUseCase: CreateReportUseCase
+    private val createReportUseCase: CreateReportUseCase,
+    private val deleteReviewUseCase: DeleteReviewUseCase
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow<ReviewState>(ReviewState.Init)
@@ -93,6 +95,10 @@ class ReviewViewModel @Inject constructor(
             is ReviewIntent.ReportReview -> {
                 reportReview(intent.reviewId, intent.reason)
             }
+
+            is ReviewIntent.DeleteReview -> {
+                deleteReview(intent.reviewId)
+            }
         }
     }
 
@@ -155,6 +161,26 @@ class ReviewViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    private fun deleteReview(reviewId: Long) {
+        launch {
+            deleteReviewUseCase(reviewId)
+                .onSuccess {
+                    _reviewData.update {
+                        it.copy(reviews = it.reviews.filter { review -> review.id != reviewId })
+                    }
+                    _event.emit(ReviewEvent.DeleteSuccess)
+                }
+                .onFailure { e ->
+                    _event.emit(
+                        ReviewEvent.DataFetch.Error(
+                            userMessage = "리뷰 삭제에 실패했습니다.",
+                            exceptionMessage = e.message
+                        )
+                    )
+                }
         }
     }
 

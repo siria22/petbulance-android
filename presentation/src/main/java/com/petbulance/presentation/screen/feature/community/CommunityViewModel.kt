@@ -2,7 +2,11 @@ package com.petbulance.presentation.screen.feature.community
 
 import androidx.lifecycle.SavedStateHandle
 import com.petbulance.domain.model.feature.community.post.PostSummary
+import com.petbulance.domain.model.feature.community.post.NoticeBanner
 import com.petbulance.domain.usecase.feature.community.post.GetPostListUseCase
+import com.petbulance.domain.usecase.feature.community.post.TogglePostLikeUseCase
+import com.petbulance.domain.usecase.feature.support.notice.GetNoticeListUseCase
+import com.petbulance.domain.usecase.feature.user.auth.CheckLoginStatusUseCase
 import com.petbulance.presentation.utils.BaseViewModel
 import com.petbulance.presentation.utils.error.ErrorDisplayType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +20,10 @@ import javax.inject.Inject
 @HiltViewModel
 class CommunityViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getPostListUseCase: GetPostListUseCase
+    private val getPostListUseCase: GetPostListUseCase,
+    private val togglePostLikeUseCase: TogglePostLikeUseCase,
+    private val checkLoginStatusUseCase: CheckLoginStatusUseCase,
+    private val getNoticeListUseCase: GetNoticeListUseCase
 ) : BaseViewModel() {
 
     private val _dataState = MutableStateFlow<CommunityDataState>(CommunityDataState.Init)
@@ -32,6 +39,7 @@ class CommunityViewModel @Inject constructor(
     val communityData: StateFlow<CommunityData> = _communityData
 
     private var currentPageCount = 0
+    private var isLoggedIn = false
 
     fun onIntent(intent: CommunityIntent) {
         when (intent) {
@@ -54,7 +62,36 @@ class CommunityViewModel @Inject constructor(
 
     init {
         observeErrorEvent(eventFlow)
+        checkLoginStatus()
         loadInitialPosts()
+        loadNoticeBanner()
+    }
+
+    private fun checkLoginStatus() {
+        launch {
+            isLoggedIn = checkLoginStatusUseCase().getOrNull() ?: false
+        }
+    }
+
+    private fun loadNoticeBanner() {
+        launch {
+            getNoticeListUseCase(lastNoticeId = null, pageSize = 1)
+                .onSuccess { pagingResult ->
+                    val latestNotice = pagingResult.content.firstOrNull()
+                    _communityData.update {
+                        it.copy(
+                            noticeBanner = latestNotice?.let { notice ->
+                                NoticeBanner(
+                                    noticeId = notice.noticeId,
+                                    noticeStatus = notice.noticeStatus.name,
+                                    title = notice.title,
+                                    content = notice.content ?: ""
+                                )
+                            }
+                        )
+                    }
+                }
+        }
     }
 
     private fun loadInitialPosts() {
@@ -74,7 +111,6 @@ class CommunityViewModel @Inject constructor(
             ).onSuccess { pagingPostList ->
                 _communityData.update {
                     it.copy(
-                        noticeBanner = pagingPostList.noticeBanner,
                         posts = pagingPostList.items,
                         hasNext = pagingPostList.hasNext
                     )
@@ -93,8 +129,7 @@ class CommunityViewModel @Inject constructor(
         val data = _communityData.value
         if (!data.hasNext) return
 
-        // TODO: [정책 확인 필요] 비로그인 사용자 페이징 제한 - PM과 논의 후 최종 결정
-        if (currentPageCount >= MAX_NON_LOGIN_PAGES) return
+        if (!isLoggedIn && currentPageCount >= MAX_NON_LOGIN_PAGES) return
 
         launch {
             _dataState.update { CommunityDataState.LoadingMore }
@@ -152,9 +187,6 @@ class CommunityViewModel @Inject constructor(
                     lastPostId = lastPostId,
                     pageSize = PAGE_SIZE
                 ).onSuccess { pagingPostList ->
-                    if (page == 1) {
-                        _communityData.update { it.copy(noticeBanner = pagingPostList.noticeBanner) }
-                    }
                     allPosts.addAll(pagingPostList.items)
                     lastPostId = pagingPostList.items.lastOrNull()?.id
                     hasMorePages = pagingPostList.hasNext
@@ -195,7 +227,9 @@ class CommunityViewModel @Inject constructor(
     }
 
     private fun toggleLike(postId: Long) {
-        // TODO: [구현 필요] 좋아요 토글 로직 - LikePostUseCase 필요
+        val currentPost = _communityData.value.posts.find { it.id == postId } ?: return
+
+        // 낙관적 UI 업데이트
         _communityData.update { data ->
             data.copy(
                 posts = data.posts.map { post ->
@@ -209,6 +243,44 @@ class CommunityViewModel @Inject constructor(
                     }
                 }
             )
+        }
+
+        launch {
+            togglePostLikeUseCase(postId, currentPost.isLiked)
+                .onSuccess { postLike ->
+                    // 서버 응답으로 정확한 값 반영
+                    _communityData.update { data ->
+                        data.copy(
+                            posts = data.posts.map { post ->
+                                if (post.id == postId) {
+                                    post.copy(
+                                        isLiked = postLike.isLiked,
+                                        likeCount = postLike.currentLikeCount.toInt()
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+                        )
+                    }
+                }
+                .onFailure {
+                    // 실패 시 원래 상태로 롤백
+                    _communityData.update { data ->
+                        data.copy(
+                            posts = data.posts.map { post ->
+                                if (post.id == postId) {
+                                    post.copy(
+                                        isLiked = currentPost.isLiked,
+                                        likeCount = currentPost.likeCount
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+                        )
+                    }
+                }
         }
     }
 

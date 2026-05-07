@@ -12,6 +12,8 @@ data class MyPageArgument(
 sealed class MyPageIntent
 
 sealed class MyPageEvent {
+    data object AccountSuspended : MyPageEvent()
+
     sealed class DataFetch : MyPageEvent() {
         data class Error(
             override val userMessage: String = "문제가 발생했습니다.",

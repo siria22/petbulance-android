@@ -1,6 +1,9 @@
 package com.petbulance.presentation.screen.feature.mypage.main
 
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -14,6 +17,7 @@ fun NavGraphBuilder.myPageDestination(navController: NavController) {
         route = ScreenDestinations.MyPage.route
     ) {
         val viewModel: MyPageViewModel = hiltViewModel()
+        val context = LocalContext.current
 
         val argument = MyPageArgument(
             intent = {},
@@ -30,6 +34,21 @@ fun NavGraphBuilder.myPageDestination(navController: NavController) {
                 currentVersion = currentVersion,
                 latestVersion = latestVersion
             )
+        }
+
+        LaunchedEffect(Unit) {
+            viewModel.eventFlow.collect { event ->
+                when (event) {
+                    is MyPageEvent.AccountSuspended -> {
+                        Toast.makeText(
+                            context,
+                            "이용이 정지된 계정입니다. 고객센터에 문의해 주세요.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    else -> {}
+                }
+            }
         }
 
         val errorState by viewModel.errorDialogState.collectAsStateWithLifecycle()

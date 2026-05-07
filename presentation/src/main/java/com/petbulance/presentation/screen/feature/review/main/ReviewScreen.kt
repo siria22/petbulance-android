@@ -31,6 +31,7 @@ import com.petbulance.presentation.component.ui.atom.BasicFabIcon
 import com.petbulance.presentation.component.ui.atom.IconResource
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheet
 import com.petbulance.presentation.component.ui.molecule.FilterBottomSheetTab
+import com.petbulance.presentation.component.ui.molecule.WarningDialog
 import com.petbulance.presentation.component.ui.organism.AppTopBar
 import com.petbulance.presentation.component.ui.organism.BottomNavigationBar
 import com.petbulance.presentation.component.ui.organism.CurrentBottomNav
@@ -245,13 +246,22 @@ fun ReviewScreen(
     }
 
     if (showDeleteConfirmDialog) {
-        // TODO: 삭제 확인 다이얼로그 추가 필요
-        // WarningDialog 또는 유사한 컴포넌트 사용
-        showDeleteConfirmDialog = false
-        selectedReviewId?.let { reviewId ->
-            // argument.intent(ReviewIntent.DeleteReview(reviewId))
-        }
-        selectedReviewId = null
+        WarningDialog(
+            title = "후기를 삭제할까요?",
+            content = "후기를 삭제하면 모든 데이터가 삭제되고 다시 볼 수 없어요.",
+            confirmText = "삭제",
+            onDismissRequest = {
+                showDeleteConfirmDialog = false
+                selectedReviewId = null
+            },
+            onExitButtonClicked = {
+                showDeleteConfirmDialog = false
+                selectedReviewId?.let { reviewId ->
+                    argument.intent(ReviewIntent.DeleteReview(reviewId))
+                }
+                selectedReviewId = null
+            }
+        )
     }
 
     if (showReportReasonDialog) {

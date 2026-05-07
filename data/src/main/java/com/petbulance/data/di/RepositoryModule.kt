@@ -12,9 +12,11 @@ import com.petbulance.data.repository.feature.hospital.history.SearchRepositoryI
 import com.petbulance.data.repository.feature.hospital.hospital.HospitalRepositoryImpl
 import com.petbulance.data.repository.feature.hospital.review.ReviewRepositoryImpl
 import com.petbulance.data.repository.feature.support.inquiry.InquiryRepositoryImpl
+import com.petbulance.data.repository.feature.notification.NotificationRepositoryImpl
 import com.petbulance.data.repository.feature.support.notice.NoticeRepositoryImpl
 import com.petbulance.data.repository.feature.support.qna.QnaRepositoryImpl
 import com.petbulance.data.repository.feature.support.report.ReportRepositoryImpl
+import com.petbulance.data.repository.feature.user.authority.AuthorityRepositoryImpl
 import com.petbulance.data.repository.feature.user.auth.AuthRepositoryImpl
 import com.petbulance.data.repository.feature.user.terms.TermsRepositoryImpl
 import com.petbulance.data.repository.feature.user.user.UserRepositoryImpl
@@ -33,10 +35,12 @@ import com.petbulance.domain.repository.feature.hospital.HospitalRepository
 import com.petbulance.domain.repository.feature.hospital.ReviewRepository
 import com.petbulance.domain.repository.feature.hospital.SearchRepository
 import com.petbulance.domain.repository.feature.support.InquiryRepository
+import com.petbulance.domain.repository.feature.notification.NotificationRepository
 import com.petbulance.domain.repository.feature.support.NoticeRepository
 import com.petbulance.domain.repository.feature.support.QnaRepository
 import com.petbulance.domain.repository.feature.support.ReportRepository
 import com.petbulance.domain.repository.feature.user.AuthRepository
+import com.petbulance.domain.repository.feature.user.AuthorityRepository
 import com.petbulance.domain.repository.feature.user.TermsRepository
 import com.petbulance.domain.repository.feature.user.UserRepository
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
@@ -67,6 +71,12 @@ abstract class RepositoryModule {
 //        mock: MockAuthRepository,
         impl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthorityRepository(
+        impl: AuthorityRepositoryImpl
+    ): AuthorityRepository
 
     @Binds
     @Singleton
@@ -121,6 +131,12 @@ abstract class RepositoryModule {
 //        mock: MockInquiryRepository
         impl: InquiryRepositoryImpl
     ): InquiryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        impl: NotificationRepositoryImpl
+    ): NotificationRepository
 
     @Binds
     @Singleton

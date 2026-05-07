@@ -28,12 +28,15 @@ android {
         applicationId = "com.petbulance.petbulance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "v1.0"
+        versionCode = 12
+        versionName = "v1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders["kakao_native_app_key"] = (localProperties["KAKAO_NATIVE_APP_KEY"] as String? ?: "").lowercase()
+
+        resValue("string", "facebook_app_id", localProperties["FB_APP_ID"] as String? ?: "")
+        resValue("string", "facebook_client_token", localProperties["FB_CLIENT_TOKEN"] as String? ?: "")
     }
 
     buildTypes {

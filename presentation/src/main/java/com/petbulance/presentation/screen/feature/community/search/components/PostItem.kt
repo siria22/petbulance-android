@@ -131,7 +131,7 @@ fun PostListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "익명", // TODO: API에 nickname 필드 추가 필요
+                    text = post.nickname ?: "익명",
                     style = typography.labelSmall,
                     color = colorScheme.text.caption
                 )

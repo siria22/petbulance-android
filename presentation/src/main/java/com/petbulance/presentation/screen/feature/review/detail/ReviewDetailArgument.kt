@@ -32,4 +32,5 @@ sealed class ReviewDetailEvent {
 
     data object DeleteSuccess : ReviewDetailEvent()
     data object ReportSuccess : ReviewDetailEvent()
+    data object LoginRequired : ReviewDetailEvent()
 }

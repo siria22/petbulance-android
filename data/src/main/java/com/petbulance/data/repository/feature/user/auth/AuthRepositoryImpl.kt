@@ -22,6 +22,11 @@ class AuthRepositoryImpl @Inject constructor(
     private val cryptoManager: CryptoManager,
 ) : AuthRepository {
 
+    @Volatile
+    private var _isLoggingOut = false
+
+    override fun isLoggingOut(): Boolean = _isLoggingOut
+
     override suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit> =
         runCatching {
             val encryptedAccessToken = cryptoManager.encrypt(
@@ -89,10 +94,15 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun logout(): Result<Unit> {
-        return safeApiCall<Unit>("auth/logout") {
-            authApi.logout()
-        }.onSuccess {
-            clearTokens()
+        _isLoggingOut = true
+        return try {
+            safeApiCall<Unit>("auth/logout") {
+                authApi.logout()
+            }.also {
+                clearTokens()
+            }
+        } finally {
+            _isLoggingOut = false
         }
     }
 

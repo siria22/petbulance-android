@@ -25,7 +25,10 @@ interface UserRepository {
 
     suspend fun checkProfileImageUpdate(saveId: String, filename: String): Result<ProfileImageCheckResult>
 
+    suspend fun deleteAccount(): Result<Unit>
+
     suspend fun getMyInfo(): Result<UserInfo>
 
+    suspend fun getNotificationSettings(): Result<NotificationSettings>
     suspend fun updateNotificationSettings(settings: NotificationSettings): Result<NotificationSettings>
 }
