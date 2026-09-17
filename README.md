@@ -2,11 +2,28 @@
 
 특수동물(개/고양이 외의 반려동물)을 진료하는 병원을 찾고, 영수증으로 방문을 인증한 후기를 남기고, 보호자끼리 정보를 나누는 Android 앱입니다.
 
-<!-- TODO: 스크린샷 -->
-
 - 8명이 참여한 팀 프로젝트 Petbulance의 Android 앱입니다. Android는 1명이 전담했습니다.
 - 원본 저장소: [Petbulance/Petbulance-android-rework](https://github.com/Petbulance/Petbulance-android-rework). 이 저장소는 원본을 개인 계정으로 옮긴 사본입니다.
-- Google Play에 출시했고, 현재는 서버 종료로 운영이 중단되었습니다. <!-- TODO(확인): 출시 시기, Play에 배포된 마지막 버전 -->
+- Google Play에 출시했고, 현재는 서버 종료로 운영이 중단되었습니다.
+
+## 예시 화면
+
+> 서버 종료 후 Mock 데이터로 촬영한 화면입니다. 병원, 사용자 이름, 연락처 등은 모두 가상 데이터입니다.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/home.png" width="200" alt="홈 화면"><br>홈</td>
+    <td align="center"><img src="docs/images/search-map.png" width="200" alt="병원 검색 지도 보기"><br>병원 검색 (지도)</td>
+    <td align="center"><img src="docs/images/search-list.png" width="200" alt="병원 검색 목록 보기"><br>병원 검색 (목록)</td>
+    <td align="center"><img src="docs/images/hospital-detail.png" width="200" alt="병원 상세 정보"><br>병원 상세</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/review-list.png" width="200" alt="영수증 인증 병원 후기 목록"><br>병원 후기</td>
+    <td align="center"><img src="docs/images/community.png" width="200" alt="커뮤니티 게시글 목록"><br>커뮤니티</td>
+    <td align="center"><img src="docs/images/notification.png" width="200" alt="내 활동 알림"><br>알림</td>
+    <td></td>
+  </tr>
+</table>
 
 ## 프로젝트 정보
 
@@ -74,7 +91,7 @@ app -> presentation -> domain <- data
 
 ### 5. Mock Repository 및 데이터
 
-domain의 Repository 인터페이스 18개에 실제 구현(`*RepositoryImpl`)과 Mock 구현(`Mock*Repository`)을 함께 두고, Hilt `@Binds`에서 주입할 쪽을 고릅니다. 어느 쪽을 쓰든 UseCase와 ViewModel 코드는 그대로입니다.
+domain의 Repository 인터페이스 20개에 실제 구현(`*RepositoryImpl`)과 Mock 구현(`Mock*Repository`)을 함께 두고, Hilt `@Binds`에서 주입할 쪽을 고릅니다. 어느 쪽을 쓰든 UseCase와 ViewModel 코드는 그대로입니다.
 
 현재는 서버가 내려간 상태라, 화면을 채워넣을 용도로 MockRepository가 사용되고 있습니다.
 
