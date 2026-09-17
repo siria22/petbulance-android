@@ -1,5 +1,6 @@
 package com.petbulance.data.repository.feature.hospital.history
 
+import com.petbulance.data.repository.MockFixtures
 import com.petbulance.domain.model.feature.hospital.recent.RecentSearchKeyword
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospital
 import com.petbulance.domain.model.feature.hospital.recent.ViewedHospitalList
@@ -11,13 +12,15 @@ import javax.inject.Inject
 class MockHistoryRepository @Inject constructor() : HistoryRepository {
 
     private val recentKeywords = mutableListOf(
-        RecentSearchKeyword(1, "강아지 슬개골", "2025-12-10"),
-        RecentSearchKeyword(2, "고양이 신부전", "2025-12-09")
+        RecentSearchKeyword(1, "앵무새 깃털", LocalDateTime.now().minusDays(2).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+        RecentSearchKeyword(2, "24시 특수동물병원", LocalDateTime.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE)),
+        RecentSearchKeyword(3, "토끼 부정교합", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
     )
 
     private val viewedHospitals = mutableListOf(
-        ViewedHospital(1, "행복 동물병원", "2025-12-11T10:00:00"),
-        ViewedHospital(2, "튼튼 동물병원", "2025-12-11T11:00:00")
+        ViewedHospital(2, "하늘깃 조류 동물병원", LocalDateTime.now().minusHours(2).withNano(0).toString()),
+        ViewedHospital(4, "달빛 24시 특수동물 메디컬센터", LocalDateTime.now().minusHours(1).withNano(0).toString()),
+        ViewedHospital(5, "솜털 토끼 클리닉", LocalDateTime.now().withNano(0).toString())
     )
 
     override suspend fun getRecentKeywords(): Result<List<RecentSearchKeyword>> {
@@ -42,7 +45,7 @@ class MockHistoryRepository @Inject constructor() : HistoryRepository {
     override suspend fun saveViewedHospital(hospitalId: Long): Result<Unit> {
         val newViewed = ViewedHospital(
             hospitalId = hospitalId,
-            hospitalName = "새로 본 병원 $hospitalId",
+            hospitalName = MockFixtures.findHospital(hospitalId)?.name.orEmpty(),
             viewedAt = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         )
         viewedHospitals.removeIf { it.hospitalId == hospitalId } // Remove old one if exists

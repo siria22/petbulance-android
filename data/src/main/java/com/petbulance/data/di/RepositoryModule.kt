@@ -25,6 +25,26 @@ import com.petbulance.data.repository.nonfeature.app.ContentFileReaderImpl
 import com.petbulance.data.repository.nonfeature.device.DeviceRepositoryImpl
 import com.petbulance.data.repository.nonfeature.device.FusedLocationProviderImpl
 import com.petbulance.data.repository.nonfeature.preference.PreferenceRepositoryImpl
+import com.petbulance.data.repository.nonfeature.app.MockAppInfoRepository
+import com.petbulance.data.repository.feature.user.auth.MockAuthRepository
+import com.petbulance.data.repository.feature.user.authority.MockAuthorityRepository
+import com.petbulance.data.repository.feature.home.MockBannerRepository
+import com.petbulance.data.repository.feature.community.board.MockBoardRepository
+import com.petbulance.data.repository.feature.community.comment.MockCommentRepository
+import com.petbulance.data.repository.nonfeature.device.MockDeviceRepository
+import com.petbulance.data.repository.feature.hospital.history.MockHistoryRepository
+import com.petbulance.data.repository.feature.hospital.hospital.MockHospitalRepository
+import com.petbulance.data.repository.feature.support.inquiry.MockInquiryRepository
+import com.petbulance.data.repository.feature.support.notice.MockNoticeRepository
+import com.petbulance.data.repository.feature.notification.MockNotificationRepository
+import com.petbulance.data.repository.feature.community.post.MockPostRepository
+import com.petbulance.data.repository.feature.support.qna.MockQnaRepository
+import com.petbulance.data.repository.feature.community.recent.MockRecentRepository
+import com.petbulance.data.repository.feature.support.report.MockReportRepository
+import com.petbulance.data.repository.feature.hospital.review.MockReviewRepository
+import com.petbulance.data.repository.feature.hospital.history.MockSearchRepository
+import com.petbulance.data.repository.feature.user.terms.MockTermsRepository
+import com.petbulance.data.repository.feature.user.user.MockUserRepository
 import com.petbulance.domain.repository.feature.community.BoardRepository
 import com.petbulance.domain.repository.feature.community.CommentRepository
 import com.petbulance.domain.repository.feature.community.PostRepository
@@ -54,6 +74,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * 백엔드 서버가 종료되어, 서버와 통신하는 Repository에는 Mock 구현을 주입한다.
+ * 실제 구현으로 되돌리려면 각 함수의 `mock`/`impl` 파라미터 주석을 맞바꾼다.
+ */
 @Suppress("unused")
 @Module
 @InstallIn(SingletonComponent::class)
@@ -68,27 +92,29 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(
-//        mock: MockAuthRepository,
-        impl: AuthRepositoryImpl
+        mock: MockAuthRepository,
+//        impl: AuthRepositoryImpl
     ): AuthRepository
 
     @Binds
     @Singleton
     abstract fun bindAuthorityRepository(
-        impl: AuthorityRepositoryImpl
+        mock: MockAuthorityRepository,
+//        impl: AuthorityRepositoryImpl
     ): AuthorityRepository
 
     @Binds
     @Singleton
     abstract fun bindTermsRepository(
-//        mock: MockTermsRepository
-        impl: TermsRepositoryImpl
+        mock: MockTermsRepository,
+//        impl: TermsRepositoryImpl
     ): TermsRepository
 
     @Binds
     @Singleton
     abstract fun bindAppInfoRepository(
-        impl: AppInfoRepositoryImpl
+        mock: MockAppInfoRepository,
+//        impl: AppInfoRepositoryImpl
     ): AppInfoRepository
 
     @Binds
@@ -100,105 +126,106 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBoardRepository(
-//        mock: MockBoardRepository
-        impl: BoardRepositoryImpl
+        mock: MockBoardRepository,
+//        impl: BoardRepositoryImpl
     ): BoardRepository
 
     @Binds
     @Singleton
     abstract fun bindCommentRepository(
-//        mock: MockCommentRepository
-        impl: CommentRepositoryImpl
+        mock: MockCommentRepository,
+//        impl: CommentRepositoryImpl
     ): CommentRepository
 
     @Binds
     @Singleton
     abstract fun bindDeviceRepository(
-//        mock: MockDeviceRepository
-        impl: DeviceRepositoryImpl
+        mock: MockDeviceRepository,
+//        impl: DeviceRepositoryImpl
     ): DeviceRepository
 
     @Binds
     @Singleton
     abstract fun bindHospitalRepository(
-//        mock: MockHospitalRepository
-        impl: HospitalRepositoryImpl
+        mock: MockHospitalRepository,
+//        impl: HospitalRepositoryImpl
     ): HospitalRepository
 
     @Binds
     @Singleton
     abstract fun bindInquiryRepository(
-//        mock: MockInquiryRepository
-        impl: InquiryRepositoryImpl
+        mock: MockInquiryRepository,
+//        impl: InquiryRepositoryImpl
     ): InquiryRepository
 
     @Binds
     @Singleton
     abstract fun bindNotificationRepository(
-        impl: NotificationRepositoryImpl
+        mock: MockNotificationRepository,
+//        impl: NotificationRepositoryImpl
     ): NotificationRepository
 
     @Binds
     @Singleton
     abstract fun bindNoticeRepository(
-//        mock: MockNoticeRepository
-        impl: NoticeRepositoryImpl
+        mock: MockNoticeRepository,
+//        impl: NoticeRepositoryImpl
     ): NoticeRepository
 
     @Binds
     @Singleton
     abstract fun bindPostRepository(
-//        mock: MockPostRepository
-        impl: PostRepositoryImpl
+        mock: MockPostRepository,
+//        impl: PostRepositoryImpl
     ): PostRepository
 
     @Binds
     @Singleton
     abstract fun bindQnaRepository(
-//        mock: MockQnaRepository,
-        impl: QnaRepositoryImpl
+        mock: MockQnaRepository,
+//        impl: QnaRepositoryImpl
     ): QnaRepository
 
     @Binds
     @Singleton
     abstract fun bindUserRepository(
-//        mock: MockUserRepository
-        impl: UserRepositoryImpl
+        mock: MockUserRepository,
+//        impl: UserRepositoryImpl
     ): UserRepository
 
     @Binds
     @Singleton
     abstract fun bindReviewRepository(
-//        mock: MockReviewRepository
-        impl: ReviewRepositoryImpl
+        mock: MockReviewRepository,
+//        impl: ReviewRepositoryImpl
     ): ReviewRepository
 
     @Binds
     @Singleton
     abstract fun bindHistoryRepository(
-//        mock: MockHistoryRepository
-        impl: HistoryRepositoryImpl
+        mock: MockHistoryRepository,
+//        impl: HistoryRepositoryImpl
     ): HistoryRepository
 
     @Binds
     @Singleton
     abstract fun bindRecentRepository(
-//        mock: MockRecentRepository
-        impl: RecentRepositoryImpl
+        mock: MockRecentRepository,
+//        impl: RecentRepositoryImpl
     ): RecentRepository
 
     @Binds
     @Singleton
     abstract fun bindSearchRepository(
-//        mock: MockSearchRepository,
-        impl: SearchRepositoryImpl
+        mock: MockSearchRepository,
+//        impl: SearchRepositoryImpl
     ): SearchRepository
 
     @Binds
     @Singleton
     abstract fun bindBannerRepository(
-//        mock: MockBannerRepository,
-        impl: BannerRepositoryImpl
+        mock: MockBannerRepository,
+//        impl: BannerRepositoryImpl
     ): BannerRepository
 
     @Binds
@@ -210,7 +237,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindReportRepository(
-//        mock: MockReportRepository,
-        impl: ReportRepositoryImpl
+        mock: MockReportRepository,
+//        impl: ReportRepositoryImpl
     ): ReportRepository
 }

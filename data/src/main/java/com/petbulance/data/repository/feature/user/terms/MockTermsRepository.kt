@@ -13,9 +13,9 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
         delay(300) // 네트워크 지연 시뮬레이션
         return Result.success(
             TermsStatus(
-                service = false,
-                privacy = false,
-                location = false,
+                service = true,
+                privacy = true,
+                location = true,
                 marketing = false
             )
         )
@@ -91,25 +91,9 @@ class MockTermsRepository @Inject constructor() : TermsRepository {
     }
 
     override suspend fun getTermDetail(type: String): Result<Term> {
-        delay(300)
-        // type을 ID로 가정하고 더미 데이터 반환 (실제 ID 매칭 로직이 필요하다면 getTermsList에서 필터링 가능)
-        return Result.success(
-            Term(
-                id = type.toLongOrNull() ?: 0L,
-                title = "약관 상세 ($type)",
-                required = true,
-                summary = "약관 내용입니다.",
-                content = """
-                    <h2>약관 상세 내용 ($type)</h2>
-                    <p>이 내용은 서버에서 받아온 <strong>$type</strong> 약관의 상세 전문입니다.</p>
-                    <p>HTML 태그가 포함되어 있어 스타일링이 적용됩니다.</p>
-                    <hr>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                """.trimIndent(),
-                version = "1.0",
-                termsType = TermsType.LOCATION
-            )
-        )
+        val term = getTermsList().getOrNull()?.find { it.termsType?.name.equals(type, ignoreCase = true) }
+            ?: return Result.failure(NoSuchElementException("Terms not found: $type"))
+        return Result.success(term)
     }
 
     override suspend fun saveTermsConsent(termsTypeList: List<Long>): Result<Unit> {

@@ -1,18 +1,17 @@
 package com.petbulance.data.repository.feature.hospital.hospital
 
+import com.petbulance.data.repository.MockFixtures
+import com.petbulance.data.repository.MockHospital
 import com.petbulance.domain.model.common.PagingResult
 import com.petbulance.domain.model.feature.hospital.hospital.Hospital
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalCard
 import com.petbulance.domain.model.feature.hospital.hospital.HospitalDetail
-import com.petbulance.domain.model.feature.hospital.hospital.OpenHour
 import com.petbulance.domain.repository.feature.hospital.HospitalRepository
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class MockHospitalRepository @Inject constructor() : HospitalRepository {
-    private val mockHospitals = List(20) { i ->
-        Hospital.stub()
-    }
 
     override suspend fun searchHospitals(
         q: String?,
@@ -27,75 +26,121 @@ class MockHospitalRepository @Inject constructor() : HospitalRepository {
         cursorRating: Double?,
         cursorReviewCount: Long?
     ): Result<PagingResult<Hospital>> {
-        delay(500)
+        delay(MockFixtures.NETWORK_DELAY_MS)
+        val now = LocalDateTime.now()
+        val animals = animal?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
+        val area = bounds?.toBounds()
+
+        val filtered = MockFixtures.hospitals.filter { hospital ->
+            hospital.matchesQuery(q) &&
+                    (animals.isEmpty() || hospital.animals.any { it.name in animals }) &&
+                    (openNow != true || hospital.isOpenAt(now)) &&
+                    (area == null || area.contains(hospital))
+        }
+        val startIndex = cursorId?.let { id -> filtered.indexOfFirst { it.id == id } + 1 } ?: 0
+        val page = filtered.drop(startIndex).take(size)
+
         return Result.success(
             PagingResult(
-                content = mockHospitals.take(size),
-                hasNext = mockHospitals.size > size,
-                cursorId = mockHospitals.getOrNull(size - 1)?.hospitalId,
-                cursorDistance = null,
-                cursorRating = null,
-                cursorReviewCount = null
+                content = page.map { it.toHospital(now) },
+                hasNext = startIndex + page.size < filtered.size,
+                cursorId = page.lastOrNull()?.id
             )
         )
     }
 
     override suspend fun getHospitalDetail(hospitalId: Long): Result<HospitalDetail> {
-        delay(500)
-        val hospital = mockHospitals.find { it.hospitalId == hospitalId }
+        delay(MockFixtures.NETWORK_DELAY_MS)
+        val hospital = MockFixtures.findHospital(hospitalId)
+            ?: return Result.failure(NoSuchElementException("Hospital not found: $hospitalId"))
+        val now = LocalDateTime.now()
 
-        return if (hospital != null) {
-            Result.success(
-                HospitalDetail(
-                    hospitalId = hospitalId,
-                    name = hospital.name.replace("(Mock)", "상세 (Mock)"),
-                    address = "서울시 어딘가 ${hospital.hospitalId}번지",
-                    lat = hospital.lat,
-                    lng = hospital.lng,
-                    phone = hospital.phone ?: "02-0000-0000",
-                    acceptedAnimals = listOf("DOG", "CAT", "HAMSTER", "AVIAN"),
-                    openHours = listOf(
-                        OpenHour("월-금", "09:00-19:00"),
-                        OpenHour("토", "10:00-16:00"),
-                        OpenHour("일", "휴무")
-                    ),
-                    notes = "주차 가능, 예약 시 10% 할인",
-                    openNow = hospital.isOpenNow,
-                    description = "이곳은 ${hospital.name}의 상세 설명입니다. 최신 장비와 최고의 의료진이 함께합니다.",
-                    rating = hospital.rating ?: 0.0,
-                    reviewCount = hospital.reviewCount ?: 0,
-                    thumbnailUrl = hospital.thumbnailUrl
-                )
+        return Result.success(
+            HospitalDetail(
+                hospitalId = hospital.id,
+                name = hospital.name,
+                address = hospital.address,
+                lat = hospital.lat,
+                lng = hospital.lng,
+                phone = hospital.phone,
+                acceptedAnimals = hospital.species.map { it.korean },
+                openHours = hospital.openHours,
+                notes = hospital.notes,
+                openNow = hospital.isOpenAt(now),
+                description = hospital.description,
+                rating = MockFixtures.ratingOf(hospital.id),
+                reviewCount = MockFixtures.reviewsOf(hospital.id).size,
+                thumbnailUrl = null,
+                tags = hospital.tags
             )
-        } else {
-            Result.failure(Exception("Hospital not found"))
-        }
+        )
     }
 
     override suspend fun getHospitalCard(hospitalId: Long): Result<HospitalCard> {
-        delay(300)
-        val hospital = mockHospitals.find { it.hospitalId == hospitalId }
+        delay(MockFixtures.NETWORK_DELAY_MS)
+        val hospital = MockFixtures.findHospital(hospitalId)
+            ?: return Result.failure(NoSuchElementException("Hospital not found: $hospitalId"))
+        val now = LocalDateTime.now()
 
-        return if (hospital != null) {
-            Result.success(
-                HospitalCard(
-                    hospitalId = hospitalId,
-                    name = hospital.name.replace("(Mock)", "카드 (Mock)"),
-                    lat = hospital.lat,
-                    lng = hospital.lng,
-                    distanceMeters = 550.0,
-                    phone = hospital.phone ?: "02-0000-0000",
-                    types = hospital.types,
-                    isOpenNow = hospital.isOpenNow,
-                    nextOpenHours = if (!hospital.isOpenNow) "내일 오전 9시" else "오후 6시까지",
-                    thumbnailUrl = hospital.thumbnailUrl ?: "",
-                    rating = hospital.rating ?: 0.0,
-                    reviewCount = (hospital.reviewCount ?: 0).toLong(),
-                    image = ""
-                )
+        return Result.success(
+            HospitalCard(
+                hospitalId = hospital.id,
+                name = hospital.name,
+                lat = hospital.lat,
+                lng = hospital.lng,
+                distanceMeters = 0.0,
+                phone = hospital.phone,
+                types = hospital.species.map { it.name },
+                isOpenNow = hospital.isOpenAt(now),
+                nextOpenHours = hospital.openHoursLabel(now),
+                thumbnailUrl = "",
+                rating = MockFixtures.ratingOf(hospital.id),
+                reviewCount = MockFixtures.reviewsOf(hospital.id).size.toLong(),
+                image = null
             )
-        } else {
-            Result.failure(Exception("Hospital not found"))
-        }
+        )
+    }
+
+    private fun MockHospital.matchesQuery(query: String?): Boolean {
+        val keyword = query?.trim().orEmpty()
+        if (keyword.isEmpty()) return true
+        return name.contains(keyword) ||
+                address.contains(keyword) ||
+                tags.any { it.value.contains(keyword) } ||
+                species.any { it.korean.contains(keyword) } ||
+                animals.any { it.korean.contains(keyword) }
+    }
+
+    private fun MockHospital.toHospital(now: LocalDateTime) = Hospital(
+        hospitalId = id,
+        name = name,
+        lat = lat,
+        lng = lng,
+        distanceMeters = null,
+        phone = phone,
+        types = species.map { it.name },
+        isOpenNow = isOpenAt(now),
+        openHours = openHoursLabel(now),
+        thumbnailUrl = null,
+        rating = MockFixtures.ratingOf(id),
+        reviewCount = MockFixtures.reviewsOf(id).size,
+        image = null,
+        tags = tags
+    )
+
+    private data class Bounds(val minLat: Double, val minLng: Double, val maxLat: Double, val maxLng: Double) {
+        fun contains(hospital: MockHospital): Boolean =
+            hospital.lat in minLat..maxLat && hospital.lng in minLng..maxLng
+    }
+
+    /** `SearchHospitalsUseCase`가 만드는 "minLat,minLng,maxLat,maxLng" 형식을 읽는다. */
+    private fun String.toBounds(): Bounds? {
+        val values = split(",").mapNotNull { it.trim().toDoubleOrNull() }
+        if (values.size != BOUNDS_VALUE_COUNT) return null
+        return Bounds(values[0], values[1], values[2], values[3])
+    }
+
+    companion object {
+        private const val BOUNDS_VALUE_COUNT = 4
     }
 }

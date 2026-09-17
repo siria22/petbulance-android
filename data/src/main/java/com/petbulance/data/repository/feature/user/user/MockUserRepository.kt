@@ -1,5 +1,6 @@
 package com.petbulance.data.repository.feature.user.user
 
+import com.petbulance.data.repository.MockFixtures
 import com.petbulance.domain.model.feature.user.user.ConnectedSocials
 import com.petbulance.domain.model.feature.user.user.NicknameActionResult
 import com.petbulance.domain.model.feature.user.user.NicknameCheckResult
@@ -16,7 +17,7 @@ class MockUserRepository @Inject constructor() : UserRepository {
     override suspend fun checkNickname(nickname: String): Result<NicknameCheckResult> {
         return Result.success(
             NicknameCheckResult(
-                nickname = "HappyEnergy ^o^",
+                nickname = nickname,
                 isAvailable = true,
                 reason = ""
             )
@@ -65,9 +66,9 @@ class MockUserRepository @Inject constructor() : UserRepository {
     override suspend fun getMyInfo(): Result<UserInfo> {
         return Result.success(
             UserInfo(
-                nickname = "펫뷸런스",
-                profileImageUrl = "https://petbulance.com/profile/default.png",
-                email = "contact@petbulance.com",
+                nickname = MockFixtures.MY_NICKNAME,
+                profileImageUrl = null,
+                email = MockFixtures.MY_EMAIL,
                 provider = "KAKAO",
                 connectedSocials = ConnectedSocials(
                     kakao = "connected",
@@ -79,7 +80,7 @@ class MockUserRepository @Inject constructor() : UserRepository {
     }
 
     override suspend fun getNotificationSettings(): Result<NotificationSettings> {
-        return Result.success(NotificationSettings(isAllEnabled = true, isEventEnabled = true, isMarketingEnabled = true))
+        return Result.success(NotificationSettings(isAllEnabled = true, isEventEnabled = true, isMarketingEnabled = false))
     }
 
     override suspend fun updateNotificationSettings(settings: NotificationSettings): Result<NotificationSettings> {

@@ -7,8 +7,8 @@ import javax.inject.Inject
 class MockRecentRepository @Inject constructor() : RecentRepository {
 
     private val recentKeywords = mutableListOf(
-        RecentCommunityKeyword("1", "강아지 사료 추천", "2025-12-10"),
-        RecentCommunityKeyword("2", "고양이 장난감", "2025-12-09")
+        RecentCommunityKeyword("1", "게코 은신처", "2026-09-15"),
+        RecentCommunityKeyword("2", "햄스터 케이지", "2026-09-16")
     )
 
     override suspend fun getRecentCommunityKeywords(): Result<List<RecentCommunityKeyword>> {

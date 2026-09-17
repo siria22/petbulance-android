@@ -1,5 +1,6 @@
 ﻿package com.petbulance.data.repository.nonfeature.app
 
+import com.petbulance.data.repository.MockFixtures
 import com.petbulance.domain.model.nonfeature.app.HealthCheckResult
 import com.petbulance.domain.model.nonfeature.app.MetadataResponse
 import com.petbulance.domain.model.nonfeature.app.PresignFileRequest
@@ -8,6 +9,7 @@ import com.petbulance.domain.model.nonfeature.app.RegionsResponse
 import com.petbulance.domain.repository.nonfeature.app.AppInfoRepository
 import com.petbulance.domain.utils.LOGGER_TAG
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 
 class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
     override suspend fun checkHealth(): Result<HealthCheckResult> {
@@ -23,7 +25,12 @@ class MockAppInfoRepository @Inject constructor() : AppInfoRepository {
         return Result.failure(Exception("Forced Error"))
     }
 
+    /**
+     * 스플래시는 이 결과를 받은 뒤 화면 이동 이벤트를 발행한다.
+     * 즉시 반환하면 화면이 이벤트를 구독하기 전에 발행돼 이동이 누락되므로 네트워크 지연을 흉내 낸다.
+     */
     override suspend fun getVersion(): Result<String> {
+        delay(MockFixtures.NETWORK_DELAY_MS)
         return Result.success("1.0.0")
     }
 
